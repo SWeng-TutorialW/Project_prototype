@@ -1,6 +1,14 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "Flowers")
 public class Flower {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
     private String flowerName;
     private double flowerPrice;
     private String flowerType;
