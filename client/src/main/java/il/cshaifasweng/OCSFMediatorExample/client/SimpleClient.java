@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
 import org.greenrobot.eventbus.EventBus;
 
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
@@ -17,6 +18,9 @@ public class SimpleClient extends AbstractClient {
 	protected void handleMessageFromServer(Object msg) {
 		if (msg.getClass().equals(Warning.class)) {
 			EventBus.getDefault().post(new WarningEvent((Warning) msg));
+		}
+		else if(msg.getClass().equals(CatalogUpdateEvent.class)){
+			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
 		else{
 			String message = msg.toString();
