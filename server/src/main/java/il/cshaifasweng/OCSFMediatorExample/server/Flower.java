@@ -13,7 +13,7 @@ public class Flower {
     private double flowerPrice;
     private String flowerType;
 
-    public Flower(){}
+    public Flower(){} //ctor
 
     public Flower(String flowerName, double flowerPrice, String flowerType){
         super();
