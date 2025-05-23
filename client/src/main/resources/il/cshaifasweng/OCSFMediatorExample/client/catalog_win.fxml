@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="catalogWin" prefHeight="536.0" prefWidth="733.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogController">
+   <children>
+      <TableView fx:id="catalogTbl" layoutX="38.0" layoutY="113.0" prefHeight="404.0" prefWidth="663.0">
+        <columns>
+            <TableColumn fx:id="idCol" editable="false" text="ID" />
+            <TableColumn fx:id="nameCol" editable="false" prefWidth="180.0" text="Name" />
+            <TableColumn fx:id="priceCol" onEditCommit="#commitPrice" prefWidth="113.0" text="Price" />
+            <TableColumn fx:id="categoryCol" editable="false" prefWidth="144.0" text="Category" />
+            <TableColumn fx:id="infoButtonCol" editable="false" prefWidth="144.0" text="INFO" />
+        </columns>
+      </TableView>
+      <Label fx:id="catalogLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="290.0" layoutY="41.0" prefHeight="17.0" prefWidth="153.0" text="Browse Catalog" textAlignment="CENTER" wrapText="true">
+         <font>
+            <Font name="Segoe UI Bold" size="20.0" />
+         </font>
+      </Label>
+      <Label fx:id="copyrightLBl" alignment="CENTER" layoutX="193.0" layoutY="523.0" prefHeight="29.0" prefWidth="348.0" text="LilachSystem v0.1 © 2025 BestGroup. All rights reserved.">
+         <font>
+            <Font name="Segoe UI" size="10.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
