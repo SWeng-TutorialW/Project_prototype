@@ -5,8 +5,8 @@ import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.CatalogItem;
 import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
+import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -39,22 +39,22 @@ public class CatalogController {
     //
 
     @FXML
-    private TableView<CatalogItem> catalogTbl;
+    private TableView<Flower> catalogTbl;
 
     @FXML
-    private TableColumn<CatalogItem, String> categoryCol;
+    private TableColumn<Flower, String> categoryCol;
 
     @FXML
-    private TableColumn<CatalogItem, Integer> idCol;
+    private TableColumn<Flower, Integer> idCol;
 
     @FXML
-    private TableColumn<CatalogItem, String> nameCol;
+    private TableColumn<Flower, String> nameCol;
 
     @FXML
-    private TableColumn<CatalogItem, Double> priceCol;
+    private TableColumn<Flower, Double> priceCol;
 
     @FXML
-    private TableColumn<CatalogItem, Void> infoButtonCol;
+    private TableColumn<Flower, Void> infoButtonCol;
     //
 
     @Subscribe
@@ -65,8 +65,8 @@ public class CatalogController {
         Platform.runLater(()-> {
 
             try{
-                List<CatalogItem> itemsList = (List<CatalogItem>)event.getUpdatedItems();
-                catalogTbl.setItems((ObservableList<CatalogItem>) itemsList);
+                List<Flower> itemsList = (List<Flower>)event.getUpdatedItems();
+                catalogTbl.setItems((ObservableList<Flower>) itemsList);
 
                 infoButtonCol.setCellFactory(column -> new TableCell<>() {
 
@@ -76,14 +76,14 @@ public class CatalogController {
 
                         {
 
-                            CatalogItem item = getTableView().getItems().get(getIndex());
+                            Flower item = getTableView().getItems().get(getIndex());
 
                             Alert alert = new Alert(Alert.AlertType.INFORMATION);
                             alert.setTitle("Item Info");
                             alert.setHeaderText("Item Information");      // Here is the window for information about the item
-                            alert.setContentText("Name: " + item.getItemName() + "\n" +
-                                    "Price: " + item.getItemPrice() + "\n" +
-                                    "Category: " + item.getItemCategory());
+                            alert.setContentText("Name: " + item.getFlowerName() + "\n" +
+                                    "Price: " + item.getFlowerPrice() + "\n" +
+                                    "Category: " + item.getFlowerType());
                             alert.showAndWait();
                         });
                     }
@@ -115,7 +115,7 @@ public class CatalogController {
         // so we can receive events SimpleClient.
         try {
             if (SimpleClient.getClient().isConnected())
-                SimpleClient.getClient().sendToServer("#getCatalogTable");
+                SimpleClient.getClient().sendToServer("getCatalogTable");
         } catch (Exception e) {
             e.printStackTrace();
 
