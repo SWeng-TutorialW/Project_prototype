@@ -3,16 +3,16 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 import java.io.Serializable;
 import java.util.List;
 
-public class CatalogUpdateEvent {
 
+public class CatalogUpdateEvent implements Serializable {
 
-    private List<CatalogItem> updatedItems;
+    private List<Flower> updatedItems;
 
-    public CatalogUpdateEvent(List<CatalogItem> updatedItems) {
+    public CatalogUpdateEvent(List<Flower> updatedItems) {
         this.updatedItems = updatedItems;
     }
-    public List<CatalogItem> getUpdatedItems() {
+
+    public List<Flower> getUpdatedItems() {
         return updatedItems;
     }
-
 }
