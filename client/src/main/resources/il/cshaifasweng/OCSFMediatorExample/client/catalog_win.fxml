@@ -10,11 +10,11 @@
    <children>
       <TableView fx:id="catalogTbl" layoutX="38.0" layoutY="113.0" prefHeight="404.0" prefWidth="663.0">
         <columns>
-            <TableColumn fx:id="idCol" text="ID" />
-            <TableColumn fx:id="nameCol" prefWidth="180.0" text="Name" />
+            <TableColumn fx:id="idCol" editable="false" text="ID" />
+            <TableColumn fx:id="nameCol" editable="false" prefWidth="180.0" text="Name" />
             <TableColumn fx:id="priceCol" onEditCommit="#commitPrice" prefWidth="113.0" text="Price" />
-            <TableColumn fx:id="categoryCol" prefWidth="144.0" text="Category" />
-            <TableColumn fx:id="infoButtonCol" prefWidth="144.0" text="INFO" />
+            <TableColumn fx:id="categoryCol" editable="false" prefWidth="144.0" text="Category" />
+            <TableColumn fx:id="infoButtonCol" editable="false" prefWidth="144.0" text="INFO" />
         </columns>
       </TableView>
       <Label fx:id="catalogLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="290.0" layoutY="41.0" prefHeight="17.0" prefWidth="153.0" text="Browse Catalog" textAlignment="CENTER" wrapText="true">

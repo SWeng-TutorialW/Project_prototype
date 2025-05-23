@@ -9,7 +9,7 @@ import java.io.IOException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
+
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -17,7 +17,7 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
-import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,8 +25,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 import org.hibernate.Session;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
+
 
 public class SimpleServer extends AbstractServer {
 	private static ArrayList<SubscribedClient> SubscribersList = new ArrayList<>();
@@ -39,6 +38,7 @@ public class SimpleServer extends AbstractServer {
 	@Override
 	protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
 		String msgString = msg.toString();
+		System.out.println("Received message from client: " + msg);
 		if (msgString.startsWith("#warning")) {
 			Warning warning = new Warning("Warning from server!");
 			try {
@@ -67,8 +67,8 @@ public class SimpleServer extends AbstractServer {
 				}
 			}
 		}
-		else if(msgString.startsWith("getCatalogTable"))
-		{
+		else if (msgString.startsWith("getCatalogTable")) {
+			System.out.println("1");
 			try {
 				Session session = App.getSessionFactory().openSession();
 				session.beginTransaction();
@@ -78,6 +78,15 @@ public class SimpleServer extends AbstractServer {
 				query.from(Flower.class);
 
 				List<Flower> flowerList = session.createQuery(query).getResultList();
+
+				// 🟢 הדפסות בדיקה:
+				System.out.println("Flowers in DB: " + flowerList.size());
+				for (Flower flower : flowerList) {
+					System.out.println("Name: " + flower.getFlowerName() +
+							", Price: " + flower.getFlowerPrice() +
+							", Type: " + flower.getFlowerType());
+				}
+
 				session.getTransaction().commit();
 				session.close();
 

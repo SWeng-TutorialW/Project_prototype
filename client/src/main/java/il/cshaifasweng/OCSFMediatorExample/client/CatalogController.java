@@ -56,23 +56,26 @@ public class CatalogController {
     @FXML
     private TableColumn<Flower, Void> infoButtonCol;
     //
+    public void setCatalogData(List<Flower> flowerList) {
+        ObservableList<Flower> observableList = javafx.collections.FXCollections.observableArrayList(flowerList);
 
-    @Subscribe
-    public void handleCatalogUpdate(CatalogUpdateEvent event) {
-        // Handle the catalog update event here
-        // For example, update the catalog table with new data
-        // catalogTbl.setItems(event.getUpdatedCatalog()); <-- pseudocode
+        idCol.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("id"));
+        nameCol.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("flowerName"));
+        priceCol.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("flowerPrice"));
+        categoryCol.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("flowerType"));
+
+
         Platform.runLater(()-> {
 
             try{
-                List<Flower> itemsList = (List<Flower>)event.getUpdatedItems();
-                catalogTbl.setItems((ObservableList<Flower>) itemsList);
+                List<Flower> itemsList = flowerList;
+                catalogTbl.setItems(observableList);
 
                 infoButtonCol.setCellFactory(column -> new TableCell<>() {
 
                     final Button btn = new Button("Info");
                     {
-                    btn.setOnAction(e ->
+                        btn.setOnAction(e ->
 
                         {
 
@@ -99,7 +102,19 @@ public class CatalogController {
                 e.printStackTrace();
             }});
 
-    } // The runtime of this scares me
+
+
+
+        System.out.println("Received flowers: " + flowerList.size());
+        for (Flower f : flowerList) {
+            System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
+        }
+    }
+    // The runtime of this scares me
+
+
+
+
 
     @FXML
     void onCommitPrice(ActionEvent event){
@@ -111,18 +126,65 @@ public class CatalogController {
 
     @FXML
     void initialize() {
-        EventBus.getDefault().register(this);
+        System.out.println("CatalogController initialized");
+        // EventBus.getDefault().register(this);
         // so we can receive events SimpleClient.
-        try {
-            if (SimpleClient.getClient().isConnected())
-                SimpleClient.getClient().sendToServer("getCatalogTable");
-        } catch (Exception e) {
-            e.printStackTrace();
 
-
-
-        }
     }
 
 
+    public void commitPrice(TableColumn.CellEditEvent<Flower, Double> event) {
+        Flower flower = event.getRowValue();
+        Double newPrice = event.getNewValue();
+        flower.setFlowerPrice(newPrice);
+
+
+    }
 }
+/*
+ @Subscribe
+    public void handleCatalogUpdate(CatalogUpdateEvent event) {
+        // Handle the catalog update event here
+        // For example, update the catalog table with new data
+        // catalogTbl.setItems(event.getUpdatedCatalog()); <-- pseudocode
+        System.out.println("asafi");
+
+        Platform.runLater(()-> {
+
+            try{
+                List<Flower> itemsList = (List<Flower>)event.getUpdatedItems();
+                catalogTbl.setItems((ObservableList<Flower>) itemsList);
+
+                infoButtonCol.setCellFactory(column -> new TableCell<>() {
+
+                    final Button btn = new Button("Info");
+                    {
+                        btn.setOnAction(e ->
+
+                        {
+
+                            Flower item = getTableView().getItems().get(getIndex());
+
+                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                            alert.setTitle("Item Info");
+                            alert.setHeaderText("Item Information");      // Here is the window for information about the item
+                            alert.setContentText("Name: " + item.getFlowerName() + "\n" +
+                                    "Price: " + item.getFlowerPrice() + "\n" +
+                                    "Category: " + item.getFlowerType());
+                            alert.showAndWait();
+                        });
+                    }
+                    @Override
+                    protected void updateItem(Void item, boolean empty) {
+                        super.updateItem(item, empty);
+                        setGraphic(empty ? null : btn);
+                    }
+
+                });
+
+            }catch(Exception e){
+                e.printStackTrace();
+            }});
+
+    }
+ */
