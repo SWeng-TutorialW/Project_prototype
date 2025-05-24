@@ -97,6 +97,28 @@ public class SimpleServer extends AbstractServer {
 				e.printStackTrace();
 			}
 		}
+		else if(msg.getClass().equals(Flower.class)){
+			// we got a Flower from the client, it means we want to update this flower into our DB table.
+			try {
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				Flower flowerToUpdate = (Flower) msg;
+				session.update(flowerToUpdate);
+
+				session.getTransaction().commit();
+				session.close();
+
+				client.sendToClient("Flower updated successfully :)))))");
+			} catch (Exception e) {
+				e.printStackTrace();
+				try {
+					client.sendToClient("Error updating flower: " + e.getMessage());
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			}
+		}
 
 	}
 	public void sendToAllClients(String message) {

@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -116,13 +117,7 @@ public class CatalogController {
 
 
 
-    @FXML
-    void onCommitPrice(ActionEvent event){
 
-        // send changes to the server...
-        // and hopefully the server will update the database and return the result to us
-
-    }
 
     @FXML
     void initialize() {
@@ -132,12 +127,16 @@ public class CatalogController {
 
     }
 
-
-    public void commitPrice(TableColumn.CellEditEvent<Flower, Double> event) {
+    @FXML
+    public void commitPrice(TableColumn.CellEditEvent<Flower, Double> event) throws IOException {
         Flower flower = event.getRowValue();
-        Double newPrice = event.getNewValue();
-        flower.setFlowerPrice(newPrice);
+        flower.setFlowerPrice(event.getNewValue());
 
+            try {
+                SimpleClient.getClient().sendToServer(flower); // try to send the flower to the DB
+            }catch (IOException e){
+                e.printStackTrace();
+            }
 
     }
 }

@@ -14,7 +14,7 @@
             <TableColumn fx:id="nameCol" editable="false" prefWidth="180.0" text="Name" />
             <TableColumn fx:id="priceCol" onEditCommit="#commitPrice" prefWidth="113.0" text="Price" />
             <TableColumn fx:id="categoryCol" editable="false" prefWidth="144.0" text="Category" />
-            <TableColumn fx:id="infoButtonCol" editable="false" prefWidth="144.0" text="INFO" />
+            <TableColumn fx:id="infoButtonCol" editable="false" prefWidth="144.0" style="-fx-alignment: center;" styleClass="center" text="INFO" />
         </columns>
       </TableView>
       <Label fx:id="catalogLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="290.0" layoutY="41.0" prefHeight="17.0" prefWidth="153.0" text="Browse Catalog" textAlignment="CENTER" wrapText="true">
