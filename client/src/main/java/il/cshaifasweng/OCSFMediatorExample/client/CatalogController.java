@@ -12,8 +12,10 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
 
+import javafx.util.converter.DoubleStringConverter;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -111,7 +113,7 @@ public class CatalogController {
             System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
         }
     }
-    // The runtime of this scares me
+
 
 
 
@@ -122,6 +124,10 @@ public class CatalogController {
     @FXML
     void initialize() {
         System.out.println("CatalogController initialized");
+        catalogTbl.setEditable(true);
+
+
+        priceCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
         // EventBus.getDefault().register(this);
         // so we can receive events SimpleClient.
 
@@ -140,50 +146,3 @@ public class CatalogController {
 
     }
 }
-/*
- @Subscribe
-    public void handleCatalogUpdate(CatalogUpdateEvent event) {
-        // Handle the catalog update event here
-        // For example, update the catalog table with new data
-        // catalogTbl.setItems(event.getUpdatedCatalog()); <-- pseudocode
-        System.out.println("asafi");
-
-        Platform.runLater(()-> {
-
-            try{
-                List<Flower> itemsList = (List<Flower>)event.getUpdatedItems();
-                catalogTbl.setItems((ObservableList<Flower>) itemsList);
-
-                infoButtonCol.setCellFactory(column -> new TableCell<>() {
-
-                    final Button btn = new Button("Info");
-                    {
-                        btn.setOnAction(e ->
-
-                        {
-
-                            Flower item = getTableView().getItems().get(getIndex());
-
-                            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                            alert.setTitle("Item Info");
-                            alert.setHeaderText("Item Information");      // Here is the window for information about the item
-                            alert.setContentText("Name: " + item.getFlowerName() + "\n" +
-                                    "Price: " + item.getFlowerPrice() + "\n" +
-                                    "Category: " + item.getFlowerType());
-                            alert.showAndWait();
-                        });
-                    }
-                    @Override
-                    protected void updateItem(Void item, boolean empty) {
-                        super.updateItem(item, empty);
-                        setGraphic(empty ? null : btn);
-                    }
-
-                });
-
-            }catch(Exception e){
-                e.printStackTrace();
-            }});
-
-    }
- */
