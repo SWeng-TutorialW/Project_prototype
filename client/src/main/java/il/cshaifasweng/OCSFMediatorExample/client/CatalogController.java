@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -11,8 +12,10 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.AnchorPane;
 
+import javafx.util.converter.DoubleStringConverter;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -56,23 +59,26 @@ public class CatalogController {
     @FXML
     private TableColumn<Flower, Void> infoButtonCol;
     //
+    public void setCatalogData(List<Flower> flowerList) {
+        ObservableList<Flower> observableList = javafx.collections.FXCollections.observableArrayList(flowerList);
 
-    @Subscribe
-    public void handleCatalogUpdate(CatalogUpdateEvent event) {
-        // Handle the catalog update event here
-        // For example, update the catalog table with new data
-        // catalogTbl.setItems(event.getUpdatedCatalog()); <-- pseudocode
+        idCol.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("id"));
+        nameCol.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("flowerName"));
+        priceCol.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("flowerPrice"));
+        categoryCol.setCellValueFactory(new javafx.scene.control.cell.PropertyValueFactory<>("flowerType"));
+
+
         Platform.runLater(()-> {
 
             try{
-                List<Flower> itemsList = (List<Flower>)event.getUpdatedItems();
-                catalogTbl.setItems((ObservableList<Flower>) itemsList);
+                List<Flower> itemsList = flowerList;
+                catalogTbl.setItems(observableList);
 
                 infoButtonCol.setCellFactory(column -> new TableCell<>() {
 
                     final Button btn = new Button("Info");
                     {
-                    btn.setOnAction(e ->
+                        btn.setOnAction(e ->
 
                         {
 
@@ -99,30 +105,44 @@ public class CatalogController {
                 e.printStackTrace();
             }});
 
-    } // The runtime of this scares me
-
-    @FXML
-    void onCommitPrice(ActionEvent event){
-
-        // send changes to the server...
-        // and hopefully the server will update the database and return the result to us
-
-    }
-
-    @FXML
-    void initialize() {
-        EventBus.getDefault().register(this);
-        // so we can receive events SimpleClient.
-        try {
-            if (SimpleClient.getClient().isConnected())
-                SimpleClient.getClient().sendToServer("getCatalogTable");
-        } catch (Exception e) {
-            e.printStackTrace();
 
 
 
+        System.out.println("Received flowers: " + flowerList.size());
+        for (Flower f : flowerList) {
+            System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
         }
     }
 
 
+
+
+
+
+
+
+    @FXML
+    void initialize() {
+        System.out.println("CatalogController initialized");
+        catalogTbl.setEditable(true);
+
+
+        priceCol.setCellFactory(TextFieldTableCell.forTableColumn(new DoubleStringConverter()));
+        // EventBus.getDefault().register(this);
+        // so we can receive events SimpleClient.
+
+    }
+
+    @FXML
+    public void commitPrice(TableColumn.CellEditEvent<Flower, Double> event) throws IOException {
+        Flower flower = event.getRowValue();
+        flower.setFlowerPrice(event.getNewValue());
+
+            try {
+                SimpleClient.getClient().sendToServer(flower); // try to send the flower to the DB
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
+    }
 }
