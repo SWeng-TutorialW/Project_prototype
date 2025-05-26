@@ -13,7 +13,6 @@ tomcat
 *.dmg
 *.gz
 *.iso
-*.jar
 *.rar
 *.tar
 *.zip
@@ -51,6 +50,5 @@ nb-configuration.xml
 
 # Misc
 *.swp
-release.properties
-pom.xml.releaseBackup
-pom.xml.tag
+pl.releaseBackup
+ pom.xmom.xml.tag
