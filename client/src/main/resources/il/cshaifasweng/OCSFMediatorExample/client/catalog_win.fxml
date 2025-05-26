@@ -8,7 +8,7 @@
 
 <AnchorPane fx:id="catalogWin" prefHeight="536.0" prefWidth="733.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogController">
    <children>
-      <TableView fx:id="catalogTbl" layoutX="38.0" layoutY="113.0" prefHeight="404.0" prefWidth="663.0">
+      <TableView fx:id="catalogTbl" editable="true" layoutX="38.0" layoutY="113.0" prefHeight="404.0" prefWidth="663.0">
         <columns>
             <TableColumn fx:id="idCol" editable="false" text="ID" />
             <TableColumn fx:id="nameCol" editable="false" prefWidth="180.0" text="Name" />

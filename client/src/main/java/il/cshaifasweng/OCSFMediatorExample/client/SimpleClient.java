@@ -20,7 +20,6 @@ public class SimpleClient extends AbstractClient {
 			EventBus.getDefault().post(new WarningEvent((Warning) msg));
 		}
 		else if(msg.getClass().equals(CatalogUpdateEvent.class)){
-			System.out.println("2");
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
 		else{
