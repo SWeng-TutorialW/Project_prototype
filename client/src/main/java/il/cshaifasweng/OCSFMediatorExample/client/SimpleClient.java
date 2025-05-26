@@ -30,7 +30,7 @@ public class SimpleClient extends AbstractClient {
 	
 	public static SimpleClient getClient() {
 		if (client == null) {
-			client = new SimpleClient("6.tcp.eu.ngrok.io", 17741);
+			client = new SimpleClient("localhost", 3000);
 		}
 		return client;
 	}

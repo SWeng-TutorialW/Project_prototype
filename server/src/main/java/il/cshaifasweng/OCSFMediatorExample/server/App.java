@@ -3,6 +3,7 @@ package il.cshaifasweng.OCSFMediatorExample.server;
 import java.io.IOException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import java.util.Scanner;
 
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
@@ -26,9 +27,13 @@ public class App
     private static SessionFactory sessionFactory = null;
 
     static SessionFactory getSessionFactory() throws HibernateException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter DB password: ");
+        String password = scanner.nextLine();
         if (sessionFactory == null) {
             Configuration configuration = new Configuration();
             configuration.setProperty("hibernate.show_sql", "true");
+            configuration.setProperty("hibernate.connection.password", password);
             configuration.addAnnotatedClass(Flower.class);
             ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                     .applySettings(configuration.getProperties())
