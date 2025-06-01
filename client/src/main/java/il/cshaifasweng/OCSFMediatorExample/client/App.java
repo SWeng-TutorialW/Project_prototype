@@ -25,9 +25,7 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
     	EventBus.getDefault().register(this);
-    	client = SimpleClient.getClient();
-    	client.openConnection();
-        scene = new Scene(loadFXML("primary"), 750, 565);
+        scene = new Scene(loadFXML("primary"), 562, 386);
         stage.setScene(scene);
         stage.show();
     }

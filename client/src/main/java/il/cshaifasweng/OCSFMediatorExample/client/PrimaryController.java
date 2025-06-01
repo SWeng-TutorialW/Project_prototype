@@ -3,18 +3,34 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 import java.io.IOException;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
+import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+
+import static il.cshaifasweng.OCSFMediatorExample.client.SimpleClient.client;
 
 public class PrimaryController {
 	@FXML
 	private Button Catalog;
+	@FXML
+	private TextField IP;
+
+	@FXML
+	private Label ip_label;
+
+	@FXML
+	private Label port;
+
+	@FXML
+	private TextField port_box;
 
 	@FXML
 	void sendWarning(ActionEvent event) {
@@ -29,15 +45,24 @@ public class PrimaryController {
 	@FXML
 	void initialize() {
 		EventBus.getDefault().register(this);
-		try {
-			SimpleClient.getClient().sendToServer("add client");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 	}
 
 	public void show_cata(ActionEvent actionEvent) {
+		SimpleClient.ip = IP.getText();
+		SimpleClient.port = Integer.parseInt(port_box.getText());
+		client = SimpleClient.getClient();
+
+		try {
+			SimpleClient.getClient().openConnection();
+			SimpleClient.getClient().sendToServer("add client");
+		} catch (IOException e) {
+			client = null;
+			Warning warning = new Warning("IP or Port is incorrect. Could not connect.");
+			EventBus.getDefault().post(new WarningEvent(warning));
+			e.printStackTrace();
+			return;
+		}
 		try {
 			if (SimpleClient.getClient().isConnected())
 				System.out.println("show_cata");
