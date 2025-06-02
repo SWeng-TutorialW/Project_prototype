@@ -43,7 +43,6 @@ public class App
     {
 
         try {
-
             SessionFactory sessionFactory = getSessionFactory();
         session = sessionFactory.openSession();
         session.beginTransaction();
@@ -62,7 +61,7 @@ public class App
         Flower flower_5 = new Flower("Exotic Queen",9.99,"Orchid");
         session.save(flower_5);
         session.flush();
-        Flower flower_6 = new Flower("White Snowflakee", 7.49, "Lily");
+        Flower flower_6 = new Flower("White Snowflake", 6.49, "Lily");
         session.save(flower_6);
         session.flush();
         session.getTransaction().commit(); // Save everything.

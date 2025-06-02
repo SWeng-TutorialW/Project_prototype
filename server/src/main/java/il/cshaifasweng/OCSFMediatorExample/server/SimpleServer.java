@@ -153,6 +153,24 @@ public class SimpleServer extends AbstractServer {
 			}
 
 		}
+		else if(msg.getClass().equals(Flower.class)) {
+			Flower flower = (Flower) msg;
+
+			Session session = App.getSessionFactory().openSession();
+			try {
+				session.beginTransaction();
+				session.save(flower);
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				session.getTransaction().rollback();
+				e.printStackTrace();
+			} finally {
+				session.close();
+			}
+			sendToAllClients("update_catalog_after_change");
+
+
+		}
 
 	}
 	public void sendToAllClients(String message) {

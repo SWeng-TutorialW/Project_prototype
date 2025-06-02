@@ -29,10 +29,16 @@ public class CatalogController {
     private Button cart;
 
     @FXML
+    private ComboBox<String> combo;
+
+    @FXML
     private Button contact;
 
     @FXML
     private Label copyrightLBl;
+
+    @FXML
+    private Button eight_8;
 
     @FXML
     private HBox first_line;
@@ -59,6 +65,18 @@ public class CatalogController {
     private VBox flower_6;
 
     @FXML
+    private VBox flower_7;
+
+    @FXML
+    private VBox flower_8;
+
+    @FXML
+    private VBox flower_9;
+
+    @FXML
+    private AnchorPane for_combo;
+
+    @FXML
     private Button four_4;
 
     @FXML
@@ -83,6 +101,18 @@ public class CatalogController {
     private Label name_6;
 
     @FXML
+    private Label name_7;
+
+    @FXML
+    private Label name_8;
+
+    @FXML
+    private Label name_9;
+
+    @FXML
+    private Button nine_9;
+
+    @FXML
     private Button one_1;
 
     @FXML
@@ -104,6 +134,15 @@ public class CatalogController {
     private ImageView pic_6;
 
     @FXML
+    private ImageView pic_7;
+
+    @FXML
+    private ImageView pic_8;
+
+    @FXML
+    private ImageView pic_9;
+
+    @FXML
     private TextField price_1;
 
     @FXML
@@ -122,10 +161,28 @@ public class CatalogController {
     private TextField price_6;
 
     @FXML
+    private TextField price_7;
+
+    @FXML
+    private TextField price_8;
+
+    @FXML
+    private TextField price_9;
+
+    @FXML
     private HBox second_line;
 
     @FXML
+    private HBox second_line1;
+
+    @FXML
+    private Button seven_7;
+
+    @FXML
     private Button six_6;
+
+    @FXML
+    private ImageView sort_image;
 
     @FXML
     private Button three_3;
@@ -152,14 +209,13 @@ public class CatalogController {
     private Label type_6;
 
     @FXML
-    private ComboBox<String> combo;
-
-
-    @FXML
-    private AnchorPane for_combo;
+    private Label type_7;
 
     @FXML
-    private ImageView sort_image;
+    private Label type_8;
+
+    @FXML
+    private Label type_9;
 
 
     private List<Flower> flowersList_c;
@@ -215,6 +271,30 @@ public class CatalogController {
             type_6.setText(f.getFlowerType());
             setImage(pic_6, f.getFlowerType());
         }
+        if (flowerList.size() > 6) {
+            Flower f = flowerList.get(6);
+            name_7.setText(f.getFlowerName());
+            price_7.setText(String.format("%.2f", f.getFlowerPrice()));
+            type_7.setText(f.getFlowerType());
+            setImage(pic_7, f.getFlowerType());
+            seven_7.setVisible(true);
+        }
+        if (flowerList.size() > 7) {
+            Flower f = flowerList.get(7);
+            name_8.setText(f.getFlowerName());
+            price_8.setText(String.format("%.2f", f.getFlowerPrice()));
+            type_8.setText(f.getFlowerType());
+            setImage(pic_8, f.getFlowerType());
+            eight_8.setVisible(true);
+        }
+        if (flowerList.size() > 8) {
+            Flower f = flowerList.get(8);
+            name_9.setText(f.getFlowerName());
+            price_9.setText(String.format("%.2f", f.getFlowerPrice()));
+            type_9.setText(f.getFlowerType());
+            setImage(pic_9, f.getFlowerType());
+            nine_9.setVisible(true);
+        }
     }
 
     private void setImage(ImageView imageView, String flowerName) {
@@ -224,6 +304,9 @@ public class CatalogController {
             imageView.setImage(image);
         } catch (Exception e) {
             System.err.println("Failed to load image for: " + flowerName);
+            String imagePath = "/images/" + "no_photo"+".png";
+            Image image = new Image(getClass().getResourceAsStream(imagePath));
+            imageView.setImage(image);
             e.printStackTrace();
         }
     }
@@ -256,27 +339,7 @@ public class CatalogController {
     }
 
 
-    @FXML
-    public void commitPrice(ActionEvent event) throws IOException {
-        int flower_to_update = 0;
-        TextField source = (TextField) event.getSource();
-        List<TextField> priceFields = List.of(price_1, price_2, price_3, price_4, price_5, price_6);
-        for (int i = 0; i < priceFields.size(); i++) {
-            if (source == priceFields.get(i)) {
-                flower_to_update = i;
-                break;
-            }
-        }
-        String str = String.valueOf(flower_to_update);
-        String new_price = source.getText();
-        double value = Double.parseDouble(new_price);
-        try {
-            SimpleClient.getClient().sendToServer("number#flower#to#update#_" + str + "_" + value); // try to send the flower to the DB
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        SimpleClient.getClient().sendToServer("update_catalog_after_change");
-    }
+
 
     @FXML
     public void combo_choose(ActionEvent actionEvent) throws IOException {
