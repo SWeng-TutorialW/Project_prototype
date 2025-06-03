@@ -331,7 +331,7 @@ public class ConnectionToClient extends Thread
     {
       // Set the streams and the sockets to NULL no matter what
       // Doing so allows, but does not require, any finalizers
-      // of these objects to reclaim system resources if and
+      // of these objects to reclaim system hibernate.properties if and
       // when they are garbage collected.
       output = null;
       input = null;

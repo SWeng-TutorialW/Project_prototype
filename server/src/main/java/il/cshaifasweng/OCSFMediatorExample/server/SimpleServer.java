@@ -68,7 +68,6 @@ public class SimpleServer extends AbstractServer {
 			}
 		}
 		else if (msgString.startsWith("getCatalogTable")) {
-			System.out.println("1");
 			try {
 				Session session = App.getSessionFactory().openSession();
 				session.beginTransaction();
@@ -79,7 +78,7 @@ public class SimpleServer extends AbstractServer {
 
 				List<Flower> flowerList = session.createQuery(query).getResultList();
 
-				// 🟢 הדפסות בדיקה:
+
 				System.out.println("Flowers in DB: " + flowerList.size());
 				for (Flower flower : flowerList) {
 					System.out.println("Name: " + flower.getFlowerName() +
@@ -97,13 +96,22 @@ public class SimpleServer extends AbstractServer {
 				e.printStackTrace();
 			}
 		}
-		else if(msg.getClass().equals(Flower.class)){
+		else if(msgString.startsWith("number#flower#to#update#")){
 			// we got a Flower from the client, it means we want to update this flower into our DB table.
 			try {
+				String[] parts = msgString.split("_");
+				int num = Integer.parseInt(parts[1]);
+				double newPrice = Double.parseDouble(parts[2]);
 				Session session = App.getSessionFactory().openSession();
 				session.beginTransaction();
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
+				query.from(Flower.class);
 
-				Flower flowerToUpdate = (Flower) msg;
+				List<Flower> flowerList = session.createQuery(query).getResultList();
+
+				Flower flowerToUpdate = flowerList.get(num);
+				flowerToUpdate.setFlowerPrice(newPrice);
 				session.update(flowerToUpdate);
 
 				session.getTransaction().commit();
@@ -119,6 +127,50 @@ public class SimpleServer extends AbstractServer {
 				}
 			}
 		}
+		else if(msgString.startsWith("update_catalog_after_change"))
+		{
+			sendToAllClients("update_catalog_after_change");
+
+		}
+		else if(msgString.startsWith("get_flowers_high_to_low"))
+		{
+			List<Flower> flowers = getFlowersOrdered("desc");
+			try {
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowers);
+				client.sendToClient(event);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+		}
+		else if(msgString.startsWith("get_flowers_low_to_high"))
+		{
+			List<Flower> flowers = getFlowersOrdered("asc");
+			try {
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowers);
+				client.sendToClient(event);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+
+		}
+		else if(msg.getClass().equals(Flower.class)) {
+			Flower flower = (Flower) msg;
+
+			Session session = App.getSessionFactory().openSession();
+			try {
+				session.beginTransaction();
+				session.save(flower);
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				session.getTransaction().rollback();
+				e.printStackTrace();
+			} finally {
+				session.close();
+			}
+			sendToAllClients("update_catalog_after_change");
+
+
+		}
 
 	}
 	public void sendToAllClients(String message) {
@@ -130,6 +182,23 @@ public class SimpleServer extends AbstractServer {
 			e1.printStackTrace();
 		}
 	}
+	private List<Flower> getFlowersOrdered(String direction) {
+		List<Flower> result = new ArrayList<>();
+		try {
+			Session session = App.getSessionFactory().openSession();
+			session.beginTransaction();
+
+			String hql = "FROM Flower ORDER BY flowerPrice " + (direction.equals("desc") ? "DESC" : "ASC");
+			result = session.createQuery(hql, Flower.class).getResultList();
+
+			session.getTransaction().commit();
+			session.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
 }
 
 
