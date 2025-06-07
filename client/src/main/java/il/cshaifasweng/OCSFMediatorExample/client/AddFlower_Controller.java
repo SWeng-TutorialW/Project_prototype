@@ -45,6 +45,7 @@ public class AddFlower_Controller {
         if (isTextFieldEmpty(new_name)|| isTextFieldEmpty(new_price) || isTextFieldEmpty(new_type)) {
             Warning warning = new Warning("Please fill in all the fields");
             EventBus.getDefault().post(new WarningEvent(warning));
+            return;
         }
         String new_name_s = new_name.getText();
         String new_type_s = new_type.getText();

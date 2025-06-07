@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.server;
 
 
 import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
+import il.cshaifasweng.OCSFMediatorExample.entities.Complain;
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
@@ -168,8 +169,23 @@ public class SimpleServer extends AbstractServer {
 				session.close();
 			}
 			sendToAllClients("update_catalog_after_change");
+		}
+		else if(msg.getClass().equals(Complain.class)) {
+			Complain comp = (Complain) msg;
+			comp.setClient(client.getInetAddress().toString());
 
-
+			Session session = App.getSessionFactory().openSession();
+			try {
+				session.beginTransaction();
+				session.save(comp);
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				session.getTransaction().rollback();
+				e.printStackTrace();
+			} finally {
+				session.close();
+			}
+			sendToAllClients("update_catalog_after_change");
 		}
 
 	}
