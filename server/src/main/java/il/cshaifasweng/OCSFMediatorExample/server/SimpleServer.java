@@ -68,7 +68,7 @@ public class SimpleServer extends AbstractServer {
 				}
 			}
 		}
-		else if (msgString.startsWith("getCatalogTable")) {
+		else if (msgString.startsWith("getCatalogTable_guest")) {
 			try {
 				Session session = App.getSessionFactory().openSession();
 				session.beginTransaction();
@@ -77,7 +77,9 @@ public class SimpleServer extends AbstractServer {
 				CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
 				query.from(Flower.class);
 
+
 				List<Flower> flowerList = session.createQuery(query).getResultList();
+
 
 
 				System.out.println("Flowers in DB: " + flowerList.size());
@@ -90,13 +92,46 @@ public class SimpleServer extends AbstractServer {
 				session.getTransaction().commit();
 				session.close();
 
-				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList);
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList,null);
 				client.sendToClient(event);
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		else if (msgString.startsWith("getCatalogTable_login")) {
+			try {
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
+				query.from(Flower.class);
+				CriteriaQuery<LoginRegCheck> query1 = builder.createQuery(LoginRegCheck.class);
+				query1.from(LoginRegCheck.class);
+
+				List<Flower> flowerList = session.createQuery(query).getResultList();
+				List<LoginRegCheck> loginRegCheckList = session.createQuery(query1).getResultList();
+
+
+				System.out.println("Flowers in DB: " + flowerList.size());
+				for (Flower flower : flowerList) {
+					System.out.println("Name: " + flower.getFlowerName() +
+							", Price: " + flower.getFlowerPrice() +
+							", Type: " + flower.getFlowerType());
+				}
+
+				session.getTransaction().commit();
+				session.close();
+
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList,loginRegCheckList);
+				client.sendToClient(event);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
 		else if(msgString.startsWith("number#flower#to#update#")){
 			// we got a Flower from the client, it means we want to update this flower into our DB table.
 			try {

@@ -68,7 +68,12 @@ public class App
         Flower flower_6 = new Flower("White Snowflake", 6.49, "Lily");
         session.save(flower_6);
         session.flush();
-        session.getTransaction().commit(); // Save everything.
+        LoginRegCheck Asaf = new  LoginRegCheck("Asaf","123","asaf@",0,true);
+        session.save(Asaf);
+        session.flush();
+        session.getTransaction().commit();// Save everything.
+
+
 
     } catch (Exception exception) {
     if (session != null) {
