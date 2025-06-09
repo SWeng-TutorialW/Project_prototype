@@ -12,7 +12,7 @@ public class SimpleClient extends AbstractClient {
 	static SimpleClient client = null;
 	public static int port = 3000;
 	public static String ip = "localhost";
-
+	public static boolean loggedIn = false; // to check if the user is logged in or not
 	private SimpleClient(String host, int port) {
 		super(host, port);
 	}
@@ -35,6 +35,11 @@ public class SimpleClient extends AbstractClient {
 			}
 
 		}
+		else if(msgString.startsWith("#user_exists") || msgString.startsWith("#login_failed") || msgString.startsWith("#login/reg_ok")){
+			EventBus.getDefault().post((String)msg);
+			System.out.println("I GOT THE MESSAGE");
+		}
+
 
 	}
 
