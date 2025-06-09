@@ -53,8 +53,8 @@ public class PrimaryController {
 		EventBus.getDefault().register(this);
 		combo.getItems().addAll("client", "employee");
 		combo.setValue("type");
-
 	}
+
 	@FXML
 	void combo_select(ActionEvent event)
 	{
@@ -91,6 +91,7 @@ public class PrimaryController {
 		}
 
 	}
+
 	@Subscribe
 	public void handleCatalogUpdate(CatalogUpdateEvent event)
 	{

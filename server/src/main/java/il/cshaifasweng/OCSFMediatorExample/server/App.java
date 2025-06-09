@@ -5,8 +5,8 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Complain;
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
+import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -31,7 +31,7 @@ public class App
             Configuration configuration = new Configuration();
             configuration.setProperty("hibernate.show_sql", "true");
             configuration.addAnnotatedClass(Flower.class);
-            configuration.addAnnotatedClass(Complain.class);
+            configuration.addAnnotatedClass(LoginRegCheck.class);
             ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                     .applySettings(configuration.getProperties())
                     .build();
