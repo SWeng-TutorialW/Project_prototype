@@ -1,6 +1,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
+
 import java.io.IOException;
 
 import java.util.List;
@@ -11,16 +13,21 @@ import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
 
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 
 
 public class CatalogController {
@@ -308,6 +315,29 @@ public class CatalogController {
             Image image = new Image(getClass().getResourceAsStream(imagePath));
             imageView.setImage(image);
             e.printStackTrace();
+        }
+    }
+
+    @FXML
+    void gotoAcc(MouseEvent event) {
+
+        if(!SimpleClient.loggedIn){
+
+                Platform.runLater(() ->{
+                    try {
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login_screen.fxml"));
+                    Parent root = fxmlLoader.load();
+                    Stage stage = new Stage();
+                    stage.setTitle("Login | Registration");
+                    stage.setScene(new Scene(root));
+                    stage.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                }
+            );
+
+
         }
     }
 
