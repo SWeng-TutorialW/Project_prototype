@@ -6,16 +6,21 @@ import il.cshaifasweng.OCSFMediatorExample.entities.Complain;
 import il.cshaifasweng.OCSFMediatorExample.entities.ComplainUpdateEvent;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.hibernate.Hibernate;
@@ -44,6 +49,12 @@ public class ComplainController_employee implements Initializable {
     @FXML
     private TableColumn<Complain, String> timeColumn;
 
+    private CatalogController_employee catalogController;
+
+    public void setCatalogController(CatalogController_employee controller) {
+        this.catalogController = controller;
+    }
+
     @FXML
     public void initialize(URL url, ResourceBundle resources) {
         EventBus.getDefault().register(this);
@@ -65,6 +76,25 @@ public class ComplainController_employee implements Initializable {
         }
 
     }
+//    void open_catalog(ActionEvent event)
+//    {
+//        try {
+//            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
+//            Parent root = fxmlLoader.load();
+//            ComplainController_employee complainControllerEmployee = fxmlLoader.getController();
+//            complainControllerEmployee.setCatalogController(this);
+//
+//            Stage stage = new Stage();
+//            stage.setTitle("Complaints");
+//            stage.setScene(new Scene(root));
+//            stage.setResizable(false);
+//            stage.initModality(Modality.WINDOW_MODAL);
+//            stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+//            stage.show();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     @Subscribe
     public void handleComplainUpdate(ComplainUpdateEvent event)

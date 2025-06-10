@@ -1,9 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
 
-import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
-import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import java.io.IOException;
@@ -22,7 +20,6 @@ import org.hibernate.service.ServiceRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 import org.hibernate.Session;
 
@@ -131,6 +128,30 @@ public class SimpleServer extends AbstractServer {
 				e.printStackTrace();
 			}
 		}
+		else if (msgString.startsWith("getComplaints")) {
+			try {
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<Complain> query = builder.createQuery(Complain.class);
+				query.from(Complain.class);
+				CriteriaQuery<LoginRegCheck> query1 = builder.createQuery(LoginRegCheck.class);
+				query1.from(LoginRegCheck.class);
+
+				List<Complain> complainList = session.createQuery(query).getResultList();
+				List<LoginRegCheck> loginRegCheckList = session.createQuery(query1).getResultList();
+
+				session.getTransaction().commit();
+				session.close();
+
+				ComplainUpdateEvent event = new ComplainUpdateEvent(complainList,loginRegCheckList);
+				client.sendToClient(event);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 
 		else if(msgString.startsWith("number#flower#to#update#")){
 			// we got a Flower from the client, it means we want to update this flower into our DB table.
@@ -217,88 +238,88 @@ public class SimpleServer extends AbstractServer {
 			System.out.println("Password: " + password);
 
 			switch (isLogin) {
-                case 1: // login
+				case 1: // login
 
-                    Session session = App.getSessionFactory().openSession();
-                    session.beginTransaction();
+					Session session = App.getSessionFactory().openSession();
+					session.beginTransaction();
 
-                    List<LoginRegCheck> resultLogin = session.createQuery(
-                                    "FROM LoginRegCheck lrc WHERE lrc.username = :username AND lrc.password = :password",
-                                    LoginRegCheck.class
-                            )
-                            .setParameter("username", username)
-                            .setParameter("password", password)
-                            .getResultList();
-                    session.getTransaction().commit();
+					List<LoginRegCheck> resultLogin = session.createQuery(
+									"FROM LoginRegCheck lrc WHERE lrc.username = :username AND lrc.password = :password",
+									LoginRegCheck.class
+							)
+							.setParameter("username", username)
+							.setParameter("password", password)
+							.getResultList();
+					session.getTransaction().commit();
 
-                    if (resultLogin.isEmpty()) {
-                        // user doesn't exist or password is wrong
-                        try {
-                            System.out.println("Login failed for user: " + username);
-                            client.sendToClient("#login_failed");
-                            session.close();
-                        } catch (IOException e) {
-                            System.out.println("User login failed ERR");
-                            e.printStackTrace();
-                        }
-                        return;
-                    }
-                    try {
-                        System.out.println("User Logged-in successfully: " + username);
-                        session.close();
-                        client.sendToClient("#login/reg_ok");
+					if (resultLogin.isEmpty()) {
+						// user doesn't exist or password is wrong
+						try {
+							System.out.println("Login failed for user: " + username);
+							client.sendToClient("#login_failed");
+							session.close();
+						} catch (IOException e) {
+							System.out.println("User login failed ERR");
+							e.printStackTrace();
+						}
+						return;
+					}
+					try {
+						System.out.println("User Logged-in successfully: " + username);
+						session.close();
+						client.sendToClient("#login/reg_ok");
 
-                    } catch (IOException e) {
-                        System.out.println("User login ok ERR");
-                        e.printStackTrace();
-                    }
-                    break;
-                case 0: // registration
-                    System.out.println("WE ARE IN REG");
-                    Session session2 = null;
-                    try {
-                        // begin checking if this user already exists
-                        session2 = App.getSessionFactory().openSession();
-                        session2.beginTransaction();
-                        List<LoginRegCheck> result = session2.createQuery("FROM LoginRegCheck lrc WHERE lrc.username = :username", LoginRegCheck.class)
-                                .setParameter("username", username)
-                                .getResultList();
-                        session2.getTransaction().commit();
+					} catch (IOException e) {
+						System.out.println("User login ok ERR");
+						e.printStackTrace();
+					}
+					break;
+				case 0: // registration
+					System.out.println("WE ARE IN REG");
+					Session session2 = null;
+					try {
+						// begin checking if this user already exists
+						session2 = App.getSessionFactory().openSession();
+						session2.beginTransaction();
+						List<LoginRegCheck> result = session2.createQuery("FROM LoginRegCheck lrc WHERE lrc.username = :username", LoginRegCheck.class)
+								.setParameter("username", username)
+								.getResultList();
+						session2.getTransaction().commit();
 
-                        if (!result.isEmpty()) {
-                            // user already exists
-                            client.sendToClient("#user_exists");
-                            System.out.println("User already exists: " + username);
-                            session2.close();
-                            return;
-                        }
+						if (!result.isEmpty()) {
+							// user already exists
+							client.sendToClient("#user_exists");
+							System.out.println("User already exists: " + username);
+							session2.close();
+							return;
+						}
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } finally {
-                        session2.close();
-                    }
+					} catch (IOException e) {
+						e.printStackTrace();
+					} finally {
+						session2.close();
+					}
 
 					Session insertSession=App.getSessionFactory().openSession();
 					try {
-                        // after user doesn't exist, we can insert into DB
-                        insertSession = App.getSessionFactory().openSession();
-                        insertSession.beginTransaction();
-                        insertSession.save(msg); // This is the INSERT INTO statement
-                        insertSession.getTransaction().commit();
-                        insertSession.close();
+						// after user doesn't exist, we can insert into DB
+						insertSession = App.getSessionFactory().openSession();
+						insertSession.beginTransaction();
+						insertSession.save(msg); // This is the INSERT INTO statement
+						insertSession.getTransaction().commit();
+						insertSession.close();
 
-                        client.sendToClient("#login/reg_ok");
-                        System.out.println("User registered successfully: " + username);
-                    } catch (IOException e) {
-                        System.out.println("User register/login ERR");
-                        insertSession.getTransaction().rollback();
-                        e.printStackTrace();
-                    } finally {
-                        insertSession.close();
-                    }
-                    break;
-            }
+						client.sendToClient("#login/reg_ok");
+						System.out.println("User registered successfully: " + username);
+					} catch (IOException e) {
+						System.out.println("User register/login ERR");
+						insertSession.getTransaction().rollback();
+						e.printStackTrace();
+					} finally {
+						insertSession.close();
+					}
+					break;
+			}
 
 		}
 
@@ -330,7 +351,6 @@ public class SimpleServer extends AbstractServer {
 	}
 
 }
-
 
 
 

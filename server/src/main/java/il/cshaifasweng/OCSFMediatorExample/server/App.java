@@ -3,7 +3,6 @@ package il.cshaifasweng.OCSFMediatorExample.server;
 import java.io.IOException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import java.util.Scanner;
 
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Complain;
@@ -20,22 +19,18 @@ import org.hibernate.service.ServiceRegistry;
  * Hello world!
  *
  */
-public class App 
+public class App
 {
-	
-	private static SimpleServer server;
+
+    private static SimpleServer server;
 
     private static Session session;
     private static SessionFactory sessionFactory = null;
 
     static SessionFactory getSessionFactory() throws HibernateException {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter DB password: ");
-        String password = scanner.nextLine();
         if (sessionFactory == null) {
             Configuration configuration = new Configuration();
             configuration.setProperty("hibernate.show_sql", "true");
-            configuration.setProperty("hibernate.connection.password", password);
             configuration.addAnnotatedClass(Flower.class);
             configuration.addAnnotatedClass(LoginRegCheck.class);
             configuration.addAnnotatedClass(Complain.class);
@@ -53,46 +48,45 @@ public class App
 
         try {
             SessionFactory sessionFactory = getSessionFactory();
-        session = sessionFactory.openSession();
-        session.beginTransaction();
-        Flower flower_1 = new Flower("Romance Royalty",11.99,"Rose");
-        session.save(flower_1);
-        session.flush();
-        Flower flower_2 = new Flower("Sunny Smiler",6.99,"Sunflower");
-        session.save(flower_2);
-        session.flush();
-        Flower flower_3 = new Flower("Spring's Prince",3.99,"Tulip");
-        session.save(flower_3);
-        session.flush();
-        Flower flower_4 = new Flower("Purple Cloud",8.99,"Jacarande");
-        session.save(flower_4);
-        session.flush();
-        Flower flower_5 = new Flower("Exotic Queen",9.99,"Orchid");
-        session.save(flower_5);
-        session.flush();
-        Flower flower_6 = new Flower("White Snowflake", 6.49, "Lily");
-        session.save(flower_6);
-        session.flush();
-        LoginRegCheck Asaf = new  LoginRegCheck("Asaf","123","asaf@",0,true);
-        session.save(Asaf);
-        session.flush();
-        session.getTransaction().commit();// Save everything.
+            session = sessionFactory.openSession();
+            session.beginTransaction();
+            Flower flower_1 = new Flower("Romance Royalty",11.99,"Rose");
+            session.save(flower_1);
+            session.flush();
+            Flower flower_2 = new Flower("Sunny Smiler",6.99,"Sunflower");
+            session.save(flower_2);
+            session.flush();
+            Flower flower_3 = new Flower("Spring's Prince",3.99,"Tulip");
+            session.save(flower_3);
+            session.flush();
+            Flower flower_4 = new Flower("Purple Cloud",8.99,"Jacarande");
+            session.save(flower_4);
+            session.flush();
+            Flower flower_5 = new Flower("Exotic Queen",9.99,"Orchid");
+            session.save(flower_5);
+            session.flush();
+            Flower flower_6 = new Flower("White Snowflake", 6.49, "Lily");
+            session.save(flower_6);
+            session.flush();
+            LoginRegCheck Asaf = new  LoginRegCheck("Asaf","123","asaf@",0,true);
+            session.save(Asaf);
+            session.flush();
+            session.getTransaction().commit();// Save everything.
 
 
 
-    } catch (Exception exception) {
-    if (session != null) {
-        session.getTransaction().rollback();
-    }
-    System.err.println("An error occured, changes have been rolled back.");
+        } catch (Exception exception) {
+            if (session != null) {
+                session.getTransaction().rollback();
+            }
+            System.err.println("An error occured, changes have been rolled back.");
             exception.printStackTrace();
-} finally {
-    session.close();
-}
+        } finally {
+            session.close();
+        }
         server = new SimpleServer(3000);
         server.listen();
-}
-
-
     }
 
+
+}
