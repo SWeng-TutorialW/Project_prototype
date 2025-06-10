@@ -6,7 +6,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import java.util.Scanner;
 
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Complain;
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
+import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -35,6 +37,8 @@ public class App
             configuration.setProperty("hibernate.show_sql", "true");
             configuration.setProperty("hibernate.connection.password", password);
             configuration.addAnnotatedClass(Flower.class);
+            configuration.addAnnotatedClass(LoginRegCheck.class);
+            configuration.addAnnotatedClass(Complain.class);
             ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                     .applySettings(configuration.getProperties())
                     .build();
@@ -48,7 +52,6 @@ public class App
     {
 
         try {
-
             SessionFactory sessionFactory = getSessionFactory();
         session = sessionFactory.openSession();
         session.beginTransaction();
@@ -64,8 +67,11 @@ public class App
         Flower flower_4 = new Flower("Purple Cloud",8.99,"Jacarande");
         session.save(flower_4);
         session.flush();
-        Flower flower_5 = new Flower("Exotic Queenn",9.99,"Orchid");
+        Flower flower_5 = new Flower("Exotic Queen",9.99,"Orchid");
         session.save(flower_5);
+        session.flush();
+        Flower flower_6 = new Flower("White Snowflake", 6.49, "Lily");
+        session.save(flower_6);
         session.flush();
         session.getTransaction().commit(); // Save everything.
 

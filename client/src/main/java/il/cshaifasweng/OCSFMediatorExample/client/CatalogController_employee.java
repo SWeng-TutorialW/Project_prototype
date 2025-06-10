@@ -1,18 +1,14 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Complain;
-import javafx.application.Platform;
+import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.event.ActionEvent;
-
 import java.io.IOException;
 
 import java.util.List;
 
 
-import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
 
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -23,7 +19,6 @@ import javafx.scene.control.*;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
 import javafx.scene.layout.HBox;
@@ -31,9 +26,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.greenrobot.eventbus.EventBus;
+import org.hibernate.SessionFactory;
 
+public class CatalogController_employee {
 
-public class CatalogController {
+    @FXML
+    private Button add_flower;
 
     @FXML
     private Button cart;
@@ -227,8 +226,11 @@ public class CatalogController {
     @FXML
     private Label type_9;
 
-
     private List<Flower> flowersList_c;
+    private Label[] nameLabels;
+    private Label[] typeLabels;
+    private TextField[] priceFields;
+    private ImageView[] imageViews;
 
 
     public void setCatalogData(List<Flower> flowerList) {
@@ -239,71 +241,20 @@ public class CatalogController {
             System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
         }
 
-        if (flowerList.size() > 0) {
-            Flower f = flowerList.get(0);
-            name_1.setText(f.getFlowerName());
-            price_1.setText(String.format("%.2f", f.getFlowerPrice()));
-            type_1.setText(f.getFlowerType());
-            setImage(pic_1, f.getFlowerType());
-        }
-        if (flowerList.size() > 1) {
-            Flower f = flowerList.get(1);
-            name_2.setText(f.getFlowerName());
-            price_2.setText(String.format("%.2f", f.getFlowerPrice()));
-            type_2.setText(f.getFlowerType());
-            setImage(pic_2, f.getFlowerType());
-        }
-        if (flowerList.size() > 2) {
-            Flower f = flowerList.get(2);
-            name_3.setText(f.getFlowerName());
-            price_3.setText(String.format("%.2f", f.getFlowerPrice()));
-            type_3.setText(f.getFlowerType());
-            setImage(pic_3, f.getFlowerType());
-        }
-        if (flowerList.size() > 3) {
-            Flower f = flowerList.get(3);
-            name_4.setText(f.getFlowerName());
-            price_4.setText(String.format("%.2f", f.getFlowerPrice()));
-            type_4.setText(f.getFlowerType());
-            setImage(pic_4, f.getFlowerType());
-        }
-        if (flowerList.size() > 4) {
-            Flower f = flowerList.get(4);
-            name_5.setText(f.getFlowerName());
-            price_5.setText(String.format("%.2f", f.getFlowerPrice()));
-            type_5.setText(f.getFlowerType());
-            setImage(pic_5, f.getFlowerType());
-        }
-        if (flowerList.size() > 5) {
-            Flower f = flowerList.get(5);
-            name_6.setText(f.getFlowerName());
-            price_6.setText(String.format("%.2f", f.getFlowerPrice()));
-            type_6.setText(f.getFlowerType());
-            setImage(pic_6, f.getFlowerType());
-        }
-        if (flowerList.size() > 6) {
-            Flower f = flowerList.get(6);
-            name_7.setText(f.getFlowerName());
-            price_7.setText(String.format("%.2f", f.getFlowerPrice()));
-            type_7.setText(f.getFlowerType());
-            setImage(pic_7, f.getFlowerType());
-            seven_7.setVisible(true);
-        }
-        if (flowerList.size() > 7) {
-            Flower f = flowerList.get(7);
-            name_8.setText(f.getFlowerName());
-            price_8.setText(String.format("%.2f", f.getFlowerPrice()));
-            type_8.setText(f.getFlowerType());
-            setImage(pic_8, f.getFlowerType());
-            eight_8.setVisible(true);
-        }
-        if (flowerList.size() > 8) {
-            Flower f = flowerList.get(8);
-            name_9.setText(f.getFlowerName());
-            price_9.setText(String.format("%.2f", f.getFlowerPrice()));
-            type_9.setText(f.getFlowerType());
-            setImage(pic_9, f.getFlowerType());
-            nine_9.setVisible(true);
+        flowersList_c = flowerList;
+
+        System.out.println("Received flowers: " + flowerList.size());
+        for (int i = 0; i < flowerList.size() && i < 9; i++) {
+            Flower f = flowerList.get(i);
+            nameLabels[i].setText(f.getFlowerName());
+            priceFields[i].setText(String.format("%.2f", f.getFlowerPrice()));
+            typeLabels[i].setText(f.getFlowerType());
+            setImage(imageViews[i], f.getFlowerType());
+
+
+            if (i == 6) seven_7.setVisible(true);
+            if (i == 7) eight_8.setVisible(true);
+            if (i == 8) nine_9.setVisible(true);
         }
     }
 
@@ -318,38 +269,6 @@ public class CatalogController {
             Image image = new Image(getClass().getResourceAsStream(imagePath));
             imageView.setImage(image);
             e.printStackTrace();
-        }
-    }
-    public void receiveNewComplain(Complain complain)
-    {
-        try {
-            SimpleClient.getClient().sendToServer(complain); // try to send the flower to the DB
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    @FXML
-    void gotoAcc(MouseEvent event) {
-
-        if(!SimpleClient.loggedIn){
-
-                Platform.runLater(() ->{
-                    try {
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login_screen.fxml"));
-                    Parent root = fxmlLoader.load();
-                    Stage stage = new Stage();
-                    stage.setTitle("Login | Registration");
-                    stage.setScene(new Scene(root));
-                    stage.show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                }
-            );
-
-
         }
     }
 
@@ -377,32 +296,35 @@ public class CatalogController {
                 setTextFill(Color.web("#C8A2C8"));
             }
         });
+        nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9 };
+        typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9 };
+        priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9 };
+        imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9 };
 
     }
-    @FXML
-    void complaint(ActionEvent event)
-    {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("complain_scene.fxml"));
-            Parent root = fxmlLoader.load();
-            complain_controller Controller = fxmlLoader.getController();
-            Controller.setCatalogController(this);
 
-            Stage stage = new Stage();
-            stage.setTitle("Complaint");
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(((Node) event.getSource()).getScene().getWindow());
-            stage.show();
+
+    @FXML
+    public void commitPrice(ActionEvent event) throws IOException {
+        int flower_to_update = 0;
+        TextField source = (TextField) event.getSource();
+        List<TextField> priceFields = List.of(price_1, price_2, price_3, price_4, price_5, price_6);
+        for (int i = 0; i < priceFields.size(); i++) {
+            if (source == priceFields.get(i)) {
+                flower_to_update = i;
+                break;
+            }
+        }
+        String str = String.valueOf(flower_to_update);
+        String new_price = source.getText();
+        double value = Double.parseDouble(new_price);
+        try {
+            SimpleClient.getClient().sendToServer("number#flower#to#update#_" + str + "_" + value); // try to send the flower to the DB
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+        SimpleClient.getClient().sendToServer("update_catalog_after_change");
     }
-
-
-
 
     @FXML
     public void combo_choose(ActionEvent actionEvent) throws IOException {
@@ -420,6 +342,62 @@ public class CatalogController {
             message = "get_flowers_low_to_high";
         }
         SimpleClient.getClient().sendToServer(message);
+    }
+    @FXML
+    void open_complain_box(ActionEvent event)
+    {
+
+
+    }
+    @FXML
+    void add_flower(ActionEvent event)
+    {
+        if (type_7.getText() != null && !type_7.getText().trim().isEmpty() &&
+                type_8.getText() != null && !type_8.getText().trim().isEmpty() &&
+                type_9.getText() != null && !type_9.getText().trim().isEmpty()) {
+
+            Warning warning = new Warning("The catalog is currently full. Please contact support for further assistance.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("add_flower.fxml"));
+                Parent root = fxmlLoader.load();
+                AddFlower_Controller addFlowerController = fxmlLoader.getController();
+                addFlowerController.setCatalogController(this);
+
+                Stage stage = new Stage();
+                stage.setTitle("Add New Flower");
+                stage.setScene(new Scene(root));
+                stage.setResizable(false);
+                stage.initModality(Modality.WINDOW_MODAL);
+                stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+    }
+    public void receiveNewFlower(Flower flower) {
+        System.out.println("Received flower: " + flower);
+        for (int i = 6; i <= 8; i++) {
+            if (typeLabels[i].getText() == null || typeLabels[i].getText().trim().isEmpty()) {
+                typeLabels[i].setText(flower.getFlowerType());
+                nameLabels[i].setText(flower.getFlowerName());
+                priceFields[i].setText(String.format("%.2f", flower.getFlowerPrice()));
+                setImage(imageViews[i], flower.getFlowerType());
+
+                if (i == 6) seven_7.setVisible(true);
+                if (i == 7) eight_8.setVisible(true);
+                if (i == 8) nine_9.setVisible(true);
+                break;
+            }
+        }
+
+        try {
+            SimpleClient.getClient().sendToServer(flower);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 
