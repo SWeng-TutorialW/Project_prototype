@@ -198,6 +198,11 @@ public class CatalogController {
     private Button three_3;
 
     @FXML
+    private AnchorPane buttonsAncPane;
+
+    @FXML
+    private Label titleLbl;
+    @FXML
     private Button two_2;
 
     @FXML

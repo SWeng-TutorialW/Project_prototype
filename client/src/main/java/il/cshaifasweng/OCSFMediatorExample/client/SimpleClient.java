@@ -13,6 +13,7 @@ public class SimpleClient extends AbstractClient {
 	public static int port = 3000;
 	public static String ip = "localhost";
 	public static boolean loggedIn = false; // to check if the user is logged in or not
+	public static boolean isGuest = false;
 	private SimpleClient(String host, int port) {
 		super(host, port);
 	}
@@ -23,9 +24,12 @@ public class SimpleClient extends AbstractClient {
 		if (msg.getClass().equals(Warning.class)) {
 			EventBus.getDefault().post(new WarningEvent((Warning) msg));
 		}
+
 		else if(msg.getClass().equals(CatalogUpdateEvent.class)){
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
+
+
 		else if(msgString.startsWith("update_catalog_after_change"))
 		{
 			try {
