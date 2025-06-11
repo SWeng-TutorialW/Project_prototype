@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #C8A2C8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AddFlower_Controller">
+   <children>
+      <Label alignment="TOP_CENTER" layoutX="2.0" layoutY="-2.0" prefHeight="96.0" prefWidth="800.0" text="Add Flower" textAlignment="CENTER" textFill="WHITE">
+         <font>
+            <Font name="Segoe UI Light" size="48.0" />
+         </font>
+      </Label>
+      <Label fx:id="name_labl" layoutX="14.0" layoutY="164.0" prefHeight="44.0" prefWidth="254.0" text="Enter the Flower name:" textFill="WHITE">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label fx:id="type_lbl" layoutX="14.0" layoutY="231.0" prefHeight="44.0" prefWidth="254.0" text="Enter the Flower type:" textFill="WHITE">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label fx:id="name_labl1" layoutX="14.0" layoutY="300.0" prefHeight="44.0" prefWidth="254.0" text="Enter the Flower price:" textFill="WHITE">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <TextField fx:id="new_name" layoutX="283.0" layoutY="174.0" prefHeight="25.0" prefWidth="224.0">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="new_type" layoutX="283.0" layoutY="231.0" prefHeight="25.0" prefWidth="224.0">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="new_price" layoutX="283.0" layoutY="297.0" prefHeight="25.0" prefWidth="224.0">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </TextField>
+      <Button fx:id="add_F" layoutX="159.0" layoutY="447.0" mnemonicParsing="false" onAction="#add" prefHeight="51.0" prefWidth="392.0" text="Add Flower ">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Button>
+   </children>
+</AnchorPane>
