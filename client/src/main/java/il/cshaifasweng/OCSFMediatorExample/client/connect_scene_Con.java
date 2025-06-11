@@ -45,10 +45,10 @@ public class connect_scene_Con  {
     private Label port;
 
     @FXML
-    private TextField  password;
+    private TextField password;
     @FXML
     private PrimaryController ctlr;
-    boolean guess = false;
+
     @FXML
     void initialize() {
         EventBus.getDefault().register(this);
@@ -58,7 +58,7 @@ public class connect_scene_Con  {
     @FXML
     void guess_enter(ActionEvent event)
     {
-        guess = true;
+        SimpleClient.isGuest = true;
         try {
             if (SimpleClient.getClient().isConnected()) {
                 System.out.println("show_cata_as_guess");
@@ -68,7 +68,6 @@ public class connect_scene_Con  {
             e.printStackTrace();
 
         }
-
 
     }
     public void setCatalogController(PrimaryController controller) {
@@ -90,10 +89,10 @@ public class connect_scene_Con  {
     @Subscribe
     public void handleCatalogUpdate(CatalogUpdateEvent event)
     {
-        if(guess)
+        if(SimpleClient.isGuest)
         {
             System.out.println("Processing as guest");
-            guess = false;
+            // SimpleClient.isGuest = false; // Irreverent I believe.
             Platform.runLater(() -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
