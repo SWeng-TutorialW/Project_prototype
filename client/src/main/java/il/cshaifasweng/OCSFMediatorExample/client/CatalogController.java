@@ -338,25 +338,37 @@ public class CatalogController {
     @FXML
     void gotoAcc(MouseEvent event) {
 
-        if(!SimpleClient.loggedIn){
-
-                Platform.runLater(() ->{
-                    try {
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("login_screen.fxml"));
+        if (SimpleClient.isGuest) {       //guest mode
+            Platform.runLater(() -> {
+                try {
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
                     Parent root = fxmlLoader.load();
                     Stage stage = new Stage();
-                    stage.setTitle("Login | Registration");
+                    stage.setTitle("Registration");
                     stage.setScene(new Scene(root));
                     stage.show();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                }
-            );
-
+            });
 
         }
+        else{       //login user mode
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("my_account.fxml"));
+                Parent root = fxmlLoader.load();
+                Stage stage = new Stage();
+                stage.setTitle("My Account");
+                stage.setScene(new Scene(root));
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
+
+
+
 
     @FXML
     void initialize() {

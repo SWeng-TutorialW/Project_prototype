@@ -107,7 +107,6 @@ public class connect_scene_Con  {
                     e.printStackTrace();
                 }
             });
-            return;
         }
         else
         {
@@ -153,9 +152,6 @@ public class connect_scene_Con  {
             Warning warning = new Warning("Username or password doesn't match");
             EventBus.getDefault().post(new WarningEvent(warning));
         }
-
-
-
     }
 
 }

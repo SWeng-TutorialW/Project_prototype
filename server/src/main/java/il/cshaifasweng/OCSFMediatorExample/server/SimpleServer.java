@@ -48,8 +48,7 @@ public class SimpleServer extends AbstractServer {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}
-		else if(msgString.startsWith("add client")){
+		} else if (msgString.startsWith("add client")) {
 			SubscribedClient connection = new SubscribedClient(client);
 			SubscribersList.add(connection);
 			try {
@@ -57,18 +56,16 @@ public class SimpleServer extends AbstractServer {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-		}
-		else if(msgString.startsWith("remove client")){
-			if(!SubscribersList.isEmpty()){
-				for(SubscribedClient subscribedClient: SubscribersList){
-					if(subscribedClient.getClient().equals(client)){
+		} else if (msgString.startsWith("remove client")) {
+			if (!SubscribersList.isEmpty()) {
+				for (SubscribedClient subscribedClient : SubscribersList) {
+					if (subscribedClient.getClient().equals(client)) {
 						SubscribersList.remove(subscribedClient);
 						break;
 					}
 				}
 			}
-		}
-		else if (msgString.startsWith("getCatalogTable_guest")) {
+		} else if (msgString.startsWith("getCatalogTable_guest")) {
 			try {
 				Session session = App.getSessionFactory().openSession();
 				session.beginTransaction();
@@ -81,7 +78,6 @@ public class SimpleServer extends AbstractServer {
 				List<Flower> flowerList = session.createQuery(query).getResultList();
 
 
-
 				System.out.println("Flowers in DB: " + flowerList.size());
 				for (Flower flower : flowerList) {
 					System.out.println("Name: " + flower.getFlowerName() +
@@ -92,14 +88,13 @@ public class SimpleServer extends AbstractServer {
 				session.getTransaction().commit();
 				session.close();
 
-				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList,null);
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList, null);
 				client.sendToClient(event);
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
-		else if (msgString.startsWith("getCatalogTable_login")) {
+		} else if (msgString.startsWith("getCatalogTable_login")) {
 			try {
 				Session session = App.getSessionFactory().openSession();
 				session.beginTransaction();
@@ -124,15 +119,13 @@ public class SimpleServer extends AbstractServer {
 				session.getTransaction().commit();
 				session.close();
 
-				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList,loginRegCheckList);
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList, loginRegCheckList);
 				client.sendToClient(event);
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
-
-		else if(msgString.startsWith("number#flower#to#update#")){
+		} else if (msgString.startsWith("number#flower#to#update#")) {
 			// we got a Flower from the client, it means we want to update this flower into our DB table.
 			try {
 				String[] parts = msgString.split("_");
@@ -162,14 +155,10 @@ public class SimpleServer extends AbstractServer {
 					ex.printStackTrace();
 				}
 			}
-		}
-		else if(msgString.startsWith("update_catalog_after_change"))
-		{
+		} else if (msgString.startsWith("update_catalog_after_change")) {
 			sendToAllClients("update_catalog_after_change");
 
-		}
-		else if(msgString.startsWith("get_flowers_high_to_low"))
-		{
+		} else if (msgString.startsWith("get_flowers_high_to_low")) {
 			List<Flower> flowers = getFlowersOrdered("desc");
 			try {
 				CatalogUpdateEvent event = new CatalogUpdateEvent(flowers);
@@ -177,9 +166,7 @@ public class SimpleServer extends AbstractServer {
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
-		}
-		else if(msgString.startsWith("get_flowers_low_to_high"))
-		{
+		} else if (msgString.startsWith("get_flowers_low_to_high")) {
 			List<Flower> flowers = getFlowersOrdered("asc");
 			try {
 				CatalogUpdateEvent event = new CatalogUpdateEvent(flowers);
@@ -188,8 +175,7 @@ public class SimpleServer extends AbstractServer {
 				ex.printStackTrace();
 			}
 
-		}
-		else if(msg.getClass().equals(Flower.class)) {
+		} else if (msg.getClass().equals(Flower.class)) {
 			Flower flower = (Flower) msg;
 
 			Session session = App.getSessionFactory().openSession();
@@ -205,104 +191,98 @@ public class SimpleServer extends AbstractServer {
 			}
 			sendToAllClients("update_catalog_after_change");
 
-		}
-		else if (msg.getClass().equals(LoginRegCheck.class)) {
+		} else if (msg.getClass().equals(LoginRegCheck.class)) {
 			int isLogin = ((LoginRegCheck) msg).getIsLogin();
 			// check for user is already exists :
 
 			String username = ((LoginRegCheck) msg).getUsername();
 			String password = ((LoginRegCheck) msg).getPassword();
+			String email = ((LoginRegCheck) msg).getEmail();
 
 			System.out.println("Username: " + username);
 			System.out.println("Password: " + password);
 
 			switch (isLogin) {
-                case 1: // login
+				case 1: // login
 
-                    Session session = App.getSessionFactory().openSession();
-                    session.beginTransaction();
+					Session session = App.getSessionFactory().openSession();
+					session.beginTransaction();
 
-                    List<LoginRegCheck> resultLogin = session.createQuery(
-                                    "FROM LoginRegCheck lrc WHERE lrc.username = :username AND lrc.password = :password",
-                                    LoginRegCheck.class
-                            )
-                            .setParameter("username", username)
-                            .setParameter("password", password)
-                            .getResultList();
-                    session.getTransaction().commit();
+					List<LoginRegCheck> resultLogin = session.createQuery(
+									"FROM LoginRegCheck lrc WHERE lrc.username = :username AND lrc.password = :password",
+									LoginRegCheck.class
+							)
+							.setParameter("username", username)
+							.setParameter("password", password)
+							.getResultList();
+					session.getTransaction().commit();
 
-                    if (resultLogin.isEmpty()) {
-                        // user doesn't exist or password is wrong
-                        try {
-                            System.out.println("Login failed for user: " + username);
-                            client.sendToClient("#login_failed");
-                            session.close();
-                        } catch (IOException e) {
-                            System.out.println("User login failed ERR");
-                            e.printStackTrace();
-                        }
-                        return;
-                    }
-                    try {
-                        System.out.println("User Logged-in successfully: " + username);
-                        session.close();
-                        client.sendToClient("#login/reg_ok");
-
-                    } catch (IOException e) {
-                        System.out.println("User login ok ERR");
-                        e.printStackTrace();
-                    }
-                    break;
-                case 0: // registration
-                    System.out.println("WE ARE IN REG");
-                    Session session2 = null;
-                    try {
-                        // begin checking if this user already exists
-                        session2 = App.getSessionFactory().openSession();
-                        session2.beginTransaction();
-                        List<LoginRegCheck> result = session2.createQuery("FROM LoginRegCheck lrc WHERE lrc.username = :username", LoginRegCheck.class)
-                                .setParameter("username", username)
-                                .getResultList();
-                        session2.getTransaction().commit();
-
-                        if (!result.isEmpty()) {
-                            // user already exists
-                            client.sendToClient("#user_exists");
-                            System.out.println("User already exists: " + username);
-                            session2.close();
-                            return;
-                        }
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } finally {
-                        session2.close();
-                    }
-
-					Session insertSession=App.getSessionFactory().openSession();
+					if (resultLogin.isEmpty()) {
+						// user doesn't exist or password is wrong
+						try {
+							System.out.println("Login failed for user: " + username);
+							client.sendToClient("#login_failed");
+							session.close();
+						} catch (IOException e) {
+							System.out.println("User login failed ERR");
+							e.printStackTrace();
+						}
+						return;
+					}
 					try {
-                        // after user doesn't exist, we can insert into DB
-                        insertSession = App.getSessionFactory().openSession();
-                        insertSession.beginTransaction();
-                        insertSession.save(msg); // This is the INSERT INTO statement
-                        insertSession.getTransaction().commit();
-                        insertSession.close();
+						System.out.println("User Logged-in successfully: " + username);
+						session.close();
+						client.sendToClient("#login/reg_ok");
 
-                        client.sendToClient("#login/reg_ok");
-                        System.out.println("User registered successfully: " + username);
-                    } catch (IOException e) {
-                        System.out.println("User register/login ERR");
-                        insertSession.getTransaction().rollback();
-                        e.printStackTrace();
-                    } finally {
-                        insertSession.close();
-                    }
-                    break;
-            }
+					} catch (IOException e) {
+						System.out.println("User login ok ERR");
+						e.printStackTrace();
+					}
+					break;
+				case 0: // registration
+					System.out.println("WE ARE IN REG");
+					//no need to close, try with resources will close it automatically
+					try (Session checkSession = App.getSessionFactory().openSession()) {
+						checkSession.beginTransaction();
+						List<LoginRegCheck> result = checkSession.createQuery("FROM LoginRegCheck lrc WHERE lrc.username = :username", LoginRegCheck.class)
+								.setParameter("username", username)
+								.getResultList();
 
+						if (!result.isEmpty()) {
+							// user already exists
+							client.sendToClient("#user_exists");
+							System.out.println("User already exists: " + username);
+							return;
+						}
+
+						checkSession.getTransaction().commit();
+
+					} catch (Exception e) {
+						e.printStackTrace();
+						return;
+					}
+
+					try (Session insertSession = App.getSessionFactory().openSession()) {
+						insertSession.beginTransaction();
+
+						LoginRegCheck newUser = new LoginRegCheck(username, password, email, 0);
+						insertSession.save(newUser);
+
+						//insertSession.save(msg); // INSERT INTO
+
+						insertSession.getTransaction().commit();
+						client.sendToClient("#login/reg_ok");
+						System.out.println("User registered successfully: " + username);
+
+					} catch (Exception e) {
+						System.out.println("User register/login ERR");
+						e.printStackTrace();
+					}
+
+			}
 		}
-
 	}
+
 	public void sendToAllClients(String message) {
 		try {
 			for (SubscribedClient subscribedClient : SubscribersList) {
