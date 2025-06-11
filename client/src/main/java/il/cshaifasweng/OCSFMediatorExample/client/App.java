@@ -21,14 +21,20 @@ public class App extends Application {
 
     private static Scene scene;
     private SimpleClient client;
+    private static Stage primaryStage;
 
     @Override
     public void start(Stage stage) throws IOException {
-    	EventBus.getDefault().register(this);
+        EventBus.getDefault().register(this);
+        primaryStage = stage; // ⬅️ שומר את ה־Stage
         scene = new Scene(loadFXML("primary"), 562, 386);
         stage.setScene(scene);
         stage.show();
     }
+    public static Stage getStage() {
+        return primaryStage;
+    }
+
 
     static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML(fxml));

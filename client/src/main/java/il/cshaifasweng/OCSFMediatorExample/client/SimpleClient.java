@@ -32,7 +32,7 @@ public class SimpleClient extends AbstractClient {
 		else if(msgString.startsWith("update_catalog_after_change"))
 		{
 			try {
-				SimpleClient.getClient().sendToServer("getCatalogTable");
+				SimpleClient.getClient().sendToServer("price_changed");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
