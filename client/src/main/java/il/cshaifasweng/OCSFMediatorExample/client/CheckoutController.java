@@ -8,18 +8,32 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 public class CheckoutController {
     @FXML private TextField nameField;
     @FXML private TextField emailField;
     @FXML private TextField phoneField;
+    @FXML private TextField cityField;
+    @FXML private TextField streetAddressField;
+    @FXML private TextField apartmentField;
+    @FXML private ComboBox<String> deliveryTypeComboBox;
+    @FXML private DatePicker deliveryDatePicker;
+    @FXML private Spinner<Integer> deliveryHourSpinner;
     @FXML private TableView<CartItem> orderTable;
     @FXML private TableColumn<CartItem, String> nameColumn;
     @FXML private TableColumn<CartItem, String> typeColumn;
@@ -27,10 +41,12 @@ public class CheckoutController {
     @FXML private TableColumn<CartItem, Integer> quantityColumn;
     @FXML private TableColumn<CartItem, Double> totalColumn;
     @FXML private Label orderTotal;
+    @FXML private Label deliveryFeeLabel;
     @FXML private Button placeOrderButton;
     @FXML private Button cancelButton;
     
     private ObservableList<CartItem> orderItems;
+    private static final double DELIVERY_FEE = 20.0;
     
     public void initialize() {
         // Set up table columns
@@ -47,6 +63,30 @@ public class CheckoutController {
         // Initialize order items list
         orderItems = FXCollections.observableArrayList();
         orderTable.setItems(orderItems);
+
+        deliveryTypeComboBox.getItems().addAll("Delivery", "Pickup");
+
+        
+        // Set default delivery type
+        //deliveryTypeComboBox.setValue("Delivery");
+        
+        // Set default delivery date to tomorrow
+        deliveryDatePicker.setValue(LocalDate.now().plusDays(1));
+        
+        // Add listeners
+        deliveryTypeComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            updateDeliveryFee();
+            // Show/hide address fields based on delivery type
+            boolean isDelivery = "Delivery".equals(newVal);
+            cityField.setDisable(!isDelivery);
+            streetAddressField.setDisable(!isDelivery);
+            apartmentField.setDisable(!isDelivery);
+            if (!isDelivery) {
+                cityField.clear();
+                streetAddressField.clear();
+                apartmentField.clear();
+            }
+        });
         
         // Update total when items change
         orderItems.addListener((javafx.collections.ListChangeListener.Change<? extends CartItem> change) -> {
@@ -60,42 +100,102 @@ public class CheckoutController {
         updateTotal();
     }
     
+    private void updateDeliveryFee() {
+        boolean requiresDelivery = "Delivery".equals(deliveryTypeComboBox.getValue());
+        double fee = requiresDelivery ? DELIVERY_FEE : 0.0;
+        deliveryFeeLabel.setText(String.format("Delivery Fee: ₪%.2f", fee));
+        updateTotal();
+    }
+    
     private void updateTotal() {
-        double total = orderItems.stream()
+        double itemsTotal = orderItems.stream()
                 .mapToDouble(CartItem::getTotalPrice)
                 .sum();
-        orderTotal.setText(String.format("Total: $%.2f", total));
+        double deliveryFee = "Delivery".equals(deliveryTypeComboBox.getValue()) ? DELIVERY_FEE : 0.0;
+        double total = itemsTotal + deliveryFee;
+        orderTotal.setText(String.format("Total: ₪%.2f", total));
     }
     
     @FXML
     private void placeOrder() {
-        // Validate input
-        if (nameField.getText().trim().isEmpty() || 
-            emailField.getText().trim().isEmpty() || 
-            phoneField.getText().trim().isEmpty()) {
-            Warning warning = new Warning("Please fill in all fields");
+        // Validate all required fields
+        if (nameField.getText().isEmpty() || emailField.getText().isEmpty() ||
+            phoneField.getText().isEmpty() || cityField.getText().isEmpty() ||
+            streetAddressField.getText().isEmpty()) {
+            Warning warning = new Warning("Please fill in all required fields");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
-        
-        // Create order
-        Order order = new Order(nameField.getText().trim(), emailField.getText().trim());
-        orderItems.forEach(item -> order.addItem(item));
-        
-        try {
-            // Send order to server
-            SimpleClient.getClient().sendToServer(order);
-            
-            // Show success message
-            Warning warning = new Warning("Order placed successfully!");
+
+        // Validate email format
+        if (!emailField.getText().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            Warning warning = new Warning("Please enter a valid email address");
             EventBus.getDefault().post(new WarningEvent(warning));
-            
-            // Clear cart and close window
-            OrderPageController.clearCart();
-            ((Stage) orderTable.getScene().getWindow()).close();
+            return;
+        }
+
+        // Validate phone number format
+        if (!phoneField.getText().matches("^\\d{9,10}$")) {
+            Warning warning = new Warning("Please enter a valid phone number (9-10 digits)");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+
+        // Validate delivery time if delivery is selected
+        if ("Delivery".equals(deliveryTypeComboBox.getValue())) {
+            if (deliveryDatePicker.getValue() == null) {
+                Warning warning = new Warning("Please select a delivery date");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+
+            // Check if delivery time is in the future
+            if (deliveryDatePicker.getValue().isBefore(LocalDate.now())) {
+                Warning warning = new Warning("Delivery date must be in the future");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+        }
+
+        // Create and populate the order
+        Order order = new Order(nameField.getText(), emailField.getText());
+        order.setCity(cityField.getText());
+        order.setStreetAddress(streetAddressField.getText());
+        order.setApartment(apartmentField.getText());
+        order.setRequiresDelivery("Delivery".equals(deliveryTypeComboBox.getValue()));
+        
+        if (order.isRequiresDelivery()) {
+            // Convert LocalDate and hour to Date for delivery time
+            LocalDateTime deliveryDateTime = LocalDateTime.of(
+                deliveryDatePicker.getValue(),
+                LocalTime.of(deliveryHourSpinner.getValue(), 0)
+            );
+            Date deliveryDate = Date.from(deliveryDateTime.atZone(ZoneId.systemDefault()).toInstant());
+            order.setDeliveryTime(deliveryDate);
+        }
+
+        // Add items to order
+        orderItems.forEach(item -> order.addItem(item));
+
+        // Open payment page
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/payment.fxml"));
+            Parent root = loader.load();
+            PaymentController paymentController = loader.getController();
+            paymentController.setOrder(order);
+            paymentController.setCheckoutStage((Stage) placeOrderButton.getScene().getWindow());
+
+            Scene scene = new Scene(root);
+            Stage stage = new Stage();
+            stage.setTitle("Secure Payment");
+            stage.setScene(scene);
+            stage.show();
+
+            // Hide the checkout window
+            ((Stage) placeOrderButton.getScene().getWindow()).hide();
         } catch (IOException e) {
             e.printStackTrace();
-            Warning warning = new Warning("Error placing order. Please try again.");
+            Warning warning = new Warning("Failed to open payment page");
             EventBus.getDefault().post(new WarningEvent(warning));
         }
     }
