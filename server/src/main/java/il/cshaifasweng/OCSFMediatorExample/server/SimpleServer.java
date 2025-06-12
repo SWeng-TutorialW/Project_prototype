@@ -4,6 +4,7 @@ package il.cshaifasweng.OCSFMediatorExample.server;
 import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
 import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.Order;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import java.io.IOException;
@@ -266,7 +267,31 @@ public class SimpleServer extends AbstractServer {
             }
 
 		}
-
+		else if (msg instanceof Order) {
+			Order order = (Order) msg;
+			Session session = App.getSessionFactory().openSession();
+			try {
+				session.beginTransaction();
+				session.save(order);
+				session.getTransaction().commit();
+				
+				// Send confirmation back to client
+				client.sendToClient("order_success");
+				
+				// Notify all clients about the new order
+				sendToAllClients("update_catalog_after_change");
+			} catch (Exception e) {
+				session.getTransaction().rollback();
+				e.printStackTrace();
+				try {
+					client.sendToClient("order_error");
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			} finally {
+				session.close();
+			}
+		}
 	}
 	public void sendToAllClients(String message) {
 		try {

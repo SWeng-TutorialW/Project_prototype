@@ -28,7 +28,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.hibernate.SessionFactory;
-
 public class CatalogController_employee {
 
     @FXML
@@ -296,13 +295,34 @@ public class CatalogController_employee {
                 setTextFill(Color.web("#C8A2C8"));
             }
         });
+
+        // Set up cart button click handler
+        cart.setOnAction(event -> openCart());
+
         nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9 };
         typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9 };
         priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9 };
         imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9 };
-
     }
 
+    @FXML
+    private void openCart() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));
+            Parent root = loader.load();
+            CartController cartController = loader.getController();
+            cartController.setCartItems(OrderPageController.getCartItems());
+            
+            Stage stage = new Stage();
+            stage.setTitle("Shopping Cart");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Warning warning = new Warning("Error opening cart");
+            EventBus.getDefault().post(new WarningEvent(warning));
+        }
+    }
 
     @FXML
     public void commitPrice(ActionEvent event) throws IOException {

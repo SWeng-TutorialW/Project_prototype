@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="20.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CartController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
+
+    <HBox alignment="CENTER_LEFT" spacing="10">
+        <Button fx:id="backButton" mnemonicParsing="false" onAction="#goBackToCatalog" text="Back to Catalog" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" />
+    </HBox>
+
+    <Label text="Shopping Cart" style="-fx-font-size: 24px;" />
+
+    <TableView fx:id="cartTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="nameColumn" prefWidth="150.0" text="Name" />
+            <TableColumn fx:id="typeColumn" prefWidth="100.0" text="Type" />
+            <TableColumn fx:id="priceColumn" prefWidth="100.0" text="Price" />
+            <TableColumn fx:id="quantityColumn" prefWidth="100.0" text="Quantity" />
+            <TableColumn fx:id="totalColumn" prefWidth="100.0" text="Total" />
+            <TableColumn fx:id="actionColumn" prefWidth="100.0" text="Action" />
+        </columns>
+    </TableView>
+
+    <HBox alignment="CENTER_RIGHT" spacing="20.0">
+        <Label fx:id="totalLabel" style="-fx-font-size: 18px;" />
+        <Button mnemonicParsing="false" onAction="#proceedToCheckout" text="Proceed to Checkout" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" />
+    </HBox>
+</VBox> 
