@@ -38,7 +38,7 @@ import java.util.ResourceBundle;
 public class ComplainController_employee implements Initializable {
 
     @FXML
-    private TableView<Complain> complainTable;
+    private TableView<Complain> complains;
 
     @FXML
     private TableColumn<Complain, String> complaintColumn;
@@ -104,7 +104,7 @@ public class ComplainController_employee implements Initializable {
        List<Complain> complainList = event.getUpdatedItems();
         // Run on JavaFX thread to update UI
         Platform.runLater(() -> {
-            complainTable.getItems().setAll(complainList);
+            complains.getItems().setAll(complainList);
         });
     }
 

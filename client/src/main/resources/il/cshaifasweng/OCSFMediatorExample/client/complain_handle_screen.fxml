@@ -11,7 +11,7 @@
 
 <AnchorPane prefHeight="650.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ComplainController_employee">
    <children>
-      <TableView layoutX="69.0" layoutY="141.0" prefHeight="450.0" prefWidth="478.0">
+      <TableView fx:id="complains" layoutX="69.0" layoutY="141.0" prefHeight="450.0" prefWidth="478.0">
         <columns>
           <TableColumn fx:id="complaintColumn" prefWidth="214.0" text="Complaint" />
           <TableColumn fx:id="timeColumn" prefWidth="149.0" text="Time Issued" />

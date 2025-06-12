@@ -141,7 +141,10 @@ public class SimpleServer extends AbstractServer {
 
 				List<Complain> complainList = session.createQuery(query).getResultList();
 				List<LoginRegCheck> loginRegCheckList = session.createQuery(query1).getResultList();
-
+				for (Complain c : complainList){
+					System.out.println(c.getComplaint());
+					System.out.println("server getComplaints work!");
+				}
 				session.getTransaction().commit();
 				session.close();
 

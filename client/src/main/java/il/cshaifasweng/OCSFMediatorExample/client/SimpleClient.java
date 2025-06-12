@@ -28,7 +28,9 @@ public class SimpleClient extends AbstractClient {
 		else if(msg.getClass().equals(CatalogUpdateEvent.class)){
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
-
+		else if(msg.getClass().equals(ComplainUpdateEvent.class)){
+			EventBus.getDefault().post(msg); // post the catalog update to UI
+		}
 
 		else if(msgString.startsWith("update_catalog_after_change"))
 		{
@@ -42,14 +44,10 @@ public class SimpleClient extends AbstractClient {
 		else if(msgString.startsWith("update_complainScene_after_change"))
 		{
 			try {
-				EventBus.getDefault().post(msg);
+				SimpleClient.getClient().sendToServer("getComplaints");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
-		else if (msg instanceof ComplainUpdateEvent) {
-			System.out.println("Received ComplainUpdateEvent, posting to EventBus");
-			EventBus.getDefault().post(msg);
 		}
 		else if(msgString.startsWith("#user_exists") || msgString.startsWith("#login_failed") || msgString.startsWith("#login/reg_ok")){
 			EventBus.getDefault().post(msg);
