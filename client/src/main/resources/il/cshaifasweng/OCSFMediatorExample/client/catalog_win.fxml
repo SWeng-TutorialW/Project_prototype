@@ -12,12 +12,13 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <ScrollPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="850.0" prefWidth="789.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogController">
    <content>
       <AnchorPane prefHeight="846.0" prefWidth="788.0">
          <children>
-            <Label fx:id="copyrightLBl" alignment="CENTER" layoutX="168.0" layoutY="804.0" prefHeight="28.0" prefWidth="253.0" text="LilachSystem v0.1 © 2025 BestGroup. All rights reserved.">
+            <Label fx:id="copyrightLBl" alignment="CENTER" layoutX="220.0" layoutY="810.0" prefHeight="28.0" prefWidth="253.0" text="LilachSystem v0.1 © 2025 BestGroup. All rights reserved.">
                <font>
                   <Font name="Segoe UI" size="10.0" />
                </font>
@@ -60,13 +61,13 @@
                   <Image url="@../../../../images/call.png" />
                </image>
             </ImageView>
-            <HBox fx:id="first_line" layoutX="-1.0" layoutY="156.0" prefHeight="197.0" prefWidth="778.0" spacing="20.0">
+            <HBox fx:id="first_line" layoutY="126.0" prefHeight="197.0" prefWidth="776.0" spacing="20.0">
                <children>
-                  <Button fx:id="one_1" mnemonicParsing="false" prefWidth="74.0">
+                  <Button fx:id="one_1" mnemonicParsing="false" prefHeight="219.0" prefWidth="182.0">
                      <graphic>
-                        <VBox fx:id="flower_1" prefHeight="155.0" prefWidth="144.0">
+                        <VBox fx:id="flower_1" prefHeight="193.0" prefWidth="166.0">
                            <children>
-                              <ImageView fx:id="pic_1" fitHeight="96.0" fitWidth="166.0" pickOnBounds="true" />
+                              <ImageView fx:id="pic_1" fitHeight="83.0" fitWidth="166.0" pickOnBounds="true" />
                               <Label fx:id="name_1" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
                                  <font>
                                     <Font size="18.0" />
@@ -77,7 +78,11 @@
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="price_1" alignment="TOP_CENTER" editable="false" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_1_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font></Text>
+                              <TextField fx:id="price_1" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -101,7 +106,12 @@
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="price_2" alignment="TOP_CENTER" editable="false" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_2_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_2" alignment="TOP_CENTER" prefHeight="27.0" prefWidth="166.0" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -125,7 +135,12 @@
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="price_3" alignment="TOP_CENTER" editable="false" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_3_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_3" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -149,7 +164,12 @@
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="price_4" alignment="TOP_CENTER" editable="false" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_4_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_4" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -160,7 +180,7 @@
                   </Button>
                </children>
             </HBox>
-            <HBox fx:id="second_line" layoutX="2.0" layoutY="386.0" prefHeight="197.0" prefWidth="774.0" spacing="20.0">
+            <HBox fx:id="second_line" layoutY="356.0" prefHeight="197.0" prefWidth="775.0" spacing="20.0">
                <children>
                   <Button fx:id="five_5" mnemonicParsing="false" prefWidth="74.0">
                      <graphic>
@@ -177,7 +197,12 @@
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="price_5" alignment="TOP_CENTER" editable="false" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_5_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_5" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -201,7 +226,12 @@
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="price_6" alignment="TOP_CENTER" editable="false" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_6_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_6" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -225,7 +255,12 @@
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="price_7" alignment="TOP_CENTER" editable="false" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_7_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_7" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -249,7 +284,12 @@
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="price_8" alignment="TOP_CENTER" editable="false" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_8_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_8" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -270,7 +310,7 @@
                   </ImageView>
                </children>
             </AnchorPane>
-            <HBox fx:id="second_line1" layoutX="2.0" layoutY="607.0" prefHeight="197.0" prefWidth="773.0" spacing="20.0">
+            <HBox fx:id="second_line1" layoutY="589.0" prefHeight="197.0" prefWidth="775.0" spacing="20.0">
                <children>
                   <Button fx:id="nine_9" mnemonicParsing="false" prefWidth="74.0" visible="false">
                      <graphic>
@@ -287,7 +327,12 @@
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="price_9" alignment="TOP_CENTER" editable="false" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_9_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_9" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -311,7 +356,12 @@
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="price_10" alignment="TOP_CENTER" editable="false" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_10_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_10" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -335,7 +385,12 @@
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="price_11" alignment="TOP_CENTER" editable="false" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_11_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_11" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -359,7 +414,12 @@
                                     <Font size="18.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="price_12" alignment="TOP_CENTER" editable="false" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_12_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_12" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>

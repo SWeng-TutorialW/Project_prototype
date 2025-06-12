@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #C8A2C8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.discount_Controller">
+   <children>
+      <Label alignment="TOP_CENTER" layoutX="2.0" layoutY="-2.0" prefHeight="96.0" prefWidth="800.0" text="Set Discount" textAlignment="CENTER" textFill="WHITE">
+         <font>
+            <Font name="Segoe UI Light" size="48.0" />
+         </font>
+      </Label>
+      <Label fx:id="name_labl" layoutX="14.0" layoutY="164.0" prefHeight="44.0" prefWidth="254.0" text="Enter the Flower name:" textFill="WHITE">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label fx:id="name_labl1" layoutX="14.0" layoutY="226.0" prefHeight="44.0" prefWidth="210.0" text="Enter % discount:" textFill="WHITE">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <TextField fx:id="flower_name" layoutX="290.0" layoutY="164.0" prefHeight="25.0" prefWidth="224.0">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </TextField>
+      <TextField fx:id="percent_for_one" layoutX="290.0" layoutY="223.0" prefHeight="25.0" prefWidth="224.0">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </TextField>
+      <Button fx:id="discount_to_specip_flower" layoutX="539.0" layoutY="190.0" mnemonicParsing="false" onAction="#one_flower" prefHeight="51.0" prefWidth="185.0" text="Set Discount ">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Button>
+      <Label fx:id="name_labl2" layoutX="14.0" layoutY="120.0" prefHeight="44.0" prefWidth="210.0" text="CHOOSE FLOWER:" textFill="WHITE">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label fx:id="name_labl21" layoutX="14.0" layoutY="337.0" prefHeight="44.0" prefWidth="185.0" text="FOR ALL STORE: " textFill="WHITE">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label fx:id="name_labl11" layoutX="14.0" layoutY="395.0" prefHeight="44.0" prefWidth="199.0" text="Enter % discount:" textFill="WHITE">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <TextField fx:id="percent_for_all" layoutX="224.0" layoutY="391.0" prefHeight="25.0" prefWidth="224.0">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </TextField>
+      <Button fx:id="discount_to_ALL" layoutX="478.0" layoutY="356.0" mnemonicParsing="false" onAction="#all" prefHeight="51.0" prefWidth="254.0" text="Set Discount to ALL" underline="true">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Button>
+   </children>
+</AnchorPane>

@@ -1,9 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
 
-import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
-import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import java.io.IOException;
@@ -23,7 +21,6 @@ import org.hibernate.service.ServiceRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 import org.hibernate.Session;
 
@@ -234,6 +231,72 @@ public class SimpleServer extends AbstractServer {
 			sendToAllClients("update_catalog_after_change");
 
 		}
+		else if(msg.getClass().equals(Integer.class))
+		{
+			int discountPercent = (Integer) msg;
+			try {
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				String hql = "FROM Flower";
+				List<Flower> flowers = session.createQuery(hql, Flower.class).getResultList();
+
+				for (Flower flower : flowers) {
+					double originalPrice = flower.getFlowerPrice();
+					double newPrice = originalPrice * (1 - discountPercent / 100.0);
+					flower.setFlowerPrice(newPrice);
+					flower.setSale(true);
+					flower.setDiscount(discountPercent);
+					session.update(flower);
+				}
+				session.getTransaction().commit();
+				session.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			sendToAllClients("update_catalog_after_change");
+
+		}
+		if (msg.getClass().equals(FlowerDiscountWrapper.class))
+		{
+			FlowerDiscountWrapper wrapper = (FlowerDiscountWrapper) msg;
+			Flower flower = wrapper.getFlower();
+			int discountPercent = wrapper.getDiscount();
+			if (discountPercent == -1)
+			{
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
+				Root<Flower> root = query.from(Flower.class);
+				query.select(root).where(builder.equal(root.get("flowerName"), flower.getFlowerName()));
+				Flower flowerToDelete = session.createQuery(query).uniqueResult();
+				session.delete(flowerToDelete);
+				session.getTransaction().commit();
+				System.out.println("Flower deleted: " + flowerToDelete.getFlowerName());
+				session.close();
+				sendToAllClients("update_catalog_after_change");
+				return;
+			}
+			Session session = App.getSessionFactory().openSession();
+			session.beginTransaction();
+			CriteriaBuilder builder = session.getCriteriaBuilder();
+			CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
+			Root<Flower> root = query.from(Flower.class);
+			query.select(root).where(builder.equal(root.get("flowerName"), flower.getFlowerName()));
+			Flower flowerToUpdate = session.createQuery(query).uniqueResult();
+			double originalPrice = flowerToUpdate.getFlowerPrice();
+			double newPrice = originalPrice * (1 - discountPercent / 100.0);
+			flowerToUpdate.setFlowerPrice(newPrice);
+			flowerToUpdate.setSale(true);
+			flowerToUpdate.setDiscount(discountPercent);
+			session.update(flowerToUpdate);
+			session.getTransaction().commit();
+			System.out.println("Updated price for " + flowerToUpdate.getFlowerName() + ": " + newPrice);
+			session.close();
+			sendToAllClients("update_catalog_after_change");
+		}
+
 		else if (msg.getClass().equals(LoginRegCheck.class)) {
 			int isLogin = ((LoginRegCheck) msg).getIsLogin();
 			// check for user is already exists :

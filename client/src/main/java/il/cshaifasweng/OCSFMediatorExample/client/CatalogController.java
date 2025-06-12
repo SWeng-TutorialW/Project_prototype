@@ -30,6 +30,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
@@ -280,6 +281,41 @@ public class CatalogController {
 
     @FXML
     private Label type_12;
+    @FXML
+    private Text price_1_before_sale;
+
+    @FXML
+    private Text price_2_before_sale;
+
+    @FXML
+    private Text price_3_before_sale;
+
+    @FXML
+    private Text price_4_before_sale;
+
+    @FXML
+    private Text price_5_before_sale;
+
+    @FXML
+    private Text price_6_before_sale;
+
+    @FXML
+    private Text price_7_before_sale;
+
+    @FXML
+    private Text price_8_before_sale;
+
+    @FXML
+    private Text price_9_before_sale;
+
+    @FXML
+    private Text price_10_before_sale;
+
+    @FXML
+    private Text price_11_before_sale;
+
+    @FXML
+    private Text price_12_before_sale;
 
 
 
@@ -288,6 +324,7 @@ public class CatalogController {
     private Label[] typeLabels;
     private TextField[] priceFields;
     private ImageView[] imageViews;
+    private Text[] price_Before_sale;
 
 
     public void setCatalogData(List<Flower> flowerList) {
@@ -300,10 +337,23 @@ public class CatalogController {
 
         flowersList_c = flowerList;
 
-        System.out.println("Received flowers: " + flowerList.size());
+
+
         for (int i = 0; i < flowerList.size() && i < 12; i++) {
             Flower f = flowerList.get(i);
             nameLabels[i].setText(f.getFlowerName());
+            if (f.isSale())
+            {
+                price_Before_sale[i].setVisible(true);
+                int discount_percent = f.getDiscount();
+                double remainingPercent = 100.0 -discount_percent;
+                double originalPrice = f.getFlowerPrice() * 100.0 / remainingPercent;
+                String originalPriceStr = String.format("%.2f", originalPrice);
+                price_Before_sale[i].setText(originalPriceStr);
+
+
+
+            }
             priceFields[i].setText(String.format("%.2f", f.getFlowerPrice()));
             typeLabels[i].setText(f.getFlowerType());
             setImage(imageViews[i], f.getFlowerType());
@@ -315,7 +365,6 @@ public class CatalogController {
             if (i == 9) ten_10.setVisible(true);
             if (i == 10) eleven_11.setVisible(true);
             if (i == 11) twelve_12.setVisible(true);
-
         }
     }
 
@@ -417,6 +466,11 @@ public class CatalogController {
         setupClickHandler(flower_7, name_7, type_7, price_7, pic_7);
         setupClickHandler(flower_8, name_8, type_8, price_8, pic_8);
         setupClickHandler(flower_9, name_9, type_9, price_9, pic_9);
+        nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12 };
+        typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12 };
+        priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
+        imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12 };
+        price_Before_sale = new Text[] { price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale };
 
 
 

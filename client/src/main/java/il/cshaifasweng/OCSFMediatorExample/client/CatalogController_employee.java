@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.FlowerDiscountWrapper;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.event.ActionEvent;
 import java.io.IOException;
@@ -24,6 +25,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
@@ -217,6 +219,8 @@ public class CatalogController_employee {
     @FXML
     private TextField price_12;
 
+
+
     @FXML
     private HBox second_line;
 
@@ -273,11 +277,51 @@ public class CatalogController_employee {
     @FXML
     private Label type_12;
 
+    @FXML
+    private Text price_1_before_sale;
+
+    @FXML
+    private Text price_2_before_sale;
+
+    @FXML
+    private Text price_3_before_sale;
+
+    @FXML
+    private Text price_4_before_sale;
+
+    @FXML
+    private Text price_5_before_sale;
+
+    @FXML
+    private Text price_6_before_sale;
+
+    @FXML
+    private Text price_7_before_sale;
+
+    @FXML
+    private Text price_8_before_sale;
+
+    @FXML
+    private Text price_9_before_sale;
+
+    @FXML
+    private Text price_10_before_sale;
+
+    @FXML
+    private Text price_11_before_sale;
+
+    @FXML
+    private Text price_12_before_sale;
+    @FXML
+    private Button discount;
+
     private List<Flower> flowersList_c;
     private Label[] nameLabels;
     private Label[] typeLabels;
     private TextField[] priceFields;
     private ImageView[] imageViews;
+    private Text[] price_Before_sale;
+
 
 
 
@@ -291,10 +335,23 @@ public class CatalogController_employee {
 
         flowersList_c = flowerList;
 
-        System.out.println("Received flowers: " + flowerList.size());
+
+
         for (int i = 0; i < flowerList.size() && i < 12; i++) {
             Flower f = flowerList.get(i);
             nameLabels[i].setText(f.getFlowerName());
+            if (f.isSale())
+            {
+                price_Before_sale[i].setVisible(true);
+                int discount_percent = f.getDiscount();
+                double remainingPercent = 100.0 -discount_percent;
+                double originalPrice = f.getFlowerPrice() * 100.0 / remainingPercent;
+                String originalPriceStr = String.format("%.2f", originalPrice);
+                price_Before_sale[i].setText(originalPriceStr);
+
+
+
+            }
             priceFields[i].setText(String.format("%.2f", f.getFlowerPrice()));
             typeLabels[i].setText(f.getFlowerType());
             setImage(imageViews[i], f.getFlowerType());
@@ -351,6 +408,9 @@ public class CatalogController_employee {
         typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12 };
         priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
         imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12 };
+        price_Before_sale = new Text[] { price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale };
+
+
 
 
     }
@@ -462,6 +522,98 @@ public class CatalogController_employee {
             e.printStackTrace();
         }
     }
+    @FXML
+    void discount(ActionEvent event)
+    {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("discount_scene.fxml"));
+            Parent root = fxmlLoader.load();
+            discount_Controller controller = fxmlLoader.getController();
+            controller.setCatalogController(this);
+            controller.setFlowersList_c(flowersList_c);
+
+            Stage stage = new Stage();
+            stage.setTitle("Set discount");
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+    public void receivediscount(int discount,Flower flower) {
+        System.out.println("Received discount: " + discount);
+        if(flower!=null)
+        {
+            System.out.println("On flower: " + flower.getFlowerName());
+            FlowerDiscountWrapper wrapper = new FlowerDiscountWrapper(flower, discount);
+            try {
+                SimpleClient.getClient().sendToServer(wrapper);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+
+        }
+        else
+        {
+            System.out.println("for all flowers");
+            try {
+                SimpleClient.getClient().sendToServer(discount);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+    }
+    @FXML
+    void delete_flower(ActionEvent event)
+    {
+        Button clickedButton = (Button) event.getSource();
+        VBox graphicVBox = (VBox) clickedButton.getGraphic();
+        String flowerName="";
+
+        for (Node node : graphicVBox.getChildren()) {
+            if (node instanceof Label && ((Label) node).getId() != null && ((Label) node).getId().startsWith("name_")) {
+                Label nameLabel = (Label) node;
+                 flowerName = nameLabel.getText();
+                System.out.println("Flower name: " + flowerName);
+                break;
+            }
+        }
+        Flower targetFlower = null;
+        for (Flower flower : flowersList_c) {
+            if (flower.getFlowerName().equalsIgnoreCase(flowerName)) {
+                targetFlower = flower;
+                break;
+            }
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("delete_scene.fxml"));
+            Parent root = loader.load();
+            delete_controller orderController = loader.getController();
+            orderController.setFlower(targetFlower);
+
+            Stage stage = new Stage();
+            stage.setTitle("Delete Flower");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    void delete(Flower flower)
+    {
+
+
+    }
+
+
 }
 
 
