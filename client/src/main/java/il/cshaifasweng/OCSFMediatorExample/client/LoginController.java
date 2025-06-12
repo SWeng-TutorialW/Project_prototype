@@ -115,6 +115,7 @@ public class LoginController {
                     }
 
                 }
+
                 regErrMsgLbl.setText("Details Not in Correct Format");
                 regErrMsgLbl.textFillProperty().set(Paint.valueOf("red"));
                 regErrMsgLbl.setVisible(true);
@@ -151,8 +152,6 @@ public class LoginController {
                 // Close the window (because we logged in)
                 Platform.runLater(() -> {Stage stage = (Stage) loginAnchPane.getScene().getWindow();
                     stage.close();});
-
-
         }
         else if (msg.startsWith("#login_failed"))
             Platform.runLater(()->{loginErrMsgLbl.setText("User/Pass are incorrect");
@@ -162,7 +161,6 @@ public class LoginController {
             Platform.runLater(()->{regErrMsgLbl.setText("User already exists");
                 regErrMsgLbl.setVisible(true);
                 regErrMsgLbl.textFillProperty().set(Paint.valueOf("red"));});
-
 
     }
 

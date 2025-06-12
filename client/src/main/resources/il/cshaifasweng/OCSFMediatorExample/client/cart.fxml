@@ -12,12 +12,12 @@
                 <Font name="Segoe UI Light" size="48.0" />
             </font>
         </Label>
-        
+
         <VBox alignment="CENTER" layoutX="50.0" layoutY="150.0" prefHeight="400.0" prefWidth="700.0" spacing="20.0">
             <padding>
                 <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
             </padding>
-            
+
             <TableView fx:id="cartTable" VBox.vgrow="ALWAYS">
                 <columns>
                     <TableColumn fx:id="nameColumn" prefWidth="200.0" text="Flower Name" />
@@ -28,7 +28,7 @@
                     <TableColumn fx:id="actionColumn" prefWidth="100.0" text="Action" />
                 </columns>
             </TableView>
-            
+
             <HBox alignment="CENTER_RIGHT" spacing="20.0">
                 <Label fx:id="cartTotal" text="Total: $0.00" textFill="WHITE">
                     <font>
@@ -36,7 +36,7 @@
                     </font>
                 </Label>
             </HBox>
-            
+
             <HBox alignment="CENTER" spacing="20.0">
                 <Button fx:id="checkoutButton" mnemonicParsing="false" onAction="#checkout" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #9B6B9E;" text="Proceed to Checkout" textFill="WHITE">
                     <font>
@@ -51,4 +51,4 @@
             </HBox>
         </VBox>
     </children>
-</AnchorPane> 
+</AnchorPane>

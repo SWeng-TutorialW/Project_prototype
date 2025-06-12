@@ -10,6 +10,7 @@ import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import java.io.IOException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 
 import org.hibernate.HibernateException;
@@ -69,7 +70,7 @@ public class SimpleServer extends AbstractServer {
 				}
 			}
 		}
-		else if (msgString.startsWith("getCatalogTable")) {
+		else if (msgString.startsWith("getCatalogTable_guest")) {
 			try {
 				Session session = App.getSessionFactory().openSession();
 				session.beginTransaction();
@@ -78,7 +79,9 @@ public class SimpleServer extends AbstractServer {
 				CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
 				query.from(Flower.class);
 
+
 				List<Flower> flowerList = session.createQuery(query).getResultList();
+
 
 
 				System.out.println("Flowers in DB: " + flowerList.size());
@@ -91,28 +94,65 @@ public class SimpleServer extends AbstractServer {
 				session.getTransaction().commit();
 				session.close();
 
-				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList);
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList,null);
 				client.sendToClient(event);
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		else if (msgString.startsWith("getCatalogTable_login")) {
+			try {
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
+				query.from(Flower.class);
+				CriteriaQuery<LoginRegCheck> query1 = builder.createQuery(LoginRegCheck.class);
+				query1.from(LoginRegCheck.class);
+
+				List<Flower> flowerList = session.createQuery(query).getResultList();
+				List<LoginRegCheck> loginRegCheckList = session.createQuery(query1).getResultList();
+
+
+				System.out.println("Flowers in DB: " + flowerList.size());
+				for (Flower flower : flowerList) {
+					System.out.println("Name: " + flower.getFlowerName() +
+							", Price: " + flower.getFlowerPrice() +
+							", Type: " + flower.getFlowerType());
+				}
+
+				session.getTransaction().commit();
+				session.close();
+
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList,loginRegCheckList);
+				client.sendToClient(event);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
 		else if(msgString.startsWith("number#flower#to#update#")){
 			// we got a Flower from the client, it means we want to update this flower into our DB table.
 			try {
 				String[] parts = msgString.split("_");
-				int num = Integer.parseInt(parts[1]);
+				String flower_name = parts[1];
 				double newPrice = Double.parseDouble(parts[2]);
+
 				Session session = App.getSessionFactory().openSession();
 				session.beginTransaction();
+
 				CriteriaBuilder builder = session.getCriteriaBuilder();
 				CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
-				query.from(Flower.class);
+				Root<Flower> root = query.from(Flower.class);
 
-				List<Flower> flowerList = session.createQuery(query).getResultList();
 
-				Flower flowerToUpdate = flowerList.get(num);
+				query.select(root).where(builder.equal(root.get("flowerName"), flower_name));
+
+
+				Flower flowerToUpdate = session.createQuery(query).uniqueResult();
 				flowerToUpdate.setFlowerPrice(newPrice);
 				session.update(flowerToUpdate);
 
@@ -136,6 +176,7 @@ public class SimpleServer extends AbstractServer {
 		}
 		else if(msgString.startsWith("get_flowers_high_to_low"))
 		{
+			String[] parts = msgString.split("_");
 			List<Flower> flowers = getFlowersOrdered("desc");
 			try {
 				CatalogUpdateEvent event = new CatalogUpdateEvent(flowers);
@@ -144,8 +185,30 @@ public class SimpleServer extends AbstractServer {
 				ex.printStackTrace();
 			}
 		}
+		else if (msgString.startsWith("price_changed")) {
+			try {
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
+				query.from(Flower.class);
+
+				List<Flower> flowerList = session.createQuery(query).getResultList();
+
+				session.getTransaction().commit();
+				session.close();
+
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList);
+				client.sendToClient(event);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 		else if(msgString.startsWith("get_flowers_low_to_high"))
 		{
+			String[] parts = msgString.split("_");
 			List<Flower> flowers = getFlowersOrdered("asc");
 			try {
 				CatalogUpdateEvent event = new CatalogUpdateEvent(flowers);

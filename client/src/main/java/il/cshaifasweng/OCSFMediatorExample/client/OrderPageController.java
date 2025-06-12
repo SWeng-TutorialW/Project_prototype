@@ -18,7 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrderPageController {
-    @FXML private ImageView flowerImage;
+    @FXML
+    private ImageView flowerImage;
     @FXML private Label flowerName;
     @FXML private Label flowerType;
     @FXML private Label flowerPrice;
