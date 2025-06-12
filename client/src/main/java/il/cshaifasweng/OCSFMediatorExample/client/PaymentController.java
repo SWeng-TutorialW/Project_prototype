@@ -25,19 +25,37 @@ public class PaymentController {
     @FXML private PasswordField cvvField;
     @FXML private Label totalAmountLabel;
     @FXML private ImageView visaLogo;
+    @FXML private ImageView mastercardLogo;
+    @FXML private ImageView amexLogo;
     @FXML private Button payButton;
     @FXML private Button backButton;
 
     private Order order;
     private Stage checkoutStage;
 
+    private enum CardType {
+        VISA,
+        MASTERCARD,
+        AMEX,
+        UNKNOWN
+    }
+
     public void initialize() {
-        // Load Visa logo
+        // Load card logos
         try {
             Image visaImage = new Image(getClass().getResourceAsStream("/images/visa.png"));
             visaLogo.setImage(visaImage);
+            visaLogo.setVisible(false);
+
+            Image mastercardImage = new Image(getClass().getResourceAsStream("/images/mastercard.png"));
+            mastercardLogo.setImage(mastercardImage);
+            mastercardLogo.setVisible(false);
+
+            Image amexImage = new Image(getClass().getResourceAsStream("/images/amex.png"));
+            amexLogo.setImage(amexImage);
+            amexLogo.setVisible(false);
         } catch (Exception e) {
-            System.err.println("Failed to load Visa logo");
+            System.err.println("Failed to load card logos");
         }
 
         // Initialize expiry month combo box
@@ -57,10 +75,13 @@ public class PaymentController {
             if (!newVal.matches("\\d*")) {
                 cardNumberField.setText(newVal.replaceAll("[^\\d]", ""));
             }
-            // Limit to 16 digits
+            // Limit to 16 digits for Visa/Mastercard, 15 for Amex
             if (newVal.length() > 16) {
                 cardNumberField.setText(oldVal);
             }
+            
+            // Update card logo based on card number
+            updateCardLogo(newVal);
         });
 
         cvvField.textProperty().addListener((obs, oldVal, newVal) -> {
@@ -88,11 +109,74 @@ public class PaymentController {
         }
     }
 
+    private CardType detectCardType(String cardNumber) {
+        // Remove any spaces
+        cardNumber = cardNumber.replaceAll("\\s", "");
+        
+        if (cardNumber.isEmpty()) {
+            return CardType.UNKNOWN;
+        }
+
+        // Visa: starts with 4
+        if (cardNumber.startsWith("4")) {
+            return CardType.VISA;
+        }
+        
+        // Mastercard: starts with 51-55 or 2221-2720
+        if (cardNumber.matches("^5[1-5].*") || 
+            (cardNumber.length() >= 4 && 
+             Integer.parseInt(cardNumber.substring(0, 4)) >= 2221 && 
+             Integer.parseInt(cardNumber.substring(0, 4)) <= 2720)) {
+            return CardType.MASTERCARD;
+        }
+        
+        // American Express: starts with 34 or 37
+        if (cardNumber.matches("^3[47].*")) {
+            return CardType.AMEX;
+        }
+        
+        return CardType.UNKNOWN;
+    }
+
+    private void updateCardLogo(String cardNumber) {
+        // Hide all logos first
+        visaLogo.setVisible(false);
+        mastercardLogo.setVisible(false);
+        amexLogo.setVisible(false);
+        
+        // Show the appropriate logo based on card type
+        CardType cardType = detectCardType(cardNumber);
+        switch (cardType) {
+            case VISA:
+                visaLogo.setVisible(true);
+                break;
+            case MASTERCARD:
+                mastercardLogo.setVisible(true);
+                break;
+            case AMEX:
+                amexLogo.setVisible(true);
+                break;
+            default:
+                // No logo shown for unknown card type
+                break;
+        }
+    }
+
     private boolean validateCardNumber(String cardNumber) {
         // Remove any spaces
         cardNumber = cardNumber.replaceAll("\\s", "");
-        // Check if it's exactly 16 digits
-        return cardNumber.matches("\\d{16}");
+        
+        // Validate based on card type
+        CardType cardType = detectCardType(cardNumber);
+        switch (cardType) {
+            case VISA:
+            case MASTERCARD:
+                return cardNumber.matches("\\d{16}");
+            case AMEX:
+                return cardNumber.matches("\\d{15}");
+            default:
+                return false;
+        }
     }
 
     private boolean validateExpiryDate() {
@@ -123,7 +207,9 @@ public class PaymentController {
         }
 
         if (!validateCardNumber(cardNumberField.getText())) {
-            showError("Please enter a valid Visa card number");
+            CardType cardType = detectCardType(cardNumberField.getText());
+            String cardTypeStr = cardType == CardType.UNKNOWN ? "credit card" : cardType.toString().toLowerCase();
+            showError("Please enter a valid " + cardTypeStr + " number");
             return;
         }
 
