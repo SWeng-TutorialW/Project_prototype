@@ -92,11 +92,14 @@ public class App
         LoginRegCheck Asaf = new  LoginRegCheck("Asaf","123","Asaf@",0,true);
         session.save(Asaf);
         session.flush();
+        LoginRegCheck tamar = new  LoginRegCheck("tamar","123","Asaf@",0,false);
+        session.save(tamar);
+        session.flush();
 
 
 
 
-            session.getTransaction().commit();// Save everything.
+        session.getTransaction().commit();// Save everything.
 
 
 
