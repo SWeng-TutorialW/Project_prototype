@@ -5,7 +5,11 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 
 
-import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import il.cshaifasweng.OCSFMediatorExample.entities.Complain;
+import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
+import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.Order;
+import il.cshaifasweng.OCSFMediatorExample.entities.CartItem;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -32,8 +36,8 @@ public class App
             configuration.addAnnotatedClass(Flower.class);
             configuration.addAnnotatedClass(LoginRegCheck.class);
             configuration.addAnnotatedClass(Complain.class);
-            configuration.addAnnotatedClass(CartItem.class);
             configuration.addAnnotatedClass(Order.class);
+            configuration.addAnnotatedClass(CartItem.class);
             ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                     .applySettings(configuration.getProperties())
                     .build();

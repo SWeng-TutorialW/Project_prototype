@@ -96,26 +96,37 @@ public class CartController {
     
     @FXML
     private void checkout() {
+        System.out.println("Checkout button clicked");
+        System.out.println("Cart items size: " + cartItems.size());
+        
         if (cartItems.isEmpty()) {
+            System.out.println("Cart is empty");
             Warning warning = new Warning("Your cart is empty!");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
         
         try {
+            System.out.println("Loading checkout.fxml");
             FXMLLoader loader = new FXMLLoader(getClass().getResource("checkout.fxml"));
             Parent root = loader.load();
+            System.out.println("Checkout.fxml loaded successfully");
+            
             CheckoutController checkoutController = loader.getController();
             checkoutController.setCartItems(cartItems);
+            System.out.println("Cart items set in checkout controller");
             
             Stage stage = new Stage();
             stage.setTitle("Checkout");
             stage.setScene(new Scene(root));
             stage.show();
+            System.out.println("Checkout window shown");
             
             // Close cart window
             ((Stage) cartTable.getScene().getWindow()).close();
+            System.out.println("Cart window closed");
         } catch (IOException e) {
+            System.err.println("Error loading checkout.fxml: " + e.getMessage());
             e.printStackTrace();
         }
     }
