@@ -8,48 +8,53 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="386.0" prefWidth="562.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.connect_scene_Con">
+<AnchorPane prefHeight="381.0" prefWidth="562.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.connect_scene_Con">
     <children>
-        <Label layoutX="142.0" layoutY="-7.0" prefHeight="76.0" prefWidth="279.0" text="Welcome to Liliac Systems" textFill="#83328a">
-            <font>
-                <Font name="Dubai Medium" size="18.0" />
-            </font></Label>
-        <Button fx:id="Catalog" layoutX="202.0" layoutY="260.0" mnemonicParsing="false" onAction="#show_cata" text="Connect " />
-        <Label fx:id="ip_label" layoutX="64.0" layoutY="136.0" prefHeight="35.0" prefWidth="130.0" text="User Name:">
-            <font>
-                <Font size="24.0" />
-            </font>
-        </Label>
-        <TextField fx:id="user_name" layoutX="206.0" layoutY="139.0" prefHeight="30.0" prefWidth="188.0">
-            <font>
-                <Font size="14.0" />
-            </font>
-        </TextField>
-        <Label fx:id="port" layoutX="78.0" layoutY="195.0" prefHeight="35.0" prefWidth="102.0" text="Password">
-            <font>
-                <Font size="24.0" />
-            </font>
-        </Label>
-        <Label layoutX="48.0" layoutY="60.0" prefHeight="76.0" prefWidth="279.0" text="Please enter the appropariate fields">
-            <font>
-                <Font name="Dubai Medium" size="18.0" />
-            </font>
-        </Label>
-        <TextField fx:id="password" layoutX="202.0" layoutY="197.0" prefHeight="30.0" prefWidth="196.0">
-            <font>
-                <Font size="14.0" />
-            </font>
-        </TextField>
-        <ImageView fx:id="image_1" fitHeight="150.0" fitWidth="200.0" layoutY="259.0" pickOnBounds="true" preserveRatio="true">
+      <AnchorPane layoutX="59.0" layoutY="14.0" prefHeight="271.0" prefWidth="445.0" AnchorPane.bottomAnchor="108.0" AnchorPane.leftAnchor="59.0" AnchorPane.rightAnchor="58.0" AnchorPane.topAnchor="14.0">
+         <children>
+              <Button fx:id="Catalog" alignment="CENTER" contentDisplay="CENTER" layoutX="117.0" layoutY="245.0" mnemonicParsing="false" onAction="#show_cata" prefHeight="25.0" prefWidth="77.0" text="Login" />
+            <Button fx:id="guess_btn" layoutX="240.0" layoutY="245.0" mnemonicParsing="false" onAction="#guess_enter" text="Connect as guess" />
+              <Label fx:id="port" layoutX="35.0" layoutY="180.0" prefHeight="35.0" prefWidth="130.0" text="Password">
+                  <font>
+                      <Font size="24.0" />
+                  </font>
+              </Label>
+              <Label fx:id="ip_label" layoutX="35.0" layoutY="118.0" prefHeight="35.0" prefWidth="130.0" text="Username">
+                  <font>
+                      <Font size="24.0" />
+                  </font>
+              </Label>
+              <TextField fx:id="password" layoutX="194.0" layoutY="182.0" prefHeight="30.0" prefWidth="200.0">
+                  <font>
+                      <Font size="14.0" />
+                  </font>
+              </TextField>
+              <TextField fx:id="user_name" layoutX="194.0" layoutY="121.0" prefHeight="30.0" prefWidth="200.0">
+                  <font>
+                      <Font size="14.0" />
+                  </font>
+              </TextField>
+              <Label alignment="CENTER" layoutX="84.0" layoutY="38.0" prefHeight="76.0" prefWidth="279.0" text="Please enter the appropariate fields">
+                  <font>
+                      <Font name="Dubai Medium" size="18.0" />
+                  </font>
+              </Label>
+              <Label alignment="CENTER" layoutX="83.0" prefHeight="76.0" prefWidth="279.0" text="Welcome to Liliac Systems" textFill="#83328a">
+                  <font>
+                      <Font name="Segoe UI Bold" size="18.0" />
+                  </font>
+            </Label>
+         </children>
+      </AnchorPane>
+        <ImageView fx:id="image_1" fitHeight="104.0" fitWidth="156.0" layoutY="285.0" pickOnBounds="true" preserveRatio="true">
             <image>
                 <Image url="@../../../../images/entery_flowers.png" />
             </image>
         </ImageView>
-        <ImageView fx:id="image_2" fitHeight="150.0" fitWidth="200.0" layoutX="362.0" layoutY="260.0" pickOnBounds="true" preserveRatio="true">
+        <ImageView fx:id="image_2" fitHeight="104.0" fitWidth="160.0" layoutX="406.0" layoutY="285.0" pickOnBounds="true" preserveRatio="true">
             <image>
                 <Image url="@../../../../images/entery_flowers.png" />
             </image>
         </ImageView>
-      <Button fx:id="guess_btn" layoutX="301.0" layoutY="260.0" mnemonicParsing="false" onAction="#guess_enter" text="Connect as guess" />
     </children>
 </AnchorPane>
