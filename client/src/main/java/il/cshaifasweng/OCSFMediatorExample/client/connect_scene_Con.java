@@ -63,6 +63,7 @@ public class connect_scene_Con  {
     @FXML
     void guess_enter(ActionEvent event)
     {
+        SimpleClient.isGuest = true;
         guess = true;
         try {
             if (SimpleClient.getClient().isConnected()) {
