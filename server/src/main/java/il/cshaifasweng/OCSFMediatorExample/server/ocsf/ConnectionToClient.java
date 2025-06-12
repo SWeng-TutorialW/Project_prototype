@@ -342,6 +342,7 @@ public class ConnectionToClient extends Thread
   /**
    * This method is called by garbage collection.
    */
+@Override
   protected void finalize()
   {
     try

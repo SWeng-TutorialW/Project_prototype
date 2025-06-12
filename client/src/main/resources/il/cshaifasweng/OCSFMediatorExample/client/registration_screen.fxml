@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="loginWin" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="501.0" prefWidth="425.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RegistrationController">
+   <children>
+      <AnchorPane fx:id="regAnchPane" layoutX="96.0" layoutY="59.0" prefHeight="386.0" prefWidth="235.0" AnchorPane.bottomAnchor="56.0" AnchorPane.leftAnchor="96.0" AnchorPane.rightAnchor="94.0" AnchorPane.topAnchor="59.0">
+         <children>
+            <Label fx:id="regLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="36.0" prefHeight="43.0" prefWidth="176.0" text="Registration" AnchorPane.bottomAnchor="341.0" AnchorPane.leftAnchor="36.0" AnchorPane.rightAnchor="37.0" AnchorPane.topAnchor="0.0">
+               <font>
+                  <Font name="Dubai Medium" size="20.0" />
+               </font>
+            </Label>
+            <TextField fx:id="regUserTxtB" layoutX="2.0" layoutY="65.0" prefHeight="25.0" prefWidth="220.0" AnchorPane.bottomAnchor="277.0" AnchorPane.topAnchor="82.0" />
+            <Button fx:id="regBtn" layoutX="54.0" layoutY="349.0" mnemonicParsing="false" onMouseClicked="#RegToSys" prefHeight="32.0" prefWidth="115.0" text="Register" AnchorPane.bottomAnchor="3.0" AnchorPane.topAnchor="349.0">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font></Button>
+            <Label fx:id="regUserLbl" layoutX="6.0" layoutY="60.0" prefHeight="22.0" prefWidth="67.0" text="Username" AnchorPane.bottomAnchor="302.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="177.0" AnchorPane.topAnchor="60.0">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font></Label>
+            <Label fx:id="regPassConfLbl" layoutX="6.0" layoutY="240.0" prefHeight="17.0" prefWidth="104.0" text="Confirm Password" AnchorPane.bottomAnchor="125.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="119.20000000000002" AnchorPane.topAnchor="243.0">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font></Label>
+            <CheckBox fx:id="regShowPassCB" layoutX="61.0" layoutY="302.0" mnemonicParsing="false" onAction="#togglePass" text="Show Password" AnchorPane.bottomAnchor="65.19999999999999" AnchorPane.topAnchor="302.0">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font></CheckBox>
+            <Label fx:id="regPassLbl" layoutX="6.0" layoutY="180.0" text="Password">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font></Label>
+            <TextField fx:id="regEmailTxtB" layoutX="2.0" layoutY="130.0" prefHeight="25.0" prefWidth="220.0" AnchorPane.bottomAnchor="218.0" AnchorPane.topAnchor="141.0" />
+            <Label fx:id="regEmailLbl" layoutX="6.0" layoutY="120.0" prefHeight="17.0" prefWidth="59.0" text="Email">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font></Label>
+            <PasswordField fx:id="regPassTxtB" layoutX="1.0" layoutY="200.0" prefHeight="25.0" prefWidth="220.0" />
+            <PasswordField fx:id="regPassConfTxtB" layoutX="2.0" layoutY="265.0" prefHeight="25.0" prefWidth="220.0" />
+            <Label fx:id="regErrMsgLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="22.0" layoutY="324.0" prefHeight="18.0" prefWidth="189.0" text="____" textAlignment="CENTER" visible="false" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="23.0" />
+            <TextField fx:id="regPassConfVisibleTxtB" layoutX="2.0" layoutY="265.0" prefHeight="25.0" prefWidth="220.0" visible="false" />
+            <TextField fx:id="regPassVisibleTxtB" layoutX="1.0" layoutY="200.0" prefHeight="25.0" prefWidth="220.0" visible="false" />
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>

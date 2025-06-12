@@ -24,5 +24,15 @@
       <artifactId>hibernate-core</artifactId>
       <version>5.6.15.Final</version>
     </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-base</artifactId>
+      <version>21.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.openjfx</groupId>
+      <artifactId>javafx-controls</artifactId>
+      <version>21.0.1</version>
+    </dependency>
   </dependencies>
 </project>

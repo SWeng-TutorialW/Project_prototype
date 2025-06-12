@@ -14,11 +14,10 @@ public class Flower implements Serializable {
     private String flowerName;
     private double flowerPrice;
     private String flowerType;
-
-    public Flower() {} // ctor
-
-    public Flower(String flowerName, double flowerPrice, String flowerType){
-        super();
+    
+    public Flower() {}
+    
+    public Flower(String flowerName, double flowerPrice, String flowerType) {
         this.flowerName = flowerName;
         this.flowerPrice = flowerPrice;
         this.flowerType = flowerType;
@@ -47,6 +46,7 @@ public class Flower implements Serializable {
     public void setFlowerType(String flowerType) {
         this.flowerType = flowerType;
     }
+    
     public int getId() {
         return id;
     }

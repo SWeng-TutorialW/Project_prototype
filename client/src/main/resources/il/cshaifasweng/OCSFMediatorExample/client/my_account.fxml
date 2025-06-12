@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane fx:id="my_account_data" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="501.0" prefWidth="424.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label fx:id="myAccountLbl" alignment="CENTER" layoutX="156.0" layoutY="46.0" prefHeight="18.0" prefWidth="111.0" text="My Account" textAlignment="CENTER">
+         <font>
+            <Font name="Dubai Medium" size="20.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
