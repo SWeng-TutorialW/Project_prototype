@@ -103,11 +103,12 @@ public class LoginController {
             case 1: // login
                 String username = userTxtB.getText();
                 String password = passTxtB.getText();
+
                 if(username.length() >=4 || password.length()>=4){
 
                     try {
                         loginErrMsgLbl.setVisible(false);
-                        SimpleClient.getClient().sendToServer(new LoginRegCheck(username, password, "", 1));
+                        SimpleClient.getClient().sendToServer(new LoginRegCheck(username, password, "", 1 ));
                         return;
                     }
                     catch (Exception e) {

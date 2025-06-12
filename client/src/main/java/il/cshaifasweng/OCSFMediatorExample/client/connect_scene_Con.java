@@ -45,13 +45,18 @@ public class connect_scene_Con  {
     private Label port;
 
     @FXML
-    private TextField password;
+    private TextField  password;
     @FXML
     private PrimaryController ctlr;
-
+    boolean guess = false;
+    boolean type_Client = false;
+    boolean type_Employee = false;
+    boolean type_guess = false; //only to know if is the first time to jet the catalog
     @FXML
     void initialize() {
+
         EventBus.getDefault().register(this);
+        System.out.println("connect_scene_Con_initialize");
 
     }
 
@@ -59,6 +64,7 @@ public class connect_scene_Con  {
     void guess_enter(ActionEvent event)
     {
         SimpleClient.isGuest = true;
+        guess = true;
         try {
             if (SimpleClient.getClient().isConnected()) {
                 System.out.println("show_cata_as_guess");
@@ -68,6 +74,7 @@ public class connect_scene_Con  {
             e.printStackTrace();
 
         }
+
 
     }
     public void setCatalogController(PrimaryController controller) {
@@ -89,10 +96,11 @@ public class connect_scene_Con  {
     @Subscribe
     public void handleCatalogUpdate(CatalogUpdateEvent event)
     {
-        if(SimpleClient.isGuest)
+        System.out.println(type_Client);
+        System.out.println(type_Employee);
+        if(guess)
         {
             System.out.println("Processing as guest");
-            // SimpleClient.isGuest = false; // Irreverent I believe.
             Platform.runLater(() -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
@@ -100,58 +108,113 @@ public class connect_scene_Con  {
 
                     CatalogController controller = loader.getController();
                     controller.setCatalogData(event.getUpdatedItems());
-
                     App.getScene().setRoot(root);
+                    if(!type_guess)//to know this is the first time
+                    {
+                        type_guess = true;
+                        System.out.println("show the catalog first time as guest");
+                        App.getStage().setWidth(800);
+                        App.getStage().setHeight(750);
+                        App.getStage().centerOnScreen();
+                    }
 
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             });
+            return;
         }
-        else
-        {
+            if(type_Client) {
+                Platform.runLater(() -> {
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
+                        Parent root = loader.load();
+                        CatalogController controller = loader.getController();
+                        controller.setCatalogData(event.getUpdatedItems());
+                        App.getScene().setRoot(root);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                return;
+            }
+            if(type_Employee)
+            {
+                Platform.runLater(() -> {
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
+                        Parent root = loader.load();
+
+                        CatalogController_employee controller = loader.getController();
+                        controller.setCatalogData(event.getUpdatedItems());
+
+
+                        App.getScene().setRoot(root);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                return;
+            }
             System.out.println("Processing as regular login");
             String user_Name = user_name.getText().trim();
             String passWord = password.getText().trim();
-            if(user_Name.isEmpty() || passWord.isEmpty())
-                return;
             System.out.println("USERNAME: " + user_Name);
             System.out.println("PASSWORD: " + passWord);
             List<LoginRegCheck> users = event.getUsers();
-
-            for (LoginRegCheck loginRegCheck : users) {
-                if (loginRegCheck.getUsername().equals(user_Name) && loginRegCheck.getPassword().equals(passWord))
-                {
-                    Platform.runLater(() -> {
-                        try {
-                            FXMLLoader loader;
-                            Parent root;
-
-                            if (loginRegCheck.isType()) {
-                                loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
-                                root = loader.load();
-                                CatalogController_employee controller = loader.getController();
-                                controller.setCatalogData(event.getUpdatedItems());
-                            } else {
-                                loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
-                                root = loader.load();
-                                CatalogController controller = loader.getController();
-                                controller.setCatalogData(event.getUpdatedItems());
-                            }
-
-                            App.getScene().setRoot(root);
-
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                for (LoginRegCheck loginRegCheck : users) {
+                    if (loginRegCheck.getUsername().equals(user_Name) && loginRegCheck.getPassword().equals(passWord)) {
+                        if (loginRegCheck.isType())
+                        {
+                            type_Employee = true;
+                            System.out.println("type_Employee is true");
                         }
-                    });
-                    return;
-                }
+                        if (!loginRegCheck.isType())
+                        {
+                            type_Client = true;
+                            System.out.println("type_Client is true");
+                        }
+                        Platform.runLater(() -> {
+                            try {
+                                FXMLLoader loader;
+                                Parent root;
 
+                                if (loginRegCheck.isType()) {
+                                    loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
+                                    root = loader.load();
+                                    CatalogController_employee controller = loader.getController();
+                                    controller.setCatalogData(event.getUpdatedItems());
+
+                                } else {
+                                    loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
+                                    root = loader.load();
+                                    CatalogController controller = loader.getController();
+                                    controller.setCatalogData(event.getUpdatedItems());
+
+                                }
+
+                                App.getScene().setRoot(root);
+                                App.getStage().setWidth(800);
+                                App.getStage().setHeight(750);
+                                App.getStage().centerOnScreen();
+                                System.out.println("show the catalog as user/employee first time");
+
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                        return;
+                    }
+                }
+                Warning warning = new Warning("Username or password doesn't match");
+                EventBus.getDefault().post(new WarningEvent(warning));
             }
-            Warning warning = new Warning("Username or password doesn't match");
-            EventBus.getDefault().post(new WarningEvent(warning));
-        }
+
+
+
+
+
     }
 
-}

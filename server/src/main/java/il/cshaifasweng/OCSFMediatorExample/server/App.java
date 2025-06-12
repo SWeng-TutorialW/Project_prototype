@@ -68,9 +68,37 @@ public class App
         Flower flower_6 = new Flower("White Snowflake", 6.49, "Lily");
         session.save(flower_6);
         session.flush();
-        LoginRegCheck Asaf = new LoginRegCheck("Asaf","123","asaf@",0,true);
+        Flower flower_7 = new Flower("Golden Breeze", 7.99, "Daffodil");
+        session.save(flower_7);
+        session.flush();
+        Flower flower_8 = new Flower("Blue Whisper", 5.49, "Hyacinth");
+        session.save(flower_8);
+        session.flush();
+        LoginRegCheck Nissim = new  LoginRegCheck("Nissim","123","Nissim@",0,true);
+        session.save(Nissim);
+        session.flush();
+        LoginRegCheck Yarden = new  LoginRegCheck("Yarden","123","Yarden@",0,true);
+        session.save(Yarden);
+        session.flush();
+        LoginRegCheck Itay = new  LoginRegCheck("Itay","123","Itay@",0,true);
+        session.save(Itay);
+        session.flush();
+        LoginRegCheck Diana = new  LoginRegCheck("Diana","123","Diana@",0,true);
+        session.save(Diana);
+        session.flush();
+        LoginRegCheck Dor = new  LoginRegCheck("Dor","123","Dor@",0,true);
+        session.save(Dor);
+        session.flush();
+        LoginRegCheck Asaf = new  LoginRegCheck("Asaf","123","Asaf@",0,true);
         session.save(Asaf);
         session.flush();
+        LoginRegCheck tamar = new  LoginRegCheck("tamar","123","Asaf@",0,false);
+        session.save(tamar);
+        session.flush();
+
+
+
+
         session.getTransaction().commit();// Save everything.
 
 

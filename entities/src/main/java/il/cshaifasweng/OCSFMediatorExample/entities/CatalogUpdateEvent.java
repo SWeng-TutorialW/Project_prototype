@@ -9,6 +9,7 @@ public class CatalogUpdateEvent implements Serializable {
     private List<Flower> updatedItems;
     private List<LoginRegCheck> users;
 
+
     public CatalogUpdateEvent(List<Flower> updatedItems, List<LoginRegCheck> USERS) {
         this.updatedItems = updatedItems;
         users = USERS;
@@ -17,6 +18,7 @@ public class CatalogUpdateEvent implements Serializable {
         this.updatedItems = updatedItems;
 
     }
+
 
 
     public List<Flower> getUpdatedItems() {

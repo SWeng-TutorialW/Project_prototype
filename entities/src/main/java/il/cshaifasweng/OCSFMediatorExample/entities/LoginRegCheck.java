@@ -10,7 +10,6 @@ import java.io.Serializable;
 public class LoginRegCheck implements Serializable {
 
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -26,8 +25,18 @@ public class LoginRegCheck implements Serializable {
 
     private int isLogin; // 1 = login, 0 = registration
     private boolean type; // false = client, true = employee
+    private int accType ;        //??
 
     public LoginRegCheck() {}
+
+    public LoginRegCheck(String username, String password, String email, int isLogin, int accType) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.isLogin = isLogin;
+        this.type = false;
+        this.accType = accType;
+    }
 
     public LoginRegCheck(String username, String password, String email, int isLogin) {
         this.username = username;
@@ -51,7 +60,12 @@ public class LoginRegCheck implements Serializable {
     public String getEmail() { return email; }
     public int getIsLogin() { return isLogin; }
     public boolean isType() { return type; }
+    public int getAccType() { return accType; }
 
+
+    public void setAccType(int accType) {
+        this.accType = accType;
+    }
     public void setUsername(String username) {
         this.username = username;
     }

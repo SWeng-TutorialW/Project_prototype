@@ -9,6 +9,7 @@ import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import java.io.IOException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 
 import org.hibernate.HibernateException;
@@ -48,7 +49,8 @@ public class SimpleServer extends AbstractServer {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		} else if (msgString.startsWith("add client")) {
+		}
+		else if(msgString.startsWith("add client")){
 			SubscribedClient connection = new SubscribedClient(client);
 			SubscribersList.add(connection);
 			try {
@@ -56,16 +58,18 @@ public class SimpleServer extends AbstractServer {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-		} else if (msgString.startsWith("remove client")) {
-			if (!SubscribersList.isEmpty()) {
-				for (SubscribedClient subscribedClient : SubscribersList) {
-					if (subscribedClient.getClient().equals(client)) {
+		}
+		else if(msgString.startsWith("remove client")){
+			if(!SubscribersList.isEmpty()){
+				for(SubscribedClient subscribedClient: SubscribersList){
+					if(subscribedClient.getClient().equals(client)){
 						SubscribersList.remove(subscribedClient);
 						break;
 					}
 				}
 			}
-		} else if (msgString.startsWith("getCatalogTable_guest")) {
+		}
+		else if (msgString.startsWith("getCatalogTable_guest")) {
 			try {
 				Session session = App.getSessionFactory().openSession();
 				session.beginTransaction();
@@ -78,6 +82,7 @@ public class SimpleServer extends AbstractServer {
 				List<Flower> flowerList = session.createQuery(query).getResultList();
 
 
+
 				System.out.println("Flowers in DB: " + flowerList.size());
 				for (Flower flower : flowerList) {
 					System.out.println("Name: " + flower.getFlowerName() +
@@ -88,13 +93,14 @@ public class SimpleServer extends AbstractServer {
 				session.getTransaction().commit();
 				session.close();
 
-				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList, null);
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList,null);
 				client.sendToClient(event);
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} else if (msgString.startsWith("getCatalogTable_login")) {
+		}
+		else if (msgString.startsWith("getCatalogTable_login")) {
 			try {
 				Session session = App.getSessionFactory().openSession();
 				session.beginTransaction();
@@ -119,27 +125,33 @@ public class SimpleServer extends AbstractServer {
 				session.getTransaction().commit();
 				session.close();
 
-				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList, loginRegCheckList);
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList,loginRegCheckList);
 				client.sendToClient(event);
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		} else if (msgString.startsWith("number#flower#to#update#")) {
+		}
+
+		else if(msgString.startsWith("number#flower#to#update#")){
 			// we got a Flower from the client, it means we want to update this flower into our DB table.
 			try {
 				String[] parts = msgString.split("_");
-				int num = Integer.parseInt(parts[1]);
+				String flower_name = parts[1];
 				double newPrice = Double.parseDouble(parts[2]);
+
 				Session session = App.getSessionFactory().openSession();
 				session.beginTransaction();
+
 				CriteriaBuilder builder = session.getCriteriaBuilder();
 				CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
-				query.from(Flower.class);
+				Root<Flower> root = query.from(Flower.class);
 
-				List<Flower> flowerList = session.createQuery(query).getResultList();
 
-				Flower flowerToUpdate = flowerList.get(num);
+				query.select(root).where(builder.equal(root.get("flowerName"), flower_name));
+
+
+				Flower flowerToUpdate = session.createQuery(query).uniqueResult();
 				flowerToUpdate.setFlowerPrice(newPrice);
 				session.update(flowerToUpdate);
 
@@ -155,10 +167,15 @@ public class SimpleServer extends AbstractServer {
 					ex.printStackTrace();
 				}
 			}
-		} else if (msgString.startsWith("update_catalog_after_change")) {
+		}
+		else if(msgString.startsWith("update_catalog_after_change"))
+		{
 			sendToAllClients("update_catalog_after_change");
 
-		} else if (msgString.startsWith("get_flowers_high_to_low")) {
+		}
+		else if(msgString.startsWith("get_flowers_high_to_low"))
+		{
+			String[] parts = msgString.split("_");
 			List<Flower> flowers = getFlowersOrdered("desc");
 			try {
 				CatalogUpdateEvent event = new CatalogUpdateEvent(flowers);
@@ -166,7 +183,31 @@ public class SimpleServer extends AbstractServer {
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			}
-		} else if (msgString.startsWith("get_flowers_low_to_high")) {
+		}
+		else if (msgString.startsWith("price_changed")) {
+			try {
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
+				query.from(Flower.class);
+
+				List<Flower> flowerList = session.createQuery(query).getResultList();
+
+				session.getTransaction().commit();
+				session.close();
+
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList);
+				client.sendToClient(event);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		else if(msgString.startsWith("get_flowers_low_to_high"))
+		{
+			String[] parts = msgString.split("_");
 			List<Flower> flowers = getFlowersOrdered("asc");
 			try {
 				CatalogUpdateEvent event = new CatalogUpdateEvent(flowers);
@@ -175,7 +216,8 @@ public class SimpleServer extends AbstractServer {
 				ex.printStackTrace();
 			}
 
-		} else if (msg.getClass().equals(Flower.class)) {
+		}
+		else if(msg.getClass().equals(Flower.class)) {
 			Flower flower = (Flower) msg;
 
 			Session session = App.getSessionFactory().openSession();
@@ -191,48 +233,48 @@ public class SimpleServer extends AbstractServer {
 			}
 			sendToAllClients("update_catalog_after_change");
 
-		} else if (msg.getClass().equals(LoginRegCheck.class)) {
+		}
+		else if (msg.getClass().equals(LoginRegCheck.class)) {
 			int isLogin = ((LoginRegCheck) msg).getIsLogin();
 			// check for user is already exists :
 
 			String username = ((LoginRegCheck) msg).getUsername();
 			String password = ((LoginRegCheck) msg).getPassword();
-			String email = ((LoginRegCheck) msg).getEmail();
 
 			System.out.println("Username: " + username);
 			System.out.println("Password: " + password);
 
 			switch (isLogin) {
-				case 1: // login
+                case 1: // login
 
-					Session session = App.getSessionFactory().openSession();
-					session.beginTransaction();
+                    Session session = App.getSessionFactory().openSession();
+                    session.beginTransaction();
 
-					List<LoginRegCheck> resultLogin = session.createQuery(
-									"FROM LoginRegCheck lrc WHERE lrc.username = :username AND lrc.password = :password",
-									LoginRegCheck.class
-							)
-							.setParameter("username", username)
-							.setParameter("password", password)
-							.getResultList();
-					session.getTransaction().commit();
+                    List<LoginRegCheck> resultLogin = session.createQuery(
+                                    "FROM LoginRegCheck lrc WHERE lrc.username = :username AND lrc.password = :password",
+                                    LoginRegCheck.class
+                            )
+                            .setParameter("username", username)
+                            .setParameter("password", password)
+                            .getResultList();
+                    session.getTransaction().commit();
 
-					if (resultLogin.isEmpty()) {
-						// user doesn't exist or password is wrong
-						try {
-							System.out.println("Login failed for user: " + username);
-							client.sendToClient("#login_failed");
-							session.close();
-						} catch (IOException e) {
-							System.out.println("User login failed ERR");
-							e.printStackTrace();
-						}
-						return;
-					}
-					try {
-						System.out.println("User Logged-in successfully: " + username);
-						session.close();
-						client.sendToClient("#login/reg_ok");
+                    if (resultLogin.isEmpty()) {
+                        // user doesn't exist or password is wrong
+                        try {
+                            System.out.println("Login failed for user: " + username);
+                            client.sendToClient("#login_failed");
+                            session.close();
+                        } catch (IOException e) {
+                            System.out.println("User login failed ERR");
+                            e.printStackTrace();
+                        }
+                        return;
+                    }
+                    try {
+                        System.out.println("User Logged-in successfully: " + username);
+                        session.close();
+                        client.sendToClient("#login/reg_ok");
 
 					} catch (IOException e) {
 						System.out.println("User login ok ERR");
@@ -256,7 +298,6 @@ public class SimpleServer extends AbstractServer {
 						}
 
 						checkSession.getTransaction().commit();
-
 					} catch (Exception e) {
 						e.printStackTrace();
 						return;
@@ -265,10 +306,10 @@ public class SimpleServer extends AbstractServer {
 					try (Session insertSession = App.getSessionFactory().openSession()) {
 						insertSession.beginTransaction();
 
-						LoginRegCheck newUser = new LoginRegCheck(username, password, email, 0);
-						insertSession.save(newUser);
+						//LoginRegCheck newUser = new LoginRegCheck(username, password, email, 0);
+					//	insertSession.save(newUser);
 
-						//insertSession.save(msg); // INSERT INTO
+						insertSession.save(msg); // INSERT INTO
 
 						insertSession.getTransaction().commit();
 						client.sendToClient("#login/reg_ok");
@@ -282,6 +323,9 @@ public class SimpleServer extends AbstractServer {
 			}
 		}
 	}
+
+
+
 
 	public void sendToAllClients(String message) {
 		try {

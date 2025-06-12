@@ -73,7 +73,7 @@ public class PrimaryController {
 			e.printStackTrace();
 			return;
 		}
-		move_to_connect_scene();
+	//	move_to_connect_scene();//??
 		if (SimpleClient.getClient().isConnected()) {
 			System.out.println("move_to_connect_scene");
 			move_to_connect_scene();
