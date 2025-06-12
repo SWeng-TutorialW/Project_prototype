@@ -227,6 +227,23 @@ public class SimpleServer extends AbstractServer {
 			sendToAllClients("update_catalog_after_change");
 
 		}
+		else if(msg.getClass().equals(Complain.class)) {
+			Complain complain = (Complain) msg;
+
+			Session session = App.getSessionFactory().openSession();
+			try {
+				session.beginTransaction();
+				session.save(complain);
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				session.getTransaction().rollback();
+				e.printStackTrace();
+			} finally {
+				session.close();
+			}
+			sendToAllClients("update_complainScene_after_change");
+
+		}
 		else if (msg.getClass().equals(LoginRegCheck.class)) {
 			int isLogin = ((LoginRegCheck) msg).getIsLogin();
 			// check for user is already exists :

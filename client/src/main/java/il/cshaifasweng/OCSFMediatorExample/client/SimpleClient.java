@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
+import il.cshaifasweng.OCSFMediatorExample.entities.ComplainUpdateEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
 import org.greenrobot.eventbus.EventBus;
 
@@ -38,8 +39,20 @@ public class SimpleClient extends AbstractClient {
 			}
 
 		}
+		else if(msgString.startsWith("update_complainScene_after_change"))
+		{
+			try {
+				EventBus.getDefault().post(msg);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		else if (msg instanceof ComplainUpdateEvent) {
+			System.out.println("Received ComplainUpdateEvent, posting to EventBus");
+			EventBus.getDefault().post(msg);
+		}
 		else if(msgString.startsWith("#user_exists") || msgString.startsWith("#login_failed") || msgString.startsWith("#login/reg_ok")){
-			EventBus.getDefault().post((String)msg);
+			EventBus.getDefault().post(msg);
 			System.out.println("I GOT THE MESSAGE");
 		}
 

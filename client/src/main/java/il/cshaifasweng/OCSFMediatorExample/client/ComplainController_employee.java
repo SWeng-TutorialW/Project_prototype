@@ -59,7 +59,7 @@ public class ComplainController_employee implements Initializable {
     public void initialize(URL url, ResourceBundle resources) {
         EventBus.getDefault().register(this);
         System.out.println("complain handler initialized");
-        complaintColumn.setCellValueFactory(new PropertyValueFactory<>("complain"));
+        complaintColumn.setCellValueFactory(new PropertyValueFactory<>("complaint"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("client"));
         timeColumn.setCellValueFactory(cellData -> {
             LocalDateTime timestamp = cellData.getValue().getTimestamp();
@@ -74,6 +74,7 @@ public class ComplainController_employee implements Initializable {
             e.printStackTrace();
 
         }
+
 
     }
 //    void open_catalog(ActionEvent event)
@@ -99,6 +100,7 @@ public class ComplainController_employee implements Initializable {
     @Subscribe
     public void handleComplainUpdate(ComplainUpdateEvent event)
     {
+        System.out.println("updating complaint list debuggg");
        List<Complain> complainList = event.getUpdatedItems();
         // Run on JavaFX thread to update UI
         Platform.runLater(() -> {
