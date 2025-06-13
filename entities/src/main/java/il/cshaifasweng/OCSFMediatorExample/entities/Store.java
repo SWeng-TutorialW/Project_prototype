@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table(name = "Stores")
@@ -13,17 +14,21 @@ public class Store implements Serializable {
     private String name;
     private String Address;
     private double incomes;
+    @Transient
+    private List<Flower> flowersList;
 
 
 
     public Store() {} // ctor
 
-    public Store(String storename,String address) {
+    public Store(String storename,String address,List<Flower> flowersList) {
         super();
         this.name = storename;
         Address = address;
         incomes = 0;
+        this.flowersList = flowersList;
     }
+    public List<Flower> getFlowersList() {return flowersList;}
 
     public double getIncomes() {
         return incomes;
@@ -36,6 +41,7 @@ public class Store implements Serializable {
     public String getaddress() {
         return Address;
     }
+    public void setFlowersList(List<Flower> flowersList) {this.flowersList = flowersList;}
 
     public int getId() {
         return id;

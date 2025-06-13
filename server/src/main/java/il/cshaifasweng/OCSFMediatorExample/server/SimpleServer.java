@@ -1,10 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
 
-import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
-import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
-import il.cshaifasweng.OCSFMediatorExample.entities.Order;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import java.io.IOException;
@@ -24,7 +21,6 @@ import org.hibernate.service.ServiceRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 import org.hibernate.Session;
 
@@ -94,7 +90,7 @@ public class SimpleServer extends AbstractServer {
 				session.getTransaction().commit();
 				session.close();
 
-				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList,null);
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList,null,null);
 				client.sendToClient(event);
 
 			} catch (Exception e) {
@@ -112,8 +108,10 @@ public class SimpleServer extends AbstractServer {
 				CriteriaQuery<LoginRegCheck> query1 = builder.createQuery(LoginRegCheck.class);
 				query1.from(LoginRegCheck.class);
 
+
 				List<Flower> flowerList = session.createQuery(query).getResultList();
 				List<LoginRegCheck> loginRegCheckList = session.createQuery(query1).getResultList();
+				List<Store> Stores = App.get_stores();
 
 
 				System.out.println("Flowers in DB: " + flowerList.size());
@@ -126,7 +124,7 @@ public class SimpleServer extends AbstractServer {
 				session.getTransaction().commit();
 				session.close();
 
-				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList,loginRegCheckList);
+				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList,loginRegCheckList,Stores);
 				client.sendToClient(event);
 
 			} catch (Exception e) {
@@ -174,17 +172,6 @@ public class SimpleServer extends AbstractServer {
 			sendToAllClients("update_catalog_after_change");
 
 		}
-		else if(msgString.startsWith("get_flowers_high_to_low"))
-		{
-			String[] parts = msgString.split("_");
-			List<Flower> flowers = getFlowersOrdered("desc");
-			try {
-				CatalogUpdateEvent event = new CatalogUpdateEvent(flowers);
-				client.sendToClient(event);
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-		}
 		else if (msgString.startsWith("price_changed")) {
 			try {
 				Session session = App.getSessionFactory().openSession();
@@ -206,18 +193,6 @@ public class SimpleServer extends AbstractServer {
 				e.printStackTrace();
 			}
 		}
-		else if(msgString.startsWith("get_flowers_low_to_high"))
-		{
-			String[] parts = msgString.split("_");
-			List<Flower> flowers = getFlowersOrdered("asc");
-			try {
-				CatalogUpdateEvent event = new CatalogUpdateEvent(flowers);
-				client.sendToClient(event);
-			} catch (IOException ex) {
-				ex.printStackTrace();
-			}
-
-		}
 		else if(msg.getClass().equals(Flower.class)) {
 			Flower flower = (Flower) msg;
 
@@ -234,6 +209,71 @@ public class SimpleServer extends AbstractServer {
 			}
 			sendToAllClients("update_catalog_after_change");
 
+		}
+		else if(msg.getClass().equals(Integer.class))
+		{
+			int discountPercent = (Integer) msg;
+			try {
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				String hql = "FROM Flower";
+				List<Flower> flowers = session.createQuery(hql, Flower.class).getResultList();
+
+				for (Flower flower : flowers) {
+					double originalPrice = flower.getFlowerPrice();
+					double newPrice = originalPrice * (1 - discountPercent / 100.0);
+					flower.setFlowerPrice(newPrice);
+					flower.setSale(true);
+					flower.setDiscount(discountPercent);
+					session.update(flower);
+				}
+				session.getTransaction().commit();
+				session.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			sendToAllClients("update_catalog_after_change");
+
+		}
+		if (msg.getClass().equals(FlowerDiscountWrapper.class))
+		{
+			FlowerDiscountWrapper wrapper = (FlowerDiscountWrapper) msg;
+			Flower flower = wrapper.getFlower();
+			int discountPercent = wrapper.getDiscount();
+			if (discountPercent == -1)
+			{
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
+				Root<Flower> root = query.from(Flower.class);
+				query.select(root).where(builder.equal(root.get("flowerName"), flower.getFlowerName()));
+				Flower flowerToDelete = session.createQuery(query).uniqueResult();
+				session.delete(flowerToDelete);
+				session.getTransaction().commit();
+				System.out.println("Flower deleted: " + flowerToDelete.getFlowerName());
+				session.close();
+				sendToAllClients("update_catalog_after_change");
+				return;
+			}
+			Session session = App.getSessionFactory().openSession();
+			session.beginTransaction();
+			CriteriaBuilder builder = session.getCriteriaBuilder();
+			CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
+			Root<Flower> root = query.from(Flower.class);
+			query.select(root).where(builder.equal(root.get("flowerName"), flower.getFlowerName()));
+			Flower flowerToUpdate = session.createQuery(query).uniqueResult();
+			double originalPrice = flowerToUpdate.getFlowerPrice();
+			double newPrice = originalPrice * (1 - discountPercent / 100.0);
+			flowerToUpdate.setFlowerPrice(newPrice);
+			flowerToUpdate.setSale(true);
+			flowerToUpdate.setDiscount(discountPercent);
+			session.update(flowerToUpdate);
+			session.getTransaction().commit();
+			System.out.println("Updated price for " + flowerToUpdate.getFlowerName() + ": " + newPrice);
+			session.close();
+			sendToAllClients("update_catalog_after_change");
 		}
 		else if (msg.getClass().equals(LoginRegCheck.class)) {
 			int isLogin = ((LoginRegCheck) msg).getIsLogin();
@@ -330,17 +370,18 @@ public class SimpleServer extends AbstractServer {
             }
 
 		}
-		else if (msg instanceof Order) {
+		else if (msg instanceof Order)
+		{
 			Order order = (Order) msg;
 			Session session = App.getSessionFactory().openSession();
 			try {
 				session.beginTransaction();
 				session.save(order);
 				session.getTransaction().commit();
-				
+
 				// Send confirmation back to client
 				client.sendToClient("order_success");
-				
+
 				// Notify all clients about the new order
 				sendToAllClients("update_catalog_after_change");
 			} catch (Exception e) {
@@ -355,7 +396,378 @@ public class SimpleServer extends AbstractServer {
 				session.close();
 			}
 		}
+		else if(msgString.startsWith("Haifa"))
+		{
+			List<Store> Stores = App.get_stores();
+			Store store = Stores.get(0);
+			List<Flower> original_flowers=store.getFlowersList();
+			String[] parts = msgString.split("_");
+			List<Flower> sorted_flowers=store.getFlowersList();
+			if(parts[1].trim().equals("1"))
+			{
+				store = Stores.get(0);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[1].trim().equals("2"))
+			{
+				store = Stores.get(1);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[1].trim().equals("3"))
+			{
+				store = Stores.get(2);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[1].trim().equals("4")) {
+
+				try {
+					Session session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+
+					original_flowers = session.createQuery("FROM Flower", Flower.class).getResultList();
+
+					session.getTransaction().commit();
+					session.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			try {
+				catalog_sort_event event = new catalog_sort_event(sorted_flowers,1,original_flowers);
+				client.sendToClient(event);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+			return;
+
+
+		}
+		else if(msgString.startsWith("Krayot"))
+		{
+			List<Store> Stores = App.get_stores();
+			Store store = Stores.get(1);
+			List<Flower> original_flowers=store.getFlowersList();
+			String[] parts = msgString.split("_");
+			List<Flower> sorted_flowers=store.getFlowersList();
+			if(parts[1].trim().equals("1"))
+			{
+				store = Stores.get(0);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[1].trim().equals("2"))
+			{
+				store = Stores.get(1);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[1].trim().equals("3"))
+			{
+				store = Stores.get(2);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[1].trim().equals("4")) {
+
+				try {
+					Session session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+
+					original_flowers = session.createQuery("FROM Flower", Flower.class).getResultList();
+
+					session.getTransaction().commit();
+					session.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			try {
+				catalog_sort_event event = new catalog_sort_event(sorted_flowers,2,original_flowers);
+				client.sendToClient(event);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+			return;
+
+
+		}
+		else if(msgString.startsWith("Nahariyya"))
+		{
+			List<Store> Stores = App.get_stores();
+			Store store = Stores.get(2);
+			List<Flower> original_flowers=store.getFlowersList();
+			String[] parts = msgString.split("_");
+			List<Flower> sorted_flowers=store.getFlowersList();
+			if(parts[1].trim().equals("1"))
+			{
+				store = Stores.get(0);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[1].trim().equals("2"))
+			{
+				store = Stores.get(1);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[1].trim().equals("3"))
+			{
+				store = Stores.get(2);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[1].trim().equals("4")) {
+
+				try {
+					Session session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+
+					original_flowers = session.createQuery("FROM Flower", Flower.class).getResultList();
+
+					session.getTransaction().commit();
+					session.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			try {
+				catalog_sort_event event = new catalog_sort_event(sorted_flowers,3,original_flowers);
+				client.sendToClient(event);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+			return;
+
+
+		}
+		else if(msgString.startsWith("network"))
+		{
+			List<Store> Stores = App.get_stores();
+			Store store = Stores.get(1);
+			List<Flower> original_flowers=store.getFlowersList();
+			String[] parts = msgString.split("_");
+			List<Flower> sorted_flowers=store.getFlowersList();
+			if(parts[1].trim().equals("1"))
+			{
+				store = Stores.get(0);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[1].trim().equals("2"))
+			{
+				store = Stores.get(1);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[1].trim().equals("3"))
+			{
+				store = Stores.get(2);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[1].trim().equals("4")) {
+
+				try {
+					Session session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+
+					original_flowers = session.createQuery("FROM Flower", Flower.class).getResultList();
+					sorted_flowers = session.createQuery("FROM Flower", Flower.class).getResultList();
+
+					session.getTransaction().commit();
+					session.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			try {
+				catalog_sort_event event = new catalog_sort_event(sorted_flowers,4,original_flowers);
+				client.sendToClient(event);
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
+			return;
+
+
+		}
+		else if(msgString.startsWith("get_flowers_low_to_high"))
+		{
+			List<Store> Stores = App.get_stores();
+			Store store = Stores.get(0);
+			List<Flower> original_flowers=store.getFlowersList();
+			String[] parts = msgString.split("_");
+			if(parts[6].trim().equals("1"))
+			{
+				store = Stores.get(0);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[6].trim().equals("2"))
+			{
+				store = Stores.get(1);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[6].trim().equals("3"))
+			{
+				store = Stores.get(2);
+				original_flowers=store.getFlowersList();
+			}
+			if (parts[5].trim().equals("4") )
+			{
+				List<Flower> flowers = getSortedFlowersFromDatabase("asc");
+				if(parts[6].trim().equals("4")||parts[6].trim().equals("0"))
+				{
+					try {
+						catalog_sort_event event = new catalog_sort_event(flowers,4,flowers);
+						client.sendToClient(event);
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
+					return;
+				}
+				else
+				{
+					try {
+						catalog_sort_event event = new catalog_sort_event(flowers,4,original_flowers);
+						client.sendToClient(event);
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
+					return;
+				}
+
+			}
+
+
+			List<Flower> sorted_flowers=store.getFlowersList();
+			if(parts[5].trim().equals("1"))
+			{
+				store = Stores.get(0);
+				sorted_flowers=store.getFlowersList();
+				sorted_flowers = getFlowersOrdered("asc",sorted_flowers);
+				try {
+					catalog_sort_event event = new catalog_sort_event(sorted_flowers,1,original_flowers);
+					client.sendToClient(event);
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+				return;
+
+			}
+			if(parts[5].trim().equals("2"))
+			{
+				store = Stores.get(1);
+				sorted_flowers=store.getFlowersList();
+				sorted_flowers = getFlowersOrdered("asc",sorted_flowers);
+				try {
+					catalog_sort_event event = new catalog_sort_event(sorted_flowers,2,original_flowers);
+					client.sendToClient(event);
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+				return;
+			}
+			if(parts[5].trim().equals("3"))
+			{
+				store = Stores.get(2);
+				sorted_flowers=store.getFlowersList();
+				sorted_flowers = getFlowersOrdered("asc",sorted_flowers);
+				try {
+					catalog_sort_event event = new catalog_sort_event(sorted_flowers,3,original_flowers);
+					client.sendToClient(event);
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+				return;
+			}
+
+		}
+		else if(msgString.startsWith("get_flowers_high_to_low"))
+		{
+			List<Store> Stores = App.get_stores();
+			Store store = Stores.get(0);
+			List<Flower> original_flowers=store.getFlowersList();
+			String[] parts = msgString.split("_");
+			if(parts[6].trim().equals("1"))
+			{
+				store = Stores.get(0);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[6].trim().equals("2"))
+			{
+				store = Stores.get(1);
+				original_flowers=store.getFlowersList();
+			}
+			if(parts[6].trim().equals("3"))
+			{
+				store = Stores.get(2);
+				original_flowers=store.getFlowersList();
+			}
+			if (parts[5].trim().equals("4") )
+			{
+				List<Flower> flowers = getSortedFlowersFromDatabase("desc");
+				if(parts[6].trim().equals("4")||parts[6].trim().equals("0"))
+				{
+					try {
+						catalog_sort_event event = new catalog_sort_event(flowers,4,flowers);
+						client.sendToClient(event);
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
+					return;
+				}
+				else
+				{
+					try {
+						catalog_sort_event event = new catalog_sort_event(flowers,4,original_flowers);
+						client.sendToClient(event);
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
+					return;
+				}
+
+			}
+
+
+			List<Flower> sorted_flowers=store.getFlowersList();
+			if(parts[5].trim().equals("1"))
+			{
+				store = Stores.get(0);
+				sorted_flowers=store.getFlowersList();
+				sorted_flowers = getFlowersOrdered("desc",sorted_flowers);
+				try {
+					catalog_sort_event event = new catalog_sort_event(sorted_flowers,1,original_flowers);
+					client.sendToClient(event);
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+				return;
+
+			}
+			if(parts[5].trim().equals("2"))
+			{
+				store = Stores.get(1);
+				sorted_flowers=store.getFlowersList();
+				sorted_flowers = getFlowersOrdered("desc",sorted_flowers);
+				try {
+					catalog_sort_event event = new catalog_sort_event(sorted_flowers,2,original_flowers);
+					client.sendToClient(event);
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+				return;
+			}
+			if(parts[5].trim().equals("3"))
+			{
+				store = Stores.get(2);
+				sorted_flowers=store.getFlowersList();
+				sorted_flowers = getFlowersOrdered("desc",sorted_flowers);
+				try {
+					catalog_sort_event event = new catalog_sort_event(sorted_flowers,3,original_flowers);
+					client.sendToClient(event);
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+				return;
+			}
+		}
 	}
+
 	public void sendToAllClients(String message) {
 		try {
 			for (SubscribedClient subscribedClient : SubscribersList) {
@@ -365,7 +777,17 @@ public class SimpleServer extends AbstractServer {
 			e1.printStackTrace();
 		}
 	}
-	private List<Flower> getFlowersOrdered(String direction) {
+
+	private List<Flower> getFlowersOrdered(String direction, List<Flower> flowers) {
+		List<Flower> result = new ArrayList<>(flowers);
+		if (direction.equals("desc")) {
+			result.sort((f1, f2) -> Double.compare(f2.getFlowerPrice(), f1.getFlowerPrice()));
+		} else {
+			result.sort((f1, f2) -> Double.compare(f1.getFlowerPrice(), f2.getFlowerPrice()));
+		}
+		return result;
+	}
+	private List<Flower> getSortedFlowersFromDatabase(String direction) {
 		List<Flower> result = new ArrayList<>();
 		try {
 			Session session = App.getSessionFactory().openSession();

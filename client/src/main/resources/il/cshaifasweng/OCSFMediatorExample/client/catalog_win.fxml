@@ -120,7 +120,7 @@
                         </VBox>
                      </graphic>
                   </Button>
-                  <Button fx:id="three_3"  mnemonicParsing="false" prefWidth="74.0">
+                  <Button fx:id="three_3" mnemonicParsing="false" prefWidth="74.0">
                      <graphic>
                         <VBox fx:id="flower_3" prefHeight="202.0" prefWidth="162.0">
                            <children>
@@ -430,6 +430,7 @@
                   </Button>
                </children>
             </HBox>
+            <ComboBox fx:id="Stores" layoutX="319.0" layoutY="83.0" onAction="#stores_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
          </children>
       </AnchorPane>
    </content>

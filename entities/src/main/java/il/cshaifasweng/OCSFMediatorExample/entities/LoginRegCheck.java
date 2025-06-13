@@ -25,7 +25,11 @@ public class LoginRegCheck implements Serializable {
     private String email;
 
     private int isLogin; // 1 = login, 0 = registration
-    private boolean type; // false = client, true = employee
+    private boolean type;// false = client, true = employee
+    private int store;// 1 for store number 1 ,until 3 ,
+    // if the value is 4 is for all the stores -workes must be between 1-2-3
+    // worker with value 4 is the מנהל רשת
+
 
     public LoginRegCheck() {}
 
@@ -37,13 +41,15 @@ public class LoginRegCheck implements Serializable {
         this.type = false;
     }
 
-    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type) {
+    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.isLogin = isLogin;
         this.type = type;
+        this.store = store;
     }
+    public Integer getStore() {return store;}
 
     // Getters (optionally add setters)
     public String getUsername() { return username; }

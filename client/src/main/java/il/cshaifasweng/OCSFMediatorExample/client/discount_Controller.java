@@ -1,5 +1,5 @@
-package il.cshaifasweng.OCSFMediatorExample.client;
 
+package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
@@ -14,17 +14,20 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
-public class discount_Controller
-{
+public class discount_Controller {
     private CatalogController_employee catalogController;
     public void setCatalogController(CatalogController_employee controller) {
         this.catalogController = controller;
     }
+
     @FXML
     private Button discount_to_ALL;
 
     @FXML
     private Button discount_to_specip_flower;
+
+    @FXML
+    private TextField flower_name;
 
     @FXML
     private Label name_labl;
@@ -42,13 +45,16 @@ public class discount_Controller
     private Label name_labl21;
 
     @FXML
-    private TextField flower_name;
+    private TextField new_price_box;
 
     @FXML
     private TextField percent_for_all;
 
     @FXML
     private TextField percent_for_one;
+
+    @FXML
+    private Button specip_price;
     private List<Flower> flowersList_c;
     public void setFlowersList_c(List<Flower> arr) {
         flowersList_c = arr;
@@ -80,7 +86,29 @@ public class discount_Controller
         catalogController.receivediscount(percent_discount,null);
         ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
 
+    }
 
+    @FXML
+    void new_price(ActionEvent event) {
+        String text = new_price_box.getText().trim();
+        if (text.isEmpty()) {
+            Warning warning = new Warning("Please fill in the price field");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+
+        try {
+            double price = Double.parseDouble(text);
+            if (price <= 0) {
+                Warning warning = new Warning("Price must be a positive number");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+            System.out.println("Valid price: " + price);
+        } catch (NumberFormatException e) {
+            Warning warning = new Warning("Price must be a valid number");
+            EventBus.getDefault().post(new WarningEvent(warning));
+        }
     }
 
     @FXML
@@ -129,10 +157,9 @@ public class discount_Controller
         ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
 
 
-
-
     }
     private boolean isTextFieldEmpty(TextField tf) {
         return tf.getText() == null || tf.getText().trim().isEmpty();
     }
+
 }

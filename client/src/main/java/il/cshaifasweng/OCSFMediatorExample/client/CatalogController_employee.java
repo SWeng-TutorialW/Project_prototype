@@ -41,6 +41,8 @@ public class CatalogController_employee {
 
     @FXML
     private ComboBox<String> combo;
+    @FXML
+    private ComboBox<String> Stores;
 
     @FXML
     private Button contact;
@@ -321,24 +323,48 @@ public class CatalogController_employee {
     private TextField[] priceFields;
     private ImageView[] imageViews;
     private Text[] price_Before_sale;
-
-
-
-
-    public void setCatalogData(List<Flower> flowerList) {
+    private int type=0 ; //, 1 for store 1 ,2 for store 2 ,3 for store 3 ,
+    // 4 for the network
+    private int sorting_type=-1 ; //, 1 for store 1 ,2 for store 2 ,3 for store 3 ,
+    // 4 for the network ,-1 mean not sorted anything
+    private List<Flower> flowersList_sorting;
+    public void  set_type(int value)
+    {
+        type=value;
+    }
+    public void  set_sorting_type(int value)
+    {
+        sorting_type=value;
+    }
+    public  void setFlowersList_c(List<Flower> flowerList)
+    {
         flowersList_c = flowerList;
-
-        System.out.println("Received flowers: " + flowerList.size());
-        for (Flower f : flowerList) {
+    }
+    public void setCatalogSorting(List<Flower> flowerList) {
+        flowersList_sorting = flowerList;
+        if(sorting_type==0||sorting_type==4)
+        {
+            Stores.setValue("network");
+        }
+        if(sorting_type==1)
+        {
+            Stores.setValue("Haifa");
+        }
+        if(sorting_type==2)
+        {
+            Stores.setValue("Krayot");
+        }
+        if(sorting_type==3)
+        {
+            Stores.setValue("Nahariyya");
+        }
+        System.out.println("this client is see the  store: " + sorting_type);
+        System.out.println("Received flowers: " + flowersList_sorting.size());
+        for (Flower f : flowersList_sorting) {
             System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
         }
-
-        flowersList_c = flowerList;
-
-
-
-        for (int i = 0; i < flowerList.size() && i < 12; i++) {
-            Flower f = flowerList.get(i);
+        for (int i = 0; i < flowersList_sorting.size() && i < 12; i++) {
+            Flower f = flowersList_sorting.get(i);
             nameLabels[i].setText(f.getFlowerName());
             if (f.isSale())
             {
@@ -348,22 +374,85 @@ public class CatalogController_employee {
                 double originalPrice = f.getFlowerPrice() * 100.0 / remainingPercent;
                 String originalPriceStr = String.format("%.2f", originalPrice);
                 price_Before_sale[i].setText(originalPriceStr);
-
-
-
             }
             priceFields[i].setText(String.format("%.2f", f.getFlowerPrice()));
             typeLabels[i].setText(f.getFlowerType());
             setImage(imageViews[i], f.getFlowerType());
-
-
-
-
             if (i == 8) nine_9.setVisible(true);
             if (i == 9) ten_10.setVisible(true);
             if (i == 10) eleven_11.setVisible(true);
             if (i == 11) twelve_12.setVisible(true);
         }
+    }
+
+    public void setCatalogData(List<Flower> flowerList) {
+        if(type==0||type==4)
+        {
+            flowersList_c = flowerList;
+            Stores.setValue("network");
+        }
+        if(type==1)
+        {
+            Stores.setValue("Haifa");
+        }
+        if(type==2)
+        {
+            Stores.setValue("Krayot");
+        }
+        if(type==3)
+        {
+            Stores.setValue("Nahariyya");
+        }
+        System.out.println("this client is for store: " + type);
+        System.out.println("Received flowers: " + flowersList_c.size());
+        for (Flower f : flowersList_c) {
+            System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
+        }
+        for (int i = 0; i < flowersList_c.size() && i < 12; i++) {
+            Flower f = flowersList_c.get(i);
+            nameLabels[i].setText(f.getFlowerName());
+            if (f.isSale())
+            {
+                price_Before_sale[i].setVisible(true);
+                int discount_percent = f.getDiscount();
+                double remainingPercent = 100.0 -discount_percent;
+                double originalPrice = f.getFlowerPrice() * 100.0 / remainingPercent;
+                String originalPriceStr = String.format("%.2f", originalPrice);
+                price_Before_sale[i].setText(originalPriceStr);
+            }
+            priceFields[i].setText(String.format("%.2f", f.getFlowerPrice()));
+            typeLabels[i].setText(f.getFlowerType());
+            setImage(imageViews[i], f.getFlowerType());
+            if (i == 8) nine_9.setVisible(true);
+            if (i == 9) ten_10.setVisible(true);
+            if (i == 10) eleven_11.setVisible(true);
+            if (i == 11) twelve_12.setVisible(true);
+        }
+    }
+    @FXML
+    void stores_choose(ActionEvent event) throws IOException
+    {
+        System.out.println("enter stores");
+        String selected = Stores.getValue();
+        String message = "";
+        if (selected.equals("Haifa")) {
+            message = "Haifa";
+        } else if (selected.equals("Krayot")) {
+            message = "Krayot";
+
+        }
+        else if (selected.equals("Nahariyya")) {
+            message = "Nahariyya";
+        }
+        else if (selected.equals("network")) {
+            message = "network";
+        }
+
+        message = message + "_" + type;
+        System.out.println("message: " + message);
+        SimpleClient.getClient().sendToServer(message);
+
+
     }
 
     private void setImage(ImageView imageView, String flowerName) {
@@ -385,6 +474,7 @@ public class CatalogController_employee {
         System.out.println("CatalogController employee initialized");
         combo.getItems().addAll("Price High to LOW", "Price Low to HIGH");
         combo.setValue("Sort");
+        Stores.getItems().addAll("Haifa", "Krayot","Nahariyya","network");
         combo.setButtonCell(new ListCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -415,51 +505,39 @@ public class CatalogController_employee {
 
     }
 
-
-    @FXML
-    public void commitPrice(ActionEvent event) throws IOException {
-        int flower_to_update = 0;
-        TextField source = (TextField) event.getSource();
-        List<TextField> priceFields = List.of(
-                price_1, price_2, price_3, price_4, price_5, price_6,
-                price_7, price_8, price_9, price_10, price_11, price_12
-        );
-
-        for (int i = 0; i < priceFields.size(); i++) {
-            if (source == priceFields.get(i)) {
-                flower_to_update = i;
-                break;
-            }
-        }
-
-        Flower flower = flowersList_c.get(flower_to_update);
-        String name= flower.getFlowerName();
-        String new_price = source.getText();
-        double value = Double.parseDouble(new_price);
-        try {
-            SimpleClient.getClient().sendToServer("number#flower#to#update#_" + name + "_" + value); // try to send the flower to the DB
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        SimpleClient.getClient().sendToServer("update_catalog_after_change");
-    }
-
     @FXML
     public void combo_choose(ActionEvent actionEvent) throws IOException {
         sort_image.setVisible(false);
         String selected = combo.getValue();
+        String selected_store = Stores.getValue();
+        int localtype=1;
 
         if (selected == null) {
             return;
         }
+        if(selected_store.equals("Haifa"))
+        {
+            localtype=1;
+        }
+        if(selected_store.equals("Krayot"))
+        {
+            localtype=2;
+        }
+        if(selected_store.equals("Nahariyya"))
+        {
+            localtype=3;
+        }
+        System.out.println("localtype = " + localtype);
+        String localtypeStr = String.valueOf(localtype);
+
 
         String message = "";
         if (selected.equals("Price High to LOW")) {
-            message = "get_flowers_high_to_low";
+            message = "get_flowers_high_to_low_"+localtypeStr;
         } else if (selected.equals("Price Low to HIGH")) {
-            message = "get_flowers_low_to_high";
+            message = "get_flowers_low_to_high_"+localtypeStr;
         }
-
+        System.out.println("message = " + message);
         SimpleClient.getClient().sendToServer(message);
     }
     @FXML
@@ -525,23 +603,38 @@ public class CatalogController_employee {
     @FXML
     void discount(ActionEvent event)
     {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("discount_scene.fxml"));
-            Parent root = fxmlLoader.load();
-            discount_Controller controller = fxmlLoader.getController();
-            controller.setCatalogController(this);
-            controller.setFlowersList_c(flowersList_c);
+        if(sorting_type==-1)
+        {
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("discount_scene.fxml"));
+                Parent root = fxmlLoader.load();
+                discount_Controller controller = fxmlLoader.getController();
+                controller.setCatalogController(this);
+                controller.setFlowersList_c(flowersList_c);
 
-            Stage stage = new Stage();
-            stage.setTitle("Set discount");
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(((Node) event.getSource()).getScene().getWindow());
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
+                Stage stage = new Stage();
+                stage.setTitle("Set discount");
+                stage.setScene(new Scene(root));
+                stage.setResizable(false);
+                stage.initModality(Modality.WINDOW_MODAL);
+                stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        if(sorting_type==4)
+        {
+
+        }
+        else
+        {
+            Warning warning = new Warning("You dont have access to change or set discount for this store");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            setCatalogData(flowersList_c);
+        }
+
+
 
     }
     public void receivediscount(int discount,Flower flower) {
@@ -555,7 +648,6 @@ public class CatalogController_employee {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
 
 
         }
@@ -605,12 +697,6 @@ public class CatalogController_employee {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    void delete(Flower flower)
-    {
-
-
     }
 
 

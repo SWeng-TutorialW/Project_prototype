@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
+import il.cshaifasweng.OCSFMediatorExample.entities.catalog_sort_event;
 import org.greenrobot.eventbus.EventBus;
 
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
@@ -26,6 +27,9 @@ public class SimpleClient extends AbstractClient {
 		}
 
 		else if(msg.getClass().equals(CatalogUpdateEvent.class)){
+			EventBus.getDefault().post(msg); // post the catalog update to UI
+		}
+		else if(msg.getClass().equals(catalog_sort_event.class)){
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
 
