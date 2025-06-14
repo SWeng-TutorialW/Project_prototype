@@ -17,6 +17,9 @@ public class SimpleClient extends AbstractClient {
 	private SimpleClient(String host, int port) {
 		super(host, port);
 	}
+	public static int selectedAccType = -1;
+
+
 
 	@Override
 	protected void handleMessageFromServer(Object msg) {
@@ -39,12 +42,11 @@ public class SimpleClient extends AbstractClient {
 			}
 
 		}
-		else if(msgString.startsWith("#user_exists") || msgString.startsWith("#login_failed") || msgString.startsWith("#login/reg_ok")){
+		else if(msgString.startsWith("#user_exists") || msgString.startsWith("#login_failed")
+				|| msgString.startsWith("#login/reg_ok")  || msgString.startsWith("#reg_ok") ){
 			EventBus.getDefault().post((String)msg);
 			System.out.println("I GOT THE MESSAGE");
 		}
-
-
 	}
 
 	public static SimpleClient getClient() {
@@ -56,5 +58,10 @@ public class SimpleClient extends AbstractClient {
 		return client;
 	}
 
-
+	public static void setSelectedAccType(int type) {
+		selectedAccType = type;
+	}
+	public static int getSelectedAccType() {
+		return selectedAccType;
+	}
 }

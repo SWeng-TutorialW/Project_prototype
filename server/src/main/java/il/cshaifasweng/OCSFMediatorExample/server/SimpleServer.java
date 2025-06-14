@@ -240,6 +240,7 @@ public class SimpleServer extends AbstractServer {
 
 			String username = ((LoginRegCheck) msg).getUsername();
 			String password = ((LoginRegCheck) msg).getPassword();
+			int accType = ((LoginRegCheck) msg).getAccType();
 
 			System.out.println("Username: " + username);
 			System.out.println("Password: " + password);
@@ -296,24 +297,23 @@ public class SimpleServer extends AbstractServer {
 							System.out.println("User already exists: " + username);
 							return;
 						}
-
 						checkSession.getTransaction().commit();
 					} catch (Exception e) {
 						e.printStackTrace();
 						return;
 					}
-
 					try (Session insertSession = App.getSessionFactory().openSession()) {
 						insertSession.beginTransaction();
-
-						//LoginRegCheck newUser = new LoginRegCheck(username, password, email, 0);
-					//	insertSession.save(newUser);
-
 						insertSession.save(msg); // INSERT INTO
-
 						insertSession.getTransaction().commit();
-						client.sendToClient("#login/reg_ok");
+
+						client.sendToClient("#reg_ok");
 						System.out.println("User registered successfully: " + username);
+
+						if (accType == 2) {
+							System.out.println("Registered subscriber with ID=" + ((LoginRegCheck) msg).getIdNum() +
+									", CreditCard=" + ((LoginRegCheck) msg).getCreditCard());
+						}
 
 					} catch (Exception e) {
 						System.out.println("User register/login ERR");

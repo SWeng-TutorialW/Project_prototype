@@ -9,55 +9,76 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="loginWin" prefHeight="501.0" prefWidth="425.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RegistrationController">
+<AnchorPane fx:id="registerWin" prefHeight="550.0" prefWidth="450.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RegistrationController">
+
    <children>
-      <AnchorPane fx:id="regAnchPane" layoutX="39.0" layoutY="35.0" prefHeight="419.0" prefWidth="347.0" style="-fx-background-color: #c8a2c8; -fx-background-radius: 15;">
+      <AnchorPane fx:id="regAnchPane" layoutX="40.0" layoutY="25.0" prefHeight="510.0" prefWidth="370.0" style="-fx-background-color: #c8a2c8; -fx-background-radius: 15;">
          <children>
-            <Label fx:id="regLbl" layoutX="109.0" layoutY="20.0" text="Registration">
+            <Label fx:id="regLbl" layoutX="125.0" layoutY="20.0" text="Registration">
                <font>
                   <Font name="Dubai Medium" size="20.0" />
                </font>
             </Label>
 
-            <Label fx:id="selectAccLbl" layoutX="60.0" layoutY="70.0" text="Select an account">
-               <font><Font name="Dubai Medium" size="12.0" /></font>
+            <!-- Select Store -->
+            <Label fx:id="selectStoreLbl" layoutX="40.0" layoutY="70.0" text="Select store">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font>
             </Label>
-            <ChoiceBox fx:id="select_accountCB" layoutX="60.0" layoutY="90.0" prefWidth="220.0" />
+            <ChoiceBox fx:id="selectStoreCB" layoutX="40.0" layoutY="90.0" prefWidth="290.0" />
 
-            <Label fx:id="regUserLbl" layoutX="60.0" layoutY="125.0" text="Username">
-               <font><Font name="Dubai Medium" size="12.0" /></font>
+            <!-- Username -->
+            <Label fx:id="regUserLbl" layoutX="40.0" layoutY="130.0" text="Username">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font>
             </Label>
-            <TextField fx:id="regUserTxtB" layoutX="60.0" layoutY="145.0" prefWidth="220.0" />
+            <TextField fx:id="regUserTxtB" layoutX="40.0" layoutY="150.0" prefWidth="290.0" />
 
-            <Label fx:id="regEmailLbl" layoutX="60.0" layoutY="180.0" text="Email">
-               <font><Font name="Dubai Medium" size="12.0" /></font>
+            <!-- Email -->
+            <Label fx:id="regEmailLbl" layoutX="40.0" layoutY="190.0" text="Email">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font>
             </Label>
-            <TextField fx:id="regEmailTxtB" layoutX="60.0" layoutY="200.0" prefWidth="220.0" />
+            <TextField fx:id="regEmailTxtB" layoutX="40.0" layoutY="210.0" prefWidth="290.0" />
 
-            <Label fx:id="regPassLbl" layoutX="60.0" layoutY="235.0" text="Password">
-               <font><Font name="Dubai Medium" size="12.0" /></font>
+            <!-- Password -->
+            <Label fx:id="regPassLbl" layoutX="40.0" layoutY="250.0" text="Password">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font>
             </Label>
-            <PasswordField fx:id="regPassTxtB" layoutX="60.0" layoutY="255.0" prefWidth="220.0" />
-            <TextField fx:id="regPassVisibleTxtB" layoutX="60.0" layoutY="255.0" prefWidth="220.0" visible="false" />
+            <PasswordField fx:id="regPassTxtB" layoutX="40.0" layoutY="270.0" prefWidth="290.0" />
+            <TextField fx:id="regPassVisibleTxtB" layoutX="40.0" layoutY="270.0" prefWidth="290.0" visible="false" />
 
-            <Label fx:id="regPassConfLbl" layoutX="60.0" layoutY="290.0" text="Confirm Password">
-               <font><Font name="Dubai Medium" size="12.0" /></font>
+            <!-- Confirm Password -->
+            <Label fx:id="regPassConfLbl" layoutX="40.0" layoutY="310.0" text="Confirm Password">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font>
             </Label>
-            <PasswordField fx:id="regPassConfTxtB" layoutX="60.0" layoutY="310.0" prefWidth="220.0" />
-            <TextField fx:id="regPassConfVisibleTxtB" layoutX="60.0" layoutY="310.0" prefWidth="220.0" visible="false" />
+            <PasswordField fx:id="regPassConfTxtB" layoutX="40.0" layoutY="330.0" prefWidth="290.0" />
+            <TextField fx:id="regPassConfVisibleTxtB" layoutX="40.0" layoutY="330.0" prefWidth="290.0" visible="false" />
 
-            <CheckBox fx:id="regShowPassCB" layoutX="60.0" layoutY="345.0" onAction="#togglePass" text="Show Password">
-               <font><Font name="Dubai Medium" size="12.0" /></font>
+            <!-- Show Password -->
+            <CheckBox fx:id="regShowPassCB" layoutX="120.0" layoutY="370.0" onAction="#togglePass" text="Show Password">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font>
             </CheckBox>
-            <CheckBox fx:id="subscribeCB" layoutX="180.0" layoutY="345.0" onAction="#subscribeAcc" text="Subscribe">
-               <font><Font name="Dubai Medium" size="12.0" /></font>
-            </CheckBox>
 
-            <Label fx:id="regErrMsgLbl" layoutX="60.0" layoutY="375.0" prefWidth="220.0" text="____" textAlignment="CENTER" visible="false" />
+            <!-- Error Label -->
+            <Label fx:id="regErrMsgLbl" layoutX="40.0" layoutY="400.0" prefWidth="290.0" style="-fx-text-fill: red;" text="____" textAlignment="JUSTIFY" visible="false" />
 
-            <Button fx:id="regBtn" layoutX="116.0" layoutY="400.0" onMouseClicked="#RegToSys" prefWidth="115.0" text="Register">
-               <font><Font name="Dubai Medium" size="12.0" /></font>
+            <!-- Register Button -->
+            <Button fx:id="regBtn" layoutX="130.0" layoutY="430.0" onMouseClicked="#RegToSys" prefWidth="110.0" text="Register">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font>
             </Button>
+
          </children>
       </AnchorPane>
    </children>
