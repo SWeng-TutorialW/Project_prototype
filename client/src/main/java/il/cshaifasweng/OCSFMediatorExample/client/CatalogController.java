@@ -447,10 +447,10 @@ public class CatalogController {
         if (SimpleClient.isGuest) {       //guest mode
             Platform.runLater(() -> {
                 try {
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("select_account_type.fxml"));
                     Parent root = fxmlLoader.load();
                     Stage stage = new Stage();
-                    stage.setTitle("Registration");
+                    stage.setTitle("Create New Account");
                     stage.setScene(new Scene(root));
                     stage.show();
                 } catch (IOException e) {

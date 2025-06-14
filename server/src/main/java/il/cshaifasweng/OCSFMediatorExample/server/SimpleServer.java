@@ -412,100 +412,91 @@ public class SimpleServer extends AbstractServer {
 			sendToAllClients("The network manager has added a flower.");
 		}
 		else if (msg.getClass().equals(LoginRegCheck.class)) {
+			System.out.println("entered LoginRegCheck");
 			int isLogin = ((LoginRegCheck) msg).getIsLogin();
 			// check for user is already exists :
 
 			String username = ((LoginRegCheck) msg).getUsername();
 			String password = ((LoginRegCheck) msg).getPassword();
+			LoginRegCheck new_user = (LoginRegCheck) msg;
 
 			System.out.println("Username: " + username);
 			System.out.println("Password: " + password);
 
 			switch (isLogin) {
-                case 1: // login
+				case 1: // login
 
-                    Session session = App.getSessionFactory().openSession();
-                    session.beginTransaction();
+					Session session = App.getSessionFactory().openSession();
+					session.beginTransaction();
 
-                    List<LoginRegCheck> resultLogin = session.createQuery(
-                                    "FROM LoginRegCheck lrc WHERE lrc.username = :username AND lrc.password = :password",
-                                    LoginRegCheck.class
-                            )
-                            .setParameter("username", username)
-                            .setParameter("password", password)
-                            .getResultList();
-                    session.getTransaction().commit();
+					List<LoginRegCheck> resultLogin = session.createQuery(
+									"FROM LoginRegCheck lrc WHERE lrc.username = :username AND lrc.password = :password",
+									LoginRegCheck.class
+							)
+							.setParameter("username", username)
+							.setParameter("password", password)
+							.getResultList();
+					session.getTransaction().commit();
 
-                    if (resultLogin.isEmpty()) {
-                        // user doesn't exist or password is wrong
-                        try {
-                            System.out.println("Login failed for user: " + username);
-                            client.sendToClient("#login_failed");
-                            session.close();
-                        } catch (IOException e) {
-                            System.out.println("User login failed ERR");
-                            e.printStackTrace();
-                        }
-                        return;
-                    }
-                    try {
-                        System.out.println("User Logged-in successfully: " + username);
-                        session.close();
-                        client.sendToClient("#login/reg_ok");
-
-                    } catch (IOException e) {
-                        System.out.println("User login ok ERR");
-                        e.printStackTrace();
-                    }
-                    break;
-                case 0: // registration
-                    System.out.println("WE ARE IN REG");
-                    Session session2 = null;
-                    try {
-                        // begin checking if this user already exists
-                        session2 = App.getSessionFactory().openSession();
-                        session2.beginTransaction();
-                        List<LoginRegCheck> result = session2.createQuery("FROM LoginRegCheck lrc WHERE lrc.username = :username", LoginRegCheck.class)
-                                .setParameter("username", username)
-                                .getResultList();
-                        session2.getTransaction().commit();
-
-                        if (!result.isEmpty()) {
-                            // user already exists
-                            client.sendToClient("#user_exists");
-                            System.out.println("User already exists: " + username);
-                            session2.close();
-                            return;
-                        }
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } finally {
-                        session2.close();
-                    }
-
-					Session insertSession=App.getSessionFactory().openSession();
+					if (resultLogin.isEmpty()) {
+						// user doesn't exist or password is wrong
+						try {
+							System.out.println("Login failed for user: " + username);
+							client.sendToClient("#login_failed");
+							session.close();
+						} catch (IOException e) {
+							System.out.println("User login failed ERR");
+							e.printStackTrace();
+						}
+						return;
+					}
 					try {
-                        // after user doesn't exist, we can insert into DB
-                        insertSession = App.getSessionFactory().openSession();
-                        insertSession.beginTransaction();
-                        insertSession.save(msg); // This is the INSERT INTO statement
-                        insertSession.getTransaction().commit();
-                        insertSession.close();
+						System.out.println("User Logged-in successfully: " + username);
+						session.close();
+						client.sendToClient("#login/reg_ok");
 
-                        client.sendToClient("#login/reg_ok");
-                        System.out.println("User registered successfully: " + username);
-                    } catch (IOException e) {
-                        System.out.println("User register/login ERR");
-                        insertSession.getTransaction().rollback();
-                        e.printStackTrace();
-                    } finally {
-                        insertSession.close();
-                    }
-                    break;
-            }
+					} catch (IOException e) {
+						System.out.println("User login ok ERR");
+						e.printStackTrace();
+					}
+					break;
+				case 0: // registration
+					boolean userExists = false;
 
-		}
+					try {
+						session = App.getSessionFactory().openSession();
+						session.beginTransaction();
+
+						CriteriaBuilder builder = session.getCriteriaBuilder();
+						CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
+						Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
+
+						query.select(root).where(builder.equal(root.get("username"), new_user.getUsername()));
+						List<LoginRegCheck> resultList = session.createQuery(query).getResultList();
+
+						userExists = !resultList.isEmpty();
+
+						if (userExists) {
+							System.out.println("Username already exists: " + new_user.getUsername());
+							client.sendToClient("#user_exists");
+
+							// אפשר גם להחזיר הודעה לממשק המשתמש
+						} else {
+							session.save(new_user);
+							System.out.println("New user registered: " + new_user.getUsername());
+						}
+
+						session.getTransaction().commit();
+						session.close();
+					} catch (Exception e) {
+						System.out.println("User register/login ERR");
+						e.printStackTrace();
+					}
+			}
+
+
+
+			}
 		else if (msg instanceof Order)
 		{
 			Order order = (Order) msg;

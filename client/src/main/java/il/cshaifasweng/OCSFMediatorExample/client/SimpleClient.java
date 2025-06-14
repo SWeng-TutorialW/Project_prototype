@@ -12,6 +12,7 @@ public class SimpleClient extends AbstractClient {
 	public static String ip = "localhost";
 	public static boolean loggedIn = false; // to check if the user is logged in or not
 	public static boolean isGuest = false;
+	public static int selectedAccType = -1;
 	private SimpleClient(String host, int port) {
 		super(host, port);
 	}
@@ -69,6 +70,12 @@ public class SimpleClient extends AbstractClient {
 			client = new SimpleClient(ip, port);
 		}
 		return client;
+	}
+	public static void setSelectedAccType(int type) {
+		selectedAccType = type;
+	}
+	public static int getSelectedAccType() {
+		return selectedAccType;
 	}
 
 
