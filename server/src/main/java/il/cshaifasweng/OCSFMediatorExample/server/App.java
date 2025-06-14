@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -83,9 +84,9 @@ public class App
         Flower flower_8 = new Flower("Blue Whisper", 5.49, "Hyacinth");
         session.save(flower_8);
         session.flush();
-        List<Flower> haifaFlowers = Arrays.asList(flower_1, flower_2, flower_3, flower_4, flower_5, flower_6, flower_7);
-        List<Flower> krayotFlowers = Arrays.asList(flower_1, flower_2, flower_3, flower_4, flower_5, flower_6, flower_7, flower_8);
-        List<Flower>nahariyyaFlowers = Arrays.asList(flower_1, flower_2, flower_3, flower_4, flower_5, flower_6);
+        List<Flower> haifaFlowers = new ArrayList<>(Arrays.asList(flower_1, flower_2, flower_3, flower_4, flower_5, flower_6, flower_7));
+        List<Flower> krayotFlowers = new ArrayList<>(Arrays.asList(flower_1, flower_2, flower_3, flower_4, flower_5, flower_6, flower_7, flower_8));
+        List<Flower>nahariyyaFlowers = new ArrayList<>(Arrays.asList(flower_1, flower_2, flower_3, flower_4, flower_5, flower_6));
         Store lilach_Haifa = new Store("lilach_Haifa", "Abba khoushy", haifaFlowers);
         Store lilach_Krayot = new Store("lilach_Krayot", "Hasolel Bonneh", krayotFlowers);
         Store lilach_Nahariyya = new Store("lilach_Nahariyya", "Herzl", nahariyyaFlowers);;
@@ -116,9 +117,13 @@ public class App
         session.save(Asaf);
         session.flush();
         // Asaf and Dor  are workes of Haifa
-        LoginRegCheck tamar = new  LoginRegCheck("tamar","123","Asaf@",0,false,2);
+        LoginRegCheck tamar = new  LoginRegCheck("tamar","123","Asaf@",0,false,4);
         session.save(tamar);
         session.flush();
+        LoginRegCheck malci = new  LoginRegCheck("malci","123","Asaf@",0,true,4);
+        session.save( malci);
+        session.flush();
+
         stores = Arrays.asList(lilach_Haifa, lilach_Krayot, lilach_Nahariyya);
 
 

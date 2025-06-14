@@ -434,7 +434,7 @@ public class CatalogController {
     public void receiveNewComplain(Complain complain)
     {
         try {
-            SimpleClient.getClient().sendToServer(complain); // try to send the flower to the DB
+            SimpleClient.getClient().sendToServer(complain); // try to send the complain to the DB
         } catch (IOException e) {
             e.printStackTrace();
         }

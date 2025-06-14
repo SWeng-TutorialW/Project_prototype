@@ -15,7 +15,7 @@
 
 <ScrollPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="850.0" prefWidth="798.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogController_employee">
     <content>
-        <AnchorPane  prefHeight="846.0" prefWidth="788.0">
+        <AnchorPane prefHeight="846.0" prefWidth="788.0">
             <children>
                 <Label fx:id="copyrightLBl" alignment="CENTER" layoutX="232.0" layoutY="818.0" prefHeight="28.0" prefWidth="253.0" text="LilachSystem v0.1 © 2025 BestGroup. All rights reserved.">
                     <font>
@@ -47,7 +47,7 @@
                         <Image url="@../../../../images/cart.png" />
                     </image>
                 </ImageView>
-                <Button fx:id="contact" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="647.0" layoutY="-1.0" mnemonicParsing="false" onAction="#open_complain_box" prefHeight="41.0" prefWidth="142.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Complain Box" textFill="#fdfdfd">
+                <Button fx:id="contact" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="647.0" layoutY="-1.0" mnemonicParsing="false" onAction="#open_complain_box" prefHeight="41.0" prefWidth="142.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Mail Box" textFill="#fdfdfd">
                     <font>
                         <Font size="13.0" />
                     </font>
@@ -131,7 +131,7 @@
                                     <Font size="18.0" />
                                  </font>
                               </Text>
-                                        <TextField fx:id="price_3" alignment="TOP_CENTER"  style="-fx-text-fill: #c8a2c8;">
+                                        <TextField fx:id="price_3" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -160,7 +160,7 @@
                                     <Font size="18.0" />
                                  </font>
                               </Text>
-                                        <TextField fx:id="price_4" alignment="TOP_CENTER"  style="-fx-text-fill: #c8a2c8;">
+                                        <TextField fx:id="price_4" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -193,7 +193,7 @@
                                     <Font size="18.0" />
                                  </font>
                               </Text>
-                                        <TextField fx:id="price_5" alignment="TOP_CENTER"  style="-fx-text-fill: #c8a2c8;">
+                                        <TextField fx:id="price_5" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -222,7 +222,7 @@
                                     <Font size="18.0" />
                                  </font>
                               </Text>
-                                        <TextField fx:id="price_6" alignment="TOP_CENTER"  style="-fx-text-fill: #c8a2c8;">
+                                        <TextField fx:id="price_6" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -251,7 +251,7 @@
                                     <Font size="18.0" />
                                  </font>
                               </Text>
-                                        <TextField fx:id="price_7" alignment="TOP_CENTER"  style="-fx-text-fill: #c8a2c8;">
+                                        <TextField fx:id="price_7" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -280,7 +280,7 @@
                                     <Font size="18.0" />
                                  </font>
                               </Text>
-                                        <TextField fx:id="price_8" alignment="TOP_CENTER"  style="-fx-text-fill: #c8a2c8;">
+                                        <TextField fx:id="price_8" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -323,7 +323,7 @@
                                     <Font size="18.0" />
                                  </font>
                               </Text>
-                                        <TextField fx:id="price_9" alignment="TOP_CENTER"  style="-fx-text-fill: #c8a2c8;">
+                                        <TextField fx:id="price_9" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -352,7 +352,7 @@
                                     <Font size="18.0" />
                                  </font>
                               </Text>
-                              <TextField fx:id="price_10" alignment="TOP_CENTER"  style="-fx-text-fill: #c8a2c8;">
+                              <TextField fx:id="price_10" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -381,7 +381,7 @@
                                     <Font size="18.0" />
                                  </font>
                               </Text>
-                              <TextField fx:id="price_11" alignment="TOP_CENTER"  style="-fx-text-fill: #c8a2c8;">
+                              <TextField fx:id="price_11" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -410,7 +410,7 @@
                                     <Font size="18.0" />
                                  </font>
                               </Text>
-                              <TextField fx:id="price_12" alignment="TOP_CENTER"  style="-fx-text-fill: #c8a2c8;">
+                              <TextField fx:id="price_12" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                  <font>
                                     <Font size="18.0" />
                                  </font>
@@ -421,17 +421,17 @@
                   </Button>
                     </children>
                 </HBox>
-            <Button fx:id="add_flower" layoutX="619.0" layoutY="76.0" mnemonicParsing="false" onAction="#add_flower" prefHeight="25.0" prefWidth="116.0" style="-fx-background-color: #C8A2C8;" text="Add Flower" textFill="#fdfdfd">
+            <Button fx:id="add_flower" layoutX="660.0" layoutY="76.0" mnemonicParsing="false" onAction="#add_flower" prefHeight="25.0" prefWidth="116.0" style="-fx-background-color: #C8A2C8;" text="Add Flower" textFill="#fdfdfd">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <Button fx:id="discount" layoutX="447.0" layoutY="76.0" mnemonicParsing="false" onAction="#discount" prefHeight="39.0" prefWidth="129.0" style="-fx-background-color: #C8A2C8;" text="Set Discount" textFill="#fdfdfd">
+            <Button fx:id="discount" layoutX="391.0" layoutY="76.0" mnemonicParsing="false" onAction="#discount" prefHeight="39.0" prefWidth="129.0" style="-fx-background-color: #C8A2C8;" text="Set Discount" textFill="#fdfdfd">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <ComboBox fx:id="Stores" layoutX="216.0" layoutY="83.0" onAction="#combo_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
+            <ComboBox fx:id="Stores" layoutX="195.0" layoutY="83.0" onAction="#stores_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
             </children>
         </AnchorPane>
     </content>

@@ -38,6 +38,10 @@ public class SimpleServer extends AbstractServer {
 	protected void handleMessageFromClient(Object msg, ConnectionToClient client) {
 		String msgString = msg.toString();
 		System.out.println("Received message from client: " + msg);
+		System.out.println("msg class: " + msg.getClass().getName());
+		System.out.println("is Flower? " + (msg instanceof Flower));
+		System.out.println("asaf");
+		System.out.println("equals Flower.class? " + (msg.getClass().equals(Flower.class)));
 		if (msgString.startsWith("#warning")) {
 			Warning warning = new Warning("Warning from server!");
 			try {
@@ -172,26 +176,53 @@ public class SimpleServer extends AbstractServer {
 			sendToAllClients("update_catalog_after_change");
 
 		}
-		else if (msgString.startsWith("price_changed")) {
+		else if (msgString.startsWith("price_changed"))
+		{
+			List<Store> stores = App.get_stores();
+			Store store = stores.get(0);
+		}
+		else if (msgString.startsWith("update_catalog_after_manager_add_flower"))
+		{
+			Session session = App.getSessionFactory().openSession();
+			session.beginTransaction();
+
+			String hql = "FROM Flower";
+			List<Flower> flowers = session.createQuery(hql, Flower.class).getResultList();
+			session.getTransaction().commit();
+			session.close();
 			try {
-				Session session = App.getSessionFactory().openSession();
-				session.beginTransaction();
-
-				CriteriaBuilder builder = session.getCriteriaBuilder();
-				CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
-				query.from(Flower.class);
-
-				List<Flower> flowerList = session.createQuery(query).getResultList();
-
-				session.getTransaction().commit();
-				session.close();
-
-				CatalogUpdateEvent event = new CatalogUpdateEvent(flowerList);
-				client.sendToClient(event);
-
+			Add_flower_event event = new Add_flower_event(flowers,4);
+			client.sendToClient(event);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			List<Store> stores = App.get_stores();
+			Store store = stores.get(0);
+			flowers=store.getFlowersList();
+			try {
+				Add_flower_event event = new Add_flower_event(flowers,1);
+				client.sendToClient(event);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			 store = stores.get(1);
+			flowers=store.getFlowersList();
+			try {
+				Add_flower_event event = new Add_flower_event(flowers,2);
+				client.sendToClient(event);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			store = stores.get(3);
+			flowers=store.getFlowersList();
+			try {
+				Add_flower_event event = new Add_flower_event(flowers,3);
+				client.sendToClient(event);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+
 		}
 		else if(msg.getClass().equals(Flower.class)) {
 			Flower flower = (Flower) msg;
@@ -207,33 +238,92 @@ public class SimpleServer extends AbstractServer {
 			} finally {
 				session.close();
 			}
-			sendToAllClients("update_catalog_after_change");
+			List<Store> stores = App.get_stores();
+			for (Store store : stores) {
+				store.getFlowersList().add(flower);
+			}
+			System.out.println("server send message to client");
+			sendToAllClients("The network manager has added a flower.");
 
 		}
-		else if(msg.getClass().equals(Integer.class))
-		{
+		else if (msg.getClass().equals(Integer.class)) {
 			int discountPercent = (Integer) msg;
+
 			try {
 				Session session = App.getSessionFactory().openSession();
 				session.beginTransaction();
 
-				String hql = "FROM Flower";
-				List<Flower> flowers = session.createQuery(hql, Flower.class).getResultList();
+				System.out.println("Updating flowers in database with " + discountPercent + "% discount...");
 
-				for (Flower flower : flowers) {
+
+				String hql = "FROM Flower";
+				List<Flower> flowersFromDB = session.createQuery(hql, Flower.class).getResultList();
+
+				for (Flower flower : flowersFromDB) {
 					double originalPrice = flower.getFlowerPrice();
 					double newPrice = originalPrice * (1 - discountPercent / 100.0);
+
+					System.out.println("  [DB] Flower: " + flower.getFlowerName());
+					System.out.println("    [DB] Original Price: " + originalPrice);
+					System.out.println("    [DB] New Price: " + newPrice);
+
 					flower.setFlowerPrice(newPrice);
 					flower.setSale(true);
 					flower.setDiscount(discountPercent);
 					session.update(flower);
 				}
+
 				session.getTransaction().commit();
 				session.close();
+
+
+				for (Store store : App.get_stores()) {
+					List<Flower> updatedList = new ArrayList<>();
+
+					for (Flower flowerInStore : store.getFlowersList()) {
+
+						for (Flower flowerFromDB : flowersFromDB) {
+							if (flowerFromDB.getFlowerName().equals(flowerInStore.getFlowerName())) {
+								updatedList.add(flowerFromDB);
+								break;
+							}
+						}
+					}
+
+					store.setFlowersList(updatedList);
+				}
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			sendToAllClients("update_catalog_after_change");
+
+			sendToAllClients("The network manager has added a flower.");
+		}
+
+
+		if(msg.getClass().equals(Add_flower_wrapper.class))
+		{
+			Add_flower_wrapper wrapper = (Add_flower_wrapper) msg;
+			Flower flower = wrapper.getFlower();
+			int type = wrapper.gettype();
+
+			Session session = App.getSessionFactory().openSession();
+			try {
+				session.beginTransaction();
+				session.save(flower);
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				session.getTransaction().rollback();
+				e.printStackTrace();
+			} finally {
+				session.close();
+			}
+			List<Store> stores = App.get_stores();
+			Store store = stores.get(type-1);
+			store.getFlowersList().add(flower);
+			System.out.println("Employee of " + store.getStoreName() + " added a flower.");
+			sendToAllClients("The network manager has added a flower.");
+			//the same logic as manager so the message says manager but is employee
 
 		}
 		if (msg.getClass().equals(FlowerDiscountWrapper.class))
@@ -243,6 +333,7 @@ public class SimpleServer extends AbstractServer {
 			int discountPercent = wrapper.getDiscount();
 			if (discountPercent == -1)
 			{
+
 				Session session = App.getSessionFactory().openSession();
 				session.beginTransaction();
 				CriteriaBuilder builder = session.getCriteriaBuilder();
@@ -250,11 +341,47 @@ public class SimpleServer extends AbstractServer {
 				Root<Flower> root = query.from(Flower.class);
 				query.select(root).where(builder.equal(root.get("flowerName"), flower.getFlowerName()));
 				Flower flowerToDelete = session.createQuery(query).uniqueResult();
+				if(flowerToDelete!=null)
+				{
+					for (Store store : App.get_stores())
+					{
+						store.getFlowersList().removeIf(f -> f.getFlowerName().equals(flowerToDelete.getFlowerName()));
+					}
+
+				}
 				session.delete(flowerToDelete);
 				session.getTransaction().commit();
 				System.out.println("Flower deleted: " + flowerToDelete.getFlowerName());
 				session.close();
-				sendToAllClients("update_catalog_after_change");
+				sendToAllClients("The network manager has added a flower.");
+				return;
+			}
+			if (discountPercent == -2)
+			{
+				double new_price=flower.getFlowerPrice();
+
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
+				Root<Flower> root = query.from(Flower.class);
+				query.select(root).where(builder.equal(root.get("flowerName"), flower.getFlowerName()));
+				Flower flowerToUpdate = session.createQuery(query).uniqueResult();
+				flowerToUpdate.setFlowerPrice(new_price);
+				session.update(flowerToUpdate);
+				session.getTransaction().commit();
+				System.out.println("Flower : " + flowerToUpdate.getFlowerName());
+				System.out.println("NOW THE PRICE IS : " + flowerToUpdate.getFlowerPrice());
+				session.close();
+				for (Store store : App.get_stores()) {
+					for (Flower f : store.getFlowersList()) {
+						if (f.getFlowerName().equals(flowerToUpdate.getFlowerName())) {
+							f.setFlowerPrice(new_price);
+
+						}
+					}
+				}
+				sendToAllClients("The network manager has added a flower.");
 				return;
 			}
 			Session session = App.getSessionFactory().openSession();
@@ -273,7 +400,16 @@ public class SimpleServer extends AbstractServer {
 			session.getTransaction().commit();
 			System.out.println("Updated price for " + flowerToUpdate.getFlowerName() + ": " + newPrice);
 			session.close();
-			sendToAllClients("update_catalog_after_change");
+			for (Store store : App.get_stores()) {
+				for (Flower f : store.getFlowersList()) {
+					if (f.getFlowerName().equals(flowerToUpdate.getFlowerName())) {
+						f.setFlowerPrice(newPrice);
+						f.setSale(true);
+						f.setDiscount(discountPercent);
+					}
+				}
+			}
+			sendToAllClients("The network manager has added a flower.");
 		}
 		else if (msg.getClass().equals(LoginRegCheck.class)) {
 			int isLogin = ((LoginRegCheck) msg).getIsLogin();
@@ -542,8 +678,21 @@ public class SimpleServer extends AbstractServer {
 			List<Store> Stores = App.get_stores();
 			Store store = Stores.get(1);
 			List<Flower> original_flowers=store.getFlowersList();
-			String[] parts = msgString.split("_");
 			List<Flower> sorted_flowers=store.getFlowersList();
+			String[] parts = msgString.split("_");
+			try {
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				original_flowers = session.createQuery("FROM Flower", Flower.class).getResultList();
+				sorted_flowers = session.createQuery("FROM Flower", Flower.class).getResultList();
+				System.out.println("The sorted flowers  original flowers are the ones from the database.");
+				session.getTransaction().commit();
+				session.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
 			if(parts[1].trim().equals("1"))
 			{
 				store = Stores.get(0);
@@ -567,7 +716,6 @@ public class SimpleServer extends AbstractServer {
 
 					original_flowers = session.createQuery("FROM Flower", Flower.class).getResultList();
 					sorted_flowers = session.createQuery("FROM Flower", Flower.class).getResultList();
-
 					session.getTransaction().commit();
 					session.close();
 				} catch (Exception e) {
@@ -678,6 +826,7 @@ public class SimpleServer extends AbstractServer {
 		}
 		else if(msgString.startsWith("get_flowers_high_to_low"))
 		{
+
 			List<Store> Stores = App.get_stores();
 			Store store = Stores.get(0);
 			List<Flower> original_flowers=store.getFlowersList();

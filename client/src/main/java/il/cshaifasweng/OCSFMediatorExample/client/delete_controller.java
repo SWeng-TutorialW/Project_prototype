@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
 import il.cshaifasweng.OCSFMediatorExample.entities.FlowerDiscountWrapper;
+import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -10,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 
@@ -26,6 +28,8 @@ public class delete_controller  {
 
     @FXML
     private Label flowerPrice;
+    public int  type=0;
+    public void set_type(int type){this.type=type;}
 
     @FXML
     private Label flowerType;
@@ -62,6 +66,14 @@ public class delete_controller  {
     @FXML
     void Delete(ActionEvent event)
     {
+        System.out.println(type);
+        if(type!=4)
+        {
+            Warning warning = new Warning("You are not allowed to delete flower please send request to  the administrator.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
+            return;
+        }
 
         FlowerDiscountWrapper wrapper = new FlowerDiscountWrapper(selectedFlower, -1);
         try {

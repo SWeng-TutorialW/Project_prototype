@@ -91,6 +91,13 @@ public class discount_Controller {
     @FXML
     void new_price(ActionEvent event) {
         String text = new_price_box.getText().trim();
+        String name=flower_name.getText().trim();
+        if (name.isEmpty()) {
+            Warning warning = new Warning("Please fill in the name field");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+
         if (text.isEmpty()) {
             Warning warning = new Warning("Please fill in the price field");
             EventBus.getDefault().post(new WarningEvent(warning));
@@ -109,6 +116,32 @@ public class discount_Controller {
             Warning warning = new Warning("Price must be a valid number");
             EventBus.getDefault().post(new WarningEvent(warning));
         }
+        String str_flower = flower_name.getText().trim();
+        boolean found = false;
+        Flower targetFlower = null;
+        for (Flower flower : flowersList_c) {
+            if (flower.getFlowerName().equalsIgnoreCase(str_flower)) {
+                found = true;
+                targetFlower = flower;
+                break;
+            }
+        }
+        if (!found)
+        {
+            Warning warning = new Warning("Flower not found");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+        else
+        {
+            double new_price = Double.parseDouble(text);
+            System.out.println(new_price);
+            targetFlower.setFlowerPrice(new_price);
+            int percent_discount = -2;
+            catalogController.receivediscount(percent_discount,targetFlower);
+        }
+        ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
+
     }
 
     @FXML

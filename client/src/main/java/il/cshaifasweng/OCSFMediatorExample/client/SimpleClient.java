@@ -1,12 +1,9 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
-import il.cshaifasweng.OCSFMediatorExample.entities.catalog_sort_event;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.greenrobot.eventbus.EventBus;
 
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 
 public class SimpleClient extends AbstractClient {
 	
@@ -32,6 +29,20 @@ public class SimpleClient extends AbstractClient {
 		else if(msg.getClass().equals(catalog_sort_event.class)){
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
+		else if(msg.getClass().equals(Add_flower_event.class)){
+			EventBus.getDefault().post(msg); // post the catalog update to UI
+		}
+		else if(msgString.startsWith("The network manager has added a flower."))
+		{
+			try {
+				SimpleClient.getClient().sendToServer("update_catalog_after_manager_add_flower");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+
+
 
 
 		else if(msgString.startsWith("update_catalog_after_change"))

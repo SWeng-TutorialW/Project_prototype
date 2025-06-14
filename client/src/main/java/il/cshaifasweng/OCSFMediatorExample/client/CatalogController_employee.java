@@ -1,14 +1,11 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.FlowerDiscountWrapper;
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.event.ActionEvent;
 import java.io.IOException;
 
 import java.util.List;
 
-
-import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -331,6 +328,12 @@ public class CatalogController_employee {
     public void  set_type(int value)
     {
         type=value;
+        if(type!=4)
+        {
+            discount.setText("Send request to the admin");
+            discount.setPrefWidth(240);
+            discount.setOnAction(this::request);
+        }
     }
     public void  set_sorting_type(int value)
     {
@@ -358,7 +361,7 @@ public class CatalogController_employee {
         {
             Stores.setValue("Nahariyya");
         }
-        System.out.println("this client is see the  store: " + sorting_type);
+        System.out.println("this employee is see the  store: " + sorting_type);
         System.out.println("Received flowers: " + flowersList_sorting.size());
         for (Flower f : flowersList_sorting) {
             System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
@@ -403,7 +406,7 @@ public class CatalogController_employee {
         {
             Stores.setValue("Nahariyya");
         }
-        System.out.println("this client is for store: " + type);
+        System.out.println("this employee is for store: " + type);
         System.out.println("Received flowers: " + flowersList_c.size());
         for (Flower f : flowersList_c) {
             System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
@@ -435,7 +438,7 @@ public class CatalogController_employee {
         System.out.println("enter stores");
         String selected = Stores.getValue();
         String message = "";
-        if (selected.equals("Haifa")) {
+        if(selected.equals("Haifa")) {
             message = "Haifa";
         } else if (selected.equals("Krayot")) {
             message = "Krayot";
@@ -527,15 +530,19 @@ public class CatalogController_employee {
         {
             localtype=3;
         }
+        if(selected_store.equals("network"))
+        {
+            localtype=4;
+        }
         System.out.println("localtype = " + localtype);
         String localtypeStr = String.valueOf(localtype);
 
 
         String message = "";
         if (selected.equals("Price High to LOW")) {
-            message = "get_flowers_high_to_low_"+localtypeStr;
+            message = "get_flowers_high_to_low_"+localtypeStr+"_"+type;
         } else if (selected.equals("Price Low to HIGH")) {
-            message = "get_flowers_low_to_high_"+localtypeStr;
+            message = "get_flowers_low_to_high_"+localtypeStr+"_"+type;
         }
         System.out.println("message = " + message);
         SimpleClient.getClient().sendToServer(message);
@@ -549,36 +556,108 @@ public class CatalogController_employee {
     @FXML
     void add_flower(ActionEvent event) {
         System.out.println("add_flower clicked!");
-        if (
-                type_9.getText() != null && !type_9.getText().trim().isEmpty() &&
-                        type_10.getText() != null && !type_10.getText().trim().isEmpty() &&
-                        type_11.getText() != null && !type_11.getText().trim().isEmpty() &&
-                        type_12.getText() != null && !type_12.getText().trim().isEmpty()
-        ) {
-            Warning warning = new Warning("The catalog is currently full. Please contact support for further assistance.");
-            EventBus.getDefault().post(new WarningEvent(warning));
-            return;
-        }
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("add_flower.fxml"));
-            Parent root = fxmlLoader.load();
-            AddFlower_Controller addFlowerController = fxmlLoader.getController();
-            addFlowerController.setCatalogController(this);
+        System.out.println("type = " + type);
+        if(type==4)
+        {
+            if(sorting_type!=4 && sorting_type!=-1)
+            {
+                Warning warning = new Warning("You are being transferred to the network's catalog.");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                setCatalogData(flowersList_c);
+                return;
+            }
+            if (
+                    type_9.getText() != null && !type_9.getText().trim().isEmpty() &&
+                            type_10.getText() != null && !type_10.getText().trim().isEmpty() &&
+                            type_11.getText() != null && !type_11.getText().trim().isEmpty() &&
+                            type_12.getText() != null && !type_12.getText().trim().isEmpty()
+            ) {
+                Warning warning = new Warning("The catalog is currently full. Please contact support for further assistance.");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("add_flower.fxml"));
+                Parent root = fxmlLoader.load();
+                AddFlower_Controller addFlowerController = fxmlLoader.getController();
+                addFlowerController.setCatalogController(this);
 
-            Stage stage = new Stage();
-            stage.setTitle("Add New Flower");
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(((Node) event.getSource()).getScene().getWindow());
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
+                Stage stage = new Stage();
+                stage.setTitle("Add New Flower");
+                stage.setScene(new Scene(root));
+                stage.setResizable(false);
+                stage.initModality(Modality.WINDOW_MODAL);
+                stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        else
+        {
+            if(sorting_type==-1)
+            {
+                if (
+                        type_9.getText() != null && !type_9.getText().trim().isEmpty() &&
+                                type_10.getText() != null && !type_10.getText().trim().isEmpty() &&
+                                type_11.getText() != null && !type_11.getText().trim().isEmpty() &&
+                                type_12.getText() != null && !type_12.getText().trim().isEmpty()
+                ) {
+                    Warning warning = new Warning("The catalog is currently full. Please contact support for further assistance.");
+                    EventBus.getDefault().post(new WarningEvent(warning));
+                    return;
+                }
+                try {
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("add_flower.fxml"));
+                    Parent root = fxmlLoader.load();
+                    AddFlower_Controller addFlowerController = fxmlLoader.getController();
+                    addFlowerController.setCatalogController(this);
+
+                    Stage stage = new Stage();
+                    stage.setTitle("Add New Flower");
+                    stage.setScene(new Scene(root));
+                    stage.setResizable(false);
+                    stage.initModality(Modality.WINDOW_MODAL);
+                    stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+                    stage.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return;
+            }
+            if(sorting_type!=type)
+            {
+                Warning warning = new Warning("You are being transferred to your store's catalog.");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                setCatalogData(flowersList_c);
+                return;
+            }
+            else
+            {
+                try {
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("add_flower.fxml"));
+                    Parent root = fxmlLoader.load();
+                    AddFlower_Controller addFlowerController = fxmlLoader.getController();
+                    addFlowerController.setCatalogController(this);
+
+                    Stage stage = new Stage();
+                    stage.setTitle("Add New Flower");
+                    stage.setScene(new Scene(root));
+                    stage.setResizable(false);
+                    stage.initModality(Modality.WINDOW_MODAL);
+                    stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+                    stage.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return;
+            }
+        }
+
     }
 
     public void receiveNewFlower(Flower flower) {
-        System.out.println("Received flower: " + flower);
+        System.out.println("Received flower: " + flower.getFlowerType());
         for (int i = 8; i <= 11; i++) {
             if (typeLabels[i].getText() == null || typeLabels[i].getText().trim().isEmpty()) {
                 typeLabels[i].setText(flower.getFlowerType());
@@ -593,18 +672,42 @@ public class CatalogController_employee {
                 break;
             }
         }
-
-        try {
-            SimpleClient.getClient().sendToServer(flower);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(type==4)
+        {
+            try {
+                SimpleClient.getClient().sendToServer(flower);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        else
+        {
+            System.out.println("the type is: " + type);
+            Add_flower_wrapper wrapper = new Add_flower_wrapper(flower, type);
+            try {
+                SimpleClient.getClient().sendToServer(wrapper);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+
     }
     @FXML
     void discount(ActionEvent event)
     {
-        if(sorting_type==-1)
+        System.out.println("discount clicked");
+        System.out.println("type = " + type);
+        if(type==4)
         {
+            if(sorting_type!=4 && sorting_type!=-1)
+            {
+                Warning warning = new Warning("You are being transferred to the network's catalog.");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                setCatalogData(flowersList_c);
+                return;
+            }
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("discount_scene.fxml"));
                 Parent root = fxmlLoader.load();
@@ -623,18 +726,50 @@ public class CatalogController_employee {
                 e.printStackTrace();
             }
         }
-        if(sorting_type==4)
-        {
-
-        }
         else
         {
-            Warning warning = new Warning("You dont have access to change or set discount for this store");
+            Warning warning = new Warning("You are not allowed to discount please send request to  the administrator.");
             EventBus.getDefault().post(new WarningEvent(warning));
-            setCatalogData(flowersList_c);
+            return;
+
         }
 
 
+
+    }
+    @FXML
+    void request(ActionEvent event)
+    {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("complain_scene.fxml"));
+            Parent root = fxmlLoader.load();
+            complain_controller Controller = fxmlLoader.getController();
+            Controller.change_head("Request to admin ");
+            Controller.setCatalogController(this);
+
+
+            Stage stage = new Stage();
+            stage.setTitle("Send request");
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+
+
+    }
+    public void receiveNewComplain(Complain complain)
+    {
+        try {
+            SimpleClient.getClient().sendToServer(complain); // try to send the complain to the DB
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
     public void receivediscount(int discount,Flower flower) {
@@ -665,6 +800,7 @@ public class CatalogController_employee {
     @FXML
     void delete_flower(ActionEvent event)
     {
+
         Button clickedButton = (Button) event.getSource();
         VBox graphicVBox = (VBox) clickedButton.getGraphic();
         String flowerName="";
@@ -689,6 +825,7 @@ public class CatalogController_employee {
             Parent root = loader.load();
             delete_controller orderController = loader.getController();
             orderController.setFlower(targetFlower);
+            orderController.set_type(type);
 
             Stage stage = new Stage();
             stage.setTitle("Delete Flower");
