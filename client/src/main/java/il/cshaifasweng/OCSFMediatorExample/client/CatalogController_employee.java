@@ -226,12 +226,17 @@ public class CatalogController_employee {
     @FXML
     private Label type_9;
 
+    private ComplainController_employee complainController;
+
     private List<Flower> flowersList_c;
     private Label[] nameLabels;
     private Label[] typeLabels;
     private TextField[] priceFields;
     private ImageView[] imageViews;
 
+    public void setCatalogController(ComplainController_employee controller) {
+        this.complainController = controller;
+    }
 
     public void setCatalogData(List<Flower> flowerList) {
         flowersList_c = flowerList;

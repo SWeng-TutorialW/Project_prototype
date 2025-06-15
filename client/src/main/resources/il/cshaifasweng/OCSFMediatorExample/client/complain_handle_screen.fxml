@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="650.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ComplainController_employee">
+<AnchorPane prefHeight="650.0" prefWidth="606.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ComplainController_employee">
    <children>
       <TableView fx:id="complains" layoutX="69.0" layoutY="141.0" prefHeight="450.0" prefWidth="478.0">
         <columns>
@@ -23,12 +23,12 @@
             <Font name="Palatino Linotype" size="24.0" />
          </font>
       </Label>
-      <Label prefHeight="72.0" prefWidth="600.0" style="-fx-background-color: #C8A2C8;" text="LILACH FLOWERS" textFill="#fdfdfd57">
+      <Label prefHeight="72.0" prefWidth="606.0" style="-fx-background-color: #C8A2C8;" text="LILACH FLOWERS" textFill="#fdfdfd57">
          <font>
             <Font name="Palatino Linotype" size="24.0" />
          </font>
       </Label>
-      <Button alignment="CENTER" layoutX="223.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="171.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="My Account" textFill="#fcfcfc">
+      <Button alignment="CENTER" layoutX="243.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="171.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="My Account" textFill="#fcfcfc">
          <font>
             <Font size="18.0" />
          </font>
@@ -36,18 +36,6 @@
             <ImageView fitHeight="36.0" fitWidth="34.0" pickOnBounds="true">
                <image>
                   <Image url="@../../../../images/person_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.png" />
-               </image>
-            </ImageView>
-         </graphic>
-      </Button>
-      <Button layoutX="396.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="201.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Back To Catalog" textFill="#fcfcfc">
-         <font>
-            <Font size="18.0" />
-         </font>
-         <graphic>
-            <ImageView fitHeight="38.0" fitWidth="34.0" pickOnBounds="true" preserveRatio="true">
-               <image>
-                  <Image url="@../../../../images/catalog.png" />
                </image>
             </ImageView>
          </graphic>

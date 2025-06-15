@@ -77,30 +77,11 @@ public class ComplainController_employee implements Initializable {
 
 
     }
-//    void open_catalog(ActionEvent event)
-//    {
-//        try {
-//            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
-//            Parent root = fxmlLoader.load();
-//            ComplainController_employee complainControllerEmployee = fxmlLoader.getController();
-//            complainControllerEmployee.setCatalogController(this);
-//
-//            Stage stage = new Stage();
-//            stage.setTitle("Complaints");
-//            stage.setScene(new Scene(root));
-//            stage.setResizable(false);
-//            stage.initModality(Modality.WINDOW_MODAL);
-//            stage.initOwner(((Node) event.getSource()).getScene().getWindow());
-//            stage.show();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     @Subscribe
     public void handleComplainUpdate(ComplainUpdateEvent event)
     {
-        System.out.println("updating complaint list debuggg");
+       System.out.println("updating complaint list debuggg");
        List<Complain> complainList = event.getUpdatedItems();
         // Run on JavaFX thread to update UI
         Platform.runLater(() -> {
