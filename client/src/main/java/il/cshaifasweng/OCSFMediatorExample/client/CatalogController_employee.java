@@ -338,7 +338,14 @@ public class CatalogController_employee {
         }
     }
     private LoginRegCheck user;
-    public void set_user(LoginRegCheck user) {this.user = user;}
+    public void set_user(LoginRegCheck user) {
+        this.user = user;
+        System.out.println("set_user updated");
+        System.out.println("user send?"+user.get_send_complain());
+        System.out.println("user recieve?"+user.isReceive_answer());
+
+
+    }
     boolean is_login=false;
     public void set_isLogin(boolean is_login) {
         this.is_login = is_login;
@@ -358,48 +365,239 @@ public class CatalogController_employee {
     {
         flowersList_c = flowerList;
     }
-    public void setCatalogSorting(List<Flower> flowerList) {
-        flowersList_sorting = flowerList;
-        if(sorting_type==0||sorting_type==4)
-        {
-            Stores.setValue("network");
+    int add_flower_flag=0;
+    String flower_name="";
+    @FXML
+    void initialize() {
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+            System.out.println("CatalogController_employee registered");
+        } else {
+            System.out.println("CatalogController_employee already registered");
         }
-        if(sorting_type==1)
-        {
-            Stores.setValue("Haifa");
-        }
-        if(sorting_type==2)
-        {
-            Stores.setValue("Krayot");
-        }
-        if(sorting_type==3)
-        {
-            Stores.setValue("Nahariyya");
-        }
-        System.out.println("this employee is see the  store: " + sorting_type);
-        System.out.println("Received flowers: " + flowersList_sorting.size());
-        for (Flower f : flowersList_sorting) {
-            System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
-        }
-        for (int i = 0; i < flowersList_sorting.size() && i < 12; i++) {
-            Flower f = flowersList_sorting.get(i);
-            nameLabels[i].setText(f.getFlowerName());
-            if (f.isSale())
-            {
-                price_Before_sale[i].setVisible(true);
-                int discount_percent = f.getDiscount();
-                double remainingPercent = 100.0 -discount_percent;
-                double originalPrice = f.getFlowerPrice() * 100.0 / remainingPercent;
-                String originalPriceStr = String.format("%.2f", originalPrice);
-                price_Before_sale[i].setText(originalPriceStr);
+        System.out.println("CatalogController employee initialized");
+        combo.getItems().addAll("Price High to LOW", "Price Low to HIGH");
+        combo.setValue("Sort");
+        Stores.getItems().addAll("Haifa", "Krayot","Nahariyya","network");
+        combo.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item);
+                setAlignment(Pos.CENTER);
+                setTextFill(Color.web("#FFFAFA"));
             }
-            priceFields[i].setText(String.format("%.2f", f.getFlowerPrice()));
-            typeLabels[i].setText(f.getFlowerType());
-            setImage(imageViews[i], f.getFlowerType());
-            if (i == 8) nine_9.setVisible(true);
-            if (i == 9) ten_10.setVisible(true);
-            if (i == 10) eleven_11.setVisible(true);
-            if (i == 11) twelve_12.setVisible(true);
+        });
+
+        combo.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item);
+                setAlignment(Pos.CENTER);
+                setTextFill(Color.web("#C8A2C8"));
+            }
+        });
+        nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12 };
+        typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12 };
+        priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
+        imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12 };
+        price_Before_sale = new Text[] { price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale };
+        Stage stage = App.getStage();
+        stage.setOnCloseRequest(event1 -> {
+            try {
+                if (user != null) {
+                    user.setIsLogin(0);
+                    change_user_login tt = new change_user_login(user,0);
+                    System.out.println("the user is " + user.getUsername()+"logged out");
+                    SimpleClient.getClient().sendToServer(tt);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+    public void setCatalogSorting(List<Flower> flowerList)
+    {
+        flowersList_sorting = flowerList;
+
+        Platform.runLater(() -> {
+            if (sorting_type == 0 || sorting_type == 4) {
+                Stores.setValue("network");
+            }
+            if (sorting_type == 1) {
+                Stores.setValue("Haifa");
+            }
+            if (sorting_type == 2) {
+                Stores.setValue("Krayot");
+            }
+            if (sorting_type == 3) {
+                Stores.setValue("Nahariyya");
+            }
+
+            clearCatalog();
+            System.out.println("add flag: " + add_flower_flag);
+            if(add_flower_flag==1 && type!=4)
+            {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("new flower in catalog");
+                alert.setHeaderText("see our new flower :]");
+                alert.setContentText("see our new flower :]");
+                alert.show();
+            }
+            if(add_flower_flag==-1 && type!=4)
+            {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("flower deleted from the catalog");
+                alert.setHeaderText("flower deleted from the catalog :[");
+                alert.setContentText("flower deleted from the catalog:[");
+                alert.show();
+            }
+            if(add_flower_flag==2 && type!=4)
+            {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("NEW PRICE FOR"+ flower_name);
+                alert.setHeaderText("NEW PRICE FOR"+ flower_name);
+                alert.setContentText("NEW PRICE FOR"+ flower_name);
+                alert.show();
+            }
+            if(add_flower_flag==3&& type!=4)
+            {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("ALL THE STORE IN DISCOUNTS");
+                alert.setHeaderText("ALL THE STORE IN DISCOUNTS");
+                alert.setContentText("ALL THE STORE IN DISCOUNTS");
+                alert.show();
+            }
+            add_flower_flag=0;
+            System.out.println("this employee is for store: " + type);
+            System.out.println("this employee is see the store: " + sorting_type);
+            System.out.println("Received flowers: " + flowersList_sorting.size());
+            for (Flower f : flowersList_sorting) {
+                System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
+            }
+
+            for (int i = 0; i < flowersList_sorting.size() && i < 12; i++) {
+                Flower f = flowersList_sorting.get(i);
+
+                nameLabels[i].setText(f.getFlowerName());
+
+                if (f.isSale()) {
+                    price_Before_sale[i].setVisible(true);
+                    int discount_percent = f.getDiscount();
+                    double remainingPercent = 100.0 - discount_percent;
+                    double originalPrice = f.getFlowerPrice() * 100.0 / remainingPercent;
+                    String originalPriceStr = String.format("%.2f", originalPrice);
+                    price_Before_sale[i].setText(originalPriceStr);
+                }
+
+                priceFields[i].setText(String.format("%.2f", f.getFlowerPrice()));
+                typeLabels[i].setText(f.getFlowerType());
+                setImage(imageViews[i], f.getFlowerType());
+
+                if (i == 8) nine_9.setVisible(true);
+                if (i == 9) ten_10.setVisible(true);
+                if (i == 10) eleven_11.setVisible(true);
+                if (i == 11) twelve_12.setVisible(true);
+            }
+        });
+    }
+
+    public void clearCatalog() {
+        for (int i = 0; i < 12; i++) {
+            nameLabels[i].setText("");
+            priceFields[i].setText("");
+            typeLabels[i].setText("");
+            price_Before_sale[i].setVisible(false);
+            price_Before_sale[i].setText("");
+            imageViews[i].setImage(null);
+        }
+        nine_9.setVisible(false);
+        ten_10.setVisible(false);
+        eleven_11.setVisible(false);
+        twelve_12.setVisible(false);
+        System.out.println("Catalog cleared.");
+    }
+    @Subscribe
+    public void handleCatalogUpdate(Add_flower_event event)throws IOException
+    {
+
+        System.out.println("enter handle " );
+
+        if(event.get_flowers()==null)
+        {
+            System.out.println("the user is " + user.getUsername());
+            if(type!=4)
+            {
+                System.out.println("the user that came from the event " +event.getUser().getUsername());
+                if(user.getUsername().equals(event.getUser().getUsername()))
+                {
+                    set_user(event.getUser());
+                    return;
+                }
+
+            }
+            return;
+        }
+        if(event.get_catalog_type()==-1)
+        {
+            add_flower_flag=-1;
+            setCatalogSorting(event.get_flowers());
+            set_sorting_type(4);
+            return;
+        }
+        add_flower_flag=1;
+        setCatalogSorting(event.get_flowers());
+        set_sorting_type(4);
+        if(type!=4)
+        {
+            System.out.println("send message to server "+type);
+            SimpleClient.getClient().sendToServer("I#need#to#update#my#store#catalog_"+type);
+            return;
+        }
+        flowersList_c=event.get_flowers();
+
+
+    }
+    @Subscribe
+    public void handleCatalogUpdate(discount_for_1_flower event)throws IOException
+    {
+
+        if(event.get_catalog_type()==1)
+        {
+            flower_name=event.get_flower_name();
+            add_flower_flag=2;
+            setCatalogSorting(event.get_flowers());
+            set_sorting_type(4);
+            return;
+        }
+        if(event.get_catalog_type()==2)
+        {
+
+            add_flower_flag=3;
+            setCatalogSorting(event.get_flowers());
+            set_sorting_type(4);
+            return;
+        }
+        if(type!=4)
+        {
+            System.out.println("send message to server "+type);
+            SimpleClient.getClient().sendToServer("I#need#to#update#my#store#catalog_"+type);
+            return;
+        }
+        flowersList_c=event.get_flowers();
+
+
+    }
+    @Subscribe
+    public void handleCatalogUpdate(update_local_catalog event)
+    {
+        System.out.println("enter ok");
+        if(type== event.get_catalog_type())
+        {
+            System.out.println("the local catalog updated " +event.get_catalog_type());
+            flowersList_c=event.get_flowers();
+            return;
         }
     }
 
@@ -465,6 +663,18 @@ public class CatalogController_employee {
         else if (selected.equals("network")) {
             message = "network";
         }
+        combo.getSelectionModel().clearSelection();
+        combo.setValue("Sort");
+        combo.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item);
+                setAlignment(Pos.CENTER);
+                setTextFill(Color.web("#FFFAFA"));
+            }
+        });
+        sort_image.setVisible(true);
 
         message = message + "_" + type;
         System.out.println("message: " + message);
@@ -487,55 +697,6 @@ public class CatalogController_employee {
         }
     }
 
-    @FXML
-    void initialize() {
-        System.out.println("CatalogController employee initialized");
-        combo.getItems().addAll("Price High to LOW", "Price Low to HIGH");
-        combo.setValue("Sort");
-        Stores.getItems().addAll("Haifa", "Krayot","Nahariyya","network");
-        combo.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item);
-                setAlignment(Pos.CENTER);
-                setTextFill(Color.web("#FFFAFA"));
-            }
-        });
-
-        combo.setCellFactory(listView -> new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item);
-                setAlignment(Pos.CENTER);
-                setTextFill(Color.web("#C8A2C8"));
-            }
-        });
-        nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12 };
-        typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12 };
-        priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
-        imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12 };
-        price_Before_sale = new Text[] { price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale };
-        Stage stage = App.getStage();
-        stage.setOnCloseRequest(event1 -> {
-            try {
-                if (user != null) {
-                    user.setIsLogin(0);
-                    change_user_login tt = new change_user_login(user,0);
-                    System.out.println("the user is " + user.getUsername()+"logged out");
-                    SimpleClient.getClient().sendToServer(tt);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-
-
-
-
-
-    }
 
     @FXML
     public void combo_choose(ActionEvent actionEvent) throws IOException {
@@ -579,6 +740,7 @@ public class CatalogController_employee {
     @FXML
     void open_complain_box(ActionEvent event)throws IOException
     {
+        SimpleClient.getClient().sendToServer("update_complainScene_after_change");
         if(type==4)
         {
             try {
@@ -604,12 +766,6 @@ public class CatalogController_employee {
             {
                 SimpleClient.getClient().sendToServer("I#want#to#see#my#answer_"+user.getUsername());
                 System.out.println("I#want#to#see#my#answer_"+user.getUsername());
-                if (!EventBus.getDefault().isRegistered(this)) {
-                    EventBus.getDefault().register(this);
-                    System.out.println("CatalogController_employee registered");
-                } else {
-                    System.out.println("CatalogController_employee already registered");
-                }
                 return;
             }
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -755,20 +911,6 @@ public class CatalogController_employee {
 
     public void receiveNewFlower(Flower flower) {
         System.out.println("Received flower: " + flower.getFlowerType());
-        for (int i = 8; i <= 11; i++) {
-            if (typeLabels[i].getText() == null || typeLabels[i].getText().trim().isEmpty()) {
-                typeLabels[i].setText(flower.getFlowerType());
-                nameLabels[i].setText(flower.getFlowerName());
-                priceFields[i].setText(String.format("%.2f", flower.getFlowerPrice()));
-                setImage(imageViews[i], flower.getFlowerType());
-
-                if (i == 8) nine_9.setVisible(true);
-                if (i == 9) ten_10.setVisible(true);
-                if (i == 10) eleven_11.setVisible(true);
-                if (i == 11) twelve_12.setVisible(true);
-                break;
-            }
-        }
         if(type==4)
         {
             try {
@@ -788,7 +930,6 @@ public class CatalogController_employee {
             }
 
         }
-
 
     }
     @FXML

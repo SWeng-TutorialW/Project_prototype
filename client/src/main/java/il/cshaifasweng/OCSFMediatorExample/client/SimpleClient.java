@@ -41,6 +41,12 @@ public class SimpleClient extends AbstractClient {
 		else if(msg.getClass().equals(ComplainUpdateEvent.class)){
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
+		else if(msg.getClass().equals(update_local_catalog.class)){
+			EventBus.getDefault().post(msg); // post the catalog update to UI
+		}
+		else if(msg.getClass().equals(discount_for_1_flower.class)){
+			EventBus.getDefault().post(msg); // post the catalog update to UI
+		}
 		else if(msg.getClass().equals(Complain.class)){
 			System.out.println("I send the complain event");
 			EventBus.getDefault().post(msg); // post the catalog update to UI
@@ -55,6 +61,26 @@ public class SimpleClient extends AbstractClient {
 			}
 
 		}
+		else if(msgString.startsWith("new#price#in#flower_"))
+		{
+			try {
+				SimpleClient.getClient().sendToServer(msgString);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+
+		else if(msgString.startsWith("The network manager has deleted flower."))
+		{
+			try {
+				SimpleClient.getClient().sendToServer("update_catalog_after_manager_delete_flower");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+
 		else if(msgString.startsWith("user_"))
 		{
 			String[] parts = msgString.split("_");

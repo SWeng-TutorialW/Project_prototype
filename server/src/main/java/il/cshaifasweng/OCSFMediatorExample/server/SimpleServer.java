@@ -222,36 +222,95 @@ public class SimpleServer extends AbstractServer {
 			session.getTransaction().commit();
 			session.close();
 			try {
-			Add_flower_event event = new Add_flower_event(flowers,4);
-			client.sendToClient(event);
+				Add_flower_event event = new Add_flower_event(flowers,4);
+				client.sendToClient(event);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+
+		}
+		else if (msgString.startsWith("I#need#to#update#my#store#catalog_"))
+		{
+
 			List<Store> stores = App.get_stores();
 			Store store = stores.get(0);
+			List<Flower> flowers=store.getFlowersList();
+
+			try {
+				update_local_catalog event = new update_local_catalog(flowers,1);
+				sendToAllClients(event);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			store=stores.get(1);
 			flowers=store.getFlowersList();
 			try {
-				Add_flower_event event = new Add_flower_event(flowers,1);
+				update_local_catalog event = new update_local_catalog(flowers,2);
+				sendToAllClients(event);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			store=stores.get(2);
+			flowers=store.getFlowersList();
+			try {
+				update_local_catalog event = new update_local_catalog(flowers,3);
+				sendToAllClients(event);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+		else if (msgString.startsWith("update_catalog_after_manager_delete_flower"))
+		{
+			Session session = App.getSessionFactory().openSession();
+			session.beginTransaction();
+
+			String hql = "FROM Flower";
+			List<Flower> flowers = session.createQuery(hql, Flower.class).getResultList();
+			session.getTransaction().commit();
+			session.close();
+			try {
+				Add_flower_event event = new Add_flower_event(flowers,-1);
 				client.sendToClient(event);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			 store = stores.get(1);
-			flowers=store.getFlowersList();
+
+
+
+		}
+		else if (msgString.startsWith("new#price#in#flower_"))
+		{
+			Session session = App.getSessionFactory().openSession();
+			session.beginTransaction();
+			String[] parts = msgString.split("_");
+			String flower_name=parts[1];
+			if(flower_name.equals("all"))
+			{
+				String hql = "FROM Flower";
+				List<Flower> flowers = session.createQuery(hql, Flower.class).getResultList();
+				session.getTransaction().commit();
+				session.close();
+				try {
+					discount_for_1_flower event = new discount_for_1_flower(flowers,2,flower_name);
+					client.sendToClient(event);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return;
+			}
+
+			String hql = "FROM Flower";
+			List<Flower> flowers = session.createQuery(hql, Flower.class).getResultList();
+			session.getTransaction().commit();
+			session.close();
 			try {
-				Add_flower_event event = new Add_flower_event(flowers,2);
+				discount_for_1_flower event = new discount_for_1_flower(flowers,1,flower_name);
 				client.sendToClient(event);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			store = stores.get(3);
-			flowers=store.getFlowersList();
-			try {
-				Add_flower_event event = new Add_flower_event(flowers,3);
-				client.sendToClient(event);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+
 
 
 		}
@@ -328,7 +387,7 @@ public class SimpleServer extends AbstractServer {
 				e.printStackTrace();
 			}
 
-			sendToAllClients("The network manager has added a flower.");
+			sendToAllClients("new#price#in#flower_all");
 		}
 
 
@@ -384,7 +443,7 @@ public class SimpleServer extends AbstractServer {
 				session.getTransaction().commit();
 				System.out.println("Flower deleted: " + flowerToDelete.getFlowerName());
 				session.close();
-				sendToAllClients("The network manager has added a flower.");
+				sendToAllClients("The network manager has deleted flower.");
 				return;
 			}
 			if (discountPercent == -2)
@@ -412,7 +471,7 @@ public class SimpleServer extends AbstractServer {
 						}
 					}
 				}
-				sendToAllClients("The network manager has added a flower.");
+				sendToAllClients("new#price#in#flower_" + flowerToUpdate.getFlowerName());
 				return;
 			}
 			Session session = App.getSessionFactory().openSession();
@@ -440,7 +499,7 @@ public class SimpleServer extends AbstractServer {
 					}
 				}
 			}
-			sendToAllClients("The network manager has added a flower.");
+			sendToAllClients("new#price#in#flower_" + flowerToUpdate.getFlowerName());
 		}
 		else if (msg.getClass().equals(LoginRegCheck.class))
 		{
@@ -522,6 +581,8 @@ public class SimpleServer extends AbstractServer {
 			}
 		}
 		else if(msg.getClass().equals(Complain.class)) {
+			System.out.println("add complaint");
+
 			Complain complain = (Complain) msg;
 
 			Session session = App.getSessionFactory().openSession();
@@ -535,7 +596,7 @@ public class SimpleServer extends AbstractServer {
 			} finally {
 				session.close();
 			}
-			sendToAllClients("update_complainScene_after_change");
+
 
 		}
 		else if (msg.getClass().equals(change_sendOrRecieve_messages.class)) {
@@ -578,8 +639,11 @@ public class SimpleServer extends AbstractServer {
 				} finally {
 					if (session != null) session.close();
 				}
-
+				System.out.println("the user is " + username);
 				sendToAllClients("user_" + username);
+
+
+
 			}
 		}
 
@@ -594,38 +658,8 @@ public class SimpleServer extends AbstractServer {
 			Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
 			query.select(root).where(builder.equal(root.get("username"), username));
 			LoginRegCheck user = session.createQuery(query).uniqueResult();
-
-			String hql = "FROM Flower";
-			List<Flower> flowers = session.createQuery(hql, Flower.class).getResultList();
-			session.getTransaction().commit();
-			session.close();
 			try {
-				Add_flower_event event = new Add_flower_event(flowers,4,user);
-				client.sendToClient(event);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			List<Store> stores = App.get_stores();
-			Store store = stores.get(0);
-			flowers=store.getFlowersList();
-			try {
-				Add_flower_event event = new Add_flower_event(flowers,1,user);
-				client.sendToClient(event);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			store = stores.get(1);
-			flowers=store.getFlowersList();
-			try {
-				Add_flower_event event = new Add_flower_event(flowers,2,user);
-				client.sendToClient(event);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			store = stores.get(3);
-			flowers=store.getFlowersList();
-			try {
-				Add_flower_event event = new Add_flower_event(flowers,3,user);
+				Add_flower_event event = new Add_flower_event(null,0,user);
 				client.sendToClient(event);
 			} catch (Exception e) {
 				e.printStackTrace();

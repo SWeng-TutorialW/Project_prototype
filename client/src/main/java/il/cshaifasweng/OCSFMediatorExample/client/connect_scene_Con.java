@@ -15,6 +15,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import javax.swing.*;
+import javax.xml.catalog.Catalog;
 import java.io.IOException;
 import java.util.List;
 
@@ -53,6 +54,11 @@ public class connect_scene_Con  {
     boolean type_guess = false;//only to know if is the first time to jet the catalog
     int type_local = 0;//1 for store 1 ,2 for store 2 ,3 for store 3, 4 for all of them
     private LoginRegCheck user;
+    public void setCatalogController(PrimaryController controller) {
+        this.ctlr = controller;
+    }
+    private  CatalogController catalogController;
+    private CatalogController_employee employeeController;
     @FXML
     void initialize() {
 
@@ -63,10 +69,7 @@ public class connect_scene_Con  {
         }
 
 
-
-
     }
-
     @FXML
     void guess_enter(ActionEvent event)
     {
@@ -82,12 +85,7 @@ public class connect_scene_Con  {
 
         }
 
-
     }
-    public void setCatalogController(PrimaryController controller) {
-        this.ctlr = controller;
-    }
-
     public void show_cata(ActionEvent actionEvent) {
         try {
             if (SimpleClient.getClient().isConnected()) {
@@ -109,266 +107,26 @@ public class connect_scene_Con  {
         System.out.println(type_local);
         if(guess)
         {
-            System.out.println("Processing as guest");
-            Platform.runLater(() -> {
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
-                    Parent root = loader.load();
-
-                    CatalogController controller = loader.getController();
-                    controller.set_sorting_type(event.getSort_type());
-                    controller.set_type(0);
-                    controller.setCatalogSorting(event.get_Sorted_flowers());
-                    controller.setFlowersList_c(event.get_original_catalog());
-                    App.getScene().setRoot(root);
-                    if(!type_guess)//to know this is the first time
-                    {
-                        type_guess = true;
-                        System.out.println("show the catalog first time as guest");
-                        App.getStage().setWidth(800);
-                        App.getStage().setHeight(750);
-                        App.getStage().centerOnScreen();
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
+            catalogController.set_sorting_type(event.getSort_type());
+            catalogController.setCatalogSorting(event.get_Sorted_flowers());
             return;
         }
-        if(type_Client) {
-            Platform.runLater(() -> {
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
-                    Parent root = loader.load();
-                    CatalogController controller = loader.getController();
-                    if(type_local==4)// network
-                    {
-                        controller.set_type(4);
-                        controller.set_sorting_type(event.getSort_type());
-                        controller.setFlowersList_c(event.get_original_catalog());
-                        controller.set_isLogin(true);
-                        controller.set_user(user);
-                        controller.setCatalogSorting(event.get_Sorted_flowers());
-                        System.out.println("this client is network ");
-
-                    }
-                    else
-                    {
-                        controller.set_type(type_local);
-                        controller.set_sorting_type(event.getSort_type());
-                        System.out.println("this client is for store: " + type_local);
-                        controller.set_isLogin(true);
-                        controller.set_user(user);
-                        controller.setFlowersList_c(event.get_original_catalog());
-                        controller.setCatalogSorting(event.get_Sorted_flowers());
-
-                    }
-                    App.getScene().setRoot(root);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
+        if (type_Client)
+        {
+            catalogController.set_sorting_type(event.getSort_type());
+            catalogController.setCatalogSorting(event.get_Sorted_flowers());
             return;
         }
+
         if(type_Employee)
         {
-            Platform.runLater(() -> {
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
-                    Parent root = loader.load();
-                    CatalogController_employee controller = loader.getController();
-
-                    if(type_local==4)// network
-                    {
-                        controller.set_type(type_local);
-                        controller.set_sorting_type(event.getSort_type());
-                        controller.set_isLogin(true);
-                        controller.set_user(user);
-                        controller.setFlowersList_c(event.get_original_catalog());
-                        controller.setCatalogSorting(event.get_Sorted_flowers());
-                        System.out.println("this employee is network ");
-                    }
-                    else
-                    {
-                        controller.set_type(type_local);
-                        controller.set_isLogin(true);
-                        controller.set_user(user);
-                        controller.set_sorting_type(event.getSort_type());
-                        controller.setFlowersList_c(event.get_original_catalog());
-                        System.out.println("this employee is for store: " + type_local);
-                        controller.setCatalogSorting(event.get_Sorted_flowers());
-                    }
-                    App.getScene().setRoot(root);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
+            employeeController.set_sorting_type(event.getSort_type());
+            employeeController.setCatalogSorting(event.get_Sorted_flowers());
             return;
         }
-
 
     }
-    @Subscribe
-    public void handleCatalogUpdate(Add_flower_event event)
-    {
-        System.out.println("enter event method");
-        System.out.println(type_Client);
-        System.out.println(type_Employee);
-        System.out.println(type_local);
-        System.out.println(guess);
-        System.out.println(event.get_catalog_type());
-        if(event.getUser()!=null)
-        {
-            LoginRegCheck update_user = event.getUser();
-            if(update_user.getUsername().equals(user.getUsername()))
-            {
-                user=update_user;
-            }
-            else
-            {
-                return;
-            }
 
-        }
-        if(guess)
-        {
-
-            add_flower_and_update_catalog(event.get_flowers());
-            return;
-        }
-        if(type_local == event.get_catalog_type() && type_local==1)
-        {
-            add_flower_and_update_catalog(event.get_flowers());
-            return;
-        }
-        if(type_local == event.get_catalog_type() && type_local==2)
-        {
-            add_flower_and_update_catalog(event.get_flowers());
-            return;
-        }
-        if(type_local == event.get_catalog_type() && type_local==3)
-        {
-            add_flower_and_update_catalog(event.get_flowers());
-            return;
-        }
-        if(type_local == event.get_catalog_type() && type_local==4)
-        {
-            add_flower_and_update_catalog(event.get_flowers());
-            return;
-        }
-
-
-    }
-    public void add_flower_and_update_catalog(List<Flower> flowerList)
-    {
-        System.out.println("add flower_situation");
-        System.out.println(type_Client);
-        System.out.println(type_Employee);
-        System.out.println(type_local);
-        if(guess)
-        {
-            System.out.println("Processing as guest");
-            Platform.runLater(() -> {
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
-                    Parent root = loader.load();
-
-                    CatalogController controller = loader.getController();
-                    controller.set_type(0);
-                    controller.setFlowersList_c(flowerList);
-                    controller.setCatalogData(flowerList);
-                    App.getScene().setRoot(root);
-                    if(!type_guess)//to know this is the first time
-                    {
-                        type_guess = true;
-                        System.out.println("show the catalog first time as guest");
-                        App.getStage().setWidth(800);
-                        App.getStage().setHeight(750);
-                        App.getStage().centerOnScreen();
-                    }
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            return;
-        }
-        if(type_Client) {
-            Platform.runLater(() -> {
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
-                    Parent root = loader.load();
-                    CatalogController controller = loader.getController();
-                    if(type_local==4)// network
-                    {
-                        controller.set_type(4);
-                        controller.setFlowersList_c(flowerList);
-                        controller.set_isLogin(true);
-                        controller.set_user(user);
-                        controller.setCatalogData(flowerList);
-                        System.out.println("this client is network ");
-
-                    }
-                    else
-                    {
-
-                        System.out.println("this client is for store: " + type_local);
-                        controller.set_isLogin(true);
-                        controller.set_user(user);
-                        controller.set_type(type_local);
-                        controller.setFlowersList_c(flowerList);
-                        controller.setCatalogData(flowerList);
-
-                    }
-                    App.getScene().setRoot(root);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            return;
-        }
-        if(type_Employee)
-        {
-            Platform.runLater(() -> {
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
-                    Parent root = loader.load();
-                    CatalogController_employee controller = loader.getController();
-
-                    if(type_local==4)// network
-                    {
-                        controller.set_type(4);
-                        controller.setFlowersList_c(flowerList);
-                        controller.setCatalogData(flowerList);
-                        controller.set_isLogin(true);
-                        controller.set_user(user);
-                        System.out.println("this employee is network ");
-                    }
-                    else
-                    {
-
-                        System.out.println("this employee is for store: " + type_local);
-                        controller.set_type(type_local);
-                        controller.setFlowersList_c(flowerList);
-                        controller.set_isLogin(true);
-                        controller.set_user(user);
-                        controller.setCatalogData(flowerList);
-                    }
-                    App.getScene().setRoot(root);
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            return;
-        }
-
-
-    }
     @Subscribe
     public void handleCatalogUpdate(CatalogUpdateEvent event)/// /  this method only for the first time to get the catalog
     {
@@ -385,6 +143,7 @@ public class connect_scene_Con  {
 
                     CatalogController controller = loader.getController();
                     controller.setCatalogData(event.getUpdatedItems());
+                    catalogController=controller;
                     App.getScene().setRoot(root);
                     if(!type_guess)//to know this is the first time
                     {
@@ -438,7 +197,6 @@ public class connect_scene_Con  {
                             System.out.println("type_Client is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the user is mnoy to store "+type_local);
-
                         }
                         change_user_login wrapper = new change_user_login(user,1);
                         try {
@@ -463,6 +221,7 @@ public class connect_scene_Con  {
                                         controller.set_isLogin(true);
                                         controller.set_user(loginRegCheck);
                                         controller.setCatalogData(event.getUpdatedItems());
+                                        employeeController=controller;
 
                                     }
                                     else
@@ -474,8 +233,8 @@ public class connect_scene_Con  {
                                         controller.set_user(loginRegCheck);
                                         controller.set_type(type_local);
                                         controller.setCatalogData(event.getUpdatedItems());
+                                        employeeController=controller;
                                     }
-
 
                                 }
                                 else {
@@ -490,6 +249,7 @@ public class connect_scene_Con  {
                                         controller.set_isLogin(true);
                                         controller.set_user(loginRegCheck);
                                         controller.setCatalogData(event.getUpdatedItems());
+                                        catalogController=controller;
 
                                     }
                                     else
@@ -501,14 +261,10 @@ public class connect_scene_Con  {
                                         controller.set_isLogin(true);
                                         controller.set_user(loginRegCheck);
                                         controller.setCatalogData(event.getUpdatedItems());
+                                        catalogController=controller;
 
                                     }
-
-
-
                                 }
-
-
                                 App.getScene().setRoot(root);
                                 App.getStage().setWidth(800);
                                 App.getStage().setHeight(750);
