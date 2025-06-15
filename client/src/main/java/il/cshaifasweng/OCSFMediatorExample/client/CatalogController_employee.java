@@ -344,6 +344,10 @@ public class CatalogController_employee {
     public LoginRegCheck getUser() {
         return user;
     }
+    private ComplainController_employee complainController;
+    public void setCatalogController(ComplainController_employee controller) {
+        this.complainController = controller;
+    }
     public void  set_sorting_type(int value)
     {
         sorting_type=value;
@@ -559,6 +563,22 @@ public class CatalogController_employee {
     @FXML
     void open_complain_box(ActionEvent event)
     {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("complain_handle_screen.fxml"));
+            Parent root = fxmlLoader.load();
+            ComplainController_employee complainControllerEmployee = fxmlLoader.getController();
+            complainControllerEmployee.setCatalogController(this);
+
+            Stage stage = new Stage();
+            stage.setTitle("Complaints");
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
     }
