@@ -335,6 +335,15 @@ public class CatalogController_employee {
             discount.setOnAction(this::request);
         }
     }
+    private LoginRegCheck user;
+    public void set_user(LoginRegCheck user) {this.user = user;}
+    boolean is_login=false;
+    public void set_isLogin(boolean is_login) {
+        this.is_login = is_login;
+    }
+    public LoginRegCheck getUser() {
+        return user;
+    }
     public void  set_sorting_type(int value)
     {
         sorting_type=value;

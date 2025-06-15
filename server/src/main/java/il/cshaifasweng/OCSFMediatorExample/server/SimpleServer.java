@@ -176,6 +176,37 @@ public class SimpleServer extends AbstractServer {
 			sendToAllClients("update_catalog_after_change");
 
 		}
+		else if (msgString.startsWith("asks_for_users")) {
+			Session session = null;
+			List<LoginRegCheck> allUsers = null;
+
+			try {
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
+				Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
+				query.select(root);
+
+				allUsers = session.createQuery(query).getResultList();
+
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				e.printStackTrace();
+				if (session != null) session.getTransaction().rollback();
+			} finally {
+				if (session != null) session.close();
+			}
+
+
+			try {
+				client.sendToClient(allUsers);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
 		else if (msgString.startsWith("price_changed"))
 		{
 			List<Store> stores = App.get_stores();
@@ -411,92 +442,60 @@ public class SimpleServer extends AbstractServer {
 			}
 			sendToAllClients("The network manager has added a flower.");
 		}
-		else if (msg.getClass().equals(LoginRegCheck.class)) {
+		else if (msg.getClass().equals(LoginRegCheck.class))
+		{
 			System.out.println("entered LoginRegCheck");
-			int isLogin = ((LoginRegCheck) msg).getIsLogin();
-			// check for user is already exists :
-
-			String username = ((LoginRegCheck) msg).getUsername();
-			String password = ((LoginRegCheck) msg).getPassword();
+			Session session = App.getSessionFactory().openSession();
+			session.beginTransaction();
 			LoginRegCheck new_user = (LoginRegCheck) msg;
-
-			System.out.println("Username: " + username);
-			System.out.println("Password: " + password);
-
-			switch (isLogin) {
-				case 1: // login
-
-					Session session = App.getSessionFactory().openSession();
-					session.beginTransaction();
-
-					List<LoginRegCheck> resultLogin = session.createQuery(
-									"FROM LoginRegCheck lrc WHERE lrc.username = :username AND lrc.password = :password",
-									LoginRegCheck.class
-							)
-							.setParameter("username", username)
-							.setParameter("password", password)
-							.getResultList();
-					session.getTransaction().commit();
-
-					if (resultLogin.isEmpty()) {
-						// user doesn't exist or password is wrong
-						try {
-							System.out.println("Login failed for user: " + username);
-							client.sendToClient("#login_failed");
-							session.close();
-						} catch (IOException e) {
-							System.out.println("User login failed ERR");
-							e.printStackTrace();
-						}
-						return;
-					}
-					try {
-						System.out.println("User Logged-in successfully: " + username);
-						session.close();
-						client.sendToClient("#login/reg_ok");
-
-					} catch (IOException e) {
-						System.out.println("User login ok ERR");
-						e.printStackTrace();
-					}
-					break;
-				case 0: // registration
-					boolean userExists = false;
-
-					try {
-						session = App.getSessionFactory().openSession();
-						session.beginTransaction();
-
-						CriteriaBuilder builder = session.getCriteriaBuilder();
-						CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
-						Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
-
-						query.select(root).where(builder.equal(root.get("username"), new_user.getUsername()));
-						List<LoginRegCheck> resultList = session.createQuery(query).getResultList();
-
-						userExists = !resultList.isEmpty();
-
-						if (userExists) {
-							System.out.println("Username already exists: " + new_user.getUsername());
-							client.sendToClient("#user_exists");
-
-							// אפשר גם להחזיר הודעה לממשק המשתמש
-						} else {
-							session.save(new_user);
-							System.out.println("New user registered: " + new_user.getUsername());
-						}
-
-						session.getTransaction().commit();
-						session.close();
+			System.out.println("new_user name : " + new_user.getUsername());
+			session = App.getSessionFactory().openSession();
+			try {
+				session.beginTransaction();
+				session.save(new_user);
+				session.getTransaction().commit();
 					} catch (Exception e) {
-						System.out.println("User register/login ERR");
+						session.getTransaction().rollback();
 						e.printStackTrace();
-					}
+					} finally {
+						session.close();
+					}// registration
+
+		}
+		else if (msg.getClass().equals(change_user_login.class)) {
+			change_user_login wrapper = (change_user_login) msg;
+			LoginRegCheck user = wrapper.get_user();
+			int new_state = wrapper.get_the_new_state();
+
+			Session session = null;
+
+			try {
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
+				Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
+				query.select(root).where(builder.equal(root.get("username"), user.getUsername()));
+
+				LoginRegCheck userInDb = session.createQuery(query).uniqueResult();
+
+				if (userInDb != null) {
+					userInDb.setIsLogin(new_state);
+					session.update(userInDb);
+				}
+
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				if (session != null) session.getTransaction().rollback();
+				e.printStackTrace();
+			} finally {
+				if (session != null) session.close();
 			}
+		}
 
 
-
-			}
 		else if (msg instanceof Order)
 		{
 			Order order = (Order) msg;

@@ -10,6 +10,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -51,6 +52,7 @@ public class connect_scene_Con  {
     boolean type_Employee = false;
     boolean type_guess = false;//only to know if is the first time to jet the catalog
     int type_local = 0;//1 for store 1 ,2 for store 2 ,3 for store 3, 4 for all of them
+    private LoginRegCheck user;
     @FXML
     void initialize() {
 
@@ -141,6 +143,8 @@ public class connect_scene_Con  {
                         controller.set_type(4);
                         controller.set_sorting_type(event.getSort_type());
                         controller.setFlowersList_c(event.get_original_catalog());
+                        controller.set_isLogin(true);
+                        controller.set_user(user);
                         controller.setCatalogSorting(event.get_Sorted_flowers());
                         System.out.println("this client is network ");
 
@@ -150,6 +154,8 @@ public class connect_scene_Con  {
                         controller.set_type(type_local);
                         controller.set_sorting_type(event.getSort_type());
                         System.out.println("this client is for store: " + type_local);
+                        controller.set_isLogin(true);
+                        controller.set_user(user);
                         controller.setFlowersList_c(event.get_original_catalog());
                         controller.setCatalogSorting(event.get_Sorted_flowers());
 
@@ -174,6 +180,8 @@ public class connect_scene_Con  {
                     {
                         controller.set_type(type_local);
                         controller.set_sorting_type(event.getSort_type());
+                        controller.set_isLogin(true);
+                        controller.set_user(user);
                         controller.setFlowersList_c(event.get_original_catalog());
                         controller.setCatalogSorting(event.get_Sorted_flowers());
                         System.out.println("this employee is network ");
@@ -181,6 +189,8 @@ public class connect_scene_Con  {
                     else
                     {
                         controller.set_type(type_local);
+                        controller.set_isLogin(true);
+                        controller.set_user(user);
                         controller.set_sorting_type(event.getSort_type());
                         controller.setFlowersList_c(event.get_original_catalog());
                         System.out.println("this employee is for store: " + type_local);
@@ -279,6 +289,8 @@ public class connect_scene_Con  {
                     {
                         controller.set_type(4);
                         controller.setFlowersList_c(flowerList);
+                        controller.set_isLogin(true);
+                        controller.set_user(user);
                         controller.setCatalogData(flowerList);
                         System.out.println("this client is network ");
 
@@ -287,6 +299,8 @@ public class connect_scene_Con  {
                     {
 
                         System.out.println("this client is for store: " + type_local);
+                        controller.set_isLogin(true);
+                        controller.set_user(user);
                         controller.set_type(type_local);
                         controller.setFlowersList_c(flowerList);
                         controller.setCatalogData(flowerList);
@@ -313,6 +327,8 @@ public class connect_scene_Con  {
                         controller.set_type(4);
                         controller.setFlowersList_c(flowerList);
                         controller.setCatalogData(flowerList);
+                        controller.set_isLogin(true);
+                        controller.set_user(user);
                         System.out.println("this employee is network ");
                     }
                     else
@@ -321,6 +337,8 @@ public class connect_scene_Con  {
                         System.out.println("this employee is for store: " + type_local);
                         controller.set_type(type_local);
                         controller.setFlowersList_c(flowerList);
+                        controller.set_isLogin(true);
+                        controller.set_user(user);
                         controller.setCatalogData(flowerList);
                     }
                     App.getScene().setRoot(root);
@@ -373,20 +391,41 @@ public class connect_scene_Con  {
             System.out.println("PASSWORD: " + passWord);
             List<LoginRegCheck> users = event.getUsers();
                 for (LoginRegCheck loginRegCheck : users) {
+                    user = loginRegCheck;
                     if (loginRegCheck.getUsername().equals(user_Name) && loginRegCheck.getPassword().equals(passWord)) {
                         if (loginRegCheck.isType())
                         {
+                            user = loginRegCheck;
                             type_Employee = true;
                             System.out.println("type_Employee is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the employee is for store "+type_local);
+                            if(loginRegCheck.getIsLogin()==1)
+                            {
+                                Warning warning = new Warning("this user already in the system");
+                                EventBus.getDefault().post(new WarningEvent(warning));
+                                return;
+                            }
                         }
                         if (!loginRegCheck.isType())
                         {
+                            user = loginRegCheck;
                             type_Client = true;
                             System.out.println("type_Client is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the user is mnoy to store "+type_local);
+                            if(loginRegCheck.getIsLogin()==1)
+                            {
+                                Warning warning = new Warning("this user already in the system");
+                                EventBus.getDefault().post(new WarningEvent(warning));
+                                return;
+                            }
+                        }
+                        change_user_login wrapper = new change_user_login(user,1);
+                        try {
+                            SimpleClient.getClient().sendToServer(wrapper);
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                         Platform.runLater(() -> {
                             try {
@@ -402,6 +441,8 @@ public class connect_scene_Con  {
                                     {
                                         System.out.println("this employee is network ");
                                         controller.set_type(type_local);
+                                        controller.set_isLogin(true);
+                                        controller.set_user(loginRegCheck);
                                         controller.setCatalogData(event.getUpdatedItems());
 
                                     }
@@ -410,11 +451,15 @@ public class connect_scene_Con  {
                                         Store store=stores.get(type_local-1);
                                         System.out.println("this employee is for store: " + store.getStoreName());
                                         controller.setFlowersList_c(store.getFlowersList());
+                                        controller.set_isLogin(true);
+                                        controller.set_user(loginRegCheck);
                                         controller.set_type(type_local);
                                         controller.setCatalogData(event.getUpdatedItems());
                                     }
 
-                                } else {
+
+                                }
+                                else {
                                     loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
                                     root = loader.load();
                                     CatalogController controller = loader.getController();
@@ -423,6 +468,8 @@ public class connect_scene_Con  {
                                     {
                                         controller.set_type(type_local);
                                         System.out.println("this client is network ");
+                                        controller.set_isLogin(true);
+                                        controller.set_user(loginRegCheck);
                                         controller.setCatalogData(event.getUpdatedItems());
 
                                     }
@@ -432,11 +479,16 @@ public class connect_scene_Con  {
                                         System.out.println("this client is for store: " + store.getStoreName());
                                         controller.setFlowersList_c(store.getFlowersList());
                                         controller.set_type(type_local);
+                                        controller.set_isLogin(true);
+                                        controller.set_user(loginRegCheck);
                                         controller.setCatalogData(event.getUpdatedItems());
+
                                     }
 
 
+
                                 }
+
 
                                 App.getScene().setRoot(root);
                                 App.getStage().setWidth(800);

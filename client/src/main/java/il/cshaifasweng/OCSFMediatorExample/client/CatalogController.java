@@ -1,7 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Complain;
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 
@@ -9,9 +8,6 @@ import java.io.IOException;
 
 import java.util.List;
 
-
-import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
 
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -230,6 +226,10 @@ public class CatalogController {
     private Text price_11_before_sale;
     @FXML
     private Text price_12_before_sale;
+    boolean is_login=false;
+    public void set_isLogin(boolean is_login) {
+        this.is_login = is_login;
+    }
 
     private List<Flower> flowersList_c;
     private Label[] nameLabels;
@@ -242,6 +242,15 @@ public class CatalogController {
     private int sorting_type=0 ; //0 for guest, 1 for store 1 ,2 for store 2 ,3 for store 3 ,
     // 4 for the network
     private List<Flower> flowersList_sorting;
+    private LoginRegCheck user;
+    public void set_user(LoginRegCheck user) {
+        this.user = user;
+        System.out.println("the user is " + user.getUsername());
+
+    }
+    public LoginRegCheck getUser() {
+        return user;
+    }
 
     @FXML
     private ComboBox<String> Stores;
@@ -290,6 +299,19 @@ public class CatalogController {
         priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
         imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12 };
         price_Before_sale = new Text[] { price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale };
+        Stage stage = App.getStage();
+        stage.setOnCloseRequest(event1 -> {
+            try {
+                if (user != null) {
+                    user.setIsLogin(0);
+                    change_user_login tt = new change_user_login(user,0);
+                    System.out.println("the user is " + user.getUsername()+"logged out");
+                    SimpleClient.getClient().sendToServer(tt);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
     public void  set_type(int value)
     {
@@ -444,11 +466,13 @@ public class CatalogController {
     @FXML
     void gotoAcc(MouseEvent event) {
 
-        if (SimpleClient.isGuest) {       //guest mode
+        if (type==0) {       //guest mode
             Platform.runLater(() -> {
                 try {
-                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("select_account_type.fxml"));
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
                     Parent root = fxmlLoader.load();
+                    RegistrationController regController = fxmlLoader.getController();
+                    regController.setCatalogController(this);
                     Stage stage = new Stage();
                     stage.setTitle("Create New Account");
                     stage.setScene(new Scene(root));

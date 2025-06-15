@@ -5,6 +5,8 @@ import org.greenrobot.eventbus.EventBus;
 
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
 
+import java.util.List;
+
 public class SimpleClient extends AbstractClient {
 	
 	static SimpleClient client = null;
@@ -33,6 +35,10 @@ public class SimpleClient extends AbstractClient {
 		else if(msg.getClass().equals(Add_flower_event.class)){
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
+		else if (msg instanceof List<?>) { // send users to reg scene
+			EventBus.getDefault().post(msg);
+		}
+
 		else if(msgString.startsWith("The network manager has added a flower."))
 		{
 			try {
