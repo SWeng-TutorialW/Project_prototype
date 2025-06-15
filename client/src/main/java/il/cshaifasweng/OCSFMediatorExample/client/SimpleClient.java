@@ -38,6 +38,9 @@ public class SimpleClient extends AbstractClient {
 		else if (msg instanceof List<?>) { // send users to reg scene
 			EventBus.getDefault().post(msg);
 		}
+		else if(msg.getClass().equals(ComplainUpdateEvent.class)){
+			EventBus.getDefault().post(msg); // post the catalog update to UI
+		}
 
 		else if(msgString.startsWith("The network manager has added a flower."))
 		{
@@ -48,14 +51,10 @@ public class SimpleClient extends AbstractClient {
 			}
 
 		}
-
-
-
-
-		else if(msgString.startsWith("update_catalog_after_change"))
+		else if(msgString.startsWith("update_complainScene_after_change"))
 		{
 			try {
-				SimpleClient.getClient().sendToServer("price_changed");
+				SimpleClient.getClient().sendToServer("getComplaints");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

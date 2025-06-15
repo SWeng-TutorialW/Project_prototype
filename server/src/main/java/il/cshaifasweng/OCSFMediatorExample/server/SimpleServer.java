@@ -494,6 +494,50 @@ public class SimpleServer extends AbstractServer {
 				if (session != null) session.close();
 			}
 		}
+		else if (msgString.startsWith("getComplaints")) {
+			try {
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<Complain> query = builder.createQuery(Complain.class);
+				query.from(Complain.class);
+				CriteriaQuery<LoginRegCheck> query1 = builder.createQuery(LoginRegCheck.class);
+				query1.from(LoginRegCheck.class);
+
+				List<Complain> complainList = session.createQuery(query).getResultList();
+				List<LoginRegCheck> loginRegCheckList = session.createQuery(query1).getResultList();
+				for (Complain c : complainList){
+					System.out.println(c.getComplaint());
+					System.out.println("server getComplaints work!");
+				}
+				session.getTransaction().commit();
+				session.close();
+
+				ComplainUpdateEvent event = new ComplainUpdateEvent(complainList,loginRegCheckList);
+				client.sendToClient(event);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		else if(msg.getClass().equals(Complain.class)) {
+			Complain complain = (Complain) msg;
+
+			Session session = App.getSessionFactory().openSession();
+			try {
+				session.beginTransaction();
+				session.save(complain);
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				session.getTransaction().rollback();
+				e.printStackTrace();
+			} finally {
+				session.close();
+			}
+			sendToAllClients("update_complainScene_after_change");
+
+		}
 
 
 		else if (msg instanceof Order)
