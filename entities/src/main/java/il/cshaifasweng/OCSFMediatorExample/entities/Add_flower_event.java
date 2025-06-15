@@ -8,6 +8,7 @@ public class Add_flower_event implements Serializable {
 
     private List<Flower> flowers;
     int type_of_catalog_that_send;
+    LoginRegCheck user;
 
 
 
@@ -16,6 +17,16 @@ public class Add_flower_event implements Serializable {
         this.type_of_catalog_that_send = sort_type;
 
 
+    }
+    public Add_flower_event(List<Flower> updatedItems, int sort_type,LoginRegCheck user) {
+        this.flowers = updatedItems;
+        this.type_of_catalog_that_send = sort_type;
+        this.user = user;
+
+
+    }
+    public LoginRegCheck getUser() {
+        return user;
     }
 
 

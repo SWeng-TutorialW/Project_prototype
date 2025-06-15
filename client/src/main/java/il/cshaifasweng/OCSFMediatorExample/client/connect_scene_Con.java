@@ -56,8 +56,12 @@ public class connect_scene_Con  {
     @FXML
     void initialize() {
 
-        EventBus.getDefault().register(this);
-        System.out.println("connect_scene_Con_initialize");
+        if (EventBus.getDefault().isRegistered(this)) {
+            System.out.println("already registered");
+        } else {
+            EventBus.getDefault().register(this);
+        }
+
 
 
 
@@ -216,6 +220,19 @@ public class connect_scene_Con  {
         System.out.println(type_local);
         System.out.println(guess);
         System.out.println(event.get_catalog_type());
+        if(event.getUser()!=null)
+        {
+            LoginRegCheck update_user = event.getUser();
+            if(update_user.getUsername().equals(user.getUsername()))
+            {
+                user=update_user;
+            }
+            else
+            {
+                return;
+            }
+
+        }
         if(guess)
         {
 
@@ -395,31 +412,33 @@ public class connect_scene_Con  {
                     if (loginRegCheck.getUsername().equals(user_Name) && loginRegCheck.getPassword().equals(passWord)) {
                         if (loginRegCheck.isType())
                         {
+                            if(loginRegCheck.getIsLogin()==1)
+                            {
+                                Warning warning = new Warning("this user already in the system");
+                                EventBus.getDefault().post(new WarningEvent(warning));
+                                return;
+                            }
                             user = loginRegCheck;
                             type_Employee = true;
                             System.out.println("type_Employee is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the employee is for store "+type_local);
+
+                        }
+                        if (!loginRegCheck.isType())
+                        {
                             if(loginRegCheck.getIsLogin()==1)
                             {
                                 Warning warning = new Warning("this user already in the system");
                                 EventBus.getDefault().post(new WarningEvent(warning));
                                 return;
                             }
-                        }
-                        if (!loginRegCheck.isType())
-                        {
                             user = loginRegCheck;
                             type_Client = true;
                             System.out.println("type_Client is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the user is mnoy to store "+type_local);
-                            if(loginRegCheck.getIsLogin()==1)
-                            {
-                                Warning warning = new Warning("this user already in the system");
-                                EventBus.getDefault().post(new WarningEvent(warning));
-                                return;
-                            }
+
                         }
                         change_user_login wrapper = new change_user_login(user,1);
                         try {

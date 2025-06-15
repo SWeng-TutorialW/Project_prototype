@@ -41,11 +41,25 @@ public class SimpleClient extends AbstractClient {
 		else if(msg.getClass().equals(ComplainUpdateEvent.class)){
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
+		else if(msg.getClass().equals(Complain.class)){
+			System.out.println("I send the complain event");
+			EventBus.getDefault().post(msg); // post the catalog update to UI
+		}
 
 		else if(msgString.startsWith("The network manager has added a flower."))
 		{
 			try {
 				SimpleClient.getClient().sendToServer("update_catalog_after_manager_add_flower");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+		else if(msgString.startsWith("user_"))
+		{
+			String[] parts = msgString.split("_");
+			try {
+				SimpleClient.getClient().sendToServer("need#to#change#user#localy_"+parts[1]);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

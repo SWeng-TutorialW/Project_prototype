@@ -146,7 +146,12 @@ public class RegistrationController {
         }
         if(!is_yearly_subscription)
         {
-
+            if(store==-1)
+            {
+                Warning warning = new Warning("you need to select a store");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
             LoginRegCheck new_user = new  LoginRegCheck(regUser,regPass,email,1,false,store);
             SimpleClient.getClient().sendToServer(new_user);
             catalogController.set_user(new_user);
@@ -159,7 +164,7 @@ public class RegistrationController {
                 EventBus.getDefault().post(new WarningEvent(warning));
                 return;
             }
-            if (credit_card_box.getText().length() <= 9) {
+            if (credit_card_box.getText().length() <= 16) {
                 Warning warning = new Warning("Credit card must BE 16 characters");
                 EventBus.getDefault().post(new WarningEvent(warning));
                 return;

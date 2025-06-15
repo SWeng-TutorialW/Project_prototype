@@ -538,8 +538,101 @@ public class SimpleServer extends AbstractServer {
 			sendToAllClients("update_complainScene_after_change");
 
 		}
+		else if (msg.getClass().equals(change_sendOrRecieve_messages.class)) {
+			change_sendOrRecieve_messages wrapper = (change_sendOrRecieve_messages) msg;
+
+			String username = null;
+
+			if (wrapper.get_user_name() != null) {
+				username = wrapper.get_user_name();
+			} else if (wrapper.get_user() != null) {
+				username = wrapper.get_user().getUsername();
+			}
+
+			if (username != null) {
+				boolean newSendState = wrapper.get_the_new_state_for_send();
+				boolean newReceiveState = wrapper.get_the_new_state_for_recieve();
+
+				Session session = null;
+				try {
+					session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+
+					CriteriaBuilder builder = session.getCriteriaBuilder();
+					CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
+					Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
+					query.select(root).where(builder.equal(root.get("username"), username));
+
+					LoginRegCheck userInDb = session.createQuery(query).uniqueResult();
+
+					if (userInDb != null) {
+						userInDb.set_send(newSendState);
+						userInDb.set_receive_answer(newReceiveState);
+						session.update(userInDb);
+					}
+
+					session.getTransaction().commit();
+				} catch (Exception e) {
+					if (session != null) session.getTransaction().rollback();
+					e.printStackTrace();
+				} finally {
+					if (session != null) session.close();
+				}
+
+				sendToAllClients("user_" + username);
+			}
+		}
+
+		else if (msgString.startsWith("need#to#change#user#localy"))
+		{
+			Session session = App.getSessionFactory().openSession();
+			session.beginTransaction();
+			String[] parts = msgString.split("_");
+			String username = parts[1];
+			CriteriaBuilder builder = session.getCriteriaBuilder();
+			CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
+			Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
+			query.select(root).where(builder.equal(root.get("username"), username));
+			LoginRegCheck user = session.createQuery(query).uniqueResult();
+
+			String hql = "FROM Flower";
+			List<Flower> flowers = session.createQuery(hql, Flower.class).getResultList();
+			session.getTransaction().commit();
+			session.close();
+			try {
+				Add_flower_event event = new Add_flower_event(flowers,4,user);
+				client.sendToClient(event);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			List<Store> stores = App.get_stores();
+			Store store = stores.get(0);
+			flowers=store.getFlowersList();
+			try {
+				Add_flower_event event = new Add_flower_event(flowers,1,user);
+				client.sendToClient(event);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			store = stores.get(1);
+			flowers=store.getFlowersList();
+			try {
+				Add_flower_event event = new Add_flower_event(flowers,2,user);
+				client.sendToClient(event);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			store = stores.get(3);
+			flowers=store.getFlowersList();
+			try {
+				Add_flower_event event = new Add_flower_event(flowers,3,user);
+				client.sendToClient(event);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
 
+		}
 		else if (msg instanceof Order)
 		{
 			Order order = (Order) msg;
@@ -949,6 +1042,56 @@ public class SimpleServer extends AbstractServer {
 				return;
 			}
 		}
+		else if (msgString.startsWith("I#want#to#see#my#answer_")) {
+			System.out.println("good");
+
+			String[] parts = msgString.split("_");
+			String username = parts[1];
+			String toSearch = "answer to" + username;
+			System.out.println("toSearch: " + toSearch);
+
+			Session session = null;
+
+			try {
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<Complain> query = builder.createQuery(Complain.class);
+				Root<Complain> root = query.from(Complain.class);
+
+				query.select(root).where(builder.equal(root.get("clientName"), toSearch));
+
+				List<Complain> matchingComplaints = session.createQuery(query).getResultList();
+
+				session.getTransaction().commit();
+
+				if (!matchingComplaints.isEmpty()) {
+
+					Complain latest = matchingComplaints.stream()
+							.max((c1, c2) -> c1.getTimestamp().compareTo(c2.getTimestamp()))
+							.orElse(null);
+
+					if (latest != null)
+					{
+						System.out.println("Found complaint: " + latest.getComplaint());
+						client.sendToClient(latest);
+					}
+				} else {
+					System.out.println("No matching complaints found for: " + toSearch);
+				}
+
+
+			} catch (Exception e) {
+				if (session != null) session.getTransaction().rollback();
+				e.printStackTrace();
+			} finally {
+				if (session != null) session.close();
+			}
+		}
+
+
+
 	}
 
 	public void sendToAllClients(String message) {

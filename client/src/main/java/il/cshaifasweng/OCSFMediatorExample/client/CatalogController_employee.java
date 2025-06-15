@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import java.io.IOException;
 
@@ -26,6 +27,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 import org.hibernate.SessionFactory;
 
 public class CatalogController_employee {
@@ -344,6 +346,10 @@ public class CatalogController_employee {
     public LoginRegCheck getUser() {
         return user;
     }
+    private ComplainController_employee complainController;
+    public void setCatalogController(ComplainController_employee controller) {
+        this.complainController = controller;
+    }
     public void  set_sorting_type(int value)
     {
         sorting_type=value;
@@ -511,6 +517,20 @@ public class CatalogController_employee {
         priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
         imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12 };
         price_Before_sale = new Text[] { price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale };
+        Stage stage = App.getStage();
+        stage.setOnCloseRequest(event1 -> {
+            try {
+                if (user != null) {
+                    user.setIsLogin(0);
+                    change_user_login tt = new change_user_login(user,0);
+                    System.out.println("the user is " + user.getUsername()+"logged out");
+                    SimpleClient.getClient().sendToServer(tt);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
 
 
 
@@ -557,8 +577,48 @@ public class CatalogController_employee {
         SimpleClient.getClient().sendToServer(message);
     }
     @FXML
-    void open_complain_box(ActionEvent event)
+    void open_complain_box(ActionEvent event)throws IOException
     {
+        if(type==4)
+        {
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("complain_handle_screen.fxml"));
+                Parent root = fxmlLoader.load();
+                ComplainController_employee complainControllerEmployee = fxmlLoader.getController();
+                complainControllerEmployee.setCatalogController(this);
+
+                Stage stage = new Stage();
+                stage.setTitle("Complaints");
+                stage.setScene(new Scene(root));
+                stage.setResizable(false);
+                stage.initModality(Modality.WINDOW_MODAL);
+                stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            if(user.isReceive_answer())
+            {
+                SimpleClient.getClient().sendToServer("I#want#to#see#my#answer_"+user.getUsername());
+                System.out.println("I#want#to#see#my#answer_"+user.getUsername());
+                if (!EventBus.getDefault().isRegistered(this)) {
+                    EventBus.getDefault().register(this);
+                    System.out.println("CatalogController_employee registered");
+                } else {
+                    System.out.println("CatalogController_employee already registered");
+                }
+                return;
+            }
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Mailbox");
+            alert.setHeaderText("");
+            alert.setContentText("You dont have any messages");
+            alert.showAndWait();
+        }
+
 
 
     }
@@ -663,6 +723,34 @@ public class CatalogController_employee {
             }
         }
 
+
+    }
+    @Subscribe
+    public void show_answer(Complain event)
+    {
+        System.out.println("show_answer");
+        Platform.runLater(() -> {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("answer_scene.fxml"));
+            Parent root = fxmlLoader.load();
+            AnswerScene controller = fxmlLoader.getController();
+            controller.setComplain(event);
+            controller.set_user(user);
+
+
+            Stage stage = new Stage();
+            stage.setTitle("Answer from the admin");
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.initModality(Modality.WINDOW_MODAL);
+
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        });
+        return;
+
     }
 
     public void receiveNewFlower(Flower flower) {
@@ -749,6 +837,12 @@ public class CatalogController_employee {
     @FXML
     void request(ActionEvent event)
     {
+        if(user.get_send_complain())
+        {
+            Warning warning = new Warning("You already send a  request.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("complain_scene.fxml"));
             Parent root = fxmlLoader.load();
@@ -768,14 +862,15 @@ public class CatalogController_employee {
             e.printStackTrace();
         }
 
-
-
-
     }
     public void receiveNewComplain(Complain complain)
     {
+        complain.setClient(user.getUsername());
+        user.set_send(true);
+        change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(user, true,false);
         try {
-            SimpleClient.getClient().sendToServer(complain); // try to send the complain to the DB
+            SimpleClient.getClient().sendToServer(complain);// try to send the complain to the DB
+            SimpleClient.getClient().sendToServer(wrapper);
         } catch (IOException e) {
             e.printStackTrace();
         }

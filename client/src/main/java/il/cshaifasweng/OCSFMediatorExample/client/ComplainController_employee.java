@@ -16,6 +16,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.paint.Color;
@@ -74,9 +75,39 @@ public class ComplainController_employee implements Initializable {
             e.printStackTrace();
 
         }
+        complains.setRowFactory(tv -> {
+            TableRow<Complain> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (!row.isEmpty() && event.getClickCount() == 2) {
+                    Complain selected = row.getItem();
+                    openReplyWindow(selected);
+                }
+            });
+            return row;
+        });
 
 
     }
+    private void openReplyWindow(Complain complain) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("reply_complain.fxml"));
+            Parent root = loader.load();
+
+            ReplyComplainController controller = loader.getController();
+            controller.setComplain(complain);
+
+
+            Stage stage = new Stage();
+            stage.setTitle("Reply to Complaint");
+            stage.initModality(Modality.WINDOW_MODAL);
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Subscribe
     public void handleComplainUpdate(ComplainUpdateEvent event)

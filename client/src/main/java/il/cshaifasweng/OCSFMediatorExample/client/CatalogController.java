@@ -30,6 +30,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 
 public class CatalogController {
@@ -169,6 +170,8 @@ public class CatalogController {
     @FXML
     private Button six_6;
     @FXML
+    private Button  Mail_box;
+    @FXML
     private ImageView sort_image;
     @FXML
     private Button three_3;
@@ -246,6 +249,8 @@ public class CatalogController {
     public void set_user(LoginRegCheck user) {
         this.user = user;
         System.out.println("the user is " + user.getUsername());
+        System.out.println(" user send: " + user.get_send_complain());
+
 
     }
     public LoginRegCheck getUser() {
@@ -439,6 +444,45 @@ public class CatalogController {
 
 
     }
+    @FXML
+    public void combo_choose(ActionEvent actionEvent) throws IOException {
+        sort_image.setVisible(false);
+        String selected = combo.getValue();
+        String selected_store = Stores.getValue();
+        int localtype=1;
+
+        if (selected == null) {
+            return;
+        }
+        if(selected_store.equals("Haifa"))
+        {
+            localtype=1;
+        }
+        if(selected_store.equals("Krayot"))
+        {
+            localtype=2;
+        }
+        if(selected_store.equals("Nahariyya"))
+        {
+            localtype=3;
+        }
+        if(selected_store.equals("network"))
+        {
+            localtype=4;
+        }
+        System.out.println("localtype = " + localtype);
+        String localtypeStr = String.valueOf(localtype);
+
+
+        String message = "";
+        if (selected.equals("Price High to LOW")) {
+            message = "get_flowers_high_to_low_"+localtypeStr+"_"+type;
+        } else if (selected.equals("Price Low to HIGH")) {
+            message = "get_flowers_low_to_high_"+localtypeStr+"_"+type;
+        }
+        System.out.println("message = " + message);
+        SimpleClient.getClient().sendToServer(message);
+    }
 
     private void setImage(ImageView imageView, String flowerName) {
         try {
@@ -453,16 +497,6 @@ public class CatalogController {
             e.printStackTrace();
         }
     }
-    public void receiveNewComplain(Complain complain)
-    {
-        try {
-            SimpleClient.getClient().sendToServer(complain); // try to send the complain to the DB
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
     @FXML
     void gotoAcc(MouseEvent event) {
 
@@ -496,9 +530,87 @@ public class CatalogController {
             }
         }
     }
-    @FXML
-    void complaint(ActionEvent event)
+    public void receiveNewComplain(Complain complain)
     {
+        complain.setClient(user.getUsername());
+        change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(user, true,false);
+        try {
+            SimpleClient.getClient().sendToServer(wrapper);
+            SimpleClient.getClient().sendToServer(complain);// try to send the complain to the DB
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+    @Subscribe
+    public void show_answer(Complain event)
+    {
+        System.out.println("show_answer");
+        Platform.runLater(() -> {
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("answer_scene.fxml"));
+                Parent root = fxmlLoader.load();
+                AnswerScene controller = fxmlLoader.getController();
+                controller.setComplain(event);
+                controller.set_user(user);
+
+
+                Stage stage = new Stage();
+                stage.setTitle("Answer from the admin");
+                stage.setScene(new Scene(root));
+                stage.setResizable(false);
+                stage.initModality(Modality.WINDOW_MODAL);
+
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        return;
+
+    }
+    @FXML
+    void open_mail(ActionEvent event)throws IOException
+    {
+        if(user.isReceive_answer())
+        {
+            SimpleClient.getClient().sendToServer("I#want#to#see#my#answer_"+user.getUsername());
+            System.out.println("I#want#to#see#my#answer_"+user.getUsername());
+            if (!EventBus.getDefault().isRegistered(this)) {
+                EventBus.getDefault().register(this);
+                System.out.println("CatalogController_employee registered");
+            } else {
+                System.out.println("CatalogController_employee already registered");
+            }
+            return;
+        }
+        else
+        {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Mailbox");
+            alert.setHeaderText("");
+            alert.setContentText("You dont have any messages");
+            alert.showAndWait();
+        }
+
+    }
+    @FXML
+    void complaint(ActionEvent event)throws IOException
+    {
+        if(type==0)
+        {
+            Warning warning = new Warning("guest dont allowed to send complaint");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+
+        }
+        if(user.get_send_complain() && !user.isReceive_answer())
+        {
+            Warning warning = new Warning("You already send a  complain.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("complain_scene.fxml"));
             Parent root = fxmlLoader.load();
@@ -521,45 +633,7 @@ public class CatalogController {
 
 
 
-    @FXML
-    public void combo_choose(ActionEvent actionEvent) throws IOException {
-        sort_image.setVisible(false);
-        String selected = combo.getValue();
-        String selected_store = Stores.getValue();
-        int localtype=1;
 
-        if (selected == null) {
-            return;
-        }
-        if(selected_store.equals("Haifa"))
-        {
-             localtype=1;
-        }
-        if(selected_store.equals("Krayot"))
-        {
-            localtype=2;
-        }
-        if(selected_store.equals("Nahariyya"))
-        {
-            localtype=3;
-        }
-        if(selected_store.equals("network"))
-        {
-            localtype=4;
-        }
-        System.out.println("localtype = " + localtype);
-        String localtypeStr = String.valueOf(localtype);
-
-
-        String message = "";
-        if (selected.equals("Price High to LOW")) {
-            message = "get_flowers_high_to_low_"+localtypeStr+"_"+type;
-        } else if (selected.equals("Price Low to HIGH")) {
-            message = "get_flowers_low_to_high_"+localtypeStr+"_"+type;
-        }
-        System.out.println("message = " + message);
-        SimpleClient.getClient().sendToServer(message);
-    }
 
 
     /// /////// yarden and dor

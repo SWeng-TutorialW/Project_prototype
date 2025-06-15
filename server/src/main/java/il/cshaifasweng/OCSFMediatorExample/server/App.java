@@ -117,7 +117,7 @@ public class App
         session.save(Asaf);
         session.flush();
         // Asaf and Dor  are workes of Haifa
-        LoginRegCheck tamar = new  LoginRegCheck("tamar","123","Asaf@",0,false,4);
+        LoginRegCheck tamar = new  LoginRegCheck("tamar","123","Asaf@",0,false,2);
         session.save(tamar);
         session.flush();
         LoginRegCheck malci = new  LoginRegCheck("malci","123","Asaf@",0,true,4);
