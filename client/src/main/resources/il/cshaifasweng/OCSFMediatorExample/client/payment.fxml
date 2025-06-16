@@ -44,8 +44,10 @@
                         <Font size="16.0" />
                     </font>
                 </Label>
-                <TextField fx:id="cardNumberField" promptText="1234 5678 9012 3456" 
-                          style="-fx-border-color: #B79DD9;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+              <HBox fx:id="cardNumberBox" spacing="5.0" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                 <ImageView fx:id="cardLogoInField" fitHeight="32.0" fitWidth="48.0" visible="false" />
+                    <TextField fx:id="cardNumberField" promptText="1234 5678 9012 3456" style="-fx-border-color: #B79DD9; -fx-background-insets: 0;" />
+               </HBox>
 
                 <Label text="Cardholder Name:" textFill="#333" GridPane.rowIndex="1">
                     <font>
