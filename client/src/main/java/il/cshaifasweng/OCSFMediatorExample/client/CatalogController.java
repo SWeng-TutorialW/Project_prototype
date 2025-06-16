@@ -320,9 +320,9 @@ public class CatalogController {
         price_Before_sale = new Text[] { price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale };
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
-            System.out.println("CatalogController_employee registered");
+            System.out.println("CatalogController_ registered");
         } else {
-            System.out.println("CatalogController_employee already registered");
+            System.out.println("CatalogController_ already registered");
         }
         Stage stage = App.getStage();
         stage.setOnCloseRequest(event1 -> {
@@ -728,16 +728,17 @@ public class CatalogController {
     @FXML
     void open_mail(ActionEvent event)throws IOException
     {
+        if(type==0)
+        {
+            Warning warning = new Warning("not available for guest");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+
+        }
         if(user.isReceive_answer())
         {
             SimpleClient.getClient().sendToServer("I#want#to#see#my#answer_"+user.getUsername());
             System.out.println("I#want#to#see#my#answer_"+user.getUsername());
-            if (!EventBus.getDefault().isRegistered(this)) {
-                EventBus.getDefault().register(this);
-                System.out.println("CatalogController_employee registered");
-            } else {
-                System.out.println("CatalogController_employee already registered");
-            }
             return;
         }
         else
