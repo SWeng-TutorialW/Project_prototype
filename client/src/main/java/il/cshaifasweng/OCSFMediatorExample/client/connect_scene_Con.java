@@ -176,6 +176,9 @@ public class connect_scene_Con  {
                         {
                             type_Client = true;
                             System.out.println("type_Client is true");
+                            SimpleClient.loggedIn = true;  // Set login state to true for client users Yarden added this
+                            SimpleClient.isGuest = false; // Yarden added this  
+                            System.out.println("Login state set to: " + SimpleClient.loggedIn);
                         }
                         Platform.runLater(() -> {
                             try {
