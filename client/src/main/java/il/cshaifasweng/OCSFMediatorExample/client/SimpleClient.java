@@ -14,6 +14,7 @@ public class SimpleClient extends AbstractClient {
 	public static String ip = "localhost";
 	public static boolean isGuest = false;
 	public static int selectedAccType = -1;
+	private static LoginRegCheck currentUser = null; // Store the current logged-in user
 	
 	private SimpleClient(String host, int port) {
 		super(host, port);
