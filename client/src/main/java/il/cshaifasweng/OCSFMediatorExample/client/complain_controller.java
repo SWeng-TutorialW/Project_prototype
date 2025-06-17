@@ -43,7 +43,6 @@ public class complain_controller {
 
 
         Complain complain = new Complain(client_complaint, SimpleClient.userData.getId()); // send the complaint with the client's ID
-
         SimpleClient.getClient().sendToServer(complain);
     }
 
