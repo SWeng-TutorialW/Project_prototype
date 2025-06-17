@@ -2,7 +2,7 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
@@ -14,56 +14,55 @@
    <children>
       <AnchorPane fx:id="regAnchPane" layoutX="40.0" layoutY="25.0" prefHeight="510.0" prefWidth="370.0" style="-fx-background-color: #c8a2c8; -fx-background-radius: 15;">
          <children>
-            <Label fx:id="regLbl" layoutX="125.0" layoutY="20.0" text="Registration">
+            <Label fx:id="regLbl" layoutX="126.0" text="Registration">
                <font>
                   <Font name="Dubai Medium" size="20.0" />
                </font>
             </Label>
 
             <!-- Select Store -->
-            <Label fx:id="selectStoreLbl" layoutX="40.0" layoutY="70.0" text="Select store">
+            <Label fx:id="selectStoreLbl" layoutY="51.0" prefHeight="22.0" prefWidth="141.0" text="Select type of subscription">
                <font>
                   <Font name="Dubai Medium" size="12.0" />
                </font>
             </Label>
-            <ChoiceBox fx:id="selectStoreCB" layoutX="40.0" layoutY="90.0" prefWidth="290.0" />
 
             <!-- Username -->
-            <Label fx:id="regUserLbl" layoutX="40.0" layoutY="130.0" text="Username">
+            <Label fx:id="regUserLbl" layoutX="6.0" layoutY="112.0" text="Username">
                <font>
                   <Font name="Dubai Medium" size="12.0" />
                </font>
             </Label>
-            <TextField fx:id="regUserTxtB" layoutX="40.0" layoutY="150.0" prefWidth="290.0" />
+            <TextField fx:id="regUserTxtB" layoutX="5.0" layoutY="141.0" prefWidth="290.0" />
 
             <!-- Email -->
-            <Label fx:id="regEmailLbl" layoutX="40.0" layoutY="190.0" text="Email">
+            <Label fx:id="regEmailLbl" layoutX="7.0" layoutY="166.0" text="Email">
                <font>
                   <Font name="Dubai Medium" size="12.0" />
                </font>
             </Label>
-            <TextField fx:id="regEmailTxtB" layoutX="40.0" layoutY="210.0" prefWidth="290.0" />
+            <TextField fx:id="regEmailTxtB" layoutX="5.0" layoutY="188.0" prefWidth="290.0" />
 
             <!-- Password -->
-            <Label fx:id="regPassLbl" layoutX="40.0" layoutY="250.0" text="Password">
+            <Label fx:id="regPassLbl" layoutX="8.0" layoutY="222.0" text="Password">
                <font>
                   <Font name="Dubai Medium" size="12.0" />
                </font>
             </Label>
-            <PasswordField fx:id="regPassTxtB" layoutX="40.0" layoutY="270.0" prefWidth="290.0" />
+            <PasswordField fx:id="regPassTxtB" layoutX="5.0" layoutY="243.0" prefWidth="290.0" />
             <TextField fx:id="regPassVisibleTxtB" layoutX="40.0" layoutY="270.0" prefWidth="290.0" visible="false" />
 
             <!-- Confirm Password -->
-            <Label fx:id="regPassConfLbl" layoutX="40.0" layoutY="310.0" text="Confirm Password">
+            <Label fx:id="regPassConfLbl" layoutX="5.0" layoutY="283.0" text="Confirm Password">
                <font>
                   <Font name="Dubai Medium" size="12.0" />
                </font>
             </Label>
-            <PasswordField fx:id="regPassConfTxtB" layoutX="40.0" layoutY="330.0" prefWidth="290.0" />
+            <PasswordField fx:id="regPassConfTxtB" layoutX="5.0" layoutY="305.0" prefWidth="290.0" />
             <TextField fx:id="regPassConfVisibleTxtB" layoutX="40.0" layoutY="330.0" prefWidth="290.0" visible="false" />
 
             <!-- Show Password -->
-            <CheckBox fx:id="regShowPassCB" layoutX="120.0" layoutY="370.0" onAction="#togglePass" text="Show Password">
+            <CheckBox fx:id="regShowPassCB" layoutX="295.0" layoutY="283.0" onAction="#togglePass" text="Show Password">
                <font>
                   <Font name="Dubai Medium" size="12.0" />
                </font>
@@ -73,11 +72,30 @@
             <Label fx:id="regErrMsgLbl" layoutX="40.0" layoutY="400.0" prefWidth="290.0" style="-fx-text-fill: red;" text="____" textAlignment="JUSTIFY" visible="false" />
 
             <!-- Register Button -->
-            <Button fx:id="regBtn" layoutX="130.0" layoutY="430.0" onMouseClicked="#RegToSys" prefWidth="110.0" text="Register">
+            <Button fx:id="regBtn" layoutX="95.0" layoutY="446.0" onMouseClicked="#RegToSys" prefWidth="110.0" text="Register">
                <font>
                   <Font name="Dubai Medium" size="12.0" />
                </font>
             </Button>
+            <ComboBox fx:id="select_account_type" layoutY="73.0" onAction="#selected_account" prefWidth="150.0" />
+            <Label fx:id="select_store_label" alignment="TOP_CENTER" layoutX="229.0" layoutY="51.0" prefHeight="22.0" prefWidth="141.0" text="select_store" visible="false">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font>
+            </Label>
+            <ComboBox fx:id="select_store" layoutX="250.0" layoutY="73.0" onAction="#select_store" prefHeight="25.0" prefWidth="110.0" visible="false" />
+            <Label fx:id="id" layoutX="5.0" layoutY="332.0" prefHeight="22.0" prefWidth="61.0" text="ID Number" visible="false">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font>
+            </Label>
+            <PasswordField fx:id="id_text" layoutX="5.0" layoutY="354.0" prefWidth="290.0" visible="false" />
+            <Label fx:id="credit_Card" layoutX="2.0" layoutY="389.0" prefHeight="22.0" prefWidth="61.0" text="Credit Card" visible="false">
+               <font>
+                  <Font name="Dubai Medium" size="12.0" />
+               </font>
+            </Label>
+            <PasswordField fx:id="credit_card_box" layoutX="5.0" layoutY="411.0" prefWidth="290.0" visible="false" />
 
          </children>
       </AnchorPane>

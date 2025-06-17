@@ -8,7 +8,7 @@
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: #C8A2C8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.complain_controller">
    <children>
-      <Label layoutX="137.0" layoutY="1.0" prefHeight="46.0" prefWidth="291.0" text="Tell Us What Went Wrong" textFill="WHITE">
+      <Label fx:id="head" layoutX="137.0" layoutY="1.0" prefHeight="46.0" prefWidth="291.0" text="Tell Us What Went Wrong" textFill="WHITE">
          <font>
             <Font size="24.0" />
          </font>

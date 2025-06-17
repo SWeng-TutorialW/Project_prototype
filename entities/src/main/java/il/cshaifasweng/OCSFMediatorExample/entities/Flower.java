@@ -14,6 +14,8 @@ public class Flower implements Serializable {
     private String flowerName;
     private double flowerPrice;
     private String flowerType;
+    private boolean sale;
+    private int discount;
 
     public Flower() {} // ctor
 
@@ -22,11 +24,19 @@ public class Flower implements Serializable {
         this.flowerName = flowerName;
         this.flowerPrice = flowerPrice;
         this.flowerType = flowerType;
+        this.sale = false;
     }
 
     public double getFlowerPrice() {
         return flowerPrice;
     }
+    public int getDiscount() {return discount;}
+    public void setDiscount(int discount) {this.discount = discount;}
+
+    public void setSale(boolean sale) {
+        this.sale = sale;
+    }
+    public boolean isSale() {return sale;}
 
     public String getFlowerName() {
         return flowerName;

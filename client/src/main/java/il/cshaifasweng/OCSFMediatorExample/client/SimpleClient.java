@@ -1,11 +1,11 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.greenrobot.eventbus.EventBus;
 
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+
+import java.util.List;
 
 public class SimpleClient extends AbstractClient {
 	
@@ -14,12 +14,10 @@ public class SimpleClient extends AbstractClient {
 	public static String ip = "localhost";
 	public static boolean loggedIn = false; // to check if the user is logged in or not
 	public static boolean isGuest = false;
+	public static int selectedAccType = -1;
 	private SimpleClient(String host, int port) {
 		super(host, port);
 	}
-	public static int selectedAccType = -1;
-
-
 
 	@Override
 	protected void handleMessageFromServer(Object msg) {
@@ -31,22 +29,83 @@ public class SimpleClient extends AbstractClient {
 		else if(msg.getClass().equals(CatalogUpdateEvent.class)){
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
+		else if(msg.getClass().equals(catalog_sort_event.class)){
+			EventBus.getDefault().post(msg); // post the catalog update to UI
+		}
+		else if(msg.getClass().equals(Add_flower_event.class)){
+			EventBus.getDefault().post(msg); // post the catalog update to UI
+		}
+		else if (msg instanceof List<?>) { // send users to reg scene
+			EventBus.getDefault().post(msg);
+		}
+		else if(msg.getClass().equals(ComplainUpdateEvent.class)){
+			EventBus.getDefault().post(msg); // post the catalog update to UI
+		}
+		else if(msg.getClass().equals(update_local_catalog.class)){
+			EventBus.getDefault().post(msg); // post the catalog update to UI
+		}
+		else if(msg.getClass().equals(discount_for_1_flower.class)){
+			EventBus.getDefault().post(msg); // post the catalog update to UI
+		}
+		else if(msg.getClass().equals(Complain.class)){
+			System.out.println("I send the complain event");
+			EventBus.getDefault().post(msg); // post the catalog update to UI
+		}
 
-
-		else if(msgString.startsWith("update_catalog_after_change"))
+		else if(msgString.startsWith("The network manager has added a flower."))
 		{
 			try {
-				SimpleClient.getClient().sendToServer("price_changed");
+				SimpleClient.getClient().sendToServer("update_catalog_after_manager_add_flower");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
 		}
-		else if(msgString.startsWith("#user_exists") || msgString.startsWith("#login_failed")
-				|| msgString.startsWith("#login/reg_ok")  || msgString.startsWith("#reg_ok") ){
+		else if(msgString.startsWith("new#price#in#flower_"))
+		{
+			try {
+				SimpleClient.getClient().sendToServer(msgString);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+
+		else if(msgString.startsWith("The network manager has deleted flower."))
+		{
+			try {
+				SimpleClient.getClient().sendToServer("update_catalog_after_manager_delete_flower");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+
+		else if(msgString.startsWith("user_"))
+		{
+			String[] parts = msgString.split("_");
+			try {
+				SimpleClient.getClient().sendToServer("need#to#change#user#localy_"+parts[1]);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+		else if(msgString.startsWith("update_complainScene_after_change"))
+		{
+			try {
+				SimpleClient.getClient().sendToServer("getComplaints");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+		else if(msgString.startsWith("#user_exists") || msgString.startsWith("#login_failed") || msgString.startsWith("#login/reg_ok")){
 			EventBus.getDefault().post((String)msg);
 			System.out.println("I GOT THE MESSAGE");
 		}
+
+
 	}
 
 	public static SimpleClient getClient() {
@@ -57,11 +116,12 @@ public class SimpleClient extends AbstractClient {
 		}
 		return client;
 	}
-
 	public static void setSelectedAccType(int type) {
 		selectedAccType = type;
 	}
 	public static int getSelectedAccType() {
 		return selectedAccType;
 	}
+
+
 }

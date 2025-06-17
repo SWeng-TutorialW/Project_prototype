@@ -96,12 +96,44 @@ public class CartController {
     
     @FXML
     private void checkout() {
+        System.out.println("Checkout button clicked");
+        System.out.println("Login status: " + SimpleClient.loggedIn);
+        System.out.println("Cart items size: " + cartItems.size());
+        
         if (cartItems.isEmpty()) {
+            System.out.println("Cart is empty");
             Warning warning = new Warning("Your cart is empty!");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
+
+        // Check if user is logged in
+        if (!SimpleClient.loggedIn) {
+            System.out.println("User not logged in, opening login window");
+            Warning warning = new Warning("Please log in to proceed with checkout");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            
+            // Open login window
+            try {
+                System.out.println("Attempting to load login screen");
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("login_screen.fxml"));
+                Parent root = loader.load();
+                System.out.println("Login screen loaded successfully");
+                Stage stage = new Stage();
+                stage.setTitle("Login Required");
+                stage.setScene(new Scene(root));
+                stage.show();
+                System.out.println("Login window shown");
+            } catch (IOException e) {
+                System.err.println("Error opening login window: " + e.getMessage());
+                e.printStackTrace();
+                Warning errorWarning = new Warning("Error opening login window");
+                EventBus.getDefault().post(new WarningEvent(errorWarning));
+            }
+            return;
+        }
         
+        System.out.println("User is logged in, proceeding to checkout");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("checkout.fxml"));
             Parent root = loader.load();
@@ -116,6 +148,7 @@ public class CartController {
             // Close cart window
             ((Stage) cartTable.getScene().getWindow()).close();
         } catch (IOException e) {
+            System.err.println("Error loading checkout.fxml: " + e.getMessage());
             e.printStackTrace();
         }
     }

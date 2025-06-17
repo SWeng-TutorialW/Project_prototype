@@ -1,8 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -12,10 +10,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import javax.swing.*;
+import javax.xml.catalog.Catalog;
 import java.io.IOException;
 import java.util.List;
 
@@ -51,15 +51,25 @@ public class connect_scene_Con  {
     boolean guess = false;
     boolean type_Client = false;
     boolean type_Employee = false;
-    boolean type_guess = false; //only to know if is the first time to jet the catalog
+    boolean type_guess = false;//only to know if is the first time to jet the catalog
+    int type_local = 0;//1 for store 1 ,2 for store 2 ,3 for store 3, 4 for all of them
+    private LoginRegCheck user;
+    public void setCatalogController(PrimaryController controller) {
+        this.ctlr = controller;
+    }
+    private  CatalogController catalogController;
+    private CatalogController_employee employeeController;
     @FXML
     void initialize() {
 
-        EventBus.getDefault().register(this);
-        System.out.println("connect_scene_Con_initialize");
+        if (EventBus.getDefault().isRegistered(this)) {
+            System.out.println("already registered");
+        } else {
+            EventBus.getDefault().register(this);
+        }
+
 
     }
-
     @FXML
     void guess_enter(ActionEvent event)
     {
@@ -75,12 +85,7 @@ public class connect_scene_Con  {
 
         }
 
-
     }
-    public void setCatalogController(PrimaryController controller) {
-        this.ctlr = controller;
-    }
-
     public void show_cata(ActionEvent actionEvent) {
         try {
             if (SimpleClient.getClient().isConnected()) {
@@ -94,10 +99,40 @@ public class connect_scene_Con  {
 
     }
     @Subscribe
-    public void handleCatalogUpdate(CatalogUpdateEvent event)
+    public void handleCatalogUpdate(catalog_sort_event event)
+    {
+        System.out.println("enter type sorting");
+        System.out.println(type_Client);
+        System.out.println(type_Employee);
+        System.out.println(type_local);
+        if(guess)
+        {
+            catalogController.set_sorting_type(event.getSort_type());
+            catalogController.setCatalogSorting(event.get_Sorted_flowers());
+            return;
+        }
+        if (type_Client)
+        {
+            catalogController.set_sorting_type(event.getSort_type());
+            catalogController.setCatalogSorting(event.get_Sorted_flowers());
+            return;
+        }
+
+        if(type_Employee)
+        {
+            employeeController.set_sorting_type(event.getSort_type());
+            employeeController.setCatalogSorting(event.get_Sorted_flowers());
+            return;
+        }
+
+    }
+
+    @Subscribe
+    public void handleCatalogUpdate(CatalogUpdateEvent event)/// /  this method only for the first time to get the catalog
     {
         System.out.println(type_Client);
         System.out.println(type_Employee);
+        System.out.println(type_local);
         if(guess)
         {
             System.out.println("Processing as guest");
@@ -108,6 +143,7 @@ public class connect_scene_Con  {
 
                     CatalogController controller = loader.getController();
                     controller.setCatalogData(event.getUpdatedItems());
+                    catalogController=controller;
                     App.getScene().setRoot(root);
                     if(!type_guess)//to know this is the first time
                     {
@@ -124,40 +160,6 @@ public class connect_scene_Con  {
             });
             return;
         }
-            if(type_Client) {
-                Platform.runLater(() -> {
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
-                        Parent root = loader.load();
-                        CatalogController controller = loader.getController();
-                        controller.setCatalogData(event.getUpdatedItems());
-                        App.getScene().setRoot(root);
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-                return;
-            }
-            if(type_Employee)
-            {
-                Platform.runLater(() -> {
-                    try {
-                        FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
-                        Parent root = loader.load();
-
-                        CatalogController_employee controller = loader.getController();
-                        controller.setCatalogData(event.getUpdatedItems());
-
-
-                        App.getScene().setRoot(root);
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-                return;
-            }
             System.out.println("Processing as regular login");
             String user_Name = user_name.getText().trim();
             String passWord = password.getText().trim();
@@ -165,16 +167,45 @@ public class connect_scene_Con  {
             System.out.println("PASSWORD: " + passWord);
             List<LoginRegCheck> users = event.getUsers();
                 for (LoginRegCheck loginRegCheck : users) {
+                    user = loginRegCheck;
                     if (loginRegCheck.getUsername().equals(user_Name) && loginRegCheck.getPassword().equals(passWord)) {
                         if (loginRegCheck.isType())
                         {
+                            if(loginRegCheck.getIsLogin()==1)
+                            {
+                                Warning warning = new Warning("this user already in the system");
+                                EventBus.getDefault().post(new WarningEvent(warning));
+                                return;
+                            }
+                            user = loginRegCheck;
                             type_Employee = true;
                             System.out.println("type_Employee is true");
+                            type_local=loginRegCheck.getStore();
+                            System.out.println("the employee is for store "+type_local);
+
                         }
                         if (!loginRegCheck.isType())
                         {
+                            if(loginRegCheck.getIsLogin()==1)
+                            {
+                                Warning warning = new Warning("this user already in the system");
+                                EventBus.getDefault().post(new WarningEvent(warning));
+                                return;
+                            }
+                            user = loginRegCheck;
                             type_Client = true;
                             System.out.println("type_Client is true");
+                            type_local=loginRegCheck.getStore();
+                            System.out.println("the user is mnoy to store "+type_local);
+                            SimpleClient.loggedIn = true;  // Set login state to true for client users Yarden added this
+                            SimpleClient.isGuest = false; // Yarden added this
+                            System.out.println("Login state set to: " + SimpleClient.loggedIn);
+                        }
+                        change_user_login wrapper = new change_user_login(user,1);
+                        try {
+                            SimpleClient.getClient().sendToServer(wrapper);
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                         Platform.runLater(() -> {
                             try {
@@ -185,16 +216,58 @@ public class connect_scene_Con  {
                                     loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
                                     root = loader.load();
                                     CatalogController_employee controller = loader.getController();
-                                    controller.setCatalogData(event.getUpdatedItems());
+                                    List<Store> stores=event.getStores();
+                                    if(type_local==4)// network
+                                    {
+                                        System.out.println("this employee is network ");
+                                        controller.set_type(type_local);
+                                        controller.set_isLogin(true);
+                                        controller.set_user(loginRegCheck);
+                                        controller.setCatalogData(event.getUpdatedItems());
+                                        employeeController=controller;
 
-                                } else {
+                                    }
+                                    else
+                                    {
+                                        Store store=stores.get(type_local-1);
+                                        System.out.println("this employee is for store: " + store.getStoreName());
+                                        controller.setFlowersList_c(store.getFlowersList());
+                                        controller.set_isLogin(true);
+                                        controller.set_user(loginRegCheck);
+                                        controller.set_type(type_local);
+                                        controller.setCatalogData(event.getUpdatedItems());
+                                        employeeController=controller;
+                                    }
+
+                                }
+                                else {
                                     loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
                                     root = loader.load();
                                     CatalogController controller = loader.getController();
-                                    controller.setCatalogData(event.getUpdatedItems());
+                                    List<Store> stores=event.getStores();
+                                    if(type_local==4)// network
+                                    {
+                                        controller.set_type(type_local);
+                                        System.out.println("this client is network ");
+                                        controller.set_isLogin(true);
+                                        controller.set_user(loginRegCheck);
+                                        controller.setCatalogData(event.getUpdatedItems());
+                                        catalogController=controller;
 
+                                    }
+                                    else
+                                    {
+                                        Store store=stores.get(type_local-1);
+                                        System.out.println("this client is for store: " + store.getStoreName());
+                                        controller.setFlowersList_c(store.getFlowersList());
+                                        controller.set_type(type_local);
+                                        controller.set_isLogin(true);
+                                        controller.set_user(loginRegCheck);
+                                        controller.setCatalogData(event.getUpdatedItems());
+                                        catalogController=controller;
+
+                                    }
                                 }
-
                                 App.getScene().setRoot(root);
                                 App.getStage().setWidth(800);
                                 App.getStage().setHeight(750);
@@ -211,10 +284,6 @@ public class connect_scene_Con  {
                 Warning warning = new Warning("Username or password doesn't match");
                 EventBus.getDefault().post(new WarningEvent(warning));
             }
-
-
-
-
 
     }
 

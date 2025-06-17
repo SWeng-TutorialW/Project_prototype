@@ -27,29 +27,29 @@ public class OrderPageController {
     @FXML private Label totalPrice;
     @FXML private Button addToCartButton;
     @FXML private Button viewCartButton;
-
+    
     private Flower selectedFlower;
     private static List<CartItem> cartItems = new ArrayList<>();
-
+    
     public void initialize() {
         // Set up quantity spinner listener
         quantitySpinner.valueProperty().addListener((obs, oldValue, newValue) -> {
             updateTotalPrice();
         });
     }
-
+    
     public void setFlower(Flower flower) {
         this.selectedFlower = flower;
         updateUI();
     }
-
+    
     private void updateUI() {
         if (selectedFlower != null) {
             flowerName.setText(selectedFlower.getFlowerName());
             flowerType.setText(selectedFlower.getFlowerType());
             flowerPrice.setText(String.format("Price: $%.2f", selectedFlower.getFlowerPrice()));
             updateTotalPrice();
-
+            
             // Set flower image
             try {
                 String imagePath = "/images/" + selectedFlower.getFlowerType() + ".png";
@@ -67,7 +67,7 @@ public class OrderPageController {
             }
         }
     }
-
+    
     private void updateTotalPrice() {
         if (selectedFlower != null) {
             int quantity = quantitySpinner.getValue();
@@ -75,20 +75,20 @@ public class OrderPageController {
             totalPrice.setText(String.format("Total: $%.2f", total));
         }
     }
-
+    
     @FXML
     private void addToCart() {
         if (selectedFlower != null) {
             int quantity = quantitySpinner.getValue();
             CartItem cartItem = new CartItem(selectedFlower, quantity);
             cartItems.add(cartItem);
-
+            
             // Show confirmation
             Warning warning = new Warning("Item added to cart successfully!");
             EventBus.getDefault().post(new WarningEvent(warning));
         }
     }
-
+    
     @FXML
     private void viewCart() {
         try {
@@ -96,7 +96,7 @@ public class OrderPageController {
             Parent root = loader.load();
             CartController cartController = loader.getController();
             cartController.setCartItems(cartItems);
-
+            
             Stage stage = new Stage();
             stage.setTitle("Shopping Cart");
             stage.setScene(new Scene(root));
@@ -105,7 +105,7 @@ public class OrderPageController {
             e.printStackTrace();
         }
     }
-
+    
     @FXML
     private void goBackToCatalog() {
         try {
@@ -117,12 +117,12 @@ public class OrderPageController {
             EventBus.getDefault().post(new WarningEvent(warning));
         }
     }
-
+    
     public static List<CartItem> getCartItems() {
         return cartItems;
     }
-
+    
     public static void clearCart() {
         cartItems.clear();
     }
-}
+} 

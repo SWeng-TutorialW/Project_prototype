@@ -22,6 +22,19 @@ public class Order implements Serializable {
     private String customerEmail;
     private String status; // PENDING, CONFIRMED, SHIPPED, DELIVERED
     
+    // New fields for address
+    private String city;
+    private String streetAddress;
+    private String apartment;
+    
+    // Delivery fields
+    private boolean requiresDelivery;
+    private double deliveryFee;
+    
+    // Delivery time
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date deliveryTime;
+    
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<CartItem> items = new ArrayList<>();
     
@@ -30,6 +43,7 @@ public class Order implements Serializable {
     public Order() {
         this.orderDate = new Date();
         this.status = "PENDING";
+        this.deliveryFee = 0.0;
     }
     
     public Order(String customerName, String customerEmail) {
@@ -94,8 +108,58 @@ public class Order implements Serializable {
         updateTotalAmount();
     }
     
+    public String getCity() {
+        return city;
+    }
+    
+    public void setCity(String city) {
+        this.city = city;
+    }
+    
+    public String getStreetAddress() {
+        return streetAddress;
+    }
+    
+    public void setStreetAddress(String streetAddress) {
+        this.streetAddress = streetAddress;
+    }
+    
+    public String getApartment() {
+        return apartment;
+    }
+    
+    public void setApartment(String apartment) {
+        this.apartment = apartment;
+    }
+    
+    public boolean isRequiresDelivery() {
+        return requiresDelivery;
+    }
+    
+    public void setRequiresDelivery(boolean requiresDelivery) {
+        this.requiresDelivery = requiresDelivery;
+        if (requiresDelivery) {
+            this.deliveryFee = 20.0; // 20 ILS delivery fee
+        } else {
+            this.deliveryFee = 0.0;
+        }
+        updateTotalAmount(); // Update total to include delivery fee
+    }
+    
+    public double getDeliveryFee() {
+        return deliveryFee;
+    }
+    
+    public Date getDeliveryTime() {
+        return deliveryTime;
+    }
+    
+    public void setDeliveryTime(Date deliveryTime) {
+        this.deliveryTime = deliveryTime;
+    }
+    
     public double getTotalAmount() {
-        return totalAmount;
+        return this.totalAmount + this.deliveryFee;
     }
     
     private void updateTotalAmount() {

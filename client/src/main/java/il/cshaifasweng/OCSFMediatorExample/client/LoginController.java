@@ -1,9 +1,13 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
@@ -12,6 +16,7 @@ import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
+import java.io.IOException;
 import java.util.Objects;
 
 public class LoginController {
@@ -96,27 +101,25 @@ public class LoginController {
 
     @FXML
     void loginRegToSys(MouseEvent event) {
-        // After we successfully log in, do SimpleClient.sendtoserver(we are logged) and SimpleClient.loggedIn = true;
-
-
+        System.out.println("Login/Register button clicked");
         switch(isLogin){
             case 1: // login
                 String username = userTxtB.getText();
                 String password = passTxtB.getText();
-
+                System.out.println("Attempting login for user: " + username);
                 if(username.length() >=4 || password.length()>=4){
-
                     try {
                         loginErrMsgLbl.setVisible(false);
-                        SimpleClient.getClient().sendToServer(new LoginRegCheck(username, password, "", 1 ));
+                        SimpleClient.getClient().sendToServer(new LoginRegCheck(username, password, "", 1));
+                        System.out.println("Login request sent to server");
                         return;
                     }
                     catch (Exception e) {
+                        System.err.println("Error sending login request: " + e.getMessage());
                         e.printStackTrace();
                     }
-
                 }
-
+                System.out.println("Invalid login format");
                 regErrMsgLbl.setText("Details Not in Correct Format");
                 regErrMsgLbl.textFillProperty().set(Paint.valueOf("red"));
                 regErrMsgLbl.setVisible(true);
@@ -147,22 +150,58 @@ public class LoginController {
 
     @Subscribe
     public void onLoginRegResult(String msg) {
+        System.out.println("Received login result: " + msg);
         if(msg.startsWith("#login/reg_ok")){
+            System.out.println("Login successful, setting loggedIn to true");
             SimpleClient.loggedIn = true;
+            System.out.println("Current login status: " + SimpleClient.loggedIn);
             EventBus.getDefault().unregister(this);
-                // Close the window (because we logged in)
-                Platform.runLater(() -> {Stage stage = (Stage) loginAnchPane.getScene().getWindow();
-                    stage.close();});
+            
+            // Close the login window
+            Platform.runLater(() -> {
+                System.out.println("Closing login window");
+                Stage stage = (Stage) loginAnchPane.getScene().getWindow();
+                stage.close();
+                
+                // If we have cart items, reopen the cart window
+                if (!OrderPageController.getCartItems().isEmpty()) {
+                    System.out.println("Cart has items, reopening cart window");
+                    try {
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));
+                        Parent root = loader.load();
+                        CartController cartController = loader.getController();
+                        cartController.setCartItems(OrderPageController.getCartItems());
+                        
+                        Stage cartStage = new Stage();
+                        cartStage.setTitle("Shopping Cart");
+                        cartStage.setScene(new Scene(root));
+                        cartStage.show();
+                        System.out.println("Cart window reopened");
+                    } catch (IOException e) {
+                        System.err.println("Error reopening cart: " + e.getMessage());
+                        e.printStackTrace();
+                        Warning warning = new Warning("Error reopening cart");
+                        EventBus.getDefault().post(new WarningEvent(warning));
+                    }
+                }
+            });
         }
-        else if (msg.startsWith("#login_failed"))
-            Platform.runLater(()->{loginErrMsgLbl.setText("User/Pass are incorrect");
+        else if (msg.startsWith("#login_failed")) {
+            System.out.println("Login failed");
+            Platform.runLater(()->{
+                loginErrMsgLbl.setText("User/Pass are incorrect");
                 loginErrMsgLbl.setVisible(true);
-                loginErrMsgLbl.textFillProperty().set(Paint.valueOf("red"));});
-        else if(msg.startsWith("#user_exists"))
-            Platform.runLater(()->{regErrMsgLbl.setText("User already exists");
+                loginErrMsgLbl.textFillProperty().set(Paint.valueOf("red"));
+            });
+        }
+        else if(msg.startsWith("#user_exists")) {
+            System.out.println("User already exists");
+            Platform.runLater(()->{
+                regErrMsgLbl.setText("User already exists");
                 regErrMsgLbl.setVisible(true);
-                regErrMsgLbl.textFillProperty().set(Paint.valueOf("red"));});
-
+                regErrMsgLbl.textFillProperty().set(Paint.valueOf("red"));
+            });
+        }
     }
 
 
