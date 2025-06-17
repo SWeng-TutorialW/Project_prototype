@@ -301,18 +301,6 @@ public class CatalogController {
         typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12 };
         priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
         imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12 };
-        setupClickHandler(flower_10, name_10, type_10, price_10, pic_10);
-        setupClickHandler(flower_11, name_11, type_11, price_11, pic_11);
-        setupClickHandler(flower_12, name_12, type_12, price_12, pic_12);
-        setupClickHandler(flower_1, name_1, type_1, price_1, pic_1);
-        setupClickHandler(flower_2, name_2, type_2, price_2, pic_2);
-        setupClickHandler(flower_3, name_3, type_3, price_3, pic_3);
-        setupClickHandler(flower_4, name_4, type_4, price_4, pic_4);
-        setupClickHandler(flower_5, name_5, type_5, price_5, pic_5);
-        setupClickHandler(flower_6, name_6, type_6, price_6, pic_6);
-        setupClickHandler(flower_7, name_7, type_7, price_7, pic_7);
-        setupClickHandler(flower_8, name_8, type_8, price_8, pic_8);
-        setupClickHandler(flower_9, name_9, type_9, price_9, pic_9);
         nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12 };
         typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12 };
         priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
@@ -799,7 +787,7 @@ public class CatalogController {
 
 
 
-    /// /////// yarden and dor
+  /*
     private void setupClickHandler(VBox flowerBox, Label nameLabel, Label typeLabel, TextField priceField, ImageView imageView) {
         flowerBox.setOnMouseClicked(event -> {
 
@@ -818,6 +806,53 @@ public class CatalogController {
                 }
             }
         });
+    }
+
+   */
+    @FXML
+    void delete_flower(ActionEvent event) {
+
+        Button clickedButton = (Button) event.getSource();
+        VBox graphicVBox = (VBox) clickedButton.getGraphic();
+        String flowerName = "";
+
+        for (Node node : graphicVBox.getChildren()) {
+            if (node instanceof Label && ((Label) node).getId() != null && ((Label) node).getId().startsWith("name_")) {
+                Label nameLabel = (Label) node;
+                flowerName = nameLabel.getText();
+                System.out.println("Flower name: " + flowerName);
+                break;
+            }
+        }
+        Flower targetFlower = null;
+        if (flowersList_sorting != null) {
+            for (Flower flower : flowersList_sorting) {
+                if (flower.getFlowerName().equalsIgnoreCase(flowerName)) {
+                    targetFlower = flower;
+                    break;
+                }
+            }
+        } else {
+            for (Flower flower : flowersList_c) {
+                if (flower.getFlowerName().equalsIgnoreCase(flowerName)) {
+                    targetFlower = flower;
+                    break;
+                }
+            }
+        }
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("order_page.fxml"));
+            Parent root = loader.load();
+            OrderPageController orderController = loader.getController();
+            orderController.setFlower(targetFlower);
+
+            Stage stage = new Stage();
+            stage.setTitle("Order Details");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private int getFlowerIndex(String flowerName) {
