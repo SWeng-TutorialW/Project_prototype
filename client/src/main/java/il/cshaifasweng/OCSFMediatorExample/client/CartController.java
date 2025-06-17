@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.CartItem;
+import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -31,6 +32,7 @@ public class CartController {
     @FXML private Button continueShoppingButton;
     
     private ObservableList<CartItem> cartItems;
+    private LoginRegCheck currentUser; // Store the current user
     
     public void initialize() {
         // Set up table columns
@@ -78,6 +80,10 @@ public class CartController {
         updateTotal();
     }
     
+    public void setCurrentUser(LoginRegCheck user) {
+        this.currentUser = user;
+    }
+    
     private void updateTotal() {
         double total = cartItems.stream()
                 .mapToDouble(CartItem::getTotalPrice)
@@ -98,6 +104,8 @@ public class CartController {
     private void checkout() {
         System.out.println("Checkout button clicked");
         System.out.println("Login status: " + SimpleClient.loggedIn);
+        System.out.println("Current user in cart: " + (currentUser != null ? currentUser.getUsername() : "null"));
+        System.out.println("SimpleClient current user: " + (SimpleClient.getCurrentUser() != null ? SimpleClient.getCurrentUser().getUsername() : "null"));
         System.out.println("Cart items size: " + cartItems.size());
         
         if (cartItems.isEmpty()) {
@@ -133,12 +141,26 @@ public class CartController {
             return;
         }
         
+        // Check if current user is available, use SimpleClient as fallback
+        if (currentUser == null) {
+            currentUser = SimpleClient.getCurrentUser();
+            System.out.println("Using SimpleClient current user: " + (currentUser != null ? currentUser.getUsername() : "null"));
+        }
+        
+        if (currentUser == null) {
+            System.out.println("Current user is null despite being logged in");
+            Warning warning = new Warning("User session not found. Please log in again.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+        
         System.out.println("User is logged in, proceeding to checkout");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("checkout.fxml"));
             Parent root = loader.load();
             CheckoutController checkoutController = loader.getController();
             checkoutController.setCartItems(cartItems);
+            checkoutController.setCurrentUser(currentUser); // Pass the user to checkout
             
             Stage stage = new Stage();
             stage.setTitle("Checkout");

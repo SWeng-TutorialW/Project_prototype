@@ -802,7 +802,16 @@ public class CatalogController {
     /// /////// yarden and dor
     private void setupClickHandler(VBox flowerBox, Label nameLabel, Label typeLabel, TextField priceField, ImageView imageView) {
         flowerBox.setOnMouseClicked(event -> {
-            if (flowersList_c != null) {
+
+            if (flowersList_sorting != null) {
+
+                int index = getFlowerIndex(nameLabel.getText());
+                if (index >= 0 && index < flowersList_sorting.size()) {
+                    openOrderPage(flowersList_sorting.get(index));
+                }
+
+            }
+            else if (flowersList_c != null) {
                 int index = getFlowerIndex(nameLabel.getText());
                 if (index >= 0 && index < flowersList_c.size()) {
                     openOrderPage(flowersList_c.get(index));
@@ -837,11 +846,17 @@ public class CatalogController {
     }
     @FXML
     private void openCart(ActionEvent actionEvent) {
+        System.out.println("CatalogController: openCart called");
+        System.out.println("CatalogController: Current user is: " + (user != null ? user.getUsername() : "null"));
+        System.out.println("CatalogController: SimpleClient.loggedIn is: " + SimpleClient.loggedIn);
+        
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));
             Parent root = loader.load();
             CartController cartController = loader.getController();
             cartController.setCartItems(OrderPageController.getCartItems());
+            cartController.setCurrentUser(user);
+            System.out.println("CatalogController: User passed to cart: " + (user != null ? user.getUsername() : "null"));
 
             Stage stage = new Stage();
             stage.setTitle("Shopping Cart");

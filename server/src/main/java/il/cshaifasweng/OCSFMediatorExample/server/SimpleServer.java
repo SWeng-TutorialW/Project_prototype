@@ -673,6 +673,20 @@ public class SimpleServer extends AbstractServer {
 			Session session = App.getSessionFactory().openSession();
 			try {
 				session.beginTransaction();
+				
+				// Ensure the user is properly managed in the session
+				if (order.getUser() != null) {
+					// Get the user from the database to ensure it's managed
+					CriteriaBuilder builder = session.getCriteriaBuilder();
+					CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
+					Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
+					query.select(root).where(builder.equal(root.get("username"), order.getUser().getUsername()));
+					LoginRegCheck managedUser = session.createQuery(query).uniqueResult();
+					if (managedUser != null) {
+						order.setUser(managedUser);
+					}
+				}
+				
 				session.save(order);
 				session.getTransaction().commit();
 
@@ -686,6 +700,45 @@ public class SimpleServer extends AbstractServer {
 				e.printStackTrace();
 				try {
 					client.sendToClient("order_error");
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			} finally {
+				session.close();
+			}
+		}
+		else if (msgString.startsWith("getOrdersForUser_")) {
+			// Get orders for a specific user
+			String username = msgString.substring("getOrdersForUser_".length());
+			Session session = App.getSessionFactory().openSession();
+			try {
+				session.beginTransaction();
+				
+				// First get the user
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<LoginRegCheck> userQuery = builder.createQuery(LoginRegCheck.class);
+				Root<LoginRegCheck> userRoot = userQuery.from(LoginRegCheck.class);
+				userQuery.select(userRoot).where(builder.equal(userRoot.get("username"), username));
+				LoginRegCheck user = session.createQuery(userQuery).uniqueResult();
+				
+				if (user != null) {
+					// Get orders for this user
+					CriteriaQuery<Order> orderQuery = builder.createQuery(Order.class);
+					Root<Order> orderRoot = orderQuery.from(Order.class);
+					orderQuery.select(orderRoot).where(builder.equal(orderRoot.get("user"), user));
+					List<Order> userOrders = session.createQuery(orderQuery).getResultList();
+					
+					session.getTransaction().commit();
+					client.sendToClient(userOrders);
+				} else {
+					session.getTransaction().rollback();
+					client.sendToClient("user_not_found");
+				}
+			} catch (Exception e) {
+				session.getTransaction().rollback();
+				e.printStackTrace();
+				try {
+					client.sendToClient("error_retrieving_orders");
 				} catch (IOException ex) {
 					ex.printStackTrace();
 				}
