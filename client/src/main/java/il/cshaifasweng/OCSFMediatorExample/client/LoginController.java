@@ -69,7 +69,6 @@ public class LoginController {
     @FXML
     private CheckBox regShowPassCB;
 
-
     @FXML
     private Label regUserLbl;
 

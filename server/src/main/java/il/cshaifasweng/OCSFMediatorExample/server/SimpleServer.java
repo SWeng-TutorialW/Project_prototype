@@ -1,9 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
 
-import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
-import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import java.io.IOException;
@@ -22,7 +20,6 @@ import org.hibernate.service.ServiceRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 import org.hibernate.Session;
 
@@ -204,6 +201,26 @@ public class SimpleServer extends AbstractServer {
 				session.close();
 			}
 			sendToAllClients("update_catalog_after_change");
+
+		}
+		else if(msg.getClass().equals(Complain.class)){ // handle complaints from a client
+
+		Complain complain = (Complain) msg;
+
+			Session session = App.getSessionFactory().openSession();
+			try {
+				complain.setId(0); // 0 for insert to table, otherwise for update.
+				session.beginTransaction();
+				session.save(complain);
+				session.getTransaction().commit();
+				client.sendToClient("#complaint_sent");
+			} catch (Exception e) {
+				session.getTransaction().rollback();
+				e.printStackTrace();
+			} finally {
+				session.close();
+
+			}
 
 		}
 		else if (msg.getClass().equals(LoginRegCheck.class)) {

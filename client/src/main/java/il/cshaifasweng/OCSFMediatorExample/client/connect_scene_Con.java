@@ -12,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -84,15 +85,31 @@ public class connect_scene_Con  {
             e.printStackTrace();
 
         }
-
     }
+   /* @FXML
+    public void handleLogin(MouseEvent mouseEvent) throws IOException {
+
+        String user_Name = user_name.getText().trim();
+        String passWord = password.getText().trim();
+
+        if(user_Name.isEmpty() || passWord.isEmpty())
+        {
+            Warning warning = new Warning("Please enter username and password");
+            EventBus.getDefault().post(new WarningEvent(warning));
+
+        }else{
+            LoginRegCheck loginCheck = new LoginRegCheck(user_Name, passWord, "", 1);
+            SimpleClient.getClient().sendToServer(loginCheck);
+        }
+
+    }*/
     @Subscribe
     public void handleCatalogUpdate(CatalogUpdateEvent event)
     {
         if(SimpleClient.isGuest)
         {
             System.out.println("Processing as guest");
-            // SimpleClient.isGuest = false; // Irreverent I believe.
+            // SimpleClient.isGuest = false; // Irreverent I believe, because only after registration or login we can set isGuest to false.
             Platform.runLater(() -> {
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
@@ -107,7 +124,7 @@ public class connect_scene_Con  {
                     e.printStackTrace();
                 }
             });
-            return;
+
         }
         else
         {
@@ -127,7 +144,7 @@ public class connect_scene_Con  {
                         try {
                             FXMLLoader loader;
                             Parent root;
-
+                            SimpleClient.userData = loginRegCheck;
                             if (loginRegCheck.isType()) {
                                 loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
                                 root = loader.load();

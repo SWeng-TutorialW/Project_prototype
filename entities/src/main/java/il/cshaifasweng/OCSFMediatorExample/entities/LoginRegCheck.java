@@ -9,8 +9,6 @@ import java.io.Serializable;
 @Table(name = "users_tbl")
 public class LoginRegCheck implements Serializable {
 
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -25,8 +23,8 @@ public class LoginRegCheck implements Serializable {
     private String email;
 
     private int isLogin; // 1 = login, 0 = registration
-    private boolean type; // false = client, true = employee
-
+    private boolean type =false; // false = client, true = employee
+    // assume this is a client, otherwise we can change it.
     public LoginRegCheck() {}
 
     public LoginRegCheck(String username, String password, String email, int isLogin) {
@@ -63,6 +61,9 @@ public class LoginRegCheck implements Serializable {
     }
     public void setId(Integer id) {
         this.id = id;
+    }
+    public Integer getId() {
+        return id;
     }
 }
 

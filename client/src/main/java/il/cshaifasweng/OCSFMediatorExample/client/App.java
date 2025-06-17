@@ -20,7 +20,6 @@ import org.greenrobot.eventbus.Subscribe;
 public class App extends Application {
 
     private static Scene scene;
-    private SimpleClient client;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -48,8 +47,8 @@ public class App extends Application {
 	public void stop() throws Exception {
 		// TODO Auto-generated method stub
     	EventBus.getDefault().unregister(this);
-        client.sendToServer("remove client");
-        client.closeConnection();
+        SimpleClient.getClient().sendToServer("remove client");
+        SimpleClient.getClient().closeConnection();
 		super.stop();
 	}
     

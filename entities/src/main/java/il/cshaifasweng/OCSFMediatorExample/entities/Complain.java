@@ -14,22 +14,25 @@ public class Complain implements Serializable {
 
     private String complaint;
     private LocalDateTime timestamp;
-    private String clientName;
+
+    @Column(name = "clientId")
+    private int clientId;
 
 
 
 
     public Complain() {} // ctor
 
-    public Complain(String complaint){
+    public Complain(String complaint, int clientId) {
         super();
         this.complaint = complaint;
         this.timestamp = LocalDateTime.now();
-
+        this.clientId = clientId;
 
 
     }
 
+    public void setId(int id) { this.id = id; }
     public String getComplaint() {
         return complaint;
     }
@@ -38,8 +41,8 @@ public class Complain implements Serializable {
     }
     public LocalDateTime getTimestamp() {return timestamp;}
 
-    public String getClient() {
-        return clientName;
+    public int getClientId() {
+        return clientId;
     }
-    public void setClient(String name) { clientName = name; }
+    public void setClientId(int clientID) { this.clientId = clientID; }
 }

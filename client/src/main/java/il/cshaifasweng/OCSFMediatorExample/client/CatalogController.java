@@ -202,6 +202,7 @@ public class CatalogController {
 
     @FXML
     private Label titleLbl;
+
     @FXML
     private Button two_2;
 
@@ -333,7 +334,7 @@ public class CatalogController {
             e.printStackTrace();
         }
 
-    }
+    } // why ?
 
     @FXML
     void gotoAcc(MouseEvent event) {
@@ -384,6 +385,7 @@ public class CatalogController {
         });
 
     }
+
     @FXML
     void complaint(ActionEvent event)
     {

@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
+import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import org.greenrobot.eventbus.EventBus;
 
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
@@ -14,6 +15,7 @@ public class SimpleClient extends AbstractClient {
 	public static String ip = "localhost";
 	public static boolean loggedIn = false; // to check if the user is logged in or not
 	public static boolean isGuest = false;
+	static LoginRegCheck userData = null; // to store the user data after login or registration
 	private SimpleClient(String host, int port) {
 		super(host, port);
 	}
@@ -28,8 +30,9 @@ public class SimpleClient extends AbstractClient {
 		else if(msg.getClass().equals(CatalogUpdateEvent.class)){
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
-
-
+		else if(msgString.startsWith("#complaint_sent")){
+			EventBus.getDefault().post("#complaint_sent");
+		}
 		else if(msgString.startsWith("update_catalog_after_change"))
 		{
 			try {
