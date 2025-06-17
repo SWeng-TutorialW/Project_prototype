@@ -171,7 +171,7 @@ public class RegistrationController {
             }
             String new_user_id = id_text.getText();
             String new_user_credit = credit_card_box.getText();
-            LoginRegCheck new_user = new  LoginRegCheck(regUser,regPass,email,1,false,store,new_user_id,new_user_credit,is_yearly_subscription);
+            LoginRegCheck new_user = new LoginRegCheck(regUser,regPass,email,1,false,store,new_user_id,new_user_credit,is_yearly_subscription);
             catalogController.set_user(new_user);
             catalogController.set_type(4);
             SimpleClient.getClient().sendToServer(new_user);

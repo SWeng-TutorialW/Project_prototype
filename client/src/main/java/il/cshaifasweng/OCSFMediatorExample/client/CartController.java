@@ -22,6 +22,7 @@ import java.util.List;
 public class CartController {
     @FXML private TableView<CartItem> cartTable;
     @FXML private TableColumn<CartItem, String> nameColumn;
+    @FXML private TableColumn<CartItem, String> storeColumn;
     @FXML private TableColumn<CartItem, String> typeColumn;
     @FXML private TableColumn<CartItem, Double> priceColumn;
     @FXML private TableColumn<CartItem, Integer> quantityColumn;
@@ -38,6 +39,8 @@ public class CartController {
         // Set up table columns
         nameColumn.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getFlower().getFlowerName()));
+        storeColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getStore()));
         typeColumn.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getFlower().getFlowerType()));
         priceColumn.setCellValueFactory(cellData -> 
@@ -93,8 +96,11 @@ public class CartController {
     
     private void removeItem(CartItem item) {
         cartItems.remove(item);
+        OrderPageController.getCartItems().remove(item);
+        System.out.println("Item Removed:" + item);
+        System.out.println("cart items" + cartItems);
         updateTotal();
-        
+
         // Show confirmation
         Warning warning = new Warning("Item removed from cart");
         EventBus.getDefault().post(new WarningEvent(warning));

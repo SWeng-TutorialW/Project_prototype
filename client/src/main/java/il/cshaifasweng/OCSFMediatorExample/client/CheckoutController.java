@@ -136,16 +136,13 @@ public class CheckoutController {
         System.out.println("CheckoutController: placeOrder called");
         System.out.println("CheckoutController: Current user is: " + (currentUser != null ? currentUser.getUsername() : "null"));
         System.out.println("CheckoutController: SimpleClient.loggedIn is: " + SimpleClient.loggedIn);
-        
-        // Validate all required fields
-        if (nameField.getText().isEmpty() || emailField.getText().isEmpty() ||
-            phoneField.getText().isEmpty() || cityField.getText().isEmpty() ||
-            streetAddressField.getText().isEmpty()) {
-            Warning warning = new Warning("Please fill in all required fields");
+
+        // Validate required fields
+        if (nameField.getText().isEmpty() || emailField.getText().isEmpty() || phoneField.getText().isEmpty()) {
+            Warning warning = new Warning("Please fill in all personal fields");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
-
         // Validate email format
         if (!emailField.getText().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             Warning warning = new Warning("Please enter a valid email address");
@@ -162,6 +159,13 @@ public class CheckoutController {
 
         // Validate delivery time if delivery is selected
         if ("Delivery".equals(deliveryTypeComboBox.getValue())) {
+
+            if (cityField.getText().isEmpty() || streetAddressField.getText().isEmpty()) {
+                Warning warning = new Warning("Please fill in your address for delivery");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+
             if (deliveryDatePicker.getValue() == null) {
                 Warning warning = new Warning("Please select a delivery date");
                 EventBus.getDefault().post(new WarningEvent(warning));
@@ -174,6 +178,8 @@ public class CheckoutController {
                 EventBus.getDefault().post(new WarningEvent(warning));
                 return;
             }
+
+
         }
 
         // Check if user is available

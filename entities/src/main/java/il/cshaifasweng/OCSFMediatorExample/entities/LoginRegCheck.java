@@ -90,6 +90,11 @@ public class LoginRegCheck implements Serializable {
     }
     public Integer getStore() {return store;}
 
+    public String getStoreName() {
+        String[] stores = { "Haifa", "Krayot","Nahariyya","network"};
+        return stores[this.store - 1];
+    }
+
     // Getters (optionally add setters)
     public String getUsername() { return username; }
     public String getPassword() { return password; }

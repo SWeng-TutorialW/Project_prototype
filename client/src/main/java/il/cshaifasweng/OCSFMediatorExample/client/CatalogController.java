@@ -782,35 +782,8 @@ public class CatalogController {
     }
 
 
-
-
-
-
-
-  /*
-    private void setupClickHandler(VBox flowerBox, Label nameLabel, Label typeLabel, TextField priceField, ImageView imageView) {
-        flowerBox.setOnMouseClicked(event -> {
-
-            if (flowersList_sorting != null) {
-
-                int index = getFlowerIndex(nameLabel.getText());
-                if (index >= 0 && index < flowersList_sorting.size()) {
-                    openOrderPage(flowersList_sorting.get(index));
-                }
-
-            }
-            else if (flowersList_c != null) {
-                int index = getFlowerIndex(nameLabel.getText());
-                if (index >= 0 && index < flowersList_c.size()) {
-                    openOrderPage(flowersList_c.get(index));
-                }
-            }
-        });
-    }
-
-   */
     @FXML
-    void delete_flower(ActionEvent event) {
+    void open_flower(ActionEvent event) {
 
         Button clickedButton = (Button) event.getSource();
         VBox graphicVBox = (VBox) clickedButton.getGraphic();
@@ -844,7 +817,10 @@ public class CatalogController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("order_page.fxml"));
             Parent root = loader.load();
             OrderPageController orderController = loader.getController();
+            orderController.setStore(Stores.getValue());
             orderController.setFlower(targetFlower);
+            orderController.setUser(user);
+
 
             Stage stage = new Stage();
             stage.setTitle("Order Details");
@@ -864,21 +840,6 @@ public class CatalogController {
         return -1;
     }
 
-    private void openOrderPage(Flower flower) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("order_page.fxml"));
-            Parent root = loader.load();
-            OrderPageController orderController = loader.getController();
-            orderController.setFlower(flower);
-
-            Stage stage = new Stage();
-            stage.setTitle("Order Details");
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
     @FXML
     private void openCart(ActionEvent actionEvent) {
         System.out.println("CatalogController: openCart called");
