@@ -97,12 +97,17 @@ public class OrderPageController {
     @FXML
     private void addToCart() {
 
-        if (!this.store.equals(this.user.getStoreName()) && user.getStore() != 4) {
+
+        if(user == null || user.getIsLogin() == 0) {
+            System.out.println("User not logged in");
+            Warning warning = new Warning("Please log in to add items to cart");
+            EventBus.getDefault().post(new WarningEvent(warning));
+
+        }
+
+        else if (!this.store.equals(this.user.getStoreName()) && user.getStore() != 4) {
             Warning warning = new Warning("You Can Only Order From The Store: " + user.getStoreName());
             EventBus.getDefault().post(new WarningEvent(warning));
-            // Close current window
-            Stage stage = (Stage) addToCartButton.getScene().getWindow();
-            stage.close();
         }
         else if (selectedFlower != null) {
             int quantity = quantitySpinner.getValue();
@@ -113,10 +118,10 @@ public class OrderPageController {
             // Show confirmation
             Warning warning = new Warning("Item added to cart successfully!");
             EventBus.getDefault().post(new WarningEvent(warning));
-            // Close current window
-            Stage stage = (Stage) addToCartButton.getScene().getWindow();
-            stage.close();
         }
+        // Close current window
+        Stage stage = (Stage) addToCartButton.getScene().getWindow();
+        stage.close();
     }
     
     @FXML

@@ -122,7 +122,7 @@ public class CartController {
         }
 
         // Check if user is logged in
-        if (!SimpleClient.loggedIn) {
+        if (currentUser.getIsLogin() == 0) {
             System.out.println("User not logged in, opening login window");
             Warning warning = new Warning("Please log in to proceed with checkout");
             EventBus.getDefault().post(new WarningEvent(warning));
@@ -148,7 +148,7 @@ public class CartController {
         }
         
         // Check if current user is available, use SimpleClient as fallback
-        if (currentUser == null) {
+     /*   if (currentUser == null) {
             currentUser = SimpleClient.getCurrentUser();
             System.out.println("Using SimpleClient current user: " + (currentUser != null ? currentUser.getUsername() : "null"));
         }
@@ -158,7 +158,7 @@ public class CartController {
             Warning warning = new Warning("User session not found. Please log in again.");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
-        }
+        }*/
         
         System.out.println("User is logged in, proceeding to checkout");
         try {
