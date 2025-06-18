@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -126,6 +127,29 @@ public class connect_scene_Con  {
         }
 
     }
+    @FXML
+    void show_reg(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
+            Parent root = fxmlLoader.load();
+
+
+            RegistrationController regController = fxmlLoader.getController();
+            regController.setController(this);
+
+            Stage stage = new Stage();
+            stage.setTitle("Create New Account");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
 
     @Subscribe
     public void handleCatalogUpdate(CatalogUpdateEvent event)/// /  this method only for the first time to get the catalog
