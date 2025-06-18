@@ -31,6 +31,10 @@ public class CartController {
     @FXML private Button continueShoppingButton;
     
     private ObservableList<CartItem> cartItems;
+    private CatalogController catalogController;
+    public void setCatalogController(CatalogController catalogController) {
+        this.catalogController = catalogController;
+    }
     
     public void initialize() {
         // Set up table columns
@@ -118,6 +122,8 @@ public class CartController {
                 System.out.println("Attempting to load login screen");
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("login_screen.fxml"));
                 Parent root = loader.load();
+                LoginController loginController = loader.getController();
+                loginController.setCatalogController(catalogController);
                 System.out.println("Login screen loaded successfully");
                 Stage stage = new Stage();
                 stage.setTitle("Login Required");
