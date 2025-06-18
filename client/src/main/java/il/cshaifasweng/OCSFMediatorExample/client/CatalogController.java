@@ -877,6 +877,7 @@ public class CatalogController {
             Parent root = loader.load();
             CartController cartController = loader.getController();
             cartController.setCartItems(OrderPageController.getCartItems());
+            cartController.setCatalogController(this);
 
             Stage stage = new Stage();
             stage.setTitle("Shopping Cart");
