@@ -27,7 +27,7 @@ public class LoginRegCheck implements Serializable {
     private int store;// 1 for store number 1 ,until 3 ,
     // if the value is 4 is for all the stores -workes must be between 1-2-3
     // worker with value 4 is the מנהל רשת
-    //5 is only for users and mean that the user is מנוי שנתי
+
 
     @Column(name = "userIdNum")
     private String idNum; // only if accType == 2
@@ -47,6 +47,7 @@ public class LoginRegCheck implements Serializable {
     boolean receive_answer=false;
 
     public LoginRegCheck() {}
+
 
     public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store) {
         this.username = username;
@@ -92,7 +93,13 @@ public class LoginRegCheck implements Serializable {
         this.creditCard = creditCard;
         this.is_yearly_subscription = is_yearly_subscription;
     }
+
     public Integer getStore() {return store;}
+
+    public String getStoreName() {
+        String[] stores = { "Haifa", "Krayot","Nahariyya","network"};
+        return stores[this.store - 1];
+    }
 
     // Getters (optionally add setters)
     public String getUsername() { return username; }
@@ -136,3 +143,4 @@ public class LoginRegCheck implements Serializable {
         return receive_answer;
     }
 }
+

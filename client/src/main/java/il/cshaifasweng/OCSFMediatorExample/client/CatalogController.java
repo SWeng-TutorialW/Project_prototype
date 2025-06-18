@@ -582,7 +582,7 @@ public class CatalogController {
             }
         });
         sort_image.setVisible(true);
-         message = message + "_" + type;
+        message = message + "_" + type;
         System.out.println("message: " + message);
         SimpleClient.getClient().sendToServer(message);
 
@@ -665,6 +665,9 @@ public class CatalogController {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("my_account.fxml"));
                 Parent root = fxmlLoader.load();
+                MyAccountController myAccountController = fxmlLoader.getController();
+                myAccountController.setCurrentUser(user);
+
                 Stage stage = new Stage();
                 stage.setTitle("My Account");
                 stage.setScene(new Scene(root));
@@ -782,26 +785,8 @@ public class CatalogController {
     }
 
 
-
-
-
-
-
-  /*
-    private void setupClickHandler(VBox flowerBox, Label nameLabel, Label typeLabel, TextField priceField, ImageView imageView) {
-        flowerBox.setOnMouseClicked(event -> {
-            if (flowersList_c != null) {
-                int index = getFlowerIndex(nameLabel.getText());
-                if (index >= 0 && index < flowersList_c.size()) {
-                    openOrderPage(flowersList_c.get(index));
-                }
-            }
-        });
-    }
-
-   */
     @FXML
-    void delete_flower(ActionEvent event) {
+    void open_flower(ActionEvent event) {
 
         Button clickedButton = (Button) event.getSource();
         VBox graphicVBox = (VBox) clickedButton.getGraphic();
@@ -835,7 +820,10 @@ public class CatalogController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("order_page.fxml"));
             Parent root = loader.load();
             OrderPageController orderController = loader.getController();
+            orderController.setStore(Stores.getValue());
             orderController.setFlower(targetFlower);
+            orderController.setUser(user);
+
 
             Stage stage = new Stage();
             stage.setTitle("Order Details");
@@ -855,28 +843,18 @@ public class CatalogController {
         return -1;
     }
 
-    private void openOrderPage(Flower flower) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("order_page.fxml"));
-            Parent root = loader.load();
-            OrderPageController orderController = loader.getController();
-            orderController.setFlower(flower);
-
-            Stage stage = new Stage();
-            stage.setTitle("Order Details");
-            stage.setScene(new Scene(root));
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
     @FXML
     private void openCart(ActionEvent actionEvent) {
+        System.out.println("CatalogController: openCart called");
+        System.out.println("CatalogController: Current user is: " + (user != null ? user.getUsername() : "null"));
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));
             Parent root = loader.load();
             CartController cartController = loader.getController();
             cartController.setCartItems(OrderPageController.getCartItems());
+            cartController.setCurrentUser(user);
+            System.out.println("CatalogController: User passed to cart: " + (user != null ? user.getUsername() : "null"));
             cartController.setCatalogController(this);
 
             Stage stage = new Stage();

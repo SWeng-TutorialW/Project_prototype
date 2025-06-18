@@ -21,12 +21,24 @@ public class CartItem implements Serializable {
     @ManyToOne
     @JoinColumn(name = "order_id")
     private Order order;
-    
+
+
+    private String store;
+
+    public String getStore() {
+        return store;
+    }
+
+    public void setStore(String store) {
+        this.store = store;
+    }
+
     public CartItem() {}
     
-    public CartItem(Flower flower, int quantity) {
+    public CartItem(Flower flower, int quantity,String storeName) {
         this.flower = flower;
         this.quantity = quantity;
+        this.store = storeName;
     }
     
     public int getId() {
