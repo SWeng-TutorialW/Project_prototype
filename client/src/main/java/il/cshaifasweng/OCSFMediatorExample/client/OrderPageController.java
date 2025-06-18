@@ -101,8 +101,8 @@ public class OrderPageController {
             Warning warning = new Warning("Please log in to add items to cart");
             EventBus.getDefault().post(new WarningEvent(warning));
 
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("connect_scene.fxml"));
+          /*  try {
+                 FXMLLoader loader = new FXMLLoader(getClass().getResource("connect_scene.fxml"));
                 Parent root = loader.load();
 
                 Stage stage = new Stage();
@@ -111,7 +111,7 @@ public class OrderPageController {
                 stage.show();
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            }*/
 
             return; // Exit the method to prevent further execution
         }
