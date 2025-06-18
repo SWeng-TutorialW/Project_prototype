@@ -80,9 +80,9 @@ public class connect_scene_Con  {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
             Parent root = fxmlLoader.load();
 
-           //  אם את רוצה לשלוח מידע ל־controller (למשל את ה־client או פרטים על המשתמש), את יכולה:
+
              RegistrationController regController = fxmlLoader.getController();
-            regController.setConnectController(this); // אופציונלי – אם צריך קשר דו־כיווני
+            regController.setConnectController(this);
 
             Stage stage = new Stage();
             stage.setTitle("Create New Account");

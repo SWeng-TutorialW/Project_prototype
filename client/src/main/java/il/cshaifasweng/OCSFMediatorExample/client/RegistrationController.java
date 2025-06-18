@@ -115,6 +115,7 @@ public class RegistrationController {
         this.connectController = connectController;
     }
 
+
     @FXML
     void RegToSys(MouseEvent event)throws IOException {
 
@@ -296,8 +297,8 @@ public class RegistrationController {
                         System.out.println("[DEBUG] catalogController is OK");
                     }
 
-                    catalogController.set_user(new_user);
-                    catalogController.set_type(store);
+                    //catalogController.set_user(new_user);
+                   // catalogController.set_type(store);
 
                 }
                 if (is_yearly_subscription) {
@@ -314,15 +315,9 @@ public class RegistrationController {
                     String new_user_id = id_text.getText();
                     String new_user_credit = credit_card_box.getText();
 
-                    if (catalogController == null) {
-                        System.out.println("[DEBUG] catalogController is NULL!!!");
-                    } else {
-                        System.out.println("[DEBUG] catalogController is OK");
-                    }
-
                     LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, phoneNumber, fullName, new_user_id, new_user_credit, is_yearly_subscription);
-                    catalogController.set_user(new_user);
-                    catalogController.set_type(4);
+                    //catalogController.set_user(new_user);
+                    //catalogController.set_type(4);
                     SimpleClient.getClient().sendToServer(new_user);
                 }
                 System.out.println("Successful Registration");

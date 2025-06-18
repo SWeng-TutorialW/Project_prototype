@@ -48,13 +48,6 @@ public class LoginRegCheck implements Serializable {
 
     public LoginRegCheck() {}
 
-    public LoginRegCheck(String username, String password, String email, int isLogin) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.isLogin = isLogin;
-        this.type = false;
-    }
     public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store) {
         this.username = username;
         this.password = password;

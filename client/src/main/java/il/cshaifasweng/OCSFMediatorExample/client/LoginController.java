@@ -333,6 +333,7 @@ public class LoginController {
     List<LoginRegCheck> users ;
 
     private CatalogController con;
+
     public void setCatalogController(CatalogController catalogController) {
         con = catalogController;
     }
@@ -394,15 +395,16 @@ public class LoginController {
         EventBus.getDefault().register(this);
         System.out.println("Registered to EventBus - waiting for reg result");
         SimpleClient.getClient().sendToServer("asks_for_users");
-
-
-
     }
+
+
     @Subscribe
     public void get_users(List<LoginRegCheck> allUsers)
     {
         users=allUsers;
     }
+
+
     private boolean isTextFieldEmpty(TextField tf) {
         return tf.getText() == null || tf.getText().trim().isEmpty();
     }
