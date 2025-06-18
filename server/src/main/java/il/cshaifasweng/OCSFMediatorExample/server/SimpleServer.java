@@ -504,37 +504,22 @@ public class SimpleServer extends AbstractServer {
 		else if (msg.getClass().equals(LoginRegCheck.class))
 		{
 			System.out.println("entered LoginRegCheck");
-
+			Session session = App.getSessionFactory().openSession();
+			session.beginTransaction();
 			LoginRegCheck new_user = (LoginRegCheck) msg;
 			System.out.println("new_user name : " + new_user.getUsername());
-			Session session = null;
-			// first we have to check if the user already exists in the DB
-			try{
-				session = App.getSessionFactory().openSession();
-				session.beginTransaction();
-				List<LoginRegCheck> userRow = session.createQuery("FROM LoginRegCheck lr WHERE lr.username=:username AND lr.password=:password", LoginRegCheck.class).setParameter("username", new_user.getUsername()).setParameter("password", new_user.getPassword()).getResultList();
-				session.getTransaction().commit();
-
-				if(!userRow.isEmpty()){
-					session.close();
-					client.sendToClient(new Warning("#regFailed_userExists"));
-					System.err.println("SERVER ERROR: User already exists with username: " + new_user.getUsername());
-					return;
-				}
-				session.close();
-				session = App.getSessionFactory().openSession();
-				new_user.setId(0); // This will ensure that a new user is created and inserted into the DB
+			session = App.getSessionFactory().openSession();
+			try {
 				session.beginTransaction();
 				session.save(new_user);
 				session.getTransaction().commit();
-				client.sendToClient("#registerSuccess");
-			} catch (Exception e) {
+					} catch (Exception e) {
 						session.getTransaction().rollback();
 						e.printStackTrace();
-						System.err.println("SERVER ERROR: " + e.getMessage());
-			} finally {
+					} finally {
 						session.close();
-			}// registration
+					}// registration
+
 		}
 		else if (msg.getClass().equals(change_user_login.class)) {
 			change_user_login wrapper = (change_user_login) msg;
@@ -546,6 +531,7 @@ public class SimpleServer extends AbstractServer {
 			try {
 				session = App.getSessionFactory().openSession();
 				session.beginTransaction();
+
 
 				CriteriaBuilder builder = session.getCriteriaBuilder();
 				CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
@@ -687,20 +673,6 @@ public class SimpleServer extends AbstractServer {
 			Session session = App.getSessionFactory().openSession();
 			try {
 				session.beginTransaction();
-				
-				// Ensure the user is properly managed in the session
-				if (order.getUser() != null) {
-					// Get the user from the database to ensure it's managed
-					CriteriaBuilder builder = session.getCriteriaBuilder();
-					CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
-					Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
-					query.select(root).where(builder.equal(root.get("username"), order.getUser().getUsername()));
-					LoginRegCheck managedUser = session.createQuery(query).uniqueResult();
-					if (managedUser != null) {
-						order.setUser(managedUser);
-					}
-				}
-				
 				session.save(order);
 				session.getTransaction().commit();
 
@@ -714,48 +686,6 @@ public class SimpleServer extends AbstractServer {
 				e.printStackTrace();
 				try {
 					client.sendToClient("order_error");
-				} catch (IOException ex) {
-					ex.printStackTrace();
-				}
-			} finally {
-				session.close();
-			}
-		}
-		else if (msgString.startsWith("getOrdersForUser_")) {
-			// Get orders for a specific user
-			String username = msgString.substring("getOrdersForUser_".length());
-			Session session = App.getSessionFactory().openSession();
-			try {
-				session.beginTransaction();
-				
-				// First get the user
-				CriteriaBuilder builder = session.getCriteriaBuilder();
-				CriteriaQuery<LoginRegCheck> userQuery = builder.createQuery(LoginRegCheck.class);
-				Root<LoginRegCheck> userRoot = userQuery.from(LoginRegCheck.class);
-				userQuery.select(userRoot).where(builder.equal(userRoot.get("username"), username));
-				LoginRegCheck user = session.createQuery(userQuery).uniqueResult();
-				
-				if (user != null) {
-					// Get orders for this user with items eagerly loaded
-					String hql = "SELECT DISTINCT o FROM Order o " +
-							   "LEFT JOIN FETCH o.items i " +
-							   "LEFT JOIN FETCH i.flower " +
-							   "WHERE o.user = :user";
-					List<Order> userOrders = session.createQuery(hql, Order.class)
-							.setParameter("user", user)
-							.getResultList();
-					
-					session.getTransaction().commit();
-					client.sendToClient(userOrders);
-				} else {
-					session.getTransaction().rollback();
-					client.sendToClient("user_not_found");
-				}
-			} catch (Exception e) {
-				session.getTransaction().rollback();
-				e.printStackTrace();
-				try {
-					client.sendToClient("error_retrieving_orders");
 				} catch (IOException ex) {
 					ex.printStackTrace();
 				}

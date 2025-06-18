@@ -33,6 +33,8 @@ import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 
@@ -40,6 +42,12 @@ public class ComplainController_employee implements Initializable {
 
     @FXML
     private TableView<Complain> complains;
+
+    @FXML
+    private TableColumn<Complain, String> orderIdColumn;
+
+    @FXML
+    private TableColumn<Complain, String> orderPriceColumn;
 
     @FXML
     private TableColumn<Complain, String> complaintColumn;
@@ -60,6 +68,21 @@ public class ComplainController_employee implements Initializable {
     public void initialize(URL url, ResourceBundle resources) {
         EventBus.getDefault().register(this);
         System.out.println("complain handler initialized");
+        
+        // Set up order ID column - extract from complaint text
+        orderIdColumn.setCellValueFactory(cellData -> {
+            String complaintText = cellData.getValue().getComplaint();
+            String orderId = extractOrderId(complaintText);
+            return new SimpleStringProperty(orderId);
+        });
+        
+        // Set up order price column - extract from complaint text
+        orderPriceColumn.setCellValueFactory(cellData -> {
+            String complaintText = cellData.getValue().getComplaint();
+            String orderPrice = extractOrderPrice(complaintText);
+            return new SimpleStringProperty(orderPrice);
+        });
+        
         complaintColumn.setCellValueFactory(new PropertyValueFactory<>("complaint"));
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("client"));
         timeColumn.setCellValueFactory(cellData -> {
@@ -67,7 +90,11 @@ public class ComplainController_employee implements Initializable {
             String formattedTime = timestamp.toString();
             return new SimpleStringProperty(formattedTime);
         });
+        
         try {
+            if (catalogController != null) { //TODO see how to make it different for employee
+                complains.setVisible(false);
+            }
             if (SimpleClient.getClient().isConnected())
                 System.out.println("show_complain");
             SimpleClient.getClient().sendToServer("getComplaints");
@@ -88,6 +115,35 @@ public class ComplainController_employee implements Initializable {
 
 
     }
+    
+    private String extractOrderId(String complaintText) {
+        if (complaintText == null) return "N/A";
+        
+        // Look for "Order #123" pattern
+        Pattern pattern = Pattern.compile("Order #(\\d+)");
+        Matcher matcher = pattern.matcher(complaintText);
+        
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        
+        return "N/A";
+    }
+    
+    private String extractOrderPrice(String complaintText) {
+        if (complaintText == null) return "N/A";
+        
+        // Look for price pattern like "Price: $123.45" or "Total: $123.45"
+        Pattern pattern = Pattern.compile("(?:Price|Total): \\$([\\d.]+)");
+        Matcher matcher = pattern.matcher(complaintText);
+        
+        if (matcher.find()) {
+            return "$" + matcher.group(1);
+        }
+        
+        return "N/A";
+    }
+    
     private void openReplyWindow(Complain complain) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("reply_complain.fxml"));
