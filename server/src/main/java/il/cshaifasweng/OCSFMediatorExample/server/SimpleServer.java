@@ -520,7 +520,6 @@ public class SimpleServer extends AbstractServer {
 					} finally {
 						session.close();
 					}// registration
-
 		}
 		else if (msg.getClass().equals(change_user_login.class)) {
 			change_user_login wrapper = (change_user_login) msg;

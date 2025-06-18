@@ -1,4 +1,5 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
+
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.scene.Node;
 import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
@@ -75,6 +76,7 @@ public class RegistrationController {
     private Label selectStoreLbl; // Value injected by FXMLLoader
     @FXML
     private ComboBox<String> select_store;
+
     @FXML
     private TextField regFullNameTxtB;
 
@@ -99,25 +101,67 @@ public class RegistrationController {
     @FXML
     private PasswordField id_text;
     private CatalogController catalogController;
-
     public void setCatalogController(CatalogController controller) {
         this.catalogController = controller;
     }
-
-    @Subscribe
-    public void get_users(List<LoginRegCheck> allUsers)
-    {
-        users=allUsers;
+    private connect_scene_Con con;
+    public void setController(connect_scene_Con controller) {
+        con = controller;
     }
 
-    private connect_scene_Con connectController;
-    public void setConnectController(connect_scene_Con connectController) {
-        this.connectController = connectController;
+
+    public String checkIfValid(String regUser ,String email,String regPass,String confPass, String fullName, String phoneNumber, String account_type ){
+        if (isTextFieldEmpty(regPassTxtB) || isTextFieldEmpty(regEmailTxtB) ||
+                isTextFieldEmpty(regUserTxtB) || isTextFieldEmpty(regPassConfTxtB)
+                || isTextFieldEmpty(regFullNameTxtB) || isTextFieldEmpty(regPhoneTxtB)) {
+            return "Please fill in all the fields";
+        }
+        if (!regPass.equals(confPass)) {
+            return "Passwords do not match";
+        }
+
+        if (isComboBoxEmpty(select_account_type)) {
+            return "Please select an account type";
+        }
+
+        if ("Store".equals(account_type) && isComboBoxEmpty(select_store)) {
+            return "You need to select a store";
+        }
+
+        for (LoginRegCheck user : users) {
+            if (user.getUsername().equals(regUser)) {
+                return "Username already exists";
+            }
+        }
+
+//        if (regUser.length() <= 4 || email.length() <= 4 || regPass.length() <= 4 ||
+//                fullName.length() <= 4 || phoneNumber.length() != 10) {
+//            return "Each field must be longer than 4 characters and phone number must be 10 digits";
+//        }
+//
+//        if (!email.contains("@") || !email.contains(".")) {
+//            return "Invalid email format";
+//        }
+
+        if (!is_yearly_subscription && store == -1) {
+            return "You need to select a store";
+        }
+
+        if (is_yearly_subscription) {
+            if (id_text.getText().length() != 9) {
+                return "ID must be exactly 9 characters";
+            }
+            if (credit_card_box.getText().length() != 16) {
+                return "Credit card must be exactly 16 characters";
+            }
+        }
+
+        return null;
     }
 
 
     @FXML
-    void RegToSys(MouseEvent event)throws IOException {
+    void RegToSys(MouseEvent event) throws IOException {
 
         String email = regEmailTxtB.getText();
         String regUser = regUserTxtB.getText();
@@ -127,235 +171,37 @@ public class RegistrationController {
         String confPass = regShowPassCB.isSelected() ? regPassConfVisibleTxtB.getText() : regPassConfTxtB.getText();
         String account_type = select_account_type.getValue();
 
-        if(connectController!=null) {
-            try {
-                if (isTextFieldEmpty(regPassTxtB) || isTextFieldEmpty(regEmailTxtB)
-                        || isTextFieldEmpty(regUserTxtB) || isTextFieldEmpty(regPassConfTxtB)
-                        || isTextFieldEmpty(regFullNameTxtB) || isTextFieldEmpty(regPhoneTxtB)) {
-                    Warning warning = new Warning("Please fill in all the fields");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                if (isComboBoxEmpty(select_account_type)) {
-                    Warning warning = new Warning("Please select an account type");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                if (account_type.equals("Store") && isComboBoxEmpty(select_store)) {
-                    Warning warning = new Warning("you need to select a store");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                if (!regPass.equals(confPass)) {
-                    Warning warning = new Warning("passwords do not match");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
 
-                for (LoginRegCheck user : users) {
+        String check = checkIfValid(regUser,email,regPass,confPass,fullName,phoneNumber,account_type);
 
-                    System.out.println("username: " + user.getUsername());
-
-                    if (user.getUsername().equals(regUser)) {
-                        Warning warning = new Warning("Username already exists");
-                        EventBus.getDefault().post(new WarningEvent(warning));
-                        return;
-                    }
-                }
-
-                if (regUser.length() <= 4 || email.length() <= 4 || regPass.length() <= 4 || fullName.length() <= 2 || phoneNumber.length() != 10) {
-                    Warning warning = new Warning("Each field must be longer than 4 characters");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                if (!email.contains("@") || !email.contains(".")) {
-                    Warning warning = new Warning("Invalid email format");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                if (!is_yearly_subscription) {
-                    if (store == -1) {
-                        Warning warning = new Warning("you need to select a store");
-                        EventBus.getDefault().post(new WarningEvent(warning));
-                        return;
-                    }
-                    LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, phoneNumber, fullName);
-                    System.out.println("Sending registration request to server");
-                    SimpleClient.getClient().sendToServer(new_user);
-
-
-                    if (catalogController == null) {
-                        System.out.println("[DEBUG] catalogController is NULL!!!");
-                    } else {
-                        System.out.println("[DEBUG] catalogController is OK");
-                    }
-
-                    catalogController.set_user(new_user);
-                    catalogController.set_type(store);
-
-                }
-                if (is_yearly_subscription) {
-                    if (id_text.getText().length() <= 9) {
-                        Warning warning = new Warning("ID must BE 9 characters");
-                        EventBus.getDefault().post(new WarningEvent(warning));
-                        return;
-                    }
-                    if (credit_card_box.getText().length() <= 16) {
-                        Warning warning = new Warning("Credit card must BE 16 characters");
-                        EventBus.getDefault().post(new WarningEvent(warning));
-                        return;
-                    }
-                    String new_user_id = id_text.getText();
-                    String new_user_credit = credit_card_box.getText();
-
-                    if (catalogController == null) {
-                        System.out.println("[DEBUG] catalogController is NULL!!!");
-                    } else {
-                        System.out.println("[DEBUG] catalogController is OK");
-                    }
-
-                    LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, phoneNumber, fullName, new_user_id, new_user_credit, is_yearly_subscription);
-                    catalogController.set_user(new_user);
-                    catalogController.set_type(4);
-                    SimpleClient.getClient().sendToServer(new_user);
-                }
-                System.out.println("Successful Registration");
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Registration");
-                alert.setHeaderText("Successful Registration");
-                alert.showAndWait();
-                ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
-                EventBus.getDefault().unregister(this);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Registration Error");
-                alert.setHeaderText("An error occurred");
-                alert.setContentText(e.getMessage());
-                alert.showAndWait();
-            }
-        }else {
-            try {
-                if (isTextFieldEmpty(regPassTxtB) || isTextFieldEmpty(regEmailTxtB)
-                        || isTextFieldEmpty(regUserTxtB) || isTextFieldEmpty(regPassConfTxtB)
-                        || isTextFieldEmpty(regFullNameTxtB) || isTextFieldEmpty(regPhoneTxtB)) {
-                    Warning warning = new Warning("Please fill in all the fields");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                if (isComboBoxEmpty(select_account_type)) {
-                    Warning warning = new Warning("Please select an account type");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                if (account_type.equals("Store") && isComboBoxEmpty(select_store)) {
-                    Warning warning = new Warning("you need to select a store");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                if (!regPass.equals(confPass)) {
-                    Warning warning = new Warning("passwords do not match");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-
-                for (LoginRegCheck user : users) {
-
-                    System.out.println("username: " + user.getUsername());
-
-                    if (user.getUsername().equals(regUser)) {
-                        Warning warning = new Warning("Username already exists");
-                        EventBus.getDefault().post(new WarningEvent(warning));
-                        return;
-                    }
-                }
-
-                if (regUser.length() <= 4 || email.length() <= 4 || regPass.length() <= 4 || fullName.length() <= 2 || phoneNumber.length() != 10) {
-                    Warning warning = new Warning("Each field must be longer than 4 characters");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                if (!email.contains("@") || !email.contains(".")) {
-                    Warning warning = new Warning("Invalid email format");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                if (!is_yearly_subscription) {
-                    if (store == -1) {
-                        Warning warning = new Warning("you need to select a store");
-                        EventBus.getDefault().post(new WarningEvent(warning));
-                        return;
-                    }
-                    LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, phoneNumber, fullName);
-                    System.out.println("Sending registration request to server");
-                    SimpleClient.getClient().sendToServer(new_user);
-
-
-                    if (catalogController == null) {
-                        System.out.println("[DEBUG] catalogController is NULL!!!");
-                    } else {
-                        System.out.println("[DEBUG] catalogController is OK");
-                    }
-
-                    //catalogController.set_user(new_user);
-                   // catalogController.set_type(store);
-
-                }
-                if (is_yearly_subscription) {
-                    if (id_text.getText().length() <= 9) {
-                        Warning warning = new Warning("ID must BE 9 characters");
-                        EventBus.getDefault().post(new WarningEvent(warning));
-                        return;
-                    }
-                    if (credit_card_box.getText().length() <= 16) {
-                        Warning warning = new Warning("Credit card must BE 16 characters");
-                        EventBus.getDefault().post(new WarningEvent(warning));
-                        return;
-                    }
-                    String new_user_id = id_text.getText();
-                    String new_user_credit = credit_card_box.getText();
-
-                    LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, phoneNumber, fullName, new_user_id, new_user_credit, is_yearly_subscription);
-                    //catalogController.set_user(new_user);
-                    //catalogController.set_type(4);
-                    SimpleClient.getClient().sendToServer(new_user);
-                }
-                System.out.println("Successful Registration");
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Registration");
-                alert.setHeaderText("Successful Registration");
-                alert.showAndWait();
-                ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
-                EventBus.getDefault().unregister(this);
-            } catch (Exception e) {
-                e.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Registration Error");
-                alert.setHeaderText("An error occurred");
-                alert.setContentText(e.getMessage());
-                alert.showAndWait();
-            }
+        if(check!=null){
+            Warning warning = new Warning(check);
+            EventBus.getDefault().post(new WarningEvent(warning));
         }
+
+        if(is_yearly_subscription){
+            String new_user_id = id_text.getText();
+            String new_user_credit = credit_card_box.getText();
+            LoginRegCheck new_user =  new LoginRegCheck(regUser, regPass, email, 1, false, store, phoneNumber, fullName, new_user_id, new_user_credit, is_yearly_subscription);
+            if(catalogController!=null){
+                catalogController.set_user(new_user);
+                catalogController.set_type(4);
+            }
+            SimpleClient.getClient().sendToServer(new_user);
+        }
+        else{
+            LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, phoneNumber, fullName);
+            SimpleClient.getClient().sendToServer(new_user);
+            if(catalogController!=null){
+                catalogController.set_user(new_user);
+                catalogController.set_type(store);
+            }
+
+        }
+
+        ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
+        System.out.println("Registration Completed");
     }
-
-
-    @FXML
-    void initialize() throws IOException{
-        EventBus.getDefault().register(this);
-        System.out.println("Registered to EventBus - waiting for reg result");
-        // REMEMBER: we only come to this window if we know the user is NOT logged in.
-        regAnchPane.setVisible(true);
-        select_account_type.getItems().addAll("Store", "Network", "Yearly Subscription");
-        select_store.getItems().addAll("lilach_Haifa", "lilach_Krayot", "lilach_Nahariyya");
-        SimpleClient.getClient().sendToServer("asks_for_users");
-
-        // set register anchor
-        AnchorPane.setBottomAnchor(regAnchPane, 58.0);
-        AnchorPane.setTopAnchor(regAnchPane, 58.0);
-        AnchorPane.setRightAnchor(regAnchPane, 89.0);
-        AnchorPane.setLeftAnchor(regAnchPane, 89.0);
-    }
-
 
 
     @FXML
@@ -409,10 +255,10 @@ public class RegistrationController {
             credit_card_box.setVisible(true);
         }
     }
-
     @FXML
     void select_store(ActionEvent event)
     {
+
         String selectStoreValue = select_store.getValue();
         if(selectStoreValue.equals("lilach_Haifa"))
         {
@@ -435,12 +281,6 @@ public class RegistrationController {
     }
 
 
-    private boolean isTextFieldEmpty(TextField tf) {
-        return tf.getText() == null || tf.getText().trim().isEmpty();
-    }
-    private boolean isComboBoxEmpty(ComboBox<String> cb) {
-        return cb.getValue() == null || cb.getValue().trim().isEmpty();
-    }
 
     @FXML
     void togglePass(ActionEvent event) {
@@ -461,5 +301,34 @@ public class RegistrationController {
         }
     }
 
+    @FXML
+    void initialize() throws IOException{
+        EventBus.getDefault().register(this);
+        System.out.println("Registered to EventBus - waiting for reg result");
+        // REMEMBER: we only come to this window if we know the user is NOT logged in.
+        regAnchPane.setVisible(true);
+        select_account_type.getItems().addAll("Store", "Network", "Yearly Subscription");
+        select_store.getItems().addAll("lilach_Haifa", "lilach_Krayot", "lilach_Nahariyya");
+        SimpleClient.getClient().sendToServer("asks_for_users");
+
+
+        // set register anchor
+        AnchorPane.setBottomAnchor(regAnchPane, 58.0);
+        AnchorPane.setTopAnchor(regAnchPane, 58.0);
+        AnchorPane.setRightAnchor(regAnchPane, 89.0);
+        AnchorPane.setLeftAnchor(regAnchPane, 89.0);
+    }
+    @Subscribe
+    public void get_users(List<LoginRegCheck> allUsers)
+    {
+        users=allUsers;
+    }
+    private boolean isTextFieldEmpty(TextField tf) {
+        return tf.getText() == null || tf.getText().trim().isEmpty();
+    }
+
+    private boolean isComboBoxEmpty(ComboBox<String> cb) {
+        return cb.getValue() == null || cb.getValue().trim().isEmpty();
+    }
 
 }

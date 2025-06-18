@@ -18,14 +18,41 @@ public class MyAccountController {
     @FXML // fx:id="accountTypeLbl"
     private Label accountTypeLbl; // Value injected by FXMLLoader
 
+    @FXML // fx:id="accountTypeLbl1"
+    private Label accountTypeLbl1; // Value injected by FXMLLoader
+
     @FXML // fx:id="emailEmptyLbl"
     private Label emailEmptyLbl; // Value injected by FXMLLoader
 
     @FXML // fx:id="emailLbl"
     private Label emailLbl; // Value injected by FXMLLoader
 
+    @FXML // fx:id="emailLbl1"
+    private Label emailLbl1; // Value injected by FXMLLoader
+
+    @FXML // fx:id="employeePositionLbl"
+    private Label employeePositionLbl; // Value injected by FXMLLoader
+
+    @FXML // fx:id="employeePositionLbl1"
+    private Label employeePositionLbl1; // Value injected by FXMLLoader
+
+    @FXML // fx:id="employeeUsernameLbl"
+    private Label employeeUsernameLbl; // Value injected by FXMLLoader
+
+    @FXML // fx:id="employeeUsernameLbl1"
+    private Label employeeUsernameLbl1; // Value injected by FXMLLoader
+
+    @FXML // fx:id="myAccUsers"
+    private AnchorPane myAccUsers; // Value injected by FXMLLoader
+
+    @FXML // fx:id="myAccUsers1"
+    private AnchorPane myAccUsers1; // Value injected by FXMLLoader
+
     @FXML // fx:id="myAccountLbl"
     private Label myAccountLbl; // Value injected by FXMLLoader
+
+    @FXML // fx:id="myAccountLbl1"
+    private Label myAccountLbl1; // Value injected by FXMLLoader
 
     @FXML // fx:id="my_account_data"
     private AnchorPane my_account_data; // Value injected by FXMLLoader
@@ -39,13 +66,18 @@ public class MyAccountController {
     @FXML // fx:id="usernameLbl"
     private Label usernameLbl; // Value injected by FXMLLoader
 
+    @FXML // fx:id="usernameLbl1"
+    private Label usernameLbl1; // Value injected by FXMLLoader
+
+    @FXML // fx:id="workerEmailLbl"
+    private Label workerEmailLbl; // Value injected by FXMLLoader
+
+    @FXML // fx:id="workerEmailLbl1"
+    private Label workerEmailLbl1; // Value injected by FXMLLoader
+
     @FXML
     void onSubscribe(ActionEvent event) {
 
     }
 
-    @FXML
-    void initialize() {
-
-    }
 }
