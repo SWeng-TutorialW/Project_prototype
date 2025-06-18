@@ -106,7 +106,13 @@ public class RegistrationController {
 
 
 
-
+    @Subscribe
+    public void regFailed(WarningEvent warning) {
+        if(warning.getWarning().getMessage().startsWith("#regFailed_userExists")){
+        regErrMsgLbl.setText("User Already Exists");
+        regErrMsgLbl.setVisible(true);
+        }
+    }
 
     @FXML
     void RegToSys(MouseEvent event) throws IOException {
@@ -163,12 +169,13 @@ public class RegistrationController {
                     EventBus.getDefault().post(new WarningEvent(warning));
                     return;
                 }
-                String new_user_id = id_text.getText();
-                String new_user_credit = credit_card_box.getText();
-                LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, is_yearly_subscription);
+                String new_user_id = id_text.getText().trim();
+                String new_user_credit = credit_card_box.getText().trim();
+                LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, is_yearly_subscription);
+                SimpleClient.getClient().sendToServer(new_user);
                 catalogController.set_user(new_user);
                 catalogController.set_type(4);
-                SimpleClient.getClient().sendToServer(new_user);
+
             }
         } else
         {
@@ -223,7 +230,7 @@ public class RegistrationController {
             }
 
         }
-
+        regErrMsgLbl.visibleProperty().setValue(false); // on success, hide error message
         ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
     }
 

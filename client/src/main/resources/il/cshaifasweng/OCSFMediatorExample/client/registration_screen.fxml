@@ -12,7 +12,7 @@
 <AnchorPane fx:id="registerWin" prefHeight="620.0" prefWidth="450.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RegistrationController">
 
    <children>
-      <AnchorPane fx:id="regAnchPane" layoutX="40.0" layoutY="25.0" prefHeight="580.0" prefWidth="370.0" style="-fx-background-color: #c8a2c8; -fx-background-radius: 15;">
+      <AnchorPane fx:id="regAnchPane" layoutX="27.0" layoutY="20.0" prefHeight="580.0" prefWidth="396.0" style="-fx-background-color: #c8a2c8; -fx-background-radius: 15;">
          <children>
             <Label fx:id="regLbl" layoutX="126.0" text="Registration">
                <font>
@@ -78,17 +78,17 @@
             <TextField fx:id="regPassConfVisibleTxtB" layoutX="5.0" layoutY="377.0" prefWidth="290.0" visible="false" />
 
             <!-- Show Password -->
-            <CheckBox fx:id="regShowPassCB" layoutX="295.0" layoutY="357.0" onAction="#togglePass" text="Show Password">
+            <CheckBox fx:id="regShowPassCB" layoutX="294.0" layoutY="357.0" onAction="#togglePass" text="Show Password">
                <font>
                   <Font name="Dubai Medium" size="12.0" />
                </font>
             </CheckBox>
 
             <!-- Error Label -->
-            <Label fx:id="regErrMsgLbl" layoutX="40.0" layoutY="485.0" prefWidth="290.0" style="-fx-text-fill: red;" text="____" textAlignment="JUSTIFY" visible="false" />
+            <Label fx:id="regErrMsgLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="53.0" layoutY="476.0" prefWidth="290.0" style="-fx-text-fill: red;" text="____" textAlignment="CENTER" visible="false" AnchorPane.leftAnchor="53.0" AnchorPane.rightAnchor="52.0" />
 
             <!-- Register Button -->
-            <Button fx:id="regBtn" layoutX="95.0" layoutY="525.0" onMouseClicked="#RegToSys" prefWidth="110.0" text="Register">
+            <Button fx:id="regBtn" layoutX="143.0" layoutY="522.0" onMouseClicked="#RegToSys" prefWidth="110.0" text="Register" AnchorPane.leftAnchor="143.0" AnchorPane.rightAnchor="143.0">
                <font>
                   <Font name="Dubai Medium" size="12.0" />
                </font>

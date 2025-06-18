@@ -1,5 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
+import com.sun.istack.NotNull;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
@@ -13,17 +15,22 @@ public class LoginRegCheck implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotNull
     @Column(name = "user_name")
     private String username;
-
+    @NotNull
     @Column(name = "user_pass")
     private String password;
 
     @Column(name = "emailAdd")
     private String email;
 
+    @Transient // This means that isLogin field will not be included in the database when updating/inserting
     private int isLogin; // 1 = login, 0 = registration
-    private boolean type;// false = client, true = employee
+
+    @Column(name = "type")
+    private boolean type;// false = client, true = employee , let's say the default is client
+    @Column(name = "store")
     private int store;// 1 for store number 1 ,until 3 ,
     // if the value is 4 is for all the stores -workes must be between 1-2-3
     // worker with value 4 is the מנהל רשת

@@ -71,7 +71,7 @@ public class SimpleClient extends AbstractClient {
 			}
 
 		}
-
+		else if(msgString.startsWith("#registerSuccess")) {EventBus.getDefault().post(msgString);}
 		else if(msgString.startsWith("The network manager has deleted flower."))
 		{
 			try {

@@ -504,22 +504,37 @@ public class SimpleServer extends AbstractServer {
 		else if (msg.getClass().equals(LoginRegCheck.class))
 		{
 			System.out.println("entered LoginRegCheck");
-			Session session = App.getSessionFactory().openSession();
-			session.beginTransaction();
+
 			LoginRegCheck new_user = (LoginRegCheck) msg;
 			System.out.println("new_user name : " + new_user.getUsername());
-			session = App.getSessionFactory().openSession();
-			try {
+			Session session = null;
+			// first we have to check if the user already exists in the DB
+			try{
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+				List<LoginRegCheck> userRow = session.createQuery("FROM LoginRegCheck lr WHERE lr.username=:username AND lr.password=:password", LoginRegCheck.class).setParameter("username", new_user.getUsername()).setParameter("password", new_user.getPassword()).getResultList();
+				session.getTransaction().commit();
+
+				if(!userRow.isEmpty()){
+					session.close();
+					client.sendToClient(new Warning("#regFailed_userExists"));
+					System.err.println("SERVER ERROR: User already exists with username: " + new_user.getUsername());
+					return;
+				}
+				session.close();
+				session = App.getSessionFactory().openSession();
+				new_user.setId(0); // This will ensure that a new user is created and inserted into the DB
 				session.beginTransaction();
 				session.save(new_user);
 				session.getTransaction().commit();
-					} catch (Exception e) {
+				client.sendToClient("#registerSuccess");
+			} catch (Exception e) {
 						session.getTransaction().rollback();
 						e.printStackTrace();
 						System.err.println("SERVER ERROR: " + e.getMessage());
-					} finally {
+			} finally {
 						session.close();
-					}// registration
+			}// registration
 		}
 		else if (msg.getClass().equals(change_user_login.class)) {
 			change_user_login wrapper = (change_user_login) msg;
@@ -531,7 +546,6 @@ public class SimpleServer extends AbstractServer {
 			try {
 				session = App.getSessionFactory().openSession();
 				session.beginTransaction();
-
 
 				CriteriaBuilder builder = session.getCriteriaBuilder();
 				CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
