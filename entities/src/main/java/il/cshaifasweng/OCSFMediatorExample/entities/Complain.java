@@ -17,9 +17,6 @@ public class Complain implements Serializable {
     private String clientName;
 
 
-
-
-
     public Complain() {} // ctor
 
     public Complain(String complaint){
@@ -30,7 +27,7 @@ public class Complain implements Serializable {
 
 
     }
-
+    private int test;
     public String getComplaint() {
         return complaint;
     }

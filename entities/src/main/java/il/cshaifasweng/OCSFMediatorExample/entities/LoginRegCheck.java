@@ -26,7 +26,7 @@ public class LoginRegCheck implements Serializable {
     private String email;
 
     @Transient // This means that isLogin field will not be included in the database when updating/inserting
-    private int isLogin; // 1 = login, 0 = registration
+    private int isLogin = 0; // 1 = login, 0 = registration
 
     @Column(name = "type")
     private boolean type;// false = client, true = employee , let's say the default is client
