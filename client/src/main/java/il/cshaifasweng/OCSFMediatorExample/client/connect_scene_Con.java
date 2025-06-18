@@ -100,11 +100,8 @@ public class connect_scene_Con  {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
             Parent root = fxmlLoader.load();
-
-
             RegistrationController regController = fxmlLoader.getController();
             regController.setController(this);
-
             Stage stage = new Stage();
             stage.setTitle("Create New Account");
             stage.setScene(new Scene(root));

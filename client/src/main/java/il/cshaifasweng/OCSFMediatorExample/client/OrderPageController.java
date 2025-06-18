@@ -96,8 +96,7 @@ public class OrderPageController {
     
     @FXML
     private void addToCart() {
-        System.out.println("User login status: " + user.getIsLogin());
-        if(user == null | user.getIsLogin() == 0) {
+        if(user == null || user.getIsLogin() == 0) {
             System.out.println("User not logged in");
             Warning warning = new Warning("Please log in to add items to cart");
             EventBus.getDefault().post(new WarningEvent(warning));

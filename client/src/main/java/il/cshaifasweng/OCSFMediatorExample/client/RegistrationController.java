@@ -174,9 +174,10 @@ public class RegistrationController {
 
         String check = checkIfValid(regUser,email,regPass,confPass,fullName,phoneNumber,account_type);
 
-        if(check!=null){
+        if(check != null){
             Warning warning = new Warning(check);
             EventBus.getDefault().post(new WarningEvent(warning));
+            return;
         }
 
         if(is_yearly_subscription){

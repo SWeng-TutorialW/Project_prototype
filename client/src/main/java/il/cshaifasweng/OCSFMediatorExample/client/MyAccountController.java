@@ -4,6 +4,7 @@
 
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,6 +13,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
+
+import java.io.IOException;
 
 public class MyAccountController {
 
@@ -83,6 +87,12 @@ public class MyAccountController {
 
     private LoginRegCheck currentUser;
 
+
+    @FXML
+    void onSubscribe(ActionEvent event) {
+
+    }
+
     public void setCurrentUser(LoginRegCheck user) {
         this.currentUser = user;
     }
@@ -92,6 +102,7 @@ public class MyAccountController {
         if (currentUser == null) {
             System.out.println("No user logged in");
             return;
+
         }
 
         try {

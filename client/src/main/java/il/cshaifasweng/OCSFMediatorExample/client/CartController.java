@@ -34,6 +34,8 @@ public class CartController {
     private LoginRegCheck currentUser; // Store the current user
 
     private ObservableList<CartItem> cartItems;
+
+
     private CatalogController catalogController;
     public void setCatalogController(CatalogController catalogController) {
         this.catalogController = catalogController;
