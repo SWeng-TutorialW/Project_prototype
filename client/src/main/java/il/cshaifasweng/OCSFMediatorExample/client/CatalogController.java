@@ -665,6 +665,9 @@ public class CatalogController {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("my_account.fxml"));
                 Parent root = fxmlLoader.load();
+                MyAccountController myAccountController = fxmlLoader.getController();
+                myAccountController.setCurrentUser(user);
+                
                 Stage stage = new Stage();
                 stage.setTitle("My Account");
                 stage.setScene(new Scene(root));
@@ -844,7 +847,6 @@ public class CatalogController {
     private void openCart(ActionEvent actionEvent) {
         System.out.println("CatalogController: openCart called");
         System.out.println("CatalogController: Current user is: " + (user != null ? user.getUsername() : "null"));
-        System.out.println("CatalogController: SimpleClient.loggedIn is: " + SimpleClient.loggedIn);
         
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));

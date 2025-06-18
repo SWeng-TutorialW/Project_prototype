@@ -722,11 +722,14 @@ public class SimpleServer extends AbstractServer {
 				LoginRegCheck user = session.createQuery(userQuery).uniqueResult();
 				
 				if (user != null) {
-					// Get orders for this user
-					CriteriaQuery<Order> orderQuery = builder.createQuery(Order.class);
-					Root<Order> orderRoot = orderQuery.from(Order.class);
-					orderQuery.select(orderRoot).where(builder.equal(orderRoot.get("user"), user));
-					List<Order> userOrders = session.createQuery(orderQuery).getResultList();
+					// Get orders for this user with items eagerly loaded
+					String hql = "SELECT DISTINCT o FROM Order o " +
+							   "LEFT JOIN FETCH o.items i " +
+							   "LEFT JOIN FETCH i.flower " +
+							   "WHERE o.user = :user";
+					List<Order> userOrders = session.createQuery(hql, Order.class)
+							.setParameter("user", user)
+							.getResultList();
 					
 					session.getTransaction().commit();
 					client.sendToClient(userOrders);

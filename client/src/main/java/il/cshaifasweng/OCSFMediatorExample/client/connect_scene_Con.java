@@ -182,8 +182,7 @@ public class connect_scene_Con  {
                             System.out.println("type_Employee is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the employee is for store "+type_local);
-                            // Set current user for employee
-                            SimpleClient.setCurrentUser(loginRegCheck);
+                         
 
                         }
                         if (!loginRegCheck.isType())
@@ -199,18 +198,19 @@ public class connect_scene_Con  {
                             System.out.println("type_Client is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the user is mnoy to store "+type_local);
-                            SimpleClient.loggedIn = true;  // Set login state to true for client users Yarden added this
                             SimpleClient.isGuest = false; // Yarden added this
-                            // Set current user for client
-                            SimpleClient.setCurrentUser(loginRegCheck);
-                            System.out.println("Login state set to: " + SimpleClient.loggedIn);
+
+                            
                         }
                         change_user_login wrapper = new change_user_login(user,1);
+
                         try {
                             SimpleClient.getClient().sendToServer(wrapper);
                         } catch (IOException e) {
                             e.printStackTrace();
+
                         }
+                        loginRegCheck.setIsLogin(1);
                         Platform.runLater(() -> {
                             try {
                                 FXMLLoader loader;
@@ -269,7 +269,6 @@ public class connect_scene_Con  {
                                         controller.set_user(loginRegCheck);
                                         controller.setCatalogData(event.getUpdatedItems());
                                         catalogController=controller;
-
                                     }
                                 }
                                 App.getScene().setRoot(root);

@@ -152,9 +152,6 @@ public class LoginController {
     public void onLoginRegResult(String msg) {
         System.out.println("Received login result: " + msg);
         if(msg.startsWith("#login/reg_ok")){
-            System.out.println("Login successful, setting loggedIn to true");
-            SimpleClient.loggedIn = true;
-            System.out.println("Current login status: " + SimpleClient.loggedIn);
             EventBus.getDefault().unregister(this);
             
             // Close the login window

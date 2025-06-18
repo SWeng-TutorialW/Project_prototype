@@ -109,9 +109,7 @@ public class CartController {
     @FXML
     private void checkout() {
         System.out.println("Checkout button clicked");
-        System.out.println("Login status: " + SimpleClient.loggedIn);
         System.out.println("Current user in cart: " + (currentUser != null ? currentUser.getUsername() : "null"));
-        System.out.println("SimpleClient current user: " + (SimpleClient.getCurrentUser() != null ? SimpleClient.getCurrentUser().getUsername() : "null"));
         System.out.println("Cart items size: " + cartItems.size());
         
         if (cartItems.isEmpty()) {

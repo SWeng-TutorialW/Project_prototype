@@ -135,7 +135,6 @@ public class CheckoutController {
     private void placeOrder() {
         System.out.println("CheckoutController: placeOrder called");
         System.out.println("CheckoutController: Current user is: " + (currentUser != null ? currentUser.getUsername() : "null"));
-        System.out.println("CheckoutController: SimpleClient.loggedIn is: " + SimpleClient.loggedIn);
 
         // Validate required fields
         if (nameField.getText().isEmpty() || emailField.getText().isEmpty() || phoneField.getText().isEmpty()) {
