@@ -35,7 +35,7 @@
             <Font name="Dubai Medium" size="18.0" />
          </font>
       </Label>
-      <TextField fx:id="port_box" text="3000" layoutX="177.0" layoutY="196.0" prefHeight="30.0" prefWidth="196.0">
+      <TextField fx:id="port_box" layoutX="177.0" layoutY="196.0" prefHeight="30.0" prefWidth="196.0">
          <font>
             <Font size="14.0" />
          </font>

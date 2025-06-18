@@ -12,8 +12,8 @@
     <children>
       <AnchorPane layoutX="59.0" layoutY="14.0" prefHeight="271.0" prefWidth="445.0" AnchorPane.bottomAnchor="108.0" AnchorPane.leftAnchor="59.0" AnchorPane.rightAnchor="58.0" AnchorPane.topAnchor="14.0">
          <children>
-              <Button fx:id="Catalog" alignment="CENTER" contentDisplay="CENTER" layoutX="61.0" layoutY="245.0" mnemonicParsing="false" onAction="#show_cata" prefHeight="25.0" prefWidth="77.0" text="Login" />
-            <Button fx:id="guess_btn" layoutX="254.0" layoutY="245.0" mnemonicParsing="false" onAction="#guess_enter" text="Connect as guess" />
+              <Button fx:id="Catalog" alignment="CENTER" contentDisplay="CENTER" layoutX="117.0" layoutY="245.0" mnemonicParsing="false" onAction="#show_cata" prefHeight="25.0" prefWidth="77.0" text="Login" />
+            <Button fx:id="guess_btn" layoutX="240.0" layoutY="245.0" mnemonicParsing="false" onAction="#guess_enter" text="Connect as guess" />
               <Label fx:id="port" layoutX="35.0" layoutY="180.0" prefHeight="35.0" prefWidth="130.0" text="Password">
                   <font>
                       <Font size="24.0" />
@@ -44,7 +44,6 @@
                       <Font name="Segoe UI Bold" size="18.0" />
                   </font>
             </Label>
-            <Button fx:id="registerBtn" alignment="CENTER" contentDisplay="CENTER" layoutX="155.0" layoutY="245.0" mnemonicParsing="false" onAction="#show_reg" prefHeight="25.0" prefWidth="77.0" text="Register" />
          </children>
       </AnchorPane>
         <ImageView fx:id="image_1" fitHeight="104.0" fitWidth="156.0" layoutY="285.0" pickOnBounds="true" preserveRatio="true">

@@ -2,7 +2,6 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.CartItem;
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
-import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -13,7 +12,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,13 +23,10 @@ public class OrderPageController {
     @FXML private Label flowerName;
     @FXML private Label flowerType;
     @FXML private Label flowerPrice;
-    @FXML private Label storeName;
-    @FXML private String store;
     @FXML private Spinner<Integer> quantitySpinner;
     @FXML private Label totalPrice;
     @FXML private Button addToCartButton;
     @FXML private Button viewCartButton;
-    @FXML private LoginRegCheck user;
     
     private Flower selectedFlower;
     private static List<CartItem> cartItems = new ArrayList<>();
@@ -47,24 +42,11 @@ public class OrderPageController {
         this.selectedFlower = flower;
         updateUI();
     }
-
-    public void setStore(String store){
-        this.store = store;
-    }
-
-    public void setUser(LoginRegCheck user){
-        this.user = user;
-    }
-
-
-
+    
     private void updateUI() {
         if (selectedFlower != null) {
             flowerName.setText(selectedFlower.getFlowerName());
-            flowerType.setText("Flower Type: " + selectedFlower.getFlowerType());
-            System.out.println("The store of the flower is: " + this.store);
-            storeName.setText("Store: " + this.store);
-
+            flowerType.setText(selectedFlower.getFlowerType());
             flowerPrice.setText(String.format("Price: $%.2f", selectedFlower.getFlowerPrice()));
             updateTotalPrice();
             
@@ -93,46 +75,18 @@ public class OrderPageController {
             totalPrice.setText(String.format("Total: $%.2f", total));
         }
     }
-
+    
     @FXML
     private void addToCart() {
-        if (user == null || user.getIsLogin() == 0) {
-            System.out.println("User not logged in");
-            Warning warning = new Warning("Please log in to add items to cart");
-            EventBus.getDefault().post(new WarningEvent(warning));
-
-          /*  try {
-                 FXMLLoader loader = new FXMLLoader(getClass().getResource("connect_scene.fxml"));
-                Parent root = loader.load();
-
-                Stage stage = new Stage();
-                stage.setTitle("Connect");
-                stage.setScene(new Scene(root));
-                stage.show();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
-
-            return; // Exit the method to prevent further execution
-        }
-
-        if (!this.store.equals(this.user.getStoreName()) && user.getStore() != 4) {
-            Warning warning = new Warning("You Can Only Order From The Store: " + user.getStoreName());
-            EventBus.getDefault().post(new WarningEvent(warning));
-        } else if (selectedFlower != null) {
+        if (selectedFlower != null) {
             int quantity = quantitySpinner.getValue();
-            System.out.println("The store of the flower is:" + this.store);
-            CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
+            CartItem cartItem = new CartItem(selectedFlower, quantity);
             cartItems.add(cartItem);
-
+            
             // Show confirmation
             Warning warning = new Warning("Item added to cart successfully!");
             EventBus.getDefault().post(new WarningEvent(warning));
         }
-
-        // Close current window
-        Stage stage = (Stage) addToCartButton.getScene().getWindow();
-        stage.close();
     }
     
     @FXML
@@ -171,6 +125,4 @@ public class OrderPageController {
     public static void clearCart() {
         cartItems.clear();
     }
-
-
 } 

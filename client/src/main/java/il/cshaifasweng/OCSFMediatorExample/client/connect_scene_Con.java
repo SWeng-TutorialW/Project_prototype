@@ -6,7 +6,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -46,11 +45,7 @@ public class connect_scene_Con  {
     private Label port;
 
     @FXML
-    private TextField password;
-
-    @FXML
-    private Button registerBtn;
-
+    private TextField  password;
     @FXML
     private PrimaryController ctlr;
     boolean guess = false;
@@ -72,47 +67,9 @@ public class connect_scene_Con  {
         } else {
             EventBus.getDefault().register(this);
         }
+
+
     }
-
-//    @FXML
-//    void show_reg(ActionEvent event) {
-//        try {
-//            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
-//            Parent root = fxmlLoader.load();
-//
-//
-//             RegistrationController regController = fxmlLoader.getController();
-//             regController.setConnectController(this);
-//
-//            Stage stage = new Stage();
-//            stage.setTitle("Create New Account");
-//            stage.setScene(new Scene(root));
-//            stage.show();
-//
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-
-    @FXML
-    void show_reg(ActionEvent event) {
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
-            Parent root = fxmlLoader.load();
-            RegistrationController regController = fxmlLoader.getController();
-            regController.setController(this);
-            Stage stage = new Stage();
-            stage.setTitle("Create New Account");
-            stage.setScene(new Scene(root));
-            stage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
     @FXML
     void guess_enter(ActionEvent event)
     {
@@ -139,6 +96,7 @@ public class connect_scene_Con  {
             e.printStackTrace();
 
         }
+
     }
     @Subscribe
     public void handleCatalogUpdate(catalog_sort_event event)
@@ -224,7 +182,6 @@ public class connect_scene_Con  {
                             System.out.println("type_Employee is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the employee is for store "+type_local);
-                         
 
                         }
                         if (!loginRegCheck.isType())
@@ -240,19 +197,16 @@ public class connect_scene_Con  {
                             System.out.println("type_Client is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the user is mnoy to store "+type_local);
+                            SimpleClient.loggedIn = true;  // Set login state to true for client users Yarden added this
                             SimpleClient.isGuest = false; // Yarden added this
-
-                            
+                            System.out.println("Login state set to: " + SimpleClient.loggedIn);
                         }
                         change_user_login wrapper = new change_user_login(user,1);
-
                         try {
                             SimpleClient.getClient().sendToServer(wrapper);
                         } catch (IOException e) {
                             e.printStackTrace();
-
                         }
-                        loginRegCheck.setIsLogin(1);
                         Platform.runLater(() -> {
                             try {
                                 FXMLLoader loader;
@@ -311,6 +265,7 @@ public class connect_scene_Con  {
                                         controller.set_user(loginRegCheck);
                                         controller.setCatalogData(event.getUpdatedItems());
                                         catalogController=controller;
+
                                     }
                                 }
                                 App.getScene().setRoot(root);

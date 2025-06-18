@@ -10,7 +10,7 @@
 
 <AnchorPane fx:id="loginWin" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.LoginController">
    <children>
-      <AnchorPane fx:id="loginAnchPane" layoutX="83.0" layoutY="58.0" AnchorPane.bottomAnchor="58.0" AnchorPane.leftAnchor="83.0" AnchorPane.rightAnchor="95.0" AnchorPane.topAnchor="58.0">
+      <AnchorPane fx:id="loginAnchPane" layoutX="-111.0" layoutY="58.0" AnchorPane.bottomAnchor="58.0" AnchorPane.leftAnchor="-111.0" AnchorPane.rightAnchor="289.0" AnchorPane.topAnchor="58.0">
          <children>
             <Label fx:id="loginLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="36.0" prefHeight="23.0" prefWidth="149.0" text="Lilach Login" AnchorPane.bottomAnchor="361.0" AnchorPane.leftAnchor="36.0" AnchorPane.rightAnchor="37.0" AnchorPane.topAnchor="0.0">
                <font>
@@ -18,17 +18,37 @@
                </font>
             </Label>
             <TextField fx:id="userTxtB" layoutX="2.0" layoutY="121.0" prefHeight="25.0" prefWidth="220.0" AnchorPane.bottomAnchor="238.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="121.0" />
-            <Button fx:id="loginBtn" layoutX="54.0" layoutY="284.0" mnemonicParsing="false" onAction="#loginRegToSys" onMouseClicked="#loginRegToSys" prefHeight="32.0" prefWidth="115.0" text="Login" AnchorPane.bottomAnchor="68.0" AnchorPane.leftAnchor="54.0" AnchorPane.rightAnchor="53.0" AnchorPane.topAnchor="284.0">
+            <Button fx:id="loginBtn" layoutX="54.0" layoutY="284.0" mnemonicParsing="false" onMouseClicked="#loginRegToSys" prefHeight="32.0" prefWidth="115.0" text="Login" AnchorPane.bottomAnchor="68.0" AnchorPane.leftAnchor="54.0" AnchorPane.rightAnchor="53.0" AnchorPane.topAnchor="284.0">
                <font>
                   <Font name="Segoe UI Bold" size="12.0" />
                </font></Button>
             <Label fx:id="usernameLbl" layoutX="5.0" layoutY="104.0" prefHeight="17.0" prefWidth="59.0" text="Username" AnchorPane.bottomAnchor="263.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="158.0" AnchorPane.topAnchor="104.0" />
             <Label fx:id="passLbl" layoutX="4.0" layoutY="176.0" text="Password" AnchorPane.bottomAnchor="191.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="158.0" AnchorPane.topAnchor="176.0" />
-            <CheckBox fx:id="showPassCbox" layoutX="59.0" layoutY="227.0" mnemonicParsing="false"  text="Show Password" AnchorPane.bottomAnchor="140.0" AnchorPane.leftAnchor="59.0" AnchorPane.rightAnchor="59.0" AnchorPane.topAnchor="227.0" />
-            <Button fx:id="gotoRegBtn" layoutX="53.0" layoutY="352.0" mnemonicParsing="false" onAction="#register"  prefHeight="32.0" prefWidth="115.0" text="Register" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="53.0" AnchorPane.rightAnchor="54.0" AnchorPane.topAnchor="352.0" />
+            <CheckBox fx:id="showPassCbox" layoutX="59.0" layoutY="227.0" mnemonicParsing="false" onAction="#togglePass" text="Show Password" AnchorPane.bottomAnchor="140.0" AnchorPane.leftAnchor="59.0" AnchorPane.rightAnchor="59.0" AnchorPane.topAnchor="227.0" />
+            <Button fx:id="gotoRegBtn" layoutX="53.0" layoutY="352.0" mnemonicParsing="false" onMouseClicked="#switchRegLog" prefHeight="32.0" prefWidth="115.0" text="Register" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="53.0" AnchorPane.rightAnchor="54.0" AnchorPane.topAnchor="352.0" />
             <Label fx:id="gotoRegLbl" layoutX="47.0" layoutY="333.0" text="Don't Have an Account?" AnchorPane.bottomAnchor="34.0" AnchorPane.leftAnchor="47.0" AnchorPane.rightAnchor="47.0" AnchorPane.topAnchor="333.0" />
             <PasswordField fx:id="passTxtB" layoutX="2.0" layoutY="192.0" prefHeight="25.0" prefWidth="220.0" AnchorPane.leftAnchor="1.0" AnchorPane.rightAnchor="1.0" />
             <Label fx:id="loginErrMsgLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="26.0" layoutY="255.0" prefHeight="17.0" prefWidth="171.0" text="____" visible="false" AnchorPane.leftAnchor="26.0" AnchorPane.rightAnchor="25.0" />
+         </children>
+      </AnchorPane>
+      <AnchorPane fx:id="regAnchPane" layoutX="140.0" layoutY="58.0" prefHeight="384.0" prefWidth="222.0" AnchorPane.bottomAnchor="58.0" AnchorPane.leftAnchor="140.0" AnchorPane.rightAnchor="38.0" AnchorPane.topAnchor="58.0">
+         <children>
+            <Label fx:id="regLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="36.0" prefHeight="23.0" prefWidth="149.0" text="Registration" AnchorPane.bottomAnchor="361.0" AnchorPane.leftAnchor="36.0" AnchorPane.rightAnchor="37.0" AnchorPane.topAnchor="0.0">
+               <font>
+                  <Font name="Segoe UI Bold" size="18.0" />
+               </font>
+            </Label>
+            <TextField fx:id="regUserTxtB" layoutX="2.0" layoutY="82.0" prefHeight="25.0" prefWidth="220.0" AnchorPane.bottomAnchor="277.0" AnchorPane.topAnchor="82.0" />
+            <Button fx:id="regBtn" layoutX="54.0" layoutY="349.0" mnemonicParsing="false" onMouseClicked="#loginRegToSys" prefHeight="32.0" prefWidth="115.0" text="Register" AnchorPane.bottomAnchor="3.0" AnchorPane.topAnchor="349.0" />
+            <Label fx:id="regUserLbl" layoutX="5.0" layoutY="65.0" prefHeight="17.0" prefWidth="59.0" text="Username" AnchorPane.bottomAnchor="302.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="158.0" AnchorPane.topAnchor="65.0" />
+            <Label fx:id="regPassConfLbl" layoutX="3.0" layoutY="243.0" prefHeight="17.0" prefWidth="104.0" text="Confirm Password" AnchorPane.bottomAnchor="124.0" AnchorPane.leftAnchor="3.0" AnchorPane.rightAnchor="115.0" AnchorPane.topAnchor="243.0" />
+            <CheckBox fx:id="regShowPassCB" layoutX="56.0" layoutY="297.0" mnemonicParsing="false" onAction="#togglePass" text="Show Password" AnchorPane.bottomAnchor="70.0" AnchorPane.topAnchor="297.0" />
+            <Label fx:id="regPassLbl" layoutX="5.0" layoutY="180.0" text="Password" />
+            <TextField fx:id="regEmailTxtB" layoutX="2.0" layoutY="141.0" prefHeight="25.0" prefWidth="220.0" AnchorPane.bottomAnchor="218.0" AnchorPane.topAnchor="141.0" />
+            <Label fx:id="regEmailLbl" layoutX="5.0" layoutY="124.0" prefHeight="17.0" prefWidth="59.0" text="Email" />
+            <PasswordField fx:id="regPassTxtB" layoutX="2.0" layoutY="197.0" prefHeight="25.0" prefWidth="220.0" />
+            <PasswordField fx:id="regPassConfTxtB" layoutX="2.0" layoutY="260.0" prefHeight="25.0" prefWidth="220.0" />
+            <Label fx:id="regErrMsgLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="22.0" layoutY="321.0" prefHeight="17.0" prefWidth="177.0" text="____" textAlignment="CENTER" visible="false" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="23.0" />
          </children>
       </AnchorPane>
    </children>

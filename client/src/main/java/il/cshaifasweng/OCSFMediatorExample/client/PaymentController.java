@@ -145,6 +145,7 @@ public class PaymentController {
                 break;
         }
     }
+
     private boolean validateCardNumber(String cardNumber) {
         cardNumber = cardNumber.replaceAll("\\s", "");
         CardType cardType = detectCardType(cardNumber);

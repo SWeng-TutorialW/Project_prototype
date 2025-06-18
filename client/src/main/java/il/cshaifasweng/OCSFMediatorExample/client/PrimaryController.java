@@ -94,7 +94,6 @@ public class PrimaryController {
 
 			} catch (IOException e) {
 				e.printStackTrace();
-				System.out.println("failed to load connect scene");
 			}
 		});
 	}

@@ -2,19 +2,26 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.catalog_sort_event;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -99,141 +106,88 @@ public class RegistrationController {
     public void setCatalogController(CatalogController controller) {
         this.catalogController = controller;
     }
-    private connect_scene_Con con;
-    public void setController(connect_scene_Con controller) {
-        con = controller;
-    }
 
 
 
-    @Subscribe
-    public void regFailed(WarningEvent warning) {
-        if(warning.getWarning().getMessage().startsWith("#regFailed_userExists")){
-        regErrMsgLbl.setText("User Already Exists");
-        regErrMsgLbl.setVisible(true);
-        }
-    }
+
 
     @FXML
-    void RegToSys(MouseEvent event) throws IOException {
+    void RegToSys(MouseEvent event)throws IOException
+    {
         String confPass = regPassConfTxtB.getText();
         String confPass2 = regPassConfVisibleTxtB.getText();
         String email = regEmailTxtB.getText();
         String regUser = regUserTxtB.getText();
         String regPass = regPassTxtB.getText();
         String regPass2 = regPassVisibleTxtB.getText();
-
-        if (catalogController != null) {
-            if (isTextFieldEmpty(regPassTxtB) || isTextFieldEmpty(regEmailTxtB) || isTextFieldEmpty(regUserTxtB) || isTextFieldEmpty(regPassConfTxtB)) {
-                Warning warning = new Warning("Please fill in all the fields");
-                EventBus.getDefault().post(new WarningEvent(warning));
-                return;
-            }
-            if (!regPass.equals(confPass)) {
-                Warning warning = new Warning("passwords do not match");
-                EventBus.getDefault().post(new WarningEvent(warning));
-                return;
-            }
-            for (LoginRegCheck user : users) {
-                if (user.getUsername().equals(regUser)) {
-                    Warning warning = new Warning("Username already exists");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-            }
-            if (regUser.length() <= 4 || email.length() <= 4 ||
-                    regPass.length() <= 4 || confPass.length() <= 4) {
-                Warning warning = new Warning("Each field must be longer than 4 characters");
-                EventBus.getDefault().post(new WarningEvent(warning));
-                return;
-            }
-            if (!is_yearly_subscription) {
-                if (store == -1) {
-                    Warning warning = new Warning("you need to select a store");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store);
-                SimpleClient.getClient().sendToServer(new_user);
-                catalogController.set_user(new_user);
-                catalogController.set_type(store);
-            }
-            if (is_yearly_subscription) {
-                if (id_text.getText().length() <= 9) {
-                    Warning warning = new Warning("ID must BE 9 characters");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                if (credit_card_box.getText().length() <= 16) {
-                    Warning warning = new Warning("Credit card must BE 16 characters");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                String new_user_id = id_text.getText().trim();
-                String new_user_credit = credit_card_box.getText().trim();
-                LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, is_yearly_subscription);
-                SimpleClient.getClient().sendToServer(new_user);
-                catalogController.set_user(new_user);
-                catalogController.set_type(4);
-
-            }
-        } else
-        {
-            if (isTextFieldEmpty(regPassTxtB) || isTextFieldEmpty(regEmailTxtB) || isTextFieldEmpty(regUserTxtB) || isTextFieldEmpty(regPassConfTxtB)) {
-                Warning warning = new Warning("Please fill in all the fields");
-                EventBus.getDefault().post(new WarningEvent(warning));
-                return;
-            }
-            if (!regPass.equals(confPass)) {
-                Warning warning = new Warning("passwords do not match");
-                EventBus.getDefault().post(new WarningEvent(warning));
-                return;
-            }
-            for (LoginRegCheck user : users) {
-                if (user.getUsername().equals(regUser)) {
-                    Warning warning = new Warning("Username already exists");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-            }
-            if (regUser.length() <= 4 || email.length() <= 4 ||
-                    regPass.length() <= 4 || confPass.length() <= 4) {
-                Warning warning = new Warning("Each field must be longer than 4 characters");
-                EventBus.getDefault().post(new WarningEvent(warning));
-                return;
-            }
-            if (!is_yearly_subscription) {
-                if (store == -1) {
-                    Warning warning = new Warning("you need to select a store");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store);
-                SimpleClient.getClient().sendToServer(new_user);
-
-            }
-            if (is_yearly_subscription) {
-                if (id_text.getText().length() <= 9) {
-                    Warning warning = new Warning("ID must BE 9 characters");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                if (credit_card_box.getText().length() <= 16) {
-                    Warning warning = new Warning("Credit card must BE 16 characters");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
-                }
-                String new_user_id = id_text.getText();
-                String new_user_credit = credit_card_box.getText();
-                LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, is_yearly_subscription);
-                SimpleClient.getClient().sendToServer(new_user);
-            }
-
+        if (isTextFieldEmpty(regPassTxtB)|| isTextFieldEmpty(regEmailTxtB) || isTextFieldEmpty(regUserTxtB)|| isTextFieldEmpty(regPassConfTxtB)) {
+            Warning warning = new Warning("Please fill in all the fields");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
         }
-        regErrMsgLbl.visibleProperty().setValue(false); // on success, hide error message
-        ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
-    }
+        if(!regPass.equals(confPass))
+        {
+            Warning warning = new Warning("passwords do not match");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+        for (LoginRegCheck user : users) {
+            if (user.getUsername().equals(regUser)) {
+                Warning warning = new Warning("Username already exists");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+        }
+        if (regUser.length() <= 4 || email.length() <= 4 ||
+                regPass.length() <= 4 || confPass.length() <= 4) {
+            Warning warning = new Warning("Each field must be longer than 4 characters");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+        if(!is_yearly_subscription)
+        {
+            if(store==-1)
+            {
+                Warning warning = new Warning("you need to select a store");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+            LoginRegCheck new_user = new  LoginRegCheck(regUser,regPass,email,1,false,store);
+            SimpleClient.getClient().sendToServer(new_user);
+            catalogController.set_user(new_user);
+            catalogController.set_type(store);
+        }
+        if(is_yearly_subscription)
+        {
+            if (id_text.getText().length() <= 9) {
+                Warning warning = new Warning("ID must BE 9 characters");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+            if (credit_card_box.getText().length() <= 16) {
+                Warning warning = new Warning("Credit card must BE 16 characters");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+            String new_user_id = id_text.getText();
+            String new_user_credit = credit_card_box.getText();
+            LoginRegCheck new_user = new  LoginRegCheck(regUser,regPass,email,1,false,store,new_user_id,new_user_credit,is_yearly_subscription);
+            catalogController.set_user(new_user);
+            catalogController.set_type(4);
+            SimpleClient.getClient().sendToServer(new_user);
+        }
 
+
+        ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
+
+
+
+
+
+
+
+
+    }
     @FXML
     void selected_account(ActionEvent event)
     {
