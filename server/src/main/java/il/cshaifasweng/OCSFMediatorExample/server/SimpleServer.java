@@ -516,6 +516,7 @@ public class SimpleServer extends AbstractServer {
 					} catch (Exception e) {
 						session.getTransaction().rollback();
 						e.printStackTrace();
+						System.err.println("SERVER ERROR: " + e.getMessage());
 					} finally {
 						session.close();
 					}// registration

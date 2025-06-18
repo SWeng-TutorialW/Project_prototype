@@ -9,8 +9,6 @@ import java.io.Serializable;
 @Table(name = "users_tbl")
 public class LoginRegCheck implements Serializable {
 
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -36,28 +34,17 @@ public class LoginRegCheck implements Serializable {
 
     @Column(name = "creditCard")
     private String creditCard; // only if accType == 2
+
+    @Column(name = "phoneNum")
+    private String phoneNum;
+
+    @Column(name = "fullName")
+    private String fullName;
+
+
     boolean is_yearly_subscription=false;
     boolean send_complain=false;
     boolean receive_answer=false;
-    public void set_send(boolean send_complain)
-    {
-        this.send_complain=send_complain;
-    }
-    public boolean get_send_complain()
-    {
-        return send_complain;
-    }
-    public void set_receive_answer(boolean receive_answer)
-    {
-        this.receive_answer=receive_answer;
-    }
-    public boolean isReceive_answer()
-    {
-        return receive_answer;
-    }
-
-
-
 
     public LoginRegCheck() {}
 
@@ -68,7 +55,6 @@ public class LoginRegCheck implements Serializable {
         this.isLogin = isLogin;
         this.type = false;
     }
-
     public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store) {
         this.username = username;
         this.password = password;
@@ -77,13 +63,25 @@ public class LoginRegCheck implements Serializable {
         this.type = type;
         this.store = store;
     }
-    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String idNum, String creditCard, boolean is_yearly_subscription) {
+    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String phoneNum, String fullName) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.isLogin = isLogin;
         this.type = type;
         this.store = store;
+        this.phoneNum = phoneNum;
+        this.fullName = fullName;
+    }
+    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String phoneNum, String fullName, String idNum, String creditCard, boolean is_yearly_subscription) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.isLogin = isLogin;
+        this.type = type;
+        this.store = store;
+        this.phoneNum = phoneNum;
+        this.fullName = fullName;
         this.idNum = idNum;
         this.creditCard = creditCard;
         this.is_yearly_subscription = is_yearly_subscription;
@@ -114,6 +112,22 @@ public class LoginRegCheck implements Serializable {
     }
     public boolean is_yearly_subscription() {
         return is_yearly_subscription;
+    }
+    public void set_send(boolean send_complain)
+    {
+        this.send_complain=send_complain;
+    }
+    public boolean get_send_complain()
+    {
+        return send_complain;
+    }
+    public void set_receive_answer(boolean receive_answer)
+    {
+        this.receive_answer=receive_answer;
+    }
+    public boolean isReceive_answer()
+    {
+        return receive_answer;
     }
 }
 

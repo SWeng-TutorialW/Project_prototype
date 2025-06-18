@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -45,7 +46,11 @@ public class connect_scene_Con  {
     private Label port;
 
     @FXML
-    private TextField  password;
+    private TextField password;
+
+    @FXML
+    private Button registerBtn;
+
     @FXML
     private PrimaryController ctlr;
     boolean guess = false;
@@ -67,9 +72,29 @@ public class connect_scene_Con  {
         } else {
             EventBus.getDefault().register(this);
         }
-
-
     }
+
+    @FXML
+    void show_reg(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
+            Parent root = fxmlLoader.load();
+
+           //  אם את רוצה לשלוח מידע ל־controller (למשל את ה־client או פרטים על המשתמש), את יכולה:
+             RegistrationController regController = fxmlLoader.getController();
+            regController.setConnectController(this); // אופציונלי – אם צריך קשר דו־כיווני
+
+            Stage stage = new Stage();
+            stage.setTitle("Create New Account");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     @FXML
     void guess_enter(ActionEvent event)
     {
@@ -96,7 +121,6 @@ public class connect_scene_Con  {
             e.printStackTrace();
 
         }
-
     }
     @Subscribe
     public void handleCatalogUpdate(catalog_sort_event event)

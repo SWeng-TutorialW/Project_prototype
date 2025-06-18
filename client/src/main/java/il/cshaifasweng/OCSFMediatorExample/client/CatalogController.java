@@ -247,14 +247,15 @@ public class CatalogController {
     private int sorting_type=0 ; //0 for guest, 1 for store 1 ,2 for store 2 ,3 for store 3 ,
     // 4 for the network
     private List<Flower> flowersList_sorting;
+
     private LoginRegCheck user;
+
     public void set_user(LoginRegCheck user) {
         this.user = user;
         System.out.println("the user is " + user.getUsername());
         System.out.println(" user send: " + user.get_send_complain());
-
-
     }
+
     public LoginRegCheck getUser() {
         return user;
     }
