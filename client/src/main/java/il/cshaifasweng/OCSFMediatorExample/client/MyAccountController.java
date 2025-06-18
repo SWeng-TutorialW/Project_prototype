@@ -5,6 +5,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.change_user_login;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,10 +14,14 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
+import java.util.List;
 
 public class MyAccountController {
 
@@ -85,11 +91,14 @@ public class MyAccountController {
     @FXML
     private Button myOrdersButton;
 
+
     private LoginRegCheck currentUser;
 
 
+
     @FXML
-    void onSubscribe(ActionEvent event) {
+    void onSubscribe(ActionEvent event)
+    {
 
     }
 
@@ -123,4 +132,6 @@ public class MyAccountController {
             e.printStackTrace();
         }
     }
+
+
 }

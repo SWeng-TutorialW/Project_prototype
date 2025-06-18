@@ -235,6 +235,12 @@ public class CatalogController {
     }
     @FXML
     private ComboBox<String> Stores;
+    private  connect_scene_Con connect_scene_Con;
+
+    public void set_connect_controller(connect_scene_Con connect_scene_Con) {
+       this.connect_scene_Con = connect_scene_Con;
+    }
+
 
     private List<Flower> flowersList_c;
     private Label[] nameLabels;
@@ -651,6 +657,7 @@ public class CatalogController {
                     Parent root = fxmlLoader.load();
                     RegistrationController regController = fxmlLoader.getController();
                     regController.setCatalogController(this);
+                    regController.setController(connect_scene_Con);
                     Stage stage = new Stage();
                     stage.setTitle("Create New Account");
                     stage.setScene(new Scene(root));
@@ -667,6 +674,7 @@ public class CatalogController {
                 Parent root = fxmlLoader.load();
                 MyAccountController myAccountController = fxmlLoader.getController();
                 myAccountController.setCurrentUser(user);
+
 
                 Stage stage = new Stage();
                 stage.setTitle("My Account");

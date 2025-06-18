@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.change_user_login;
 import javafx.scene.Node;
 import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import javafx.event.ActionEvent;
@@ -103,6 +104,54 @@ public class RegistrationController {
     public void setController(connect_scene_Con controller) {
         con = controller;
     }
+    @FXML
+    private TextField user_name_asaf;
+    @FXML
+    private TextField password_asaf;
+    @FXML
+    private Button login;
+
+
+    private LoginRegCheck currentUser;
+    @FXML
+    void login(ActionEvent event)
+    {
+        String username = user_name_asaf.getText();
+        String password = password_asaf.getText();
+        for (LoginRegCheck loginRegCheck : users) {
+
+            if(loginRegCheck.getUsername().equals(username) && loginRegCheck.getPassword().equals(password))
+            {
+                System.out.println("");
+                change_user_login wrapper = new change_user_login(loginRegCheck,1);
+                try {
+                    SimpleClient.getClient().sendToServer(wrapper);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                loginRegCheck.setIsLogin(1);
+                catalogController.set_user(loginRegCheck);
+                catalogController.set_type(loginRegCheck.getStore());
+                con.set_user(loginRegCheck);
+                con.set_guest(false);
+                con.set_type_client(true);
+                con.set_type_local(loginRegCheck.getStore());
+                ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
+
+                return;
+
+            }
+
+        }
+
+        {
+            Warning warning = new Warning("Username or password doesn't match");
+            EventBus.getDefault().post(new WarningEvent(warning));
+
+        }
+
+    }
+
 
 
 
@@ -165,7 +214,7 @@ public class RegistrationController {
                 }
                 String new_user_id = id_text.getText();
                 String new_user_credit = credit_card_box.getText();
-                LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, is_yearly_subscription);
+                LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store,new_user_id,new_user_credit, is_yearly_subscription);
                 catalogController.set_user(new_user);
                 catalogController.set_type(4);
                 SimpleClient.getClient().sendToServer(new_user);
@@ -218,7 +267,7 @@ public class RegistrationController {
                 }
                 String new_user_id = id_text.getText();
                 String new_user_credit = credit_card_box.getText();
-                LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, is_yearly_subscription);
+                LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store,new_user_id,new_user_credit, is_yearly_subscription);
                 SimpleClient.getClient().sendToServer(new_user);
             }
 

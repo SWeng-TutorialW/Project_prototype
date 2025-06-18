@@ -12,7 +12,7 @@
 <AnchorPane fx:id="registerWin" prefHeight="620.0" prefWidth="450.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RegistrationController">
 
    <children>
-      <AnchorPane fx:id="regAnchPane" layoutX="40.0" layoutY="25.0" prefHeight="580.0" prefWidth="370.0" style="-fx-background-color: #c8a2c8; -fx-background-radius: 15;">
+      <AnchorPane fx:id="regAnchPane" layoutX="1.0" layoutY="25.0" prefHeight="596.0" prefWidth="456.0" style="-fx-background-color: #c8a2c8; -fx-background-radius: 15;">
          <children>
             <Label fx:id="regLbl" layoutX="126.0" text="Registration">
                <font>
@@ -88,7 +88,7 @@
             <Label fx:id="regErrMsgLbl" layoutX="40.0" layoutY="485.0" prefWidth="290.0" style="-fx-text-fill: red;" text="____" textAlignment="JUSTIFY" visible="false" />
 
             <!-- Register Button -->
-            <Button fx:id="regBtn" layoutX="95.0" layoutY="525.0" onMouseClicked="#RegToSys" prefWidth="110.0" text="Register">
+            <Button fx:id="regBtn" layoutX="3.0" layoutY="515.0" onMouseClicked="#RegToSys" prefWidth="110.0" text="Register">
                <font>
                   <Font name="Dubai Medium" size="12.0" />
                </font>
@@ -114,7 +114,10 @@
                   <Font name="Dubai Medium" size="12.0" />
                </font>
             </Label>
-            <PasswordField fx:id="credit_card_box" layoutX="5.0" layoutY="472.0" prefWidth="290.0" visible="false" />
+            <PasswordField fx:id="credit_card_box" layoutX="5.0" layoutY="472.0" prefWidth="290.0" />
+            <TextField fx:id="user_name_asaf" layoutX="296.0" layoutY="503.0" />
+            <TextField fx:id="password_asaf" layoutX="296.0" layoutY="533.0" />
+            <Button fx:id="login" layoutX="224.0" layoutY="546.0" mnemonicParsing="false" onAction="#login" text="login" />
          </children>
       </AnchorPane>
    </children>
