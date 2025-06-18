@@ -44,6 +44,7 @@ public class App extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
         return fxmlLoader.load();
     }
+
     public static Scene getScene() {
         return scene;
     }
@@ -55,7 +56,7 @@ public class App extends Application {
 		// TODO Auto-generated method stub
     	EventBus.getDefault().unregister(this);
         SimpleClient.getClient().sendToServer("remove client");
-        SimpleClient.getClient().client.closeConnection();
+        SimpleClient.getClient().closeConnection();
 		super.stop();
 	}
     
