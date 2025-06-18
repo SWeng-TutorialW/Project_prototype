@@ -582,7 +582,7 @@ public class CatalogController {
             }
         });
         sort_image.setVisible(true);
-         message = message + "_" + type;
+        message = message + "_" + type;
         System.out.println("message: " + message);
         SimpleClient.getClient().sendToServer(message);
 
@@ -667,7 +667,7 @@ public class CatalogController {
                 Parent root = fxmlLoader.load();
                 MyAccountController myAccountController = fxmlLoader.getController();
                 myAccountController.setCurrentUser(user);
-                
+
                 Stage stage = new Stage();
                 stage.setTitle("My Account");
                 stage.setScene(new Scene(root));
@@ -847,7 +847,7 @@ public class CatalogController {
     private void openCart(ActionEvent actionEvent) {
         System.out.println("CatalogController: openCart called");
         System.out.println("CatalogController: Current user is: " + (user != null ? user.getUsername() : "null"));
-        
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));
             Parent root = loader.load();
@@ -855,6 +855,7 @@ public class CatalogController {
             cartController.setCartItems(OrderPageController.getCartItems());
             cartController.setCurrentUser(user);
             System.out.println("CatalogController: User passed to cart: " + (user != null ? user.getUsername() : "null"));
+            cartController.setCatalogController(this);
 
             Stage stage = new Stage();
             stage.setTitle("Shopping Cart");

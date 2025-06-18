@@ -516,10 +516,10 @@ public class SimpleServer extends AbstractServer {
 					} catch (Exception e) {
 						session.getTransaction().rollback();
 						e.printStackTrace();
+						System.err.println("SERVER ERROR: " + e.getMessage());
 					} finally {
 						session.close();
 					}// registration
-
 		}
 		else if (msg.getClass().equals(change_user_login.class)) {
 			change_user_login wrapper = (change_user_login) msg;
