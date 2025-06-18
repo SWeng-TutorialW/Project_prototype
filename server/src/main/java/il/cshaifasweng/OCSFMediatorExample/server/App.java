@@ -20,14 +20,14 @@ import org.hibernate.service.ServiceRegistry;
  * Hello world!
  *
  */
-public class App 
-{
-	
-	private static SimpleServer server;
+public class App {
+
+    private static SimpleServer server;
 
     private static Session session;
     private static SessionFactory sessionFactory = null;
     private static List<Store> stores;
+
     public static List<Store> get_stores() {
         return stores;
     }
@@ -125,9 +125,6 @@ public class App
         session.flush();
 
         stores = Arrays.asList(lilach_Haifa, lilach_Krayot, lilach_Nahariyya);
-
-
-
 
         session.getTransaction().commit();// Save everything.
 

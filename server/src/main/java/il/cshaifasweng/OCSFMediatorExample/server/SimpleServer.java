@@ -180,7 +180,6 @@ public class SimpleServer extends AbstractServer {
 			sendToAllClients("update_catalog_after_change");
 
 		}
-
 		else if (msgString.startsWith("asks_for_users")) {
 			Session session = null;
 			List<LoginRegCheck> allUsers = null;
@@ -521,6 +520,7 @@ public class SimpleServer extends AbstractServer {
 					} catch (Exception e) {
 						session.getTransaction().rollback();
 						e.printStackTrace();
+						System.err.println("SERVER ERROR: " + e.getMessage());
 					} finally {
 						session.close();
 					}// registration
@@ -678,6 +678,20 @@ public class SimpleServer extends AbstractServer {
 			Session session = App.getSessionFactory().openSession();
 			try {
 				session.beginTransaction();
+
+				// Ensure the user is properly managed in the session
+				if (order.getUser() != null) {
+					// Get the user from the database to ensure it's managed
+					CriteriaBuilder builder = session.getCriteriaBuilder();
+					CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
+					Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
+					query.select(root).where(builder.equal(root.get("username"), order.getUser().getUsername()));
+					LoginRegCheck managedUser = session.createQuery(query).uniqueResult();
+					if (managedUser != null) {
+						order.setUser(managedUser);
+					}
+				}
+
 				session.save(order);
 				session.getTransaction().commit();
 
@@ -698,67 +712,46 @@ public class SimpleServer extends AbstractServer {
 				session.close();
 			}
 		}
-		else if (msg instanceof CustomerOrdersRequest)
-		{
-			CustomerOrdersRequest request = (CustomerOrdersRequest) msg;
+		else if (msgString.startsWith("getOrdersForUser_")) {
+			// Get orders for a specific user
+			String username = msgString.substring("getOrdersForUser_".length());
 			Session session = App.getSessionFactory().openSession();
 			try {
 				session.beginTransaction();
-				
-				// Simple query to get orders first
-				String orderHql = "FROM Order o WHERE o.customerName = :customerName ORDER BY o.orderDate DESC";
-				List<Order> orders = session.createQuery(orderHql, Order.class)
-					.setParameter("customerName", request.getCustomerName())
-					.getResultList();
-				
-				System.out.println("Found " + orders.size() + " orders for customer: " + request.getCustomerName());
-				
-				List<OrderSummary> orderSummaries = new ArrayList<>();
-				for (Order order : orders) {
-					// For each order, get the items separately
-					String itemsHql = "SELECT f.flowerName, ci.quantity FROM CartItem ci JOIN ci.flower f WHERE ci.order.id = :orderId";
-					List<Object[]> items = session.createQuery(itemsHql)
-						.setParameter("orderId", order.getId())
-						.getResultList();
-					
-					// Build items summary
-					StringBuilder itemsSummary = new StringBuilder();
-					for (Object[] item : items) {
-						if (itemsSummary.length() > 0) itemsSummary.append(", ");
-						itemsSummary.append(item[0]).append(" x").append(item[1]);
-					}
-					
-					if (itemsSummary.length() == 0) {
-						itemsSummary.append("No items");
-					}
-					
-					orderSummaries.add(new OrderSummary(
-						order.getId(),
-						order.getOrderDate(),
-						order.getTotalAmount(),
-						order.getStatus(),
-						order.isRequiresDelivery(),
-						itemsSummary.toString()
-					));
+
+				// First get the user
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<LoginRegCheck> userQuery = builder.createQuery(LoginRegCheck.class);
+				Root<LoginRegCheck> userRoot = userQuery.from(LoginRegCheck.class);
+				userQuery.select(userRoot).where(builder.equal(userRoot.get("username"), username));
+				LoginRegCheck user = session.createQuery(userQuery).uniqueResult();
+
+				if (user != null) {
+					// Get orders for this user with items eagerly loaded
+					String hql = "SELECT DISTINCT o FROM Order o " +
+							   "LEFT JOIN FETCH o.items i " +
+							   "LEFT JOIN FETCH i.flower " +
+							   "WHERE o.user = :user";
+					List<Order> userOrders = session.createQuery(hql, Order.class)
+							.setParameter("user", user)
+							.getResultList();
+
+					session.getTransaction().commit();
+					client.sendToClient(userOrders);
+				} else {
+					session.getTransaction().rollback();
+					client.sendToClient("user_not_found");
 				}
-				
-				session.getTransaction().commit();
-				
-				// Send order summaries back to client
-				CustomerOrdersResponse response = new CustomerOrdersResponse(orderSummaries);
-				client.sendToClient(response);
-				
 			} catch (Exception e) {
-				if (session != null) session.getTransaction().rollback();
+				session.getTransaction().rollback();
 				e.printStackTrace();
-				System.err.println("Error fetching orders: " + e.getMessage());
 				try {
-					client.sendToClient("error_fetching_orders");
+					client.sendToClient("error_retrieving_orders");
 				} catch (IOException ex) {
 					ex.printStackTrace();
 				}
 			} finally {
-				if (session != null) session.close();
+				session.close();
 			}
 		}
 		else if(msgString.startsWith("Haifa"))
