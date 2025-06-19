@@ -5,6 +5,9 @@ import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -19,6 +22,7 @@ import org.hibernate.service.ServiceRegistry;
 
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
@@ -176,6 +180,7 @@ public class SimpleServer extends AbstractServer {
 			sendToAllClients("update_catalog_after_change");
 
 		}
+
 		else if (msgString.startsWith("asks_for_users")) {
 			Session session = null;
 			List<LoginRegCheck> allUsers = null;
@@ -691,6 +696,69 @@ public class SimpleServer extends AbstractServer {
 				}
 			} finally {
 				session.close();
+			}
+		}
+		else if (msg instanceof CustomerOrdersRequest)
+		{
+			CustomerOrdersRequest request = (CustomerOrdersRequest) msg;
+			Session session = App.getSessionFactory().openSession();
+			try {
+				session.beginTransaction();
+				
+				// Simple query to get orders first
+				String orderHql = "FROM Order o WHERE o.customerName = :customerName ORDER BY o.orderDate DESC";
+				List<Order> orders = session.createQuery(orderHql, Order.class)
+					.setParameter("customerName", request.getCustomerName())
+					.getResultList();
+				
+				System.out.println("Found " + orders.size() + " orders for customer: " + request.getCustomerName());
+				
+				List<OrderSummary> orderSummaries = new ArrayList<>();
+				for (Order order : orders) {
+					// For each order, get the items separately
+					String itemsHql = "SELECT f.flowerName, ci.quantity FROM CartItem ci JOIN ci.flower f WHERE ci.order.id = :orderId";
+					List<Object[]> items = session.createQuery(itemsHql)
+						.setParameter("orderId", order.getId())
+						.getResultList();
+					
+					// Build items summary
+					StringBuilder itemsSummary = new StringBuilder();
+					for (Object[] item : items) {
+						if (itemsSummary.length() > 0) itemsSummary.append(", ");
+						itemsSummary.append(item[0]).append(" x").append(item[1]);
+					}
+					
+					if (itemsSummary.length() == 0) {
+						itemsSummary.append("No items");
+					}
+					
+					orderSummaries.add(new OrderSummary(
+						order.getId(),
+						order.getOrderDate(),
+						order.getTotalAmount(),
+						order.getStatus(),
+						order.isRequiresDelivery(),
+						itemsSummary.toString()
+					));
+				}
+				
+				session.getTransaction().commit();
+				
+				// Send order summaries back to client
+				CustomerOrdersResponse response = new CustomerOrdersResponse(orderSummaries);
+				client.sendToClient(response);
+				
+			} catch (Exception e) {
+				if (session != null) session.getTransaction().rollback();
+				e.printStackTrace();
+				System.err.println("Error fetching orders: " + e.getMessage());
+				try {
+					client.sendToClient("error_fetching_orders");
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			} finally {
+				if (session != null) session.close();
 			}
 		}
 		else if(msgString.startsWith("Haifa"))

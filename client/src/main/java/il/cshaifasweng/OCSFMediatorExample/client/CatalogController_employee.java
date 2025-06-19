@@ -985,12 +985,10 @@ public class CatalogController_employee {
             return;
         }
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("complain_scene.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("worker_request_scene.fxml"));
             Parent root = fxmlLoader.load();
-            complain_controller Controller = fxmlLoader.getController();
-            Controller.change_head("Request to admin ");
+            worker_request_controller Controller = fxmlLoader.getController();
             Controller.setCatalogController(this);
-
 
             Stage stage = new Stage();
             stage.setTitle("Send request");

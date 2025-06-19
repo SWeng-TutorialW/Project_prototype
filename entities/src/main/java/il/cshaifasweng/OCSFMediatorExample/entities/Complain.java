@@ -12,11 +12,13 @@ public class Complain implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @ManyToOne
+    @JoinColumn(name = "order_id") // This will create a foreign key column in the Complains table
+    private Order order;
+
     private String complaint;
     private LocalDateTime timestamp;
     private String clientName;
-
-
 
 
 
@@ -26,9 +28,21 @@ public class Complain implements Serializable {
         super();
         this.complaint = complaint;
         this.timestamp = LocalDateTime.now();
+        this.order = null;
+    }
+    public Complain(String complaint, Order order){
+        super();
+        this.complaint = complaint;
+        this.timestamp = LocalDateTime.now();
+        this.order = order;
+    }
 
+    public Order getOrder() {
+        return order;
+    }
 
-
+    public void setOrder(Order order) {
+        this.order = order;
     }
 
     public String getComplaint() {

@@ -721,7 +721,6 @@ public class CatalogController {
             Warning warning = new Warning("not available for guest");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
-
         }
         if(user.isReceive_answer())
         {
