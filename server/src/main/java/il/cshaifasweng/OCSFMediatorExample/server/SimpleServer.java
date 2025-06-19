@@ -595,6 +595,7 @@ public class SimpleServer extends AbstractServer {
 				session.beginTransaction();
 				session.save(complain);
 				session.getTransaction().commit();
+				sendToAllClients("update_complainScene_after_change");
 			} catch (Exception e) {
 				session.getTransaction().rollback();
 				e.printStackTrace();
