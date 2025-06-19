@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.geometry.Insets?>
+
+<AnchorPane fx:controller="il.cshaifasweng.OCSFMediatorExample.client.OrderDetailsController" fx:id="orderDetailsPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="900.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Label fx:id="titleLabel" alignment="CENTER" layoutX="350.0" layoutY="20.0" prefHeight="30.0" prefWidth="200.0" text="Order Details" textAlignment="CENTER">
+         <font>
+            <Font name="Dubai Medium" size="24.0" />
+         </font>
+      </Label>
+      
+      <!-- Order Information Section -->
+      <VBox layoutX="50.0" layoutY="70.0" prefWidth="800.0" spacing="10.0">
+         <children>
+            <!-- Order Header Info -->
+            <HBox spacing="20.0">
+               <children>
+                  <VBox spacing="5.0" prefWidth="200.0">
+                     <children>
+                        <Label text="Order ID:" style="-fx-font-weight: bold;" />
+                        <Label fx:id="orderIdLabel" text="Order ID" />
+                     </children>
+                  </VBox>
+                  <VBox spacing="5.0" prefWidth="200.0">
+                     <children>
+                        <Label text="Order Date:" style="-fx-font-weight: bold;" />
+                        <Label fx:id="orderDateLabel" text="Order Date" />
+                     </children>
+                  </VBox>
+                  <VBox spacing="5.0" prefWidth="200.0">
+                     <children>
+                        <Label text="Status:" style="-fx-font-weight: bold;" />
+                        <Label fx:id="statusLabel" text="Status" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            
+            <!-- Customer Information -->
+            <HBox spacing="20.0">
+               <children>
+                  <VBox spacing="5.0" prefWidth="200.0">
+                     <children>
+                        <Label text="Customer Name:" style="-fx-font-weight: bold;" />
+                        <Label fx:id="customerNameLabel" text="Customer Name" />
+                     </children>
+                  </VBox>
+                  <VBox spacing="5.0" prefWidth="200.0">
+                     <children>
+                        <Label text="Customer Email:" style="-fx-font-weight: bold;" />
+                        <Label fx:id="customerEmailLabel" text="Customer Email" />
+                     </children>
+                  </VBox>
+                  <VBox spacing="5.0" prefWidth="200.0">
+                     <children>
+                        <Label text="Delivery Type:" style="-fx-font-weight: bold;" />
+                        <Label fx:id="deliveryTypeLabel" text="Delivery Type" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            
+            <!-- Address Information (if delivery) -->
+            <VBox fx:id="addressSection" spacing="5.0" visible="false">
+               <children>
+                  <Label text="Delivery Address:" style="-fx-font-weight: bold;" />
+                  <Label fx:id="addressLabel" text="Address" />
+               </children>
+            </VBox>
+            
+            <!-- Delivery Time (if delivery) -->
+            <VBox fx:id="deliveryTimeSection" spacing="5.0" visible="false">
+               <children>
+                  <Label text="Delivery Time:" style="-fx-font-weight: bold;" />
+                  <Label fx:id="deliveryTimeLabel" text="Delivery Time" />
+               </children>
+            </VBox>
+            
+            <!-- Items Table -->
+            <Label text="Order Items:" style="-fx-font-weight: bold; -fx-font-size: 16;" />
+            <TableView fx:id="itemsTable" prefHeight="250.0" prefWidth="800.0">
+               <columns>
+                  <TableColumn fx:id="itemNameColumn" prefWidth="150.0" text="Item Name" />
+                  <TableColumn fx:id="itemTypeColumn" prefWidth="100.0" text="Type" />
+                  <TableColumn fx:id="itemStoreColumn" prefWidth="100.0" text="Store" />
+                  <TableColumn fx:id="itemPriceColumn" prefWidth="80.0" text="Price" />
+                  <TableColumn fx:id="itemQuantityColumn" prefWidth="80.0" text="Quantity" />
+                  <TableColumn fx:id="itemTotalColumn" prefWidth="100.0" text="Total" />
+               </columns>
+            </TableView>
+            
+            <!-- Order Summary -->
+            <HBox spacing="20.0" alignment="CENTER_RIGHT">
+               <children>
+                  <VBox spacing="5.0" alignment="CENTER_RIGHT">
+                     <children>
+                        <Label text="Subtotal:" style="-fx-font-weight: bold;" />
+                        <Label text="Delivery Fee:" style="-fx-font-weight: bold;" />
+                        <Label text="Total Amount:" style="-fx-font-weight: bold; -fx-font-size: 16;" />
+                     </children>
+                  </VBox>
+                  <VBox spacing="5.0" alignment="CENTER_RIGHT">
+                     <children>
+                        <Label fx:id="subtotalLabel" text="₪0.00" />
+                        <Label fx:id="deliveryFeeLabel" text="₪0.00" />
+                        <Label fx:id="totalAmountLabel" text="₪0.00" style="-fx-font-size: 16;" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+      
+      <Button fx:id="backButton" layoutX="400.0" layoutY="650.0" prefHeight="30.0" prefWidth="100.0" text="Back" onAction="#handleBackButton" />
+   </children>
+</AnchorPane> 

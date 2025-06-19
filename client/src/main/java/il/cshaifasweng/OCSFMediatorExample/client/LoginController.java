@@ -406,6 +406,7 @@ public class LoginController {
 
 
     private boolean isTextFieldEmpty(TextField tf) {
+
         return tf.getText() == null || tf.getText().trim().isEmpty();
     }
 
