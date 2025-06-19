@@ -171,12 +171,12 @@ public class RegistrationController {
         String confPass = regShowPassCB.isSelected() ? regPassConfVisibleTxtB.getText() : regPassConfTxtB.getText();
         String account_type = select_account_type.getValue();
 
-
         String check = checkIfValid(regUser,email,regPass,confPass,fullName,phoneNumber,account_type);
 
-        if(check!=null){
-            Warning warning = new Warning(check);
-            EventBus.getDefault().post(new WarningEvent(warning));
+        if(check != null) {
+                Warning warning = new Warning(check);
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
         }
 
         if(is_yearly_subscription){
@@ -200,7 +200,10 @@ public class RegistrationController {
         }
 
         ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
-        System.out.println("Registration Completed");
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Registration Completed!");
+        alert.setHeaderText("Registration Completed!");
+        alert.showAndWait();
     }
 
 
