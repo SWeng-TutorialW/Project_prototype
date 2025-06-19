@@ -39,6 +39,30 @@ public class LoginRegCheck implements Serializable {
     boolean is_yearly_subscription=false;
     boolean send_complain=false;
     boolean receive_answer=false;
+
+    public LoginRegCheck(String regUser, String regPass, String email, int i, boolean b, int store, String phoneNumber, String fullName) {
+        this.username = regUser;
+        this.password = regPass;
+        this.email = email;
+        this.isLogin = i;
+        this.type = b;
+        this.store = store;
+        this.idNum = phoneNumber; // Assuming phoneNumber is used as idNum
+        this.creditCard = fullName; // Assuming fullName is used as creditCard
+    }
+
+    public LoginRegCheck(String regUser, String regPass, String email, int i, boolean b, int store, String phoneNumber, String fullName, String newUserId, String newUserCredit, boolean isYearlySubscription) {
+        this.username = regUser;
+        this.password = regPass;
+        this.email = email;
+        this.isLogin = i;
+        this.type = b;
+        this.store = store;
+        this.idNum = newUserId;
+        this.creditCard = newUserCredit;
+        this.is_yearly_subscription = isYearlySubscription;
+    }
+
     public void set_send(boolean send_complain)
     {
         this.send_complain=send_complain;

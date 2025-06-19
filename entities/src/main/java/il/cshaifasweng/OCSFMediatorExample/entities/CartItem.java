@@ -62,6 +62,10 @@ public class CartItem implements Serializable {
     }
 
     public String getStore() {
-        return flower.getStore().getName();
+        return "";
     }
+
+    //public String getStore() {
+     //   return flower.getStore().getName();
+    //}
 } 
