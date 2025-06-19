@@ -60,4 +60,8 @@ public class CartItem implements Serializable {
     public double getTotalPrice() {
         return flower.getFlowerPrice() * quantity;
     }
+
+    public String getStore() {
+        return flower.getStore().getName();
+    }
 } 
