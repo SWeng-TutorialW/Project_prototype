@@ -361,7 +361,6 @@ public class LoginController {
             {
                 Warning warning = new Warning("Username or password doesn't match");
                 EventBus.getDefault().post(new WarningEvent(warning));
-
             }
         }
 
@@ -375,7 +374,6 @@ public class LoginController {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
             Parent root = fxmlLoader.load();
-
 
             RegistrationController regController = fxmlLoader.getController();
             regController.setCatalogController(con);
