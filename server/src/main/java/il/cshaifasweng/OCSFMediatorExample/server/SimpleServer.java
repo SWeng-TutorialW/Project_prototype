@@ -5,6 +5,9 @@ import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -19,6 +22,7 @@ import org.hibernate.service.ServiceRegistry;
 
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
@@ -520,6 +524,7 @@ public class SimpleServer extends AbstractServer {
 					} finally {
 						session.close();
 					}// registration
+
 		}
 		else if (msg.getClass().equals(change_user_login.class)) {
 			change_user_login wrapper = (change_user_login) msg;
@@ -673,7 +678,7 @@ public class SimpleServer extends AbstractServer {
 			Session session = App.getSessionFactory().openSession();
 			try {
 				session.beginTransaction();
-				
+
 				// Ensure the user is properly managed in the session
 				if (order.getUser() != null) {
 					// Get the user from the database to ensure it's managed
@@ -686,7 +691,7 @@ public class SimpleServer extends AbstractServer {
 						order.setUser(managedUser);
 					}
 				}
-				
+
 				session.save(order);
 				session.getTransaction().commit();
 
@@ -713,14 +718,14 @@ public class SimpleServer extends AbstractServer {
 			Session session = App.getSessionFactory().openSession();
 			try {
 				session.beginTransaction();
-				
+
 				// First get the user
 				CriteriaBuilder builder = session.getCriteriaBuilder();
 				CriteriaQuery<LoginRegCheck> userQuery = builder.createQuery(LoginRegCheck.class);
 				Root<LoginRegCheck> userRoot = userQuery.from(LoginRegCheck.class);
 				userQuery.select(userRoot).where(builder.equal(userRoot.get("username"), username));
 				LoginRegCheck user = session.createQuery(userQuery).uniqueResult();
-				
+
 				if (user != null) {
 					// Get orders for this user with items eagerly loaded
 					String hql = "SELECT DISTINCT o FROM Order o " +
@@ -730,7 +735,7 @@ public class SimpleServer extends AbstractServer {
 					List<Order> userOrders = session.createQuery(hql, Order.class)
 							.setParameter("user", user)
 							.getResultList();
-					
+
 					session.getTransaction().commit();
 					client.sendToClient(userOrders);
 				} else {
