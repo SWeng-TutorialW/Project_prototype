@@ -8,11 +8,15 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -33,10 +37,7 @@ public class PrimaryController {
 	@FXML
 	private TextField port_box;
 
-	@FXML
-	private ComboBox<String> combo;
 
-	 private String type;
 
 	@FXML
 	void sendWarning(ActionEvent event) {
@@ -49,27 +50,19 @@ public class PrimaryController {
 	}
 
 	@FXML
-	void initialize() {
-		EventBus.getDefault().register(this);
-		combo.getItems().addAll("client", "employee");
-		combo.setValue("type");
-
-	}
-	@FXML
-	void combo_select(ActionEvent event)
+	void initialize()
 	{
-		type = combo.getValue();
+		
+
 	}
 
-	public void show_cata(ActionEvent actionEvent) {
+
+
+	public void show_connect(ActionEvent actionEvent) {
 		SimpleClient.ip = IP.getText();
 		SimpleClient.port = Integer.parseInt(port_box.getText());
 		client = SimpleClient.getClient();
-		if (type == null)
-		{
-			Warning warning = new Warning("Please choose type,client or employee");
-			EventBus.getDefault().post(new WarningEvent(warning));
-		}
+
 
 		try {
 			SimpleClient.getClient().openConnection();
@@ -81,56 +74,29 @@ public class PrimaryController {
 			e.printStackTrace();
 			return;
 		}
-		try {
-			if (SimpleClient.getClient().isConnected())
-				System.out.println("show_cata");
-				SimpleClient.getClient().sendToServer("getCatalogTable");
-		} catch (Exception e) {
-			e.printStackTrace();
-
+		if (SimpleClient.getClient().isConnected()) {
+			System.out.println("move_to_connect_scene");
+			move_to_connect_scene();
 		}
 
 	}
-	@Subscribe
-	public void handleCatalogUpdate(CatalogUpdateEvent event)
+
+
+	public void move_to_connect_scene()
 	{
-		System.out.println("Loading catalog_win.fxml...");
-		if (type.startsWith("client"))
-		{
-			Platform.runLater(() -> {
-				try {
-					FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
-					Parent root = loader.load();
+		Platform.runLater(() -> {
+			try {
+				FXMLLoader loader = new FXMLLoader(getClass().getResource("connect_scene.fxml"));
+				Parent root = loader.load();
 
-					CatalogController controller = loader.getController();
-					controller.setCatalogData(event.getUpdatedItems());
+				connect_scene_Con controller = loader.getController();
+				App.getScene().setRoot(root);
 
-
-					App.getScene().setRoot(root);
-
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			});
-		}
-		if (type.startsWith("employee"))
-		{
-			Platform.runLater(() -> {
-				try {
-					FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
-					Parent root = loader.load();
-
-					CatalogController_employee controller = loader.getController();
-					controller.setCatalogData(event.getUpdatedItems());
-
-
-					App.getScene().setRoot(root);
-
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			});
-		}
-
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.out.println("failed to load connect scene");
+			}
+		});
 	}
+
 }
