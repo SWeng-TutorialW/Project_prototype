@@ -224,9 +224,9 @@ public class connect_scene_Con  {
                             System.out.println("type_Client is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the user is mnoy to store "+type_local);
-                            SimpleClient.loggedIn = true;  // Set login state to true for client users Yarden added this
                             SimpleClient.isGuest = false; // Yarden added this
-                            System.out.println("Login state set to: " + SimpleClient.loggedIn);
+
+
                         }
                         change_user_login wrapper = new change_user_login(user,1);
                         try {
@@ -234,6 +234,7 @@ public class connect_scene_Con  {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        loginRegCheck.setIsLogin(1);
                         Platform.runLater(() -> {
                             try {
                                 FXMLLoader loader;

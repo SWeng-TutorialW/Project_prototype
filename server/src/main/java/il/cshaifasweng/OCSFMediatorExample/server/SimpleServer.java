@@ -4,6 +4,8 @@ package il.cshaifasweng.OCSFMediatorExample.server;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
+
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -505,24 +507,69 @@ public class SimpleServer extends AbstractServer {
 			}
 			sendToAllClients("new#price#in#flower_" + flowerToUpdate.getFlowerName());
 		}
-		else if (msg.getClass().equals(LoginRegCheck.class))
+		else if (msg.getClass().equals(LoginRegCheck.class)) // login and registration
 		{
 			System.out.println("entered LoginRegCheck");
-			Session session = App.getSessionFactory().openSession();
-			session.beginTransaction();
+			Session session;
 			LoginRegCheck new_user = (LoginRegCheck) msg;
 			System.out.println("new_user name : " + new_user.getUsername());
-			session = App.getSessionFactory().openSession();
-			try {
-				session.beginTransaction();
-				session.save(new_user);
-				session.getTransaction().commit();
-					} catch (Exception e) {
-						session.getTransaction().rollback();
-						e.printStackTrace();
-					} finally {
-						session.close();
-					}// registration
+
+			switch(new_user.getIsLogin()){
+
+				case 0: // registration
+					System.out.println("Trying to Register a new user: " + new_user.getUsername());
+					session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+					List<LoginRegCheck> existingUsers = session.createQuery("FROM LoginRegCheck lr WHERE username = :username", LoginRegCheck.class)
+							.setParameter("username", new_user.getUsername())
+							.getResultList();
+					session.getTransaction().commit();
+					session.close();
+					if(existingUsers.isEmpty()){
+						// we can register.
+						try {
+							session = App.getSessionFactory().openSession();
+							new_user.setId(0); // for insertion
+							session.beginTransaction();
+							session.save(new_user);
+							session.getTransaction().commit();
+							client.sendToClient("#registerSuccess");
+						} catch (Exception e) {
+
+							session.getTransaction().rollback();
+							e.printStackTrace();
+						} finally {
+							session.close();
+						}// registration
+					}
+					else {
+						// user already exists
+						try {
+							client.sendToClient("#registerFailed");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+					break;
+				case 1: // login
+
+					session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+					List<LoginRegCheck> users = session.createQuery("FROM LoginRegCheck lr WHERE username = :username AND password = :password", LoginRegCheck.class)
+							.setParameter("username", new_user.getUsername())
+							.setParameter("password", new_user.getPassword())
+							.getResultList();
+					session.getTransaction().commit();
+					session.close();
+					if(!users.isEmpty()){
+						try{client.sendToClient("#loginSuccess");}catch(IOException e){e.printStackTrace();} // correct user and password
+					}
+					else{ try{client.sendToClient("#loginFalied");}catch(IOException e){e.printStackTrace();}} // user doesn't exist or password is wrong
+
+					break;
+			}
+
+
 
 		}
 		else if (msg.getClass().equals(change_user_login.class)) {
@@ -594,6 +641,7 @@ public class SimpleServer extends AbstractServer {
 				session.beginTransaction();
 				session.save(complain);
 				session.getTransaction().commit();
+				sendToAllClients("update_complainScene_after_change");
 			} catch (Exception e) {
 				session.getTransaction().rollback();
 				e.printStackTrace();
@@ -677,6 +725,20 @@ public class SimpleServer extends AbstractServer {
 			Session session = App.getSessionFactory().openSession();
 			try {
 				session.beginTransaction();
+
+				// Ensure the user is properly managed in the session
+				if (order.getUser() != null) {
+					// Get the user from the database to ensure it's managed
+					CriteriaBuilder builder = session.getCriteriaBuilder();
+					CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
+					Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
+					query.select(root).where(builder.equal(root.get("username"), order.getUser().getUsername()));
+					LoginRegCheck managedUser = session.createQuery(query).uniqueResult();
+					if (managedUser != null) {
+						order.setUser(managedUser);
+					}
+				}
+
 				session.save(order);
 				session.getTransaction().commit();
 
@@ -697,67 +759,46 @@ public class SimpleServer extends AbstractServer {
 				session.close();
 			}
 		}
-		else if (msg instanceof CustomerOrdersRequest)
-		{
-			CustomerOrdersRequest request = (CustomerOrdersRequest) msg;
+		else if (msgString.startsWith("getOrdersForUser_")) {
+			// Get orders for a specific user
+			String username = msgString.substring("getOrdersForUser_".length());
 			Session session = App.getSessionFactory().openSession();
 			try {
 				session.beginTransaction();
 
-				// Simple query to get orders first
-				String orderHql = "FROM Order o WHERE o.customerName = :customerName ORDER BY o.orderDate DESC";
-				List<Order> orders = session.createQuery(orderHql, Order.class)
-					.setParameter("customerName", request.getCustomerName())
-					.getResultList();
+				// First get the user
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<LoginRegCheck> userQuery = builder.createQuery(LoginRegCheck.class);
+				Root<LoginRegCheck> userRoot = userQuery.from(LoginRegCheck.class);
+				userQuery.select(userRoot).where(builder.equal(userRoot.get("username"), username));
+				LoginRegCheck user = session.createQuery(userQuery).uniqueResult();
 
-				System.out.println("Found " + orders.size() + " orders for customer: " + request.getCustomerName());
+				if (user != null) {
+					// Get orders for this user with items eagerly loaded
+					String hql = "SELECT DISTINCT o FROM Order o " +
+							   "LEFT JOIN FETCH o.items i " +
+							   "LEFT JOIN FETCH i.flower " +
+							   "WHERE o.user = :user";
+					List<Order> userOrders = session.createQuery(hql, Order.class)
+							.setParameter("user", user)
+							.getResultList();
 
-				List<OrderSummary> orderSummaries = new ArrayList<>();
-				for (Order order : orders) {
-					// For each order, get the items separately
-					String itemsHql = "SELECT f.flowerName, ci.quantity FROM CartItem ci JOIN ci.flower f WHERE ci.order.id = :orderId";
-					List<Object[]> items = session.createQuery(itemsHql)
-						.setParameter("orderId", order.getId())
-						.getResultList();
-
-					// Build items summary
-					StringBuilder itemsSummary = new StringBuilder();
-					for (Object[] item : items) {
-						if (itemsSummary.length() > 0) itemsSummary.append(", ");
-						itemsSummary.append(item[0]).append(" x").append(item[1]);
-					}
-
-					if (itemsSummary.length() == 0) {
-						itemsSummary.append("No items");
-					}
-
-					orderSummaries.add(new OrderSummary(
-						order.getId(),
-						order.getOrderDate(),
-						order.getTotalAmount(),
-						order.getStatus(),
-						order.isRequiresDelivery(),
-						itemsSummary.toString()
-					));
+					session.getTransaction().commit();
+					client.sendToClient(userOrders);
+				} else {
+					session.getTransaction().rollback();
+					client.sendToClient("user_not_found");
 				}
-
-				session.getTransaction().commit();
-
-				// Send order summaries back to client
-				CustomerOrdersResponse response = new CustomerOrdersResponse(orderSummaries);
-				client.sendToClient(response);
-
 			} catch (Exception e) {
-				if (session != null) session.getTransaction().rollback();
+				session.getTransaction().rollback();
 				e.printStackTrace();
-				System.err.println("Error fetching orders: " + e.getMessage());
 				try {
-					client.sendToClient("error_fetching_orders");
+					client.sendToClient("error_retrieving_orders");
 				} catch (IOException ex) {
 					ex.printStackTrace();
 				}
 			} finally {
-				if (session != null) session.close();
+				session.close();
 			}
 		}
 		else if(msgString.startsWith("Haifa"))

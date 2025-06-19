@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.scene.Node;
 import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
@@ -11,6 +12,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -21,74 +23,6 @@ import java.util.List;
 
 public class RegistrationController {
 
-    @FXML // fx:id="regAnchPane"
-    private AnchorPane regAnchPane; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regBtn"
-    private Button regBtn; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regEmailLbl"
-    private Label regEmailLbl; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regEmailTxtB"
-    private TextField regEmailTxtB; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regErrMsgLbl"
-    private Label regErrMsgLbl; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regLbl"
-    private Label regLbl; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regPassConfLbl"
-    private Label regPassConfLbl; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regPassConfTxtB"
-    private PasswordField regPassConfTxtB; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regPassConfVisibleTxtB"
-    private TextField regPassConfVisibleTxtB; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regPassLbl"
-    private Label regPassLbl; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regPassTxtB"
-    private PasswordField regPassTxtB; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regPassVisibleTxtB"
-    private TextField regPassVisibleTxtB; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regShowPassCB"
-    private CheckBox regShowPassCB; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regUserLbl"
-    private Label regUserLbl; // Value injected by FXMLLoader
-
-    @FXML // fx:id="regUserTxtB"
-    private TextField regUserTxtB; // Value injected by FXMLLoader
-
-    @FXML // fx:id="registerWin"
-    private AnchorPane registerWin; // Value injected by FXMLLoader
-
-    @FXML // fx:id="selectStoreCB"
-    private ComboBox<String> select_account_type;
-
-    @FXML // fx:id="selectStoreLbl"
-    private Label selectStoreLbl; // Value injected by FXMLLoader
-    @FXML
-    private ComboBox<String> select_store;
-
-    @FXML
-    private TextField regFullNameTxtB;
-
-    @FXML
-    private TextField regPhoneTxtB;
-
-
-    @FXML
-    private Label select_store_label;
-    int store=-1;
-    boolean is_yearly_subscription=false;
-    List<LoginRegCheck> users ;
     @FXML
     private Label credit_Card;
 
@@ -100,6 +34,103 @@ public class RegistrationController {
 
     @FXML
     private PasswordField id_text;
+
+    @FXML
+    private AnchorPane logAnchPane;
+
+    @FXML
+    private Button logBtn;
+
+    @FXML
+    private Label loginLbl;
+
+    @FXML
+    private TextField passLogTxtB;
+
+    @FXML
+    private AnchorPane regAnchPane;
+
+    @FXML
+    private Button regBtn;
+
+    @FXML
+    private Label regEmailLbl;
+
+    @FXML
+    private TextField regEmailTxtB;
+
+    @FXML
+    private Label regErrMsgLbl;
+
+    @FXML
+    private Label regFullNameLbl;
+
+    @FXML
+    private TextField regFullNameTxtB;
+
+    @FXML
+    private Label regLbl;
+
+    @FXML
+    private Label regPassConfLbl;
+
+    @FXML
+    private PasswordField regPassConfTxtB;
+
+    @FXML
+    private TextField regPassConfVisibleTxtB;
+
+    @FXML
+    private Label regPassLbl;
+
+    @FXML
+    private PasswordField regPassTxtB;
+
+    @FXML
+    private TextField regPassVisibleTxtB;
+
+    @FXML
+    private Label regPhoneLbl;
+
+    @FXML
+    private TextField regPhoneTxtB;
+
+    @FXML
+    private CheckBox regShowPassCB;
+
+    @FXML
+    private Label regUserLbl;
+
+    @FXML
+    private Label regUserLbl1;
+
+    @FXML
+    private Label regUserLbl11;
+
+    @FXML
+    private TextField regUserTxtB;
+
+    @FXML
+    private AnchorPane registerWin;
+
+    @FXML
+    private Label selectStoreLbl;
+
+    @FXML
+    private ComboBox<String> select_account_type;
+
+    @FXML
+    private ComboBox<String> select_store;
+
+    @FXML
+    private Label select_store_label;
+
+    @FXML
+    private Button switchLoginRegbtn;
+
+    @FXML
+    private TextField userLogTxtB;
+
     private CatalogController catalogController;
     public void setCatalogController(CatalogController controller) {
         this.catalogController = controller;
@@ -108,104 +139,169 @@ public class RegistrationController {
     public void setController(connect_scene_Con controller) {
         con = controller;
     }
+    int store=-1;
+    boolean is_yearly_subscription=false;
+    List<LoginRegCheck> users;
+    static int logOrReg = 0; // 1 for login, 0 for register
 
-
-    public String checkIfValid(String regUser ,String email,String regPass,String confPass, String fullName, String phoneNumber, String account_type ){
-        if (isTextFieldEmpty(regPassTxtB) || isTextFieldEmpty(regEmailTxtB) ||
-                isTextFieldEmpty(regUserTxtB) || isTextFieldEmpty(regPassConfTxtB)
-                || isTextFieldEmpty(regFullNameTxtB) || isTextFieldEmpty(regPhoneTxtB)) {
-            return "Please fill in all the fields";
-        }
-        if (!regPass.equals(confPass)) {
-            return "Passwords do not match";
-        }
-
-        if (isComboBoxEmpty(select_account_type)) {
-            return "Please select an account type";
-        }
-
-        if ("Store".equals(account_type) && isComboBoxEmpty(select_store)) {
-            return "You need to select a store";
-        }
-
-        for (LoginRegCheck user : users) {
-            if (user.getUsername().equals(regUser)) {
-                return "Username already exists";
-            }
-        }
-
-//        if (regUser.length() <= 4 || email.length() <= 4 || regPass.length() <= 4 ||
-//                fullName.length() <= 4 || phoneNumber.length() != 10) {
-//            return "Each field must be longer than 4 characters and phone number must be 10 digits";
-//        }
-//
-//        if (!email.contains("@") || !email.contains(".")) {
-//            return "Invalid email format";
-//        }
-
-        if (!is_yearly_subscription && store == -1) {
-            return "You need to select a store";
-        }
-
-        if (is_yearly_subscription) {
-            if (id_text.getText().length() != 9) {
-                return "ID must be exactly 9 characters";
-            }
-            if (credit_card_box.getText().length() != 16) {
-                return "Credit card must be exactly 16 characters";
-            }
-        }
-
-        return null;
-    }
-
+    LoginRegCheck tempUser = null;
 
     @FXML
-    void RegToSys(MouseEvent event) throws IOException {
+    void logToSys(MouseEvent event) throws IOException {
+        String user = userLogTxtB.getText();
+        String pass = passLogTxtB.getText();
+           if(user.isEmpty() || pass.isEmpty()){
+               Warning warn = new Warning("Please fill all the fields");
+                EventBus.getDefault().post(new WarningEvent(warn));
+                return;
+           }
 
+        LoginRegCheck userLogin = new LoginRegCheck(user, pass, "", 1, false, -1);
+        SimpleClient.getClient().sendToServer(userLogin);
+        tempUser = userLogin;
+
+
+
+    }
+    @Subscribe
+    public void onSuccessLogin(String msg){
+        if(msg.startsWith("#loginSuccess")){
+            SimpleClient.setCurrentUser(tempUser);
+            if(catalogController != null) {
+                catalogController.set_user(tempUser);
+                catalogController.set_type(store);
+            }
+            System.out.println("Login successful for user: " + tempUser.getUsername());
+            Warning warning = new Warning("Login Successful");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            ((Stage) registerWin.getScene().getWindow()).close(); // close the window after successful login
+        }
+        else if(msg.startsWith("#loginFail")){
+            SimpleClient.setCurrentUser(null);
+            Warning warning = new Warning("Incorrect Username or Password");
+            EventBus.getDefault().post(new WarningEvent(warning));
+        }
+
+    }
+    @FXML
+    void RegToSys(MouseEvent event) throws IOException {
+        if(SimpleClient.getCurrentUser() != null){ Warning warn = new Warning("Can't Register While Being Logged-In."); return;}
+        String confPass = regPassConfTxtB.getText();
+        String confPass2 = regPassConfVisibleTxtB.getText();
         String email = regEmailTxtB.getText();
         String regUser = regUserTxtB.getText();
-        String fullName = regFullNameTxtB.getText();
-        String phoneNumber = regPhoneTxtB.getText();
-        String regPass = regShowPassCB.isSelected() ? regPassVisibleTxtB.getText() : regPassTxtB.getText();
-        String confPass = regShowPassCB.isSelected() ? regPassConfVisibleTxtB.getText() : regPassConfTxtB.getText();
-        String account_type = select_account_type.getValue();
-
-        String check = checkIfValid(regUser,email,regPass,confPass,fullName,phoneNumber,account_type);
-
-        if(check != null) {
-                Warning warning = new Warning(check);
+        String regPass = regPassTxtB.getText();
+        String regPass2 = regPassVisibleTxtB.getText();
+        LoginRegCheck new_user = null;
+        if (catalogController != null) {
+            if (isTextFieldEmpty(regPassTxtB) || isTextFieldEmpty(regEmailTxtB) || isTextFieldEmpty(regUserTxtB) || isTextFieldEmpty(regPassConfTxtB)) {
+                Warning warning = new Warning("Please fill in all the fields");
                 EventBus.getDefault().post(new WarningEvent(warning));
                 return;
-        }
-
-        if(is_yearly_subscription){
-            String new_user_id = id_text.getText();
-            String new_user_credit = credit_card_box.getText();
-            LoginRegCheck new_user =  new LoginRegCheck(regUser, regPass, email, 1, false, store, phoneNumber, fullName, new_user_id, new_user_credit, is_yearly_subscription);
-            if(catalogController!=null){
-                catalogController.set_user(new_user);
-                catalogController.set_type(4);
             }
-            SimpleClient.getClient().sendToServer(new_user);
-        }
-        else{
-            LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, phoneNumber, fullName);
-            SimpleClient.getClient().sendToServer(new_user);
-            if(catalogController!=null){
+            if (!regPass.equals(confPass)) {
+                Warning warning = new Warning("passwords do not match");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+            for (LoginRegCheck user : users) {
+                if (user.getUsername().equals(regUser)) {
+                    Warning warning = new Warning("Username already exists");
+                    EventBus.getDefault().post(new WarningEvent(warning));
+                    return;
+                }
+            }
+            if (regUser.length() <= 4 || email.length() <= 4 ||
+                    regPass.length() <= 4 || confPass.length() <= 4) {
+                Warning warning = new Warning("Each field must be longer than 4 characters");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+            if (!is_yearly_subscription) {
+                if (store == -1) {
+                    Warning warning = new Warning("you need to select a store");
+                    EventBus.getDefault().post(new WarningEvent(warning));
+                    return;
+                }
+                new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store);
+                SimpleClient.getClient().sendToServer(new_user);
                 catalogController.set_user(new_user);
                 catalogController.set_type(store);
             }
+            if (is_yearly_subscription) {
+                if (id_text.getText().length() <= 9) {
+                    Warning warning = new Warning("ID must BE 9 characters");
+                    EventBus.getDefault().post(new WarningEvent(warning));
+                    return;
+                }
+                if (credit_card_box.getText().length() <= 16) {
+                    Warning warning = new Warning("Credit card must BE 16 characters");
+                    EventBus.getDefault().post(new WarningEvent(warning));
+                    return;
+                }
+                String new_user_id = id_text.getText();
+                String new_user_credit = credit_card_box.getText();
+                new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, is_yearly_subscription);
+                catalogController.set_user(new_user);
+                catalogController.set_type(4);
+                SimpleClient.getClient().sendToServer(new_user);
+            }
+        } else
+        {
+            if (isTextFieldEmpty(regPassTxtB) || isTextFieldEmpty(regEmailTxtB) || isTextFieldEmpty(regUserTxtB) || isTextFieldEmpty(regPassConfTxtB)) {
+                Warning warning = new Warning("Please fill in all the fields");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+            if (!regPass.equals(confPass)) {
+                Warning warning = new Warning("passwords do not match");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+            for (LoginRegCheck user : users) {
+                if (user.getUsername().equals(regUser)) {
+                    Warning warning = new Warning("Username already exists");
+                    EventBus.getDefault().post(new WarningEvent(warning));
+                    return;
+                }
+            }
+            if (regUser.length() <= 4 || email.length() <= 4 ||
+                    regPass.length() <= 4 || confPass.length() <= 4) {
+                Warning warning = new Warning("Each field must be longer than 4 characters");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+            if (!is_yearly_subscription) {
+                if (store == -1) {
+                    Warning warning = new Warning("you need to select a store");
+                    EventBus.getDefault().post(new WarningEvent(warning));
+                    return;
+                }
+                new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store);
+                SimpleClient.getClient().sendToServer(new_user);
+
+            }
+            if (is_yearly_subscription) {
+                if (id_text.getText().length() <= 9) {
+                    Warning warning = new Warning("ID must BE 9 characters");
+                    EventBus.getDefault().post(new WarningEvent(warning));
+                    return;
+                }
+                if (credit_card_box.getText().length() <= 16) {
+                    Warning warning = new Warning("Credit card must BE 16 characters");
+                    EventBus.getDefault().post(new WarningEvent(warning));
+                    return;
+                }
+                String new_user_id = id_text.getText();
+                String new_user_credit = credit_card_box.getText();
+                new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, is_yearly_subscription);
+                SimpleClient.getClient().sendToServer(new_user);
+            }
 
         }
-
+        SimpleClient.setCurrentUser(new_user);
         ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Registration Completed!");
-        alert.setHeaderText("Registration Completed!");
-        alert.showAndWait();
     }
-
 
     @FXML
     void selected_account(ActionEvent event)
@@ -220,10 +316,7 @@ public class RegistrationController {
             alert.showAndWait();
             select_store_label.setVisible(true);
             select_store.setVisible(true);
-            id.setVisible(false);
-            credit_Card.setVisible(false);
-            id_text.setVisible(false);
-            credit_card_box.setVisible(false);
+
         }
         if(account_type.equals("Network"))
         {
@@ -239,6 +332,7 @@ public class RegistrationController {
             credit_Card.setVisible(false);
             id_text.setVisible(false);
             credit_card_box.setVisible(false);
+
         }
         if(account_type.equals("Yearly Subscription"))
         {
@@ -256,7 +350,10 @@ public class RegistrationController {
             credit_Card.setVisible(true);
             id_text.setVisible(true);
             credit_card_box.setVisible(true);
+
         }
+
+
     }
     @FXML
     void select_store(ActionEvent event)
@@ -309,18 +406,42 @@ public class RegistrationController {
         EventBus.getDefault().register(this);
         System.out.println("Registered to EventBus - waiting for reg result");
         // REMEMBER: we only come to this window if we know the user is NOT logged in.
-        regAnchPane.setVisible(true);
+        (logOrReg % 2 == 0 ? regAnchPane : logAnchPane).setVisible(true);
         select_account_type.getItems().addAll("Store", "Network", "Yearly Subscription");
         select_store.getItems().addAll("lilach_Haifa", "lilach_Krayot", "lilach_Nahariyya");
         SimpleClient.getClient().sendToServer("asks_for_users");
 
 
         // set register anchor
-        AnchorPane.setBottomAnchor(regAnchPane, 58.0);
-        AnchorPane.setTopAnchor(regAnchPane, 58.0);
-        AnchorPane.setRightAnchor(regAnchPane, 89.0);
-        AnchorPane.setLeftAnchor(regAnchPane, 89.0);
+        AnchorPane.setBottomAnchor(regAnchPane, 98.0);
+        AnchorPane.setTopAnchor(regAnchPane, 20.0);
+        AnchorPane.setRightAnchor(regAnchPane, 22.0);
+        AnchorPane.setLeftAnchor(regAnchPane, 22.0);
+
+        // set login anchor
+        AnchorPane.setBottomAnchor(logAnchPane, 98.0);
+        AnchorPane.setTopAnchor(logAnchPane, 71.0);
+        AnchorPane.setRightAnchor(logAnchPane, 22.0);
+        AnchorPane.setLeftAnchor(logAnchPane, 22.0);
     }
+
+    @FXML
+    void decideLogOrReg(MouseEvent event) // whenever we press on the "Go to Registration/Login" button
+    {
+        logOrReg++; // toggle between 0 and 1
+        if (logOrReg % 2 == 1) { // we went from registration(0) to login(1)
+            logAnchPane.setVisible(true);
+            regAnchPane.setVisible(false);
+            switchLoginRegbtn.setText("Go to Registration");
+
+        } else { // we went from login(1) to registration(0)
+            logAnchPane.setVisible(false);
+            regAnchPane.setVisible(true);
+            switchLoginRegbtn.setText("Go to Login");
+        }
+    }
+
+
     @Subscribe
     public void get_users(List<LoginRegCheck> allUsers)
     {
@@ -330,8 +451,5 @@ public class RegistrationController {
         return tf.getText() == null || tf.getText().trim().isEmpty();
     }
 
-    private boolean isComboBoxEmpty(ComboBox<String> cb) {
-        return cb.getValue() == null || cb.getValue().trim().isEmpty();
-    }
 
 }

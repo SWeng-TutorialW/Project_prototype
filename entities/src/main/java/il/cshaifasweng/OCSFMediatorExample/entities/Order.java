@@ -35,6 +35,11 @@ public class Order implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date deliveryTime;
     
+    // Link to user who placed the order
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private LoginRegCheck user;
+    
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<CartItem> items = new ArrayList<>();
     
@@ -50,6 +55,13 @@ public class Order implements Serializable {
         this();
         this.customerName = customerName;
         this.customerEmail = customerEmail;
+    }
+    
+    public Order(String customerName, String customerEmail, LoginRegCheck user) {
+        this();
+        this.customerName = customerName;
+        this.customerEmail = customerEmail;
+        this.user = user;
     }
     
     public int getId() {
@@ -86,6 +98,14 @@ public class Order implements Serializable {
     
     public void setStatus(String status) {
         this.status = status;
+    }
+    
+    public LoginRegCheck getUser() {
+        return user;
+    }
+    
+    public void setUser(LoginRegCheck user) {
+        this.user = user;
     }
     
     public List<CartItem> getItems() {

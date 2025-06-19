@@ -1057,10 +1057,22 @@ public class CatalogController_employee {
             }
         }
         Flower targetFlower = null;
-        for (Flower flower : flowersList_c) {
-            if (flower.getFlowerName().equalsIgnoreCase(flowerName)) {
-                targetFlower = flower;
-                break;
+        if(flowersList_sorting!=null)
+        {
+            for (Flower flower : flowersList_sorting) {
+                if (flower.getFlowerName().equalsIgnoreCase(flowerName)) {
+                    targetFlower = flower;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            for (Flower flower : flowersList_c) {
+                if (flower.getFlowerName().equalsIgnoreCase(flowerName)) {
+                    targetFlower = flower;
+                    break;
+                }
             }
         }
         try {

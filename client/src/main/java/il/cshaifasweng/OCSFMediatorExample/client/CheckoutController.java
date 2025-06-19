@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.CartItem;
+import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -44,8 +45,17 @@ public class CheckoutController {
     @FXML private Label deliveryFeeLabel;
     @FXML private Button placeOrderButton;
     @FXML private Button cancelButton;
-    
+
+    //check
+    private CatalogController_employee catalogController;
+
+    public void setCatalogController(CatalogController_employee controller) {
+        this.catalogController = controller;
+    }
+
+    //end check
     private ObservableList<CartItem> orderItems;
+    private LoginRegCheck currentUser; // Store the current user
     private static final double DELIVERY_FEE = 20.0;
     
     public void initialize() {
@@ -100,6 +110,11 @@ public class CheckoutController {
         updateTotal();
     }
     
+    public void setCurrentUser(LoginRegCheck user) {
+        this.currentUser = user;
+        System.out.println("CheckoutController: User set to: " + (user != null ? user.getUsername() : "null"));
+    }
+
     private void updateDeliveryFee() {
         boolean requiresDelivery = "Delivery".equals(deliveryTypeComboBox.getValue());
         double fee = requiresDelivery ? DELIVERY_FEE : 0.0;
@@ -118,11 +133,12 @@ public class CheckoutController {
     
     @FXML
     private void placeOrder() {
-        // Validate all required fields
-        if (nameField.getText().isEmpty() || emailField.getText().isEmpty() ||
-            phoneField.getText().isEmpty() || cityField.getText().isEmpty() ||
-            streetAddressField.getText().isEmpty()) {
-            Warning warning = new Warning("Please fill in all required fields");
+        System.out.println("CheckoutController: placeOrder called");
+        System.out.println("CheckoutController: Current user is: " + (currentUser != null ? currentUser.getUsername() : "null"));
+
+        // Validate required fields
+        if (nameField.getText().isEmpty() || emailField.getText().isEmpty() || phoneField.getText().isEmpty()) {
+            Warning warning = new Warning("Please fill in all personal fields");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
@@ -143,6 +159,13 @@ public class CheckoutController {
 
         // Validate delivery time if delivery is selected
         if ("Delivery".equals(deliveryTypeComboBox.getValue())) {
+
+            if (cityField.getText().isEmpty() || streetAddressField.getText().isEmpty()) {
+                Warning warning = new Warning("Please fill in your address for delivery");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+
             if (deliveryDatePicker.getValue() == null) {
                 Warning warning = new Warning("Please select a delivery date");
                 EventBus.getDefault().post(new WarningEvent(warning));
@@ -155,10 +178,21 @@ public class CheckoutController {
                 EventBus.getDefault().post(new WarningEvent(warning));
                 return;
             }
+
+
         }
 
-        // Create and populate the order
-        Order order = new Order(nameField.getText(), emailField.getText());
+        // Check if user is available
+        if (currentUser == null) {
+            System.out.println("CheckoutController: User is null, showing error");
+            Warning warning = new Warning("User session not found. Please log in again.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+
+        System.out.println("CheckoutController: Creating order with user: " + currentUser.getUsername());
+        // Create and populate the order with user information
+        Order order = new Order(nameField.getText(), emailField.getText(), currentUser);
         order.setCity(cityField.getText());
         order.setStreetAddress(streetAddressField.getText());
         order.setApartment(apartmentField.getText());
@@ -202,8 +236,7 @@ public class CheckoutController {
     
     @FXML
     private void cancel() {
-        // Close checkout window
-        ((Stage) orderTable.getScene().getWindow()).close();
+        ((Stage) cancelButton.getScene().getWindow()).close();
     }
     
     @FXML

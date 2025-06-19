@@ -12,9 +12,10 @@ public class SimpleClient extends AbstractClient {
 	static SimpleClient client = null;
 	public static int port = 3000;
 	public static String ip = "localhost";
-	public static boolean loggedIn = false; // to check if the user is logged in or not
 	public static boolean isGuest = false;
 	public static int selectedAccType = -1;
+	private static LoginRegCheck currentUser = null; // Store the current logged-in user
+
 	private SimpleClient(String host, int port) {
 		super(host, port);
 	}
@@ -76,7 +77,7 @@ public class SimpleClient extends AbstractClient {
 			}
 
 		}
-		else if(msgString.startsWith("#registerSuccess")) {EventBus.getDefault().post(msgString);}
+		else if(msgString.startsWith("#registerSuccess") || msgString.startsWith("#registerFailed")|| msgString.startsWith("#loginSuccess")||msgString.startsWith("#loginFailed")) {EventBus.getDefault().post(msgString);}
 		else if(msgString.startsWith("The network manager has deleted flower."))
 		{
 			try {
@@ -131,5 +132,14 @@ public class SimpleClient extends AbstractClient {
 		return selectedAccType;
 	}
 
+	// Getter and setter for current user
+	public static LoginRegCheck getCurrentUser() {
+		return currentUser;
+	}
+
+	public static void setCurrentUser(LoginRegCheck user) {
+		currentUser = user;
+		System.out.println("SimpleClient: Current user set to: " + (user != null ? user.getUsername() : "null"));
+	}
 
 }

@@ -63,7 +63,7 @@
             </ImageView>
             <HBox fx:id="first_line" layoutY="126.0" prefHeight="197.0" prefWidth="776.0" spacing="20.0">
                <children>
-                  <Button fx:id="one_1" mnemonicParsing="false" prefHeight="219.0" prefWidth="182.0">
+                  <Button fx:id="one_1" mnemonicParsing="false" onAction="#open_flower" prefHeight="219.0" prefWidth="182.0">
                      <graphic>
                         <VBox fx:id="flower_1" prefHeight="193.0" prefWidth="166.0">
                            <children>
@@ -91,7 +91,7 @@
                         </VBox>
                      </graphic>
                   </Button>
-                  <Button fx:id="two_2" mnemonicParsing="false" prefWidth="74.0">
+                  <Button fx:id="two_2" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
                      <graphic>
                         <VBox fx:id="flower_2" prefHeight="202.0" prefWidth="162.0">
                            <children>
@@ -120,7 +120,7 @@
                         </VBox>
                      </graphic>
                   </Button>
-                  <Button fx:id="three_3" mnemonicParsing="false" prefWidth="74.0">
+                  <Button fx:id="three_3" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
                      <graphic>
                         <VBox fx:id="flower_3" prefHeight="202.0" prefWidth="162.0">
                            <children>
@@ -149,7 +149,7 @@
                         </VBox>
                      </graphic>
                   </Button>
-                  <Button fx:id="four_4" mnemonicParsing="false" prefWidth="74.0">
+                  <Button fx:id="four_4" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
                      <graphic>
                         <VBox fx:id="flower_4" prefHeight="202.0" prefWidth="162.0">
                            <children>
@@ -182,7 +182,7 @@
             </HBox>
             <HBox fx:id="second_line" layoutY="356.0" prefHeight="197.0" prefWidth="775.0" spacing="20.0">
                <children>
-                  <Button fx:id="five_5" mnemonicParsing="false" prefWidth="74.0">
+                  <Button fx:id="five_5" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
                      <graphic>
                         <VBox fx:id="flower_5" prefHeight="202.0" prefWidth="162.0">
                            <children>
@@ -211,7 +211,7 @@
                         </VBox>
                      </graphic>
                   </Button>
-                  <Button fx:id="six_6" mnemonicParsing="false" prefWidth="74.0">
+                  <Button fx:id="six_6" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
                      <graphic>
                         <VBox fx:id="flower_6" prefHeight="202.0" prefWidth="162.0">
                            <children>
@@ -240,7 +240,7 @@
                         </VBox>
                      </graphic>
                   </Button>
-                  <Button fx:id="seven_7" mnemonicParsing="false" prefWidth="74.0">
+                  <Button fx:id="seven_7" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
                      <graphic>
                         <VBox fx:id="flower_7" prefHeight="202.0" prefWidth="162.0">
                            <children>
@@ -269,7 +269,7 @@
                         </VBox>
                      </graphic>
                   </Button>
-                  <Button fx:id="eight_8" mnemonicParsing="false" prefWidth="74.0">
+                  <Button fx:id="eight_8" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
                      <graphic>
                         <VBox fx:id="flower_8" prefHeight="202.0" prefWidth="162.0">
                            <children>
@@ -312,7 +312,7 @@
             </AnchorPane>
             <HBox fx:id="second_line1" layoutY="589.0" prefHeight="197.0" prefWidth="775.0" spacing="20.0">
                <children>
-                  <Button fx:id="nine_9" mnemonicParsing="false" prefWidth="74.0" visible="false">
+                  <Button fx:id="nine_9" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0" visible="false">
                      <graphic>
                         <VBox fx:id="flower_9" prefHeight="202.0" prefWidth="162.0">
                            <children>
@@ -341,7 +341,7 @@
                         </VBox>
                      </graphic>
                   </Button>
-                  <Button fx:id="ten_10" mnemonicParsing="false" prefWidth="74.0" visible="false">
+                  <Button fx:id="ten_10" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0" visible="false">
                      <graphic>
                         <VBox fx:id="flower_10" prefHeight="202.0" prefWidth="162.0">
                            <children>
@@ -370,7 +370,7 @@
                         </VBox>
                      </graphic>
                   </Button>
-                  <Button fx:id="eleven_11" mnemonicParsing="false" prefWidth="74.0" visible="false">
+                  <Button fx:id="eleven_11" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0" visible="false">
                      <graphic>
                         <VBox fx:id="flower_11" prefHeight="202.0" prefWidth="162.0">
                            <children>
@@ -399,7 +399,7 @@
                         </VBox>
                      </graphic>
                   </Button>
-                  <Button fx:id="twelve_12" mnemonicParsing="false" prefWidth="74.0" visible="false">
+                  <Button fx:id="twelve_12" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0" visible="false">
                      <graphic>
                         <VBox fx:id="flower_12" prefHeight="202.0" prefWidth="162.0">
                            <children>

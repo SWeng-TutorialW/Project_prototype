@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.CartItem;
+import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -21,6 +22,7 @@ import java.util.List;
 public class CartController {
     @FXML private TableView<CartItem> cartTable;
     @FXML private TableColumn<CartItem, String> nameColumn;
+    @FXML private TableColumn<CartItem, String> storeColumn;
     @FXML private TableColumn<CartItem, String> typeColumn;
     @FXML private TableColumn<CartItem, Double> priceColumn;
     @FXML private TableColumn<CartItem, Integer> quantityColumn;
@@ -29,14 +31,23 @@ public class CartController {
     @FXML private Label cartTotal;
     @FXML private Button checkoutButton;
     @FXML private Button continueShoppingButton;
-    
+    private LoginRegCheck currentUser; // Store the current user
+
     private ObservableList<CartItem> cartItems;
-    
+
+
+    private CatalogController catalogController;
+    public void setCatalogController(CatalogController catalogController) {
+        this.catalogController = catalogController;
+    }
+
     public void initialize() {
         // Set up table columns
         nameColumn.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getFlower().getFlowerName()));
-        typeColumn.setCellValueFactory(cellData -> 
+        storeColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getStore()));
+        typeColumn.setCellValueFactory(cellData ->
             new SimpleStringProperty(cellData.getValue().getFlower().getFlowerType()));
         priceColumn.setCellValueFactory(cellData -> 
             new SimpleDoubleProperty(cellData.getValue().getFlower().getFlowerPrice()).asObject());
@@ -77,7 +88,11 @@ public class CartController {
         cartItems.addAll(items);
         updateTotal();
     }
-    
+
+    public void setCurrentUser(LoginRegCheck user) {
+        this.currentUser = user;
+    }
+
     private void updateTotal() {
         double total = cartItems.stream()
                 .mapToDouble(CartItem::getTotalPrice)
@@ -87,6 +102,9 @@ public class CartController {
     
     private void removeItem(CartItem item) {
         cartItems.remove(item);
+        OrderPageController.getCartItems().remove(item);
+        System.out.println("Item Removed:" + item);
+        System.out.println("cart items" + cartItems);
         updateTotal();
         
         // Show confirmation
@@ -97,7 +115,7 @@ public class CartController {
     @FXML
     private void checkout() {
         System.out.println("Checkout button clicked");
-        System.out.println("Login status: " + SimpleClient.loggedIn);
+        System.out.println("Current user in cart: " + (currentUser != null ? currentUser.getUsername() : "null"));
         System.out.println("Cart items size: " + cartItems.size());
         
         if (cartItems.isEmpty()) {
@@ -108,7 +126,7 @@ public class CartController {
         }
 
         // Check if user is logged in
-        if (!SimpleClient.loggedIn) {
+        if (currentUser.getIsLogin() == 0) {
             System.out.println("User not logged in, opening login window");
             Warning warning = new Warning("Please log in to proceed with checkout");
             EventBus.getDefault().post(new WarningEvent(warning));
@@ -118,6 +136,8 @@ public class CartController {
                 System.out.println("Attempting to load login screen");
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("login_screen.fxml"));
                 Parent root = loader.load();
+                LoginController loginController = loader.getController();
+                loginController.setCatalogController(catalogController);
                 System.out.println("Login screen loaded successfully");
                 Stage stage = new Stage();
                 stage.setTitle("Login Required");
@@ -132,14 +152,28 @@ public class CartController {
             }
             return;
         }
-        
+
+        // Check if current user is available, use SimpleClient as fallback
+     /*   if (currentUser == null) {
+            currentUser = SimpleClient.getCurrentUser();
+            System.out.println("Using SimpleClient current user: " + (currentUser != null ? currentUser.getUsername() : "null"));
+        }
+
+        if (currentUser == null) {
+            System.out.println("Current user is null despite being logged in");
+            Warning warning = new Warning("User session not found. Please log in again.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }*/
+
         System.out.println("User is logged in, proceeding to checkout");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("checkout.fxml"));
             Parent root = loader.load();
             CheckoutController checkoutController = loader.getController();
             checkoutController.setCartItems(cartItems);
-            
+            checkoutController.setCurrentUser(currentUser); // Pass the user to checkout
+
             Stage stage = new Stage();
             stage.setTitle("Checkout");
             stage.setScene(new Scene(root));

@@ -33,6 +33,12 @@
             <Label fx:id="employeeUsernameLbl" layoutX="58.0" layoutY="123.0" text="Username: " />
             <Label fx:id="workerEmailLbl" layoutX="58.0" layoutY="151.0" text="Email: " />
             <Label fx:id="employeePositionLbl" layoutX="58.0" layoutY="182.0" text="Position :" />
+      
+             <Button fx:id="myOrdersButton" layoutX="189.0" layoutY="300.0" onAction="#handleMyOrdersButton" prefHeight="40.0" prefWidth="120.0" text="My Orders">
+                 <font>
+                     <Font name="Dubai Medium" size="14.0" />
+                 </font>
+             </Button>
          </children>
       </AnchorPane>
    </children>
