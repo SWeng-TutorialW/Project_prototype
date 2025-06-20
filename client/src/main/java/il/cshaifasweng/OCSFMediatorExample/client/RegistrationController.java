@@ -12,7 +12,8 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
 import java.io.IOException;
 import java.util.List;
 
@@ -142,8 +143,8 @@ public class RegistrationController {
     int store=-1;
     boolean is_yearly_subscription=false;
     List<LoginRegCheck> users;
-    static int logOrReg = 0; // 1 for login, 0 for register
-
+    public int logOrReg = 0; // 1 for login, 0 for register
+    public boolean gotFromConnectScene = false; // true if we came from connect scene, false if we came from catalog scene
     LoginRegCheck tempUser = null;
 
     @FXML
@@ -174,15 +175,19 @@ public class RegistrationController {
             System.out.println("Login successful for user: " + tempUser.getUsername());
             Warning warning = new Warning("Login Successful");
             EventBus.getDefault().post(new WarningEvent(warning));
-            ((Stage) registerWin.getScene().getWindow()).close(); // close the window after successful login
-        }
-        else if(msg.startsWith("#loginFail")){
+            Platform.runLater(() -> {
+                ((Stage) registerWin.getScene().getWindow()).close(); // close the window after successful login
+            });
+        }else if(msg.startsWith("#loginFailed")){
             SimpleClient.setCurrentUser(null);
+            System.out.println("Login failed for user: " + tempUser.getUsername());
             Warning warning = new Warning("Incorrect Username or Password");
             EventBus.getDefault().post(new WarningEvent(warning));
         }
-
     }
+
+
+
     @FXML
     void RegToSys(MouseEvent event) throws IOException {
         if(SimpleClient.getCurrentUser() != null){ Warning warn = new Warning("Can't Register While Being Logged-In."); return;}
@@ -223,7 +228,7 @@ public class RegistrationController {
                     EventBus.getDefault().post(new WarningEvent(warning));
                     return;
                 }
-                new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store);
+                new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store);
                 SimpleClient.getClient().sendToServer(new_user);
                 catalogController.set_user(new_user);
                 catalogController.set_type(store);
@@ -241,7 +246,7 @@ public class RegistrationController {
                 }
                 String new_user_id = id_text.getText();
                 String new_user_credit = credit_card_box.getText();
-                new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, is_yearly_subscription);
+                new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, is_yearly_subscription);
                 catalogController.set_user(new_user);
                 catalogController.set_type(4);
                 SimpleClient.getClient().sendToServer(new_user);
@@ -411,6 +416,7 @@ public class RegistrationController {
         select_store.getItems().addAll("lilach_Haifa", "lilach_Krayot", "lilach_Nahariyya");
         SimpleClient.getClient().sendToServer("asks_for_users");
 
+        if(gotFromConnectScene) {gotFromConnectScene = false; switchLoginRegbtn.setVisible(false); regAnchPane.setVisible(true); logAnchPane.setVisible(false);}
 
         // set register anchor
         AnchorPane.setBottomAnchor(regAnchPane, 98.0);

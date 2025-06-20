@@ -552,7 +552,7 @@ public class SimpleServer extends AbstractServer {
 					}
 					break;
 				case 1: // login
-
+					System.out.println("Trying to Login a user: " + new_user.getUsername());
 					session = App.getSessionFactory().openSession();
 					session.beginTransaction();
 					List<LoginRegCheck> users = session.createQuery("FROM LoginRegCheck lr WHERE username = :username AND password = :password", LoginRegCheck.class)
@@ -564,13 +564,10 @@ public class SimpleServer extends AbstractServer {
 					if(!users.isEmpty()){
 						try{client.sendToClient("#loginSuccess");}catch(IOException e){e.printStackTrace();} // correct user and password
 					}
-					else{ try{client.sendToClient("#loginFalied");}catch(IOException e){e.printStackTrace();}} // user doesn't exist or password is wrong
+					else{ try{client.sendToClient("#loginFailed");}catch(IOException e){e.printStackTrace();}} // user doesn't exist or password is wrong
 
 					break;
 			}
-
-
-
 		}
 		else if (msg.getClass().equals(change_user_login.class)) {
 			change_user_login wrapper = (change_user_login) msg;
