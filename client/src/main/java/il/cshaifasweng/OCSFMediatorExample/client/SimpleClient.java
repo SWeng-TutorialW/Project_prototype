@@ -52,9 +52,7 @@ public class SimpleClient extends AbstractClient {
 			System.out.println("I send the complain event");
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
-		else if(msg.getClass().equals(CustomerOrdersResponse.class)){
-			EventBus.getDefault().post(msg); // post the customer orders response to UI
-		}
+
 		else if(msgString.equals("error_fetching_orders")){
 			EventBus.getDefault().post(msgString); // post the error message to UI
 		}
