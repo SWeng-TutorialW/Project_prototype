@@ -32,9 +32,6 @@ public class LoginRegCheck implements Serializable {
     @Column(name = "userIdNum")
     private String idNum ; // only if accType == 2
 
-//    @Column(name = "creditCard")
-//    private String creditCard; // only if accType == 2
-
     @Column(name = "phoneNum")
     private String phoneNum  ;
 
@@ -89,7 +86,6 @@ public class LoginRegCheck implements Serializable {
         this.phoneNum = phoneNum;
         this.fullName = fullName;
         this.idNum = idNum;
-      //  this.creditCard = creditCard;
         this.is_yearly_subscription = is_yearly_subscription;
     }
 
@@ -106,8 +102,8 @@ public class LoginRegCheck implements Serializable {
     public String getEmail() { return email; }
     public int getIsLogin() { return isLogin; }
     public boolean isType() { return type; }
+
     public String getIdNum() { return idNum; }
-    //public String getCreditCard() { return creditCard; }
     public String getPhoneNum() { return phoneNum; }
     public String getFullName() { return fullName; }
     public Integer getId() { return id; }
@@ -161,11 +157,7 @@ public class LoginRegCheck implements Serializable {
         this.idNum = idNum;
     }
 
-    public void upgradeToYearly(String idNum) {
-        this.idNum = idNum;
-        this.is_yearly_subscription = true;
-        this.store = 4;
-    }
+
 
 }
 

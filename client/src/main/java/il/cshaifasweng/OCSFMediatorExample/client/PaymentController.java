@@ -39,20 +39,34 @@ public class PaymentController {
     private boolean payUpgrade = false;
 
     private LoginRegCheck userToRegister;
+
+    public void postInitialize() {
+        if (payUpgrade) {
+            backButton.setVisible(false);
+            totalAmountLabel.setText("Total Amount: ₪100.00");
+        }
+    }
     private Stage registrationStage;
-
-
+    public void setStage(Stage stage) {
+        this.registrationStage = stage;
+    }
 
     private Runnable onPaymentSuccess;
     public void setOnPaymentSuccess(Runnable callback) {
         this.onPaymentSuccess = callback;
     }
 
+    private Runnable onPaymentCancel;
+    public void setOnPaymentCancel(Runnable callback) {
+        this.onPaymentCancel = callback;
+    }
     public void setPayUpgrade(boolean payUpgrade) {
         this.payUpgrade = payUpgrade;
     }
 
-
+    public Runnable getOnPaymentCancel() {
+        return onPaymentCancel;
+    }
 
     private enum CardType {
         VISA,
@@ -77,6 +91,7 @@ public class PaymentController {
         } catch (Exception e) {
             System.err.println("Failed to load card logos: " + e.getMessage());
         }
+
 
         for (int i = 1; i <= 12; i++) {
             expiryMonthComboBox.getItems().add(String.format("%02d", i));
@@ -218,10 +233,13 @@ public class PaymentController {
         try {
             Thread.sleep(1000); // simulate payment
 
-            //  צריך לעשות בדיקה אם התשלום הוא בגלל ORDER או בגלל שהלקוח רוצה לעשות מנוי
-            if(payUpgrade){
+            if (payUpgrade) {
                 if (onPaymentSuccess != null) {
                     onPaymentSuccess.run();
+                    payUpgrade = false;
+                    if (registrationStage != null) {
+                        registrationStage.close();
+                    }
                 }
             }else {
                 order.setStatus("CONFIRMED");
@@ -243,10 +261,18 @@ public class PaymentController {
 
     @FXML
     private void goBack() {
+
+        if (onPaymentCancel != null) {
+            onPaymentCancel.run();
+
+        }
+
         ((Stage) backButton.getScene().getWindow()).close();
         if (checkoutStage != null) {
             checkoutStage.show();
         }
+
+
     }
 
     private void showError(String message) {

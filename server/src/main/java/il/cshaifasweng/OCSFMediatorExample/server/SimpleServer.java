@@ -393,8 +393,6 @@ public class SimpleServer extends AbstractServer {
 
 			sendToAllClients("new#price#in#flower_all");
 		}
-
-
 		if(msg.getClass().equals(Add_flower_wrapper.class))
 		{
 			Add_flower_wrapper wrapper = (Add_flower_wrapper) msg;
@@ -524,7 +522,6 @@ public class SimpleServer extends AbstractServer {
 					} finally {
 						session.close();
 					}// registration
-
 		}
 		else if (msg.getClass().equals(change_user_login.class)) {
 			change_user_login wrapper = (change_user_login) msg;
@@ -651,7 +648,6 @@ public class SimpleServer extends AbstractServer {
 
 			}
 		}
-
 		else if (msgString.startsWith("need#to#change#user#localy"))
 		{
 			Session session = App.getSessionFactory().openSession();
@@ -1184,8 +1180,6 @@ public class SimpleServer extends AbstractServer {
 				if (session != null) session.close();
 			}
 		}
-
-
 
 	}
 

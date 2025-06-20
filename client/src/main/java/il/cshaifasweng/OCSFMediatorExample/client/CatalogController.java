@@ -661,7 +661,7 @@ public class CatalogController {
                 Parent root = fxmlLoader.load();
                 MyAccountController myAccountController = fxmlLoader.getController();
                 myAccountController.setCurrentUser(user);
-
+                myAccountController.setCatalogController(this);
                 Stage stage = new Stage();
                 stage.setTitle("My Account");
                 stage.setScene(new Scene(root));
