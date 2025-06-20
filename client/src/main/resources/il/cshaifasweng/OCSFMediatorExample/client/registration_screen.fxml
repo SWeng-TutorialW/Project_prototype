@@ -9,113 +9,113 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="registerWin" prefHeight="620.0" prefWidth="450.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RegistrationController">
+<AnchorPane fx:id="registerWin" prefHeight="520.0" prefWidth="500.0" style="-fx-background-color: #f8d5ec;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RegistrationController">
 
    <children>
-      <AnchorPane fx:id="regAnchPane" layoutX="40.0" layoutY="25.0" prefHeight="580.0" prefWidth="370.0" style="-fx-background-color: #c8a2c8; -fx-background-radius: 15;">
+
+      <AnchorPane fx:id="regAnchPane" layoutX="20.0" layoutY="20.0" prefHeight="480.0" prefWidth="460.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e9a4c7; -fx-border-width: 1.5;">
          <children>
-            <Label fx:id="regLbl" layoutX="126.0" text="Registration">
+
+            <Label fx:id="regLbl" layoutX="150.0" layoutY="15.0" text="Registration">
                <font>
-                  <Font name="Dubai Medium" size="20.0" />
+                  <Font name="Segoe UI Semibold" size="24.0" />
                </font>
             </Label>
 
-            <!-- Select Store -->
-            <Label fx:id="selectStoreLbl" layoutY="51.0" prefHeight="22.0" prefWidth="141.0" text="Select type of subscription">
-               <font>
-                  <Font name="Dubai Medium" size="12.0" />
-               </font>
+            <Label layoutX="30.0" layoutY="60.0" text="Subscription Type:">
+               <font><Font name="Segoe UI" size="13.0" /></font>
             </Label>
+            <ComboBox fx:id="select_account_type" layoutX="160.0" layoutY="58.0" onAction="#selected_account" prefWidth="200.0" />
 
-            <!-- Username -->
-            <Label fx:id="regUserLbl" layoutX="7.0" layoutY="118.0" text="Username">
-               <font>
-                  <Font name="Dubai Medium" size="12.0" />
-               </font>
+            <Label fx:id="select_store_label" layoutX="30.0" layoutY="95.0" text="Select Store:" visible="false">
+               <font><Font name="Segoe UI" size="13.0" /></font>
             </Label>
-            <TextField fx:id="regUserTxtB" layoutX="5.0" layoutY="141.0" prefWidth="290.0" />
+            <ComboBox fx:id="select_store" layoutX="160.0" layoutY="93.0" onAction="#select_store" prefWidth="200.0" visible="false" />
 
-            <!-- Email -->
-            <Label fx:id="regEmailLbl" layoutX="7.0" layoutY="166.0" text="Email">
-               <font>
-                  <Font name="Dubai Medium" size="12.0" />
-               </font>
+            <Label layoutX="30.0" layoutY="130.0" text="Username:">
+               <font><Font name="Segoe UI" size="13.0" /></font>
             </Label>
-            <TextField fx:id="regEmailTxtB" layoutX="5.0" layoutY="188.0" prefWidth="290.0" />
+            <TextField fx:id="regUserTxtB" layoutX="160.0" layoutY="128.0" prefWidth="200.0" />
 
-            <!-- Full Name -->
-            <Label fx:id="regFullNameLbl" layoutX="7.0" layoutY="213.0" text="Full Name">
-               <font>
-                  <Font name="Dubai Medium" size="12.0" />
-               </font>
+            <Label layoutX="30.0" layoutY="165.0" text="Email:">
+               <font><Font name="Segoe UI" size="13.0" /></font>
             </Label>
-            <TextField fx:id="regFullNameTxtB" layoutX="5.0" layoutY="235.0" prefWidth="290.0" />
+            <TextField fx:id="regEmailTxtB" layoutX="160.0" layoutY="163.0" prefWidth="200.0" />
 
-            <!-- Phone Number -->
-            <Label fx:id="regPhoneLbl" layoutX="7.0" layoutY="260.0" text="Phone Number">
-               <font>
-                  <Font name="Dubai Medium" size="12.0" />
-               </font>
+            <Label layoutX="30.0" layoutY="200.0" text="Full Name:">
+               <font><Font name="Segoe UI" size="13.0" /></font>
             </Label>
-            <TextField fx:id="regPhoneTxtB" layoutX="5.0" layoutY="282.0" prefWidth="290.0" />
+            <TextField fx:id="regFullNameTxtB" layoutX="160.0" layoutY="198.0" prefWidth="200.0" />
 
-            <!-- Password -->
-            <Label fx:id="regPassLbl" layoutX="8.0" layoutY="307.0" text="Password">
-               <font>
-                  <Font name="Dubai Medium" size="12.0" />
-               </font>
+            <Label layoutX="30.0" layoutY="235.0" text="Phone Number:">
+               <font><Font name="Segoe UI" size="13.0" /></font>
             </Label>
-            <PasswordField fx:id="regPassTxtB" layoutX="5.0" layoutY="328.0" prefWidth="290.0" />
-            <TextField fx:id="regPassVisibleTxtB" layoutX="5.0" layoutY="328.0" prefWidth="290.0" visible="false" />
+            <TextField fx:id="regPhoneTxtB" layoutX="160.0" layoutY="233.0" prefWidth="200.0" />
 
-            <!-- Confirm Password -->
-            <Label fx:id="regPassConfLbl" layoutX="10.0" layoutY="357.0" text="Confirm Password">
-               <font>
-                  <Font name="Dubai Medium" size="12.0" />
-               </font>
+            <Label layoutX="30.0" layoutY="270.0" text="Password:">
+               <font><Font name="Segoe UI" size="13.0" /></font>
             </Label>
-            <PasswordField fx:id="regPassConfTxtB" layoutX="5.0" layoutY="377.0" prefWidth="290.0" />
-            <TextField fx:id="regPassConfVisibleTxtB" layoutX="5.0" layoutY="377.0" prefWidth="290.0" visible="false" />
+            <PasswordField fx:id="regPassTxtB" layoutX="160.0" layoutY="268.0" prefWidth="200.0" />
+            <TextField fx:id="regPassVisibleTxtB" layoutX="160.0" layoutY="268.0" prefWidth="200.0" visible="false" />
 
-            <!-- Show Password -->
-            <CheckBox fx:id="regShowPassCB" layoutX="295.0" layoutY="357.0" onAction="#togglePass" text="Show Password">
-               <font>
-                  <Font name="Dubai Medium" size="12.0" />
-               </font>
+            <Label layoutX="30.0" layoutY="305.0" text="Confirm Password:">
+               <font><Font name="Segoe UI" size="13.0" /></font>
+            </Label>
+            <PasswordField fx:id="regPassConfTxtB" layoutX="160.0" layoutY="303.0" prefWidth="200.0" />
+            <TextField fx:id="regPassConfVisibleTxtB" layoutX="160.0" layoutY="303.0" prefWidth="200.0" visible="false" />
+
+            <CheckBox fx:id="regShowPassCB" layoutX="164.0" layoutY="421.0" onAction="#togglePass" text="Show Password">
+               <font><Font name="Segoe UI" size="12.0" /></font>
             </CheckBox>
 
-            <!-- Error Label -->
-            <Label fx:id="regErrMsgLbl" layoutX="40.0" layoutY="485.0" prefWidth="290.0" style="-fx-text-fill: red;" text="____" textAlignment="JUSTIFY" visible="false" />
+            <Label fx:id="id" layoutX="30.0" layoutY="342.0" text="ID Number:" visible="false" />
+            <PasswordField fx:id="id_text" layoutX="160.0" layoutY="338.0" prefWidth="200.0" visible="false" />
 
-            <!-- Register Button -->
-            <Button fx:id="regBtn" layoutX="95.0" layoutY="525.0" onMouseClicked="#RegToSys" prefWidth="110.0" text="Register">
-               <font>
-                  <Font name="Dubai Medium" size="12.0" />
-               </font>
+            <Label fx:id="credit_Card" layoutX="29.0" layoutY="379.0" text="Credit Card:" visible="false" />
+            <PasswordField fx:id="credit_card_box" layoutX="160.0" layoutY="375.0" prefWidth="200.0" visible="false" />
+
+            <Button fx:id="regBtn" layoutX="176.0" layoutY="449.0" onMouseClicked="#RegToSys" prefWidth="80.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white;" text="Register">
+               <font><Font name="Segoe UI" size="13.0" /></font>
             </Button>
 
-            <ComboBox fx:id="select_account_type" layoutY="73.0" onAction="#selected_account" prefWidth="150.0" />
-            <Label fx:id="select_store_label" alignment="TOP_CENTER" layoutX="229.0" layoutY="51.0" prefHeight="22.0" prefWidth="141.0" text="select_store" visible="false">
-               <font>
-                  <Font name="Dubai Medium" size="12.0" />
-               </font>
-            </Label>
-            <ComboBox fx:id="select_store" layoutX="250.0" layoutY="73.0" onAction="#select_store" prefHeight="25.0" prefWidth="110.0" visible="false" />
-
-            <Label fx:id="id" layoutX="9.0" layoutY="404.0" prefHeight="22.0" prefWidth="61.0" text="ID Number" visible="false">
-               <font>
-                  <Font name="Dubai Medium" size="12.0" />
-               </font>
-            </Label>
-            <PasswordField fx:id="id_text" layoutX="5.0" layoutY="426.0" prefWidth="290.0" visible="false" />
-
-            <Label fx:id="credit_Card" layoutX="9.0" layoutY="452.0" prefHeight="22.0" prefWidth="61.0" text="Credit Card" visible="false">
-               <font>
-                  <Font name="Dubai Medium" size="12.0" />
-               </font>
-            </Label>
-            <PasswordField fx:id="credit_card_box" layoutX="5.0" layoutY="472.0" prefWidth="290.0" visible="false" />
          </children>
       </AnchorPane>
+
+      <AnchorPane fx:id="subAnchorPane" layoutX="20.0" layoutY="20.0" prefHeight="480.0" prefWidth="460.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-border-color: #e9a4c7; -fx-border-width: 1.5;" visible="false">
+         <children>
+
+            <Label fx:id="subscriptionLbl" layoutX="150.0" layoutY="20.0" text="Subscription Details">
+               <font>
+                  <Font name="Segoe UI Semibold" size="20.0" />
+               </font>
+            </Label>
+
+            <Label fx:id="fullNameLbl" layoutX="40.0" layoutY="80.0" text="Full Name:">
+               <font><Font name="Segoe UI" size="13.0" /></font>
+            </Label>
+            <TextField fx:id="fullNameTxt" layoutX="160.0" layoutY="78.0" prefWidth="200.0" />
+
+            <Label fx:id="idLbl" layoutX="40.0" layoutY="120.0" text="ID Number:">
+               <font><Font name="Segoe UI" size="13.0" /></font>
+            </Label>
+            <TextField fx:id="idTxt" layoutX="160.0" layoutY="118.0" prefWidth="200.0" />
+
+            <Label fx:id="creditCardLbl" layoutX="40.0" layoutY="160.0" text="Credit Card:">
+               <font><Font name="Segoe UI" size="13.0" /></font>
+            </Label>
+            <TextField fx:id="creditCardTxt" layoutX="160.0" layoutY="158.0" prefWidth="200.0" />
+
+            <Label fx:id="passwordLbl" layoutX="40.0" layoutY="200.0" text="Password:">
+               <font><Font name="Segoe UI" size="13.0" /></font>
+            </Label>
+            <TextField fx:id="passwordTxt" layoutX="160.0" layoutY="198.0" prefWidth="200.0" />
+
+            <Button fx:id="subscribeBtn" layoutX="190.0" layoutY="250.0" onMouseClicked="#onSubscribe" style="-fx-background-color: #e9a4c7; -fx-text-fill: white;" text="Subscribe">
+               <font><Font name="Segoe UI" size="13.0" /></font>
+            </Button>
+
+         </children>
+      </AnchorPane>
+
    </children>
 </AnchorPane>

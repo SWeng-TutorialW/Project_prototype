@@ -30,13 +30,13 @@ public class LoginRegCheck implements Serializable {
 
 
     @Column(name = "userIdNum")
-    private String idNum; // only if accType == 2
+    private String idNum ; // only if accType == 2
 
-    @Column(name = "creditCard")
-    private String creditCard; // only if accType == 2
+//    @Column(name = "creditCard")
+//    private String creditCard; // only if accType == 2
 
     @Column(name = "phoneNum")
-    private String phoneNum;
+    private String phoneNum  ;
 
     @Column(name = "fullName")
     private String fullName;
@@ -67,7 +67,7 @@ public class LoginRegCheck implements Serializable {
         this.phoneNum = phoneNum;
         this.fullName = fullName;
     }
-    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String phoneNum, String fullName, String idNum, String creditCard, boolean is_yearly_subscription) {
+    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String phoneNum, String fullName, String idNum, boolean is_yearly_subscription) {
         this.username = username;
         this.password = password;
         this.email = email;
@@ -77,7 +77,6 @@ public class LoginRegCheck implements Serializable {
         this.phoneNum = phoneNum;
         this.fullName = fullName;
         this.idNum = idNum;
-        this.creditCard = creditCard;
         this.is_yearly_subscription = is_yearly_subscription;
     }
     public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store,  boolean is_yearly_subscription) {
@@ -90,7 +89,7 @@ public class LoginRegCheck implements Serializable {
         this.phoneNum = phoneNum;
         this.fullName = fullName;
         this.idNum = idNum;
-        this.creditCard = creditCard;
+      //  this.creditCard = creditCard;
         this.is_yearly_subscription = is_yearly_subscription;
     }
 
@@ -107,6 +106,11 @@ public class LoginRegCheck implements Serializable {
     public String getEmail() { return email; }
     public int getIsLogin() { return isLogin; }
     public boolean isType() { return type; }
+    public String getIdNum() { return idNum; }
+    //public String getCreditCard() { return creditCard; }
+    public String getPhoneNum() { return phoneNum; }
+    public String getFullName() { return fullName; }
+    public Integer getId() { return id; }
 
     public void setUsername(String username) {
         this.username = username;
@@ -142,5 +146,26 @@ public class LoginRegCheck implements Serializable {
     {
         return receive_answer;
     }
+    public void set_yearly_subscription(boolean is_yearly_subscription)
+    {
+        this.is_yearly_subscription=is_yearly_subscription;
+    }
+    public void setStore(int store) {
+        this.store = store;
+    }
+
+//    public void setCreditCard(String creditCard) {
+//        this.creditCard = creditCard;
+//    }
+    public void setIdNum(String idNum) {
+        this.idNum = idNum;
+    }
+
+    public void upgradeToYearly(String idNum) {
+        this.idNum = idNum;
+        this.is_yearly_subscription = true;
+        this.store = 4;
+    }
+
 }
 

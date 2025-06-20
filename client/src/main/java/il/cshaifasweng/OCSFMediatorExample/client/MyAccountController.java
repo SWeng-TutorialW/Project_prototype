@@ -10,12 +10,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class MyAccountController {
 
@@ -25,41 +26,20 @@ public class MyAccountController {
     @FXML // fx:id="accountTypeLbl"
     private Label accountTypeLbl; // Value injected by FXMLLoader
 
-    @FXML // fx:id="accountTypeLbl1"
-    private Label accountTypeLbl1; // Value injected by FXMLLoader
-
     @FXML // fx:id="emailEmptyLbl"
     private Label emailEmptyLbl; // Value injected by FXMLLoader
 
     @FXML // fx:id="emailLbl"
     private Label emailLbl; // Value injected by FXMLLoader
 
-    @FXML // fx:id="emailLbl1"
-    private Label emailLbl1; // Value injected by FXMLLoader
-
-    @FXML // fx:id="employeePositionLbl"
-    private Label employeePositionLbl; // Value injected by FXMLLoader
-
-    @FXML // fx:id="employeePositionLbl1"
-    private Label employeePositionLbl1; // Value injected by FXMLLoader
-
-    @FXML // fx:id="employeeUsernameLbl"
-    private Label employeeUsernameLbl; // Value injected by FXMLLoader
-
-    @FXML // fx:id="employeeUsernameLbl1"
-    private Label employeeUsernameLbl1; // Value injected by FXMLLoader
-
     @FXML // fx:id="myAccUsers"
     private AnchorPane myAccUsers; // Value injected by FXMLLoader
-
-    @FXML // fx:id="myAccUsers1"
-    private AnchorPane myAccUsers1; // Value injected by FXMLLoader
 
     @FXML // fx:id="myAccountLbl"
     private Label myAccountLbl; // Value injected by FXMLLoader
 
-    @FXML // fx:id="myAccountLbl1"
-    private Label myAccountLbl1; // Value injected by FXMLLoader
+    @FXML // fx:id="myOrdersButton"
+    private Button myOrdersButton; // Value injected by FXMLLoader
 
     @FXML // fx:id="my_account_data"
     private AnchorPane my_account_data; // Value injected by FXMLLoader
@@ -73,28 +53,108 @@ public class MyAccountController {
     @FXML // fx:id="usernameLbl"
     private Label usernameLbl; // Value injected by FXMLLoader
 
-    @FXML // fx:id="usernameLbl1"
-    private Label usernameLbl1; // Value injected by FXMLLoader
-
-    @FXML // fx:id="workerEmailLbl"
-    private Label workerEmailLbl; // Value injected by FXMLLoader
-
-    @FXML // fx:id="workerEmailLbl1"
-    private Label workerEmailLbl1; // Value injected by FXMLLoader
-
-    @FXML
-    private Button myOrdersButton;
-
     private LoginRegCheck currentUser;
 
 
-    @FXML
-    void onSubscribe(ActionEvent event) {
 
+        @FXML
+        void onSubscribe(ActionEvent event) {
+            if (currentUser == null) {
+                System.out.println("No user logged in");
+                return;
+            }
+
+            try {
+                //check if first need to upgrade to Network account
+                if (currentUser.getStore() >= 1 && currentUser.getStore() <= 3 && !currentUser.is_yearly_subscription()) {
+                    Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+                    confirmation.setTitle("Upgrade Required");
+                    confirmation.setHeaderText("Store Subscription Detected");
+                    confirmation.setContentText("To subscribe to the yearly plan, you must first upgrade to a network subscription.\n\nDo you want to proceed?");
+
+                    ButtonType yesButton = new ButtonType("Yes");
+                    ButtonType noButton = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+                    confirmation.getButtonTypes().setAll(yesButton, noButton);
+
+                    Optional<ButtonType> result = confirmation.showAndWait();
+
+                    if (result.isPresent() && result.get() == yesButton) {
+
+                        currentUser.setStore(4);
+
+                        Alert info = new Alert(Alert.AlertType.INFORMATION);
+                        info.setTitle("Upgraded");
+                        info.setHeaderText(null);
+                        info.setContentText("Your account has been upgraded to a Network account.\nYou may now proceed to register for the yearly subscription.");
+                        info.showAndWait();
+
+                    } else {
+                        return;
+                    }
+                }
+
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
+
+                RegistrationController regController = new RegistrationController();
+                regController.setUser(currentUser);
+                regController.setUpgrade(true);
+
+                fxmlLoader.setController(regController);
+                Parent root = fxmlLoader.load();
+
+                Stage stage = new Stage();
+                stage.setTitle("Subscription");
+                stage.setScene(new Scene(root));
+                stage.show();
+
+                ((Stage) subscribeBtn.getScene().getWindow()).close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+    public void loadUserInfo() {
+        if (currentUser == null) {
+            System.out.println("No user data to display");
+            return;
+        }
+
+        usernameEmptyLbl.setText(currentUser.getUsername());
+        emailEmptyLbl.setText(currentUser.getEmail());
+
+        String accountType;
+        if (currentUser.is_yearly_subscription()) {
+            accountType = "Yearly Subscription";
+        } else if (currentUser.getStore() == 4) {
+            accountType = "Network ";
+        } else if (currentUser.getStore() >= 1 && currentUser.getStore() <= 3) {
+            accountType = "Store - " + currentUser.getStoreName();
+        } else {
+            accountType = "Guest";      //should never happen
+        }
+
+        accountTypeEmptyLbl.setText(accountType);
+
+        subscribeBtn.setVisible(!currentUser.is_yearly_subscription());
     }
+
+
+    @FXML
+    void initialize() throws IOException{
+
+        // set register anchor
+        AnchorPane.setBottomAnchor(my_account_data, 58.0);
+        AnchorPane.setTopAnchor(my_account_data, 58.0);
+        AnchorPane.setRightAnchor(my_account_data, 89.0);
+        AnchorPane.setLeftAnchor(my_account_data, 89.0);
+    }
+
 
     public void setCurrentUser(LoginRegCheck user) {
         this.currentUser = user;
+        loadUserInfo();
     }
     
     @FXML

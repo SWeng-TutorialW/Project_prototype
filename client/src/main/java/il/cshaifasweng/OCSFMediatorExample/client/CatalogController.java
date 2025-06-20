@@ -252,13 +252,10 @@ public class CatalogController {
         this.user = user;
         System.out.println("the user is " + user.getUsername());
         System.out.println(" user send: " + user.get_send_complain());
-
-
     }
     public LoginRegCheck getUser() {
         return user;
     }
-
     public void  set_type(int value)
     {
         type=value;
@@ -273,6 +270,8 @@ public class CatalogController {
     }
     int add_flower_flag=0;
     String flower_name="";
+
+
     @FXML
     void initialize() {
         System.out.println("CatalogController initialized");
@@ -425,8 +424,7 @@ public class CatalogController {
         System.out.println("Catalog cleared.");
     }
     @Subscribe
-    public void handleCatalogUpdate(discount_for_1_flower event)throws IOException
-    {
+    public void handleCatalogUpdate(discount_for_1_flower event)throws IOException {
 
         if(event.get_catalog_type()==1)
         {
@@ -455,8 +453,7 @@ public class CatalogController {
 
     }
     @Subscribe
-    public void handleCatalogUpdate(Add_flower_event event)throws IOException
-    {
+    public void handleCatalogUpdate(Add_flower_event event)throws IOException {
 
         System.out.println("enter handle " );
 
@@ -496,8 +493,7 @@ public class CatalogController {
 
     }
     @Subscribe
-    public void handleCatalogUpdate(update_local_catalog event)
-    {
+    public void handleCatalogUpdate(update_local_catalog event) {
         System.out.println("enter ok");
         if(type== event.get_catalog_type())
         {
@@ -506,8 +502,6 @@ public class CatalogController {
             return;
         }
     }
-
-
     public void setCatalogData(List<Flower> flowerList) {
         if(type==0||type==4)
         {

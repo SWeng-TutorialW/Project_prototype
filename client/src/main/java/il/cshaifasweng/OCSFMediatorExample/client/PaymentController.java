@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.fxml.FXML;
@@ -34,6 +35,24 @@ public class PaymentController {
 
     private Order order;
     private Stage checkoutStage;
+
+    private boolean payUpgrade = false;
+
+    private LoginRegCheck userToRegister;
+    private Stage registrationStage;
+
+
+
+    private Runnable onPaymentSuccess;
+    public void setOnPaymentSuccess(Runnable callback) {
+        this.onPaymentSuccess = callback;
+    }
+
+    public void setPayUpgrade(boolean payUpgrade) {
+        this.payUpgrade = payUpgrade;
+    }
+
+
 
     private enum CardType {
         VISA,
@@ -199,15 +218,23 @@ public class PaymentController {
         try {
             Thread.sleep(1000); // simulate payment
 
-            order.setStatus("CONFIRMED");
-            SimpleClient.getClient().sendToServer(order);
+            //  צריך לעשות בדיקה אם התשלום הוא בגלל ORDER או בגלל שהלקוח רוצה לעשות מנוי
+            if(payUpgrade){
+                if (onPaymentSuccess != null) {
+                    onPaymentSuccess.run();
+                }
+            }else {
+                order.setStatus("CONFIRMED");
+                SimpleClient.getClient().sendToServer(order);
 
-            Warning warning = new Warning("Payment successful! Your order has been placed.");
-            EventBus.getDefault().post(new WarningEvent(warning));
+                Warning warning = new Warning("Payment successful! Your order has been placed.");
+                EventBus.getDefault().post(new WarningEvent(warning));
 
-            OrderPageController.clearCart();
-            ((Stage) payButton.getScene().getWindow()).close();
-            if (checkoutStage != null) checkoutStage.close();
+                OrderPageController.clearCart();
+                ((Stage) payButton.getScene().getWindow()).close();
+                if (checkoutStage != null) checkoutStage.close();
+
+            }
         } catch (Exception e) {
             e.printStackTrace();
             showError("Payment processing failed. Please try again.");
