@@ -150,14 +150,8 @@ public class LoginRegCheck implements Serializable {
         this.store = store;
     }
 
-//    public void setCreditCard(String creditCard) {
-//        this.creditCard = creditCard;
-//    }
     public void setIdNum(String idNum) {
         this.idNum = idNum;
     }
-
-
-
 }
 

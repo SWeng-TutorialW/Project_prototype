@@ -60,6 +60,7 @@ public class PaymentController {
     public void setOnPaymentCancel(Runnable callback) {
         this.onPaymentCancel = callback;
     }
+
     public void setPayUpgrade(boolean payUpgrade) {
         this.payUpgrade = payUpgrade;
     }
