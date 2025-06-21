@@ -53,33 +53,15 @@ public class connect_scene_Con  {
 
     @FXML
     private PrimaryController ctlr;
-    boolean guest = false;
+    boolean guess = false;
     boolean type_Client = false;
     boolean type_Employee = false;
     boolean type_guess = false;//only to know if is the first time to jet the catalog
     int type_local = 0;//1 for store 1 ,2 for store 2 ,3 for store 3, 4 for all of them
     private LoginRegCheck user;
-    void set_guest(boolean is_guest) {
-        guest=is_guest;
-    }
     public void setCatalogController(PrimaryController controller) {
         this.ctlr = controller;
     }
-    public void set_user(LoginRegCheck user) {
-        this.user = user;
-        System.out.println("the user is " + user.getUsername());
-        System.out.println(" user send: " + user.get_send_complain());
-        System.out.println(" in connect scene !!!!! ");
-
-
-    }
-    public void set_type_client(boolean type_client) {
-        type_Client = type_client;
-    }
-    public void set_type_local(int type) {
-       type_local = type;
-    }
-
     private  CatalogController catalogController;
     private CatalogController_employee employeeController;
     @FXML
@@ -94,14 +76,22 @@ public class connect_scene_Con  {
 
 
 
-
     @FXML
     void show_reg(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
-            Parent root = fxmlLoader.load();
+
+
             RegistrationController regController = fxmlLoader.getController();
-            regController.setController(this);
+
+            fxmlLoader.setControllerFactory(var -> {
+                RegistrationController controller = new RegistrationController();
+                controller.gotFromConnectScene = true;
+                controller.setController(this);
+                return controller;
+            });
+            Parent root = fxmlLoader.load();
+
             Stage stage = new Stage();
             stage.setTitle("Create New Account");
             stage.setScene(new Scene(root));
@@ -111,13 +101,11 @@ public class connect_scene_Con  {
             e.printStackTrace();
         }
     }
-
-
     @FXML
     void guess_enter(ActionEvent event)
     {
         SimpleClient.isGuest = true;
-        guest = true;
+        guess = true;
         try {
             if (SimpleClient.getClient().isConnected()) {
                 System.out.println("show_cata_as_guess");
@@ -139,6 +127,7 @@ public class connect_scene_Con  {
             e.printStackTrace();
 
         }
+
     }
     @Subscribe
     public void handleCatalogUpdate(catalog_sort_event event)
@@ -147,7 +136,7 @@ public class connect_scene_Con  {
         System.out.println(type_Client);
         System.out.println(type_Employee);
         System.out.println(type_local);
-        if(guest)
+        if(guess)
         {
             catalogController.set_sorting_type(event.getSort_type());
             catalogController.setCatalogSorting(event.get_Sorted_flowers());
@@ -168,13 +157,16 @@ public class connect_scene_Con  {
         }
 
     }
+
+
+
     @Subscribe
     public void handleCatalogUpdate(CatalogUpdateEvent event)/// /  this method only for the first time to get the catalog
     {
         System.out.println(type_Client);
         System.out.println(type_Employee);
         System.out.println(type_local);
-        if(guest)
+        if(guess)
         {
             System.out.println("Processing as guest");
             Platform.runLater(() -> {
@@ -185,7 +177,6 @@ public class connect_scene_Con  {
                     CatalogController controller = loader.getController();
                     controller.setCatalogData(event.getUpdatedItems());
                     catalogController=controller;
-                    controller.set_connect_controller(this);
                     App.getScene().setRoot(root);
                     if(!type_guess)//to know this is the first time
                     {
@@ -224,7 +215,6 @@ public class connect_scene_Con  {
                             System.out.println("type_Employee is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the employee is for store "+type_local);
-                         
 
                         }
                         if (!loginRegCheck.isType())
@@ -242,15 +232,13 @@ public class connect_scene_Con  {
                             System.out.println("the user is mnoy to store "+type_local);
                             SimpleClient.isGuest = false; // Yarden added this
 
-                            
+
                         }
                         change_user_login wrapper = new change_user_login(user,1);
-
                         try {
                             SimpleClient.getClient().sendToServer(wrapper);
                         } catch (IOException e) {
                             e.printStackTrace();
-
                         }
                         loginRegCheck.setIsLogin(1);
                         Platform.runLater(() -> {
@@ -291,7 +279,6 @@ public class connect_scene_Con  {
                                     root = loader.load();
                                     CatalogController controller = loader.getController();
                                     List<Store> stores=event.getStores();
-                                    controller.set_connect_controller(this);
                                     if(type_local==4)// network
                                     {
                                         controller.set_type(type_local);
@@ -312,6 +299,7 @@ public class connect_scene_Con  {
                                         controller.set_user(loginRegCheck);
                                         controller.setCatalogData(event.getUpdatedItems());
                                         catalogController=controller;
+
                                     }
                                 }
                                 App.getScene().setRoot(root);

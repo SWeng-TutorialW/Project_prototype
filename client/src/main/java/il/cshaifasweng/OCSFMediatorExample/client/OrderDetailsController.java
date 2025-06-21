@@ -78,6 +78,27 @@ public class OrderDetailsController {
     private Label totalAmountLabel;
     
     @FXML
+    private VBox cancellationSection;
+    
+    @FXML
+    private Label cancellationDateLabel;
+    
+    @FXML
+    private Label refundAmountLabel;
+    
+    @FXML
+    private Label cancellationReasonLabel;
+    
+    @FXML
+    private VBox greetingCardSection;
+    
+    @FXML
+    private Label greetingCardBackgroundLabel;
+    
+    @FXML
+    private Label greetingCardMessageLabel;
+    
+    @FXML
     private Button backButton;
     
     private Order currentOrder;
@@ -167,6 +188,41 @@ public class OrderDetailsController {
         subtotalLabel.setText(String.format("₪%.2f", subtotal));
         deliveryFeeLabel.setText(String.format("₪%.2f", deliveryFee));
         totalAmountLabel.setText(String.format("₪%.2f", total));
+        
+        // Show cancellation information if order is cancelled
+        if ("CANCELLED".equals(currentOrder.getStatus())) {
+            cancellationSection.setVisible(true);
+            if (currentOrder.getCancellationDate() != null) {
+                cancellationDateLabel.setText(dateFormat.format(currentOrder.getCancellationDate()));
+            } else {
+                cancellationDateLabel.setText("Not specified");
+            }
+            refundAmountLabel.setText(String.format("₪%.2f", currentOrder.getRefundAmount()));
+            if (currentOrder.getCancellationReason() != null && !currentOrder.getCancellationReason().isEmpty()) {
+                cancellationReasonLabel.setText(currentOrder.getCancellationReason());
+            } else {
+                cancellationReasonLabel.setText("No reason provided");
+            }
+        } else {
+            cancellationSection.setVisible(false);
+        }
+        
+        // Show greeting card information if included
+        if (currentOrder.isIncludeGreetingCard()) {
+            greetingCardSection.setVisible(true);
+            if (currentOrder.getGreetingCardBackground() != null && !currentOrder.getGreetingCardBackground().isEmpty()) {
+                greetingCardBackgroundLabel.setText(currentOrder.getGreetingCardBackground());
+            } else {
+                greetingCardBackgroundLabel.setText("Not specified");
+            }
+            if (currentOrder.getGreetingCardMessage() != null && !currentOrder.getGreetingCardMessage().isEmpty()) {
+                greetingCardMessageLabel.setText(currentOrder.getGreetingCardMessage());
+            } else {
+                greetingCardMessageLabel.setText("No message provided");
+            }
+        } else {
+            greetingCardSection.setVisible(false);
+        }
     }
     
     @FXML

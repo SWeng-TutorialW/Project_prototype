@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.fxml.FXML;
@@ -35,6 +36,39 @@ public class PaymentController {
     private Order order;
     private Stage checkoutStage;
 
+    private boolean payUpgrade = false;
+
+    private LoginRegCheck userToRegister;
+
+    public void postInitialize() {
+        if (payUpgrade) {
+            backButton.setVisible(false);
+            totalAmountLabel.setText("Total Amount: ₪100.00");
+        }
+    }
+    private Stage registrationStage;
+    public void setStage(Stage stage) {
+        this.registrationStage = stage;
+    }
+
+    private Runnable onPaymentSuccess;
+    public void setOnPaymentSuccess(Runnable callback) {
+        this.onPaymentSuccess = callback;
+    }
+
+    private Runnable onPaymentCancel;
+    public void setOnPaymentCancel(Runnable callback) {
+        this.onPaymentCancel = callback;
+    }
+
+    public void setPayUpgrade(boolean payUpgrade) {
+        this.payUpgrade = payUpgrade;
+    }
+
+    public Runnable getOnPaymentCancel() {
+        return onPaymentCancel;
+    }
+
     private enum CardType {
         VISA,
         MASTERCARD,
@@ -58,6 +92,7 @@ public class PaymentController {
         } catch (Exception e) {
             System.err.println("Failed to load card logos: " + e.getMessage());
         }
+
 
         for (int i = 1; i <= 12; i++) {
             expiryMonthComboBox.getItems().add(String.format("%02d", i));
@@ -199,15 +234,26 @@ public class PaymentController {
         try {
             Thread.sleep(1000); // simulate payment
 
-            order.setStatus("CONFIRMED");
-            SimpleClient.getClient().sendToServer(order);
+            if (payUpgrade) {
+                if (onPaymentSuccess != null) {
+                    onPaymentSuccess.run();
+                    payUpgrade = false;
+                    if (registrationStage != null) {
+                        registrationStage.close();
+                    }
+                }
+            }else {
+                order.setStatus("CONFIRMED");
+                SimpleClient.getClient().sendToServer(order);
 
-            Warning warning = new Warning("Payment successful! Your order has been placed.");
-            EventBus.getDefault().post(new WarningEvent(warning));
+                Warning warning = new Warning("Payment successful! Your order has been placed.");
+                EventBus.getDefault().post(new WarningEvent(warning));
 
-            OrderPageController.clearCart();
-            ((Stage) payButton.getScene().getWindow()).close();
-            if (checkoutStage != null) checkoutStage.close();
+                OrderPageController.clearCart();
+                ((Stage) payButton.getScene().getWindow()).close();
+                if (checkoutStage != null) checkoutStage.close();
+
+            }
         } catch (Exception e) {
             e.printStackTrace();
             showError("Payment processing failed. Please try again.");
@@ -216,10 +262,18 @@ public class PaymentController {
 
     @FXML
     private void goBack() {
+
+        if (onPaymentCancel != null) {
+            onPaymentCancel.run();
+
+        }
+
         ((Stage) backButton.getScene().getWindow()).close();
         if (checkoutStage != null) {
             checkoutStage.show();
         }
+
+
     }
 
     private void showError(String message) {

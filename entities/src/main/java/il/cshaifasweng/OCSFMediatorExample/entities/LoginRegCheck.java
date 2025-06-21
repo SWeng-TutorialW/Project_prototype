@@ -22,6 +22,7 @@ public class LoginRegCheck implements Serializable {
     @Column(name = "emailAdd")
     private String email;
 
+    @Transient // This field is will not be persisted in the database
     private int isLogin; // 1 = login, 0 = registration
     private boolean type;// false = client, true = employee
     private int store;// 1 for store number 1 ,until 3 ,
@@ -67,18 +68,6 @@ public class LoginRegCheck implements Serializable {
         this.phoneNum = phoneNum;
         this.fullName = fullName;
     }
-    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String idNum, String creditCard,boolean is_yearly_subscription) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.isLogin = isLogin;
-        this.type = type;
-        this.store = store;
-        this.idNum = idNum;
-        this.creditCard = creditCard;
-        this.is_yearly_subscription = is_yearly_subscription;
-
-    }
     public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String phoneNum, String fullName, String idNum, String creditCard, boolean is_yearly_subscription) {
         this.username = username;
         this.password = password;
@@ -106,6 +95,18 @@ public class LoginRegCheck implements Serializable {
         this.is_yearly_subscription = is_yearly_subscription;
     }
 
+    public LoginRegCheck(String regUser, String regPass, String email, int isLogin, boolean b, int store, String phoneNumber, String fullName, String userId, boolean b1) {
+        this.username = regUser;
+        this.password = regPass;
+        this.email = email;
+        this.isLogin = isLogin;
+        this.type = b; // false for client, true for employee
+        this.store = store; // 1-3 for stores, 4 for network manager
+        this.phoneNum = phoneNumber;
+        this.fullName = fullName;
+        this.idNum = userId;
+        this.is_yearly_subscription = b1;
+    }
 
     public Integer getStore() {return store;}
 
@@ -121,6 +122,14 @@ public class LoginRegCheck implements Serializable {
     public int getIsLogin() { return isLogin; }
     public boolean isType() { return type; }
 
+    public String getIdNum() { return idNum; }
+    public String getPhoneNum() { return phoneNum; }
+    public String getFullName() { return fullName; }
+    public Integer getId() { return id; }
+
+    public void setPhoneNum(String phoneNum) {
+        this.phoneNum = phoneNum;
+    }
     public void setUsername(String username) {
         this.username = username;
     }
@@ -154,6 +163,17 @@ public class LoginRegCheck implements Serializable {
     public boolean isReceive_answer()
     {
         return receive_answer;
+    }
+    public void set_yearly_subscription(boolean is_yearly_subscription)
+    {
+        this.is_yearly_subscription=is_yearly_subscription;
+    }
+    public void setStore(int store) {
+        this.store = store;
+    }
+
+    public void setIdNum(String idNum) {
+        this.idNum = idNum;
     }
 }
 

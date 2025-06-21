@@ -45,6 +45,13 @@ public class CheckoutController {
     @FXML private Label deliveryFeeLabel;
     @FXML private Button placeOrderButton;
     @FXML private Button cancelButton;
+    
+    // Greeting card elements
+    @FXML private CheckBox includeGreetingCardCheckBox;
+    @FXML private ComboBox<String> greetingCardBackgroundComboBox;
+    @FXML private TextArea greetingCardMessageTextArea;
+    @FXML private Label characterCountLabel;
+    @FXML private Button previewGreetingCardButton;
 
     //check
     private CatalogController_employee catalogController;
@@ -83,6 +90,9 @@ public class CheckoutController {
         // Set default delivery date to tomorrow
         deliveryDatePicker.setValue(LocalDate.now().plusDays(1));
         
+        // Initialize greeting card options
+        initializeGreetingCardOptions();
+        
         // Add listeners
         deliveryTypeComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
             updateDeliveryFee();
@@ -95,6 +105,30 @@ public class CheckoutController {
                 cityField.clear();
                 streetAddressField.clear();
                 apartmentField.clear();
+            }
+        });
+        
+        // Add greeting card listeners
+        includeGreetingCardCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            greetingCardBackgroundComboBox.setDisable(!newVal);
+            greetingCardMessageTextArea.setDisable(!newVal);
+            previewGreetingCardButton.setDisable(!newVal);
+            if (!newVal) {
+                greetingCardBackgroundComboBox.setValue(null);
+                greetingCardMessageTextArea.clear();
+            }
+        });
+        
+        // Add character limit to greeting message
+        greetingCardMessageTextArea.textProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && newVal.length() > 300) {
+                greetingCardMessageTextArea.setText(oldVal);
+            }
+            // Update character count
+            if (newVal != null) {
+                characterCountLabel.setText(newVal.length() + "/300 characters");
+            } else {
+                characterCountLabel.setText("0/300 characters");
             }
         });
         
@@ -129,6 +163,22 @@ public class CheckoutController {
         double deliveryFee = "Delivery".equals(deliveryTypeComboBox.getValue()) ? DELIVERY_FEE : 0.0;
         double total = itemsTotal + deliveryFee;
         orderTotal.setText(String.format("Total: ₪%.2f", total));
+    }
+    
+    private void initializeGreetingCardOptions() {
+        // Add greeting card background options
+        greetingCardBackgroundComboBox.getItems().addAll(
+            "Background 1",
+            "Background 2 ", 
+            "Background 3",
+            "Background 4"
+     
+        );
+        
+        // Initially disable greeting card options
+        greetingCardBackgroundComboBox.setDisable(true);
+        greetingCardMessageTextArea.setDisable(true);
+        previewGreetingCardButton.setDisable(true);
     }
     
     @FXML
@@ -177,8 +227,21 @@ public class CheckoutController {
                 EventBus.getDefault().post(new WarningEvent(warning));
                 return;
             }
-
-
+        }
+        
+        // Validate greeting card if selected
+        if (includeGreetingCardCheckBox.isSelected()) {
+            if (greetingCardBackgroundComboBox.getValue() == null || greetingCardBackgroundComboBox.getValue().isEmpty()) {
+                Warning warning = new Warning("Please select a greeting card background");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+            
+            if (greetingCardMessageTextArea.getText() == null || greetingCardMessageTextArea.getText().trim().isEmpty()) {
+                Warning warning = new Warning("Please enter a greeting message");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
         }
 
         // Check if user is available
@@ -196,6 +259,13 @@ public class CheckoutController {
         order.setStreetAddress(streetAddressField.getText());
         order.setApartment(apartmentField.getText());
         order.setRequiresDelivery("Delivery".equals(deliveryTypeComboBox.getValue()));
+        
+        // Set greeting card information
+        order.setIncludeGreetingCard(includeGreetingCardCheckBox.isSelected());
+        if (includeGreetingCardCheckBox.isSelected()) {
+            order.setGreetingCardBackground(greetingCardBackgroundComboBox.getValue());
+            order.setGreetingCardMessage(greetingCardMessageTextArea.getText().trim());
+        }
         
         if (order.isRequiresDelivery()) {
             // Convert LocalDate and hour to Date for delivery time
@@ -246,6 +316,47 @@ public class CheckoutController {
         } catch (IOException e) {
             e.printStackTrace();
             Warning warning = new Warning("Error returning to catalog");
+            EventBus.getDefault().post(new WarningEvent(warning));
+        }
+    }
+    
+    @FXML
+    private void previewGreetingCard() {
+        if (!includeGreetingCardCheckBox.isSelected()) {
+            Warning warning = new Warning("Please enable greeting card first");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+        
+        if (greetingCardBackgroundComboBox.getValue() == null || greetingCardBackgroundComboBox.getValue().isEmpty()) {
+            Warning warning = new Warning("Please select a greeting card background");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+        
+        if (greetingCardMessageTextArea.getText() == null || greetingCardMessageTextArea.getText().trim().isEmpty()) {
+            Warning warning = new Warning("Please enter a greeting message");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+        
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("greeting_card_preview.fxml"));
+            Parent root = loader.load();
+            GreetingCardPreviewController previewController = loader.getController();
+            previewController.setGreetingCardData(
+                greetingCardBackgroundComboBox.getValue(),
+                greetingCardMessageTextArea.getText().trim()
+            );
+            
+            Stage stage = new Stage();
+            stage.setTitle("Greeting Card Preview");
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Warning warning = new Warning("Failed to open greeting card preview");
             EventBus.getDefault().post(new WarningEvent(warning));
         }
     }
