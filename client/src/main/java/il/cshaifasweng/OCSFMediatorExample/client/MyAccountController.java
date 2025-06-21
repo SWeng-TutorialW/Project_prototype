@@ -2,6 +2,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.UpdateUserEvent;
+import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -11,16 +13,26 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
+import javax.swing.*;
+import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.security.Key;
+import java.util.Objects;
 import java.util.Optional;
 
 public class MyAccountController {
-
-    @FXML private Label accountTypeEmptyLbl, accountTypeLbl, emailEmptyLbl, emailLbl, myAccountLbl, usernameEmptyLbl, usernameLbl;
-    @FXML private Button myOrdersButton, subscribeBtn;
+    @FXML TextField userChangeTxtB;
+    @FXML TextField emailChangeTxtB;
+    @FXML TextField phoneChangeTxtB;
+    @FXML private Label accountTypeEmptyLbl, passErrorMsgLbl,  newPassLbl, confNewPassLbl,accTypeLbl, usrnmeLbl, emailLbl, phoneNumLbl, changePassLbl;
+    @FXML private Button myOrdersButton, subscribeBtn, changeBtn;
     @FXML private AnchorPane myAccUsers, my_account_data;
+    @FXML private PasswordField newPassTxtB, confNewPassTxtB;
+    private LoginRegCheck tempUser;
 
-    private LoginRegCheck currentUser;
     private CatalogController catalogController;
 
     public void setCatalogController(CatalogController catalogController) {
@@ -28,13 +40,15 @@ public class MyAccountController {
     }
 
     public void setCurrentUser(LoginRegCheck user) {
-        this.currentUser = user;
+        SimpleClient.setCurrentUser(user);
         loadUserInfo();
     }
 
     @FXML
     void initialize() {
+        EventBus.getDefault().register(this);
         // AnchorPane margins
+        loadUserInfo();
         AnchorPane.setBottomAnchor(my_account_data, 58.0);
         AnchorPane.setTopAnchor(my_account_data, 58.0);
         AnchorPane.setRightAnchor(my_account_data, 89.0);
@@ -43,7 +57,7 @@ public class MyAccountController {
 
     @FXML
     private void handleMyOrdersButton() {
-        if (currentUser == null) {
+        if (SimpleClient.getCurrentUser() == null) {
             System.out.println("No user logged in");
             return;
         }
@@ -52,7 +66,7 @@ public class MyAccountController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("orders_history.fxml"));
             Parent root = loader.load();
             OrdersHistoryController controller = loader.getController();
-            controller.setCurrentUser(currentUser);
+            controller.setCurrentUser(SimpleClient.getCurrentUser());
             controller.loadUserOrders();
 
             Stage stage = new Stage();
@@ -67,35 +81,90 @@ public class MyAccountController {
     }
 
     public void loadUserInfo() {
-        if (currentUser == null) return;
+        if (SimpleClient.getCurrentUser() == null) return;
 
-        usernameEmptyLbl.setText(currentUser.getUsername());
-        emailEmptyLbl.setText(currentUser.getEmail());
-
-        String accountType = switch (currentUser.getStore()) {
-            case 4 -> currentUser.is_yearly_subscription() ? "Yearly Subscription" : "Network";
-            case 1, 2, 3 -> "Store - " + currentUser.getStoreName();
+        userChangeTxtB.setText(SimpleClient.getCurrentUser().getUsername());
+        emailChangeTxtB.setText(SimpleClient.getCurrentUser().getEmail()); // what if the user changes their info?
+        phoneChangeTxtB.setText(SimpleClient.getCurrentUser().getPhoneNum());
+        String accountType = switch (SimpleClient.getCurrentUser().getStore()) {
+            case 4 -> SimpleClient.getCurrentUser().is_yearly_subscription() ? "Yearly Subscription" : "Network";
+            case 1, 2, 3 -> "Store - " + SimpleClient.getCurrentUser().getStoreName();
             default -> "Guest"; // shouldn't happen
         };
 
         accountTypeEmptyLbl.setText(accountType);
-        subscribeBtn.setVisible(!currentUser.is_yearly_subscription());
+        subscribeBtn.setVisible(!SimpleClient.getCurrentUser().is_yearly_subscription());
     }
+    @Subscribe
+    public void onFailedUpdate(WarningEvent warning){
 
+        if(warning.getWarning().getMessage().startsWith("#updateFail_UserExists")){
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Username Error");
+                    alert.setHeaderText("Username Already Exists");
+                    alert.setContentText("The username you entered is already taken. Please choose a different username.");
+                    alert.showAndWait();
+                    userChangeTxtB.setText(SimpleClient.getCurrentUser().getUsername());
+                });
+        }
+
+    }
+    @Subscribe
+    public void onSuccessfulUpdate(String str) {
+        if(str.startsWith("#userUpdateSuccess")) {
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Update Success");
+                alert.setHeaderText("Successfully Updated User Details");
+                alert.setContentText("Your Details Are Up-To-Date.");
+                alert.showAndWait();
+            });
+            loadUserInfo();
+    }
+    }
+    @Subscribe
+    public void getUserDetails(UpdateUserEvent user) {
+        if(Objects.equals(user.getUpdatedUser().getId(), SimpleClient.getCurrentUser().getId())) { // just to make sure we are updating the correct user
+            SimpleClient.setCurrentUser(user.getUpdatedUser());
+            loadUserInfo();
+        }
+    }
+    @FXML
+    void sendUserUpdate(ActionEvent event){
+
+            if(newPassTxtB.getText().equals(confNewPassTxtB.getText())) {
+                passErrorMsgLbl.setVisible(false);
+                UpdateUserEvent updatedUser;
+                LoginRegCheck currentUser = SimpleClient.getCurrentUser();
+
+                currentUser.setUsername(userChangeTxtB.getText());
+                currentUser.setEmail(emailChangeTxtB.getText());
+                currentUser.setPhoneNum(phoneChangeTxtB.getText());
+                currentUser.setPassword(newPassTxtB.getText());
+                updatedUser = new UpdateUserEvent(currentUser);
+                try {
+                    SimpleClient.client.sendToServer(updatedUser);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            else{passErrorMsgLbl.setVisible(true);}
+    }
     @FXML
     void onSubscribe(ActionEvent event) {
-        if (currentUser == null) {
+        if (SimpleClient.getCurrentUser() == null) { // Good, we're making sure the user is indeed logged in
             System.out.println("No user logged in");
             return;
         }
 
-        if (currentUser.getStore() >= 1 && currentUser.getStore() <= 3) {
+        if (SimpleClient.getCurrentUser().getStore() >= 1 && SimpleClient.getCurrentUser().getStore() <= 3) {
             if (!showConfirmation("Upgrade Required",
                     "To subscribe to the yearly plan, you must first upgrade to a network subscription.",
                     "Do you want to proceed?")) {
                 return;
             }
-            currentUser.setStore(4);
+            SimpleClient.getCurrentUser().setStore(4);
             showAlert(Alert.AlertType.INFORMATION, "Upgraded", null,
                     "Your account has been upgraded to a Network account.\nYou may now proceed to register for the yearly subscription.");
         }
@@ -115,18 +184,18 @@ public class MyAccountController {
 
             Runnable sendUpdateToServer = () -> {
                 try {
-                    SimpleClient.getClient().sendToServer(currentUser);
+                    SimpleClient.getClient().sendToServer(SimpleClient.getCurrentUser());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             };
 
             paymentController.setOnPaymentSuccess(() -> {
-                currentUser.set_yearly_subscription(true);
+                SimpleClient.getCurrentUser().set_yearly_subscription(true);
                 sendUpdateToServer.run();
 
                 if (catalogController != null) {
-                    catalogController.set_user(currentUser);
+                    catalogController.set_user(SimpleClient.getCurrentUser());
                     catalogController.set_type(4);
                 }
 

@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import javafx.scene.control.Alert;
 import org.greenrobot.eventbus.EventBus;
 
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
@@ -15,7 +16,9 @@ public class SimpleClient extends AbstractClient {
 	public static boolean isGuest = false;
 	public static int selectedAccType = -1;
 	private static LoginRegCheck currentUser = null; // Store the current logged-in user
-	
+	// With each new insatnce of our application, there will be a new SimpleClient
+	// so we don't have to worry about multiple instances of the client...
+
 	private SimpleClient(String host, int port) {
 		super(host, port);
 	}
@@ -77,7 +80,7 @@ public class SimpleClient extends AbstractClient {
 			}
 
 		}
-
+		else if(msgString.startsWith("#registerSuccess") || msgString.startsWith("#registerFailed")|| msgString.startsWith("#loginSuccess")||msgString.startsWith("#loginFailed")) {EventBus.getDefault().post(msgString);}
 		else if(msgString.startsWith("The network manager has deleted flower."))
 		{
 			try {
@@ -87,7 +90,12 @@ public class SimpleClient extends AbstractClient {
 			}
 
 		}
-
+		else if(msg.getClass().equals(UpdateUserEvent.class)){ // Update user event has been received
+			SimpleClient.currentUser = ((UpdateUserEvent) msg).getUpdatedUser();
+			System.out.println("Client: New Details for: " + SimpleClient.currentUser.getUsername());
+			EventBus.getDefault().post(msg);
+			EventBus.getDefault().post("#userUpdateSuccess");
+		}
 		else if(msgString.startsWith("user_"))
 		{
 			String[] parts = msgString.split("_");
@@ -131,12 +139,12 @@ public class SimpleClient extends AbstractClient {
 	public static int getSelectedAccType() {
 		return selectedAccType;
 	}
-	
+
 	// Getter and setter for current user
 	public static LoginRegCheck getCurrentUser() {
 		return currentUser;
 	}
-	
+
 	public static void setCurrentUser(LoginRegCheck user) {
 		currentUser = user;
 		System.out.println("SimpleClient: Current user set to: " + (user != null ? user.getUsername() : "null"));
