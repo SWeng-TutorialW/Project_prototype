@@ -155,5 +155,9 @@ public class LoginRegCheck implements Serializable {
     {
         return receive_answer;
     }
+    public void set_type(int type)
+    {
+        this.store=type;
+    }
 }
 
