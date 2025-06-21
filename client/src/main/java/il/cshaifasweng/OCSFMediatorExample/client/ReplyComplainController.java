@@ -84,56 +84,49 @@ public class ReplyComplainController {
 
 
     @FXML
-    void sendReply(ActionEvent event) {
-        String replyText = replyArea.getText();
-        String refundAmount = moneyTf.getText();
-    
-        if (replyText == null || replyText.isBlank()) return;
-    
-        try {
-            // Create a new Complain object instead of updating the old one
-            Complain newComplain = new Complain();
-            newComplain.setTimestamp(java.time.LocalDateTime.now());
-    
-            String userToBeAnswered = originalComplain.getClient();
-            newComplain.setClient("answer to" + userToBeAnswered);
-    
-            if (!isWorkerRequest && refundCheckBox.isSelected()) {
-                if (refundAmount == null || refundAmount.isBlank()) {
-                    Warning warning = new Warning("Enter money amount to refund or disable option");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
+        void sendReply(ActionEvent event)
+        {
+            String replyText = replyArea.getText();
+            String refundAmount = moneyTf.getText();
+            if (replyText == null || replyText.isBlank()) return;
+
+            try {
+                if(!isWorkerRequest && refundCheckBox.isSelected()){
+                    if(refundAmount == null || refundAmount.isBlank()){
+                        Warning warning = new Warning("Enter money amount to refund or disable option");
+                        EventBus.getDefault().post(new WarningEvent(warning));
+                        return;
+                    }
+                    
+                    // Extract order price from complaint text and validate refund amount
+                    double refundValue = Double.parseDouble(refundAmount);
+                    double orderPrice = extractOrderPrice(originalComplain.getComplaint());
+                    
+                    if (orderPrice > 0 && refundValue > orderPrice) {
+                        Warning warning = new Warning("Cannot refund more than order price ($" + String.format("%.2f", orderPrice) + ")");
+                        EventBus.getDefault().post(new WarningEvent(warning));
+                        return;
+                    }
+                    
+                    replyText = replyText.concat("\nWe have refunded your account with ").concat(refundAmount).concat(" $");
+                    originalComplain.setComplaint(replyText);
                 }
-    
-                double refundValue = Double.parseDouble(refundAmount);
-                double orderPrice = extractOrderPrice(originalComplain.getComplaint());
-    
-                if (orderPrice > 0 && refundValue > orderPrice) {
-                    Warning warning = new Warning("Cannot refund more than order price ($" + String.format("%.2f", orderPrice) + ")");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                    return;
+                else{
+                    originalComplain.setComplaint(replyText);
                 }
-    
-                replyText = replyText.concat("\nWe have refunded your account with ").concat(refundAmount).concat(" $");
-                newComplain.setRefundAmount(refundValue);
+                String user_to_be_answerd= originalComplain.getClient();
+                String new_name="answer to"+user_to_be_answerd;
+                originalComplain.setClient(new_name);
+                change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(user_to_be_answerd, true,true);
+                SimpleClient.getClient().sendToServer(originalComplain);
+                SimpleClient.getClient().sendToServer(wrapper);
+                SimpleClient.getClient().sendToServer("getComplaints");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-    
-            newComplain.setComplaint(replyText);
-            newComplain.setOrder(originalComplain.getOrder()); // Optional, keep order context if needed
-    
-            // Send new complaint + wrapper to server
-            change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(userToBeAnswered, true, true);
-            SimpleClient.getClient().sendToServer(newComplain);
-            SimpleClient.getClient().sendToServer(wrapper);
-            SimpleClient.getClient().sendToServer("getComplaints");
-    
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
         }
-    
-        ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
-    }
-    
         
         private double extractOrderPrice(String complaintText) {
             if (complaintText == null) return 0.0;

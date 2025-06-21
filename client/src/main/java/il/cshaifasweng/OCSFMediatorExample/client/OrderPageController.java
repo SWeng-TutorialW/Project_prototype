@@ -96,11 +96,10 @@ public class OrderPageController {
 
     @FXML
     private void addToCart() {
-        if (SimpleClient.getCurrentUser() == null) {
+        if (user == null || user.getIsLogin() == 0) {
             System.out.println("User not logged in");
             Warning warning = new Warning("Please log in to add items to cart");
             EventBus.getDefault().post(new WarningEvent(warning));
-
 
           /*  try {
                  FXMLLoader loader = new FXMLLoader(getClass().getResource("connect_scene.fxml"));

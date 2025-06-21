@@ -114,7 +114,7 @@ public class CheckoutController {
         this.currentUser = user;
         System.out.println("CheckoutController: User set to: " + (user != null ? user.getUsername() : "null"));
     }
-
+    
     private void updateDeliveryFee() {
         boolean requiresDelivery = "Delivery".equals(deliveryTypeComboBox.getValue());
         double fee = requiresDelivery ? DELIVERY_FEE : 0.0;
@@ -142,7 +142,6 @@ public class CheckoutController {
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
-
         // Validate email format
         if (!emailField.getText().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             Warning warning = new Warning("Please enter a valid email address");

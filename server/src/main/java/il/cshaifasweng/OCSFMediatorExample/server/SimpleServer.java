@@ -7,9 +7,7 @@ import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -568,6 +566,31 @@ public class SimpleServer extends AbstractServer {
 
 					break;
 			}
+		}
+		else if (msg.getClass().equals(UpdateUserEvent.class)){ // USER UPDATE
+			LoginRegCheck userToUpdate = ((UpdateUserEvent) msg).getUpdatedUser();
+			Session session = null;
+
+
+			try{
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+				List<LoginRegCheck> existingUser = session.createQuery("FROM LoginRegCheck lr WHERE username = :username", LoginRegCheck.class)
+						.setParameter("username", userToUpdate.getUsername())
+						.getResultList();
+				session.getTransaction().commit();
+				if(!existingUser.isEmpty() && (Objects.equals(existingUser.get(0).getUsername(), userToUpdate.getUsername())) && !(Objects.equals(existingUser.get(0).getId(), userToUpdate.getId()))) {System.err.println("ERROR: Someone tried to set his username into someone else's, NOT ALLOWED!");
+				client.sendToClient(new Warning("#updateFail_UserExists")); session.close(); return;} // user already exists, cannot update
+				session.close();
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				session.update(userToUpdate); // UPDATE statement
+				session.getTransaction().commit();
+				client.sendToClient(userToUpdate);
+			} catch (IOException e) {
+                session.getTransaction().rollback(); e.printStackTrace(); System.err.println("ERROR: Could not send update confirmation to client or update failed.\n");
+            } finally {session.close();}
 		}
 		else if (msg.getClass().equals(change_user_login.class)) {
 			change_user_login wrapper = (change_user_login) msg;

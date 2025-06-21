@@ -12,7 +12,7 @@
 <AnchorPane fx:id="registerWin" prefHeight="698.0" prefWidth="450.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RegistrationController">
 
    <children>
-      <AnchorPane fx:id="regAnchPane" layoutX="-434.0" layoutY="71.0" prefHeight="580.0" prefWidth="407.0" style="-fx-background-color: #c8a2c8; -fx-background-radius: 15;" AnchorPane.bottomAnchor="47.0" AnchorPane.leftAnchor="-434.0" AnchorPane.rightAnchor="477.0" AnchorPane.topAnchor="71.0">
+      <AnchorPane fx:id="regAnchPane" layoutX="22.0" layoutY="38.0" prefHeight="580.0" prefWidth="407.0" style="-fx-background-color: #c8a2c8; -fx-background-radius: 15;" visible="false" AnchorPane.bottomAnchor="80.0" AnchorPane.leftAnchor="22.0" AnchorPane.rightAnchor="21.0" AnchorPane.topAnchor="38.0">
          <children>
             <Label fx:id="regLbl" layoutX="146.0" layoutY="14.0" text="Registration" AnchorPane.leftAnchor="146.0" AnchorPane.rightAnchor="146.0">
                <font>
@@ -117,7 +117,7 @@
             <PasswordField fx:id="credit_card_box" layoutX="5.0" layoutY="472.0" prefWidth="290.0" visible="false" />
          </children>
       </AnchorPane>
-      <AnchorPane fx:id="logAnchPane" layoutX="28.0" layoutY="71.0" prefHeight="529.0" prefWidth="395.0" visible="false" AnchorPane.bottomAnchor="98.0" AnchorPane.leftAnchor="28.0" AnchorPane.rightAnchor="27.0" AnchorPane.topAnchor="71.0">
+      <AnchorPane fx:id="logAnchPane" layoutX="-410.0" layoutY="64.0" prefHeight="529.0" prefWidth="395.0" visible="false" AnchorPane.bottomAnchor="105.0" AnchorPane.leftAnchor="-410.0" AnchorPane.rightAnchor="465.0" AnchorPane.topAnchor="64.0">
          <children>
             <Label fx:id="loginLbl" alignment="CENTER" contentDisplay="CENTER" layoutX="167.0" layoutY="8.0" prefHeight="35.0" prefWidth="61.0" text="Login" textAlignment="CENTER" AnchorPane.leftAnchor="167.0" AnchorPane.rightAnchor="167.0">
                <font>
@@ -140,7 +140,7 @@
                   <Font name="Dubai Medium" size="12.0" />
                </font>
             </Button>
-            <TextField fx:id="passLogTxtB" layoutX="47.0" layoutY="250.0" prefHeight="30.0" prefWidth="302.0" AnchorPane.leftAnchor="47.0" AnchorPane.rightAnchor="46.0" />
+            <PasswordField fx:id="passLogTxtB" layoutX="47.0" layoutY="250.0" prefHeight="30.0" prefWidth="302.0" />
          </children>
       </AnchorPane>
       <Button fx:id="switchLoginRegbtn" alignment="CENTER" contentDisplay="CENTER" layoutX="116.0" layoutY="618.0" onMouseClicked="#decideLogOrReg" prefHeight="30.0" prefWidth="165.0" text="Go to Login" textAlignment="CENTER" AnchorPane.leftAnchor="116.0" AnchorPane.rightAnchor="114.0">
