@@ -93,32 +93,43 @@ public class OrderPageController {
             totalPrice.setText(String.format("Total: $%.2f", total));
         }
     }
-    
+
     @FXML
     private void addToCart() {
-
-
-        if(user == null || user.getIsLogin() == 0) {
+        if (user == null || user.getIsLogin() == 0) {
             System.out.println("User not logged in");
             Warning warning = new Warning("Please log in to add items to cart");
             EventBus.getDefault().post(new WarningEvent(warning));
 
+          /*  try {
+                 FXMLLoader loader = new FXMLLoader(getClass().getResource("connect_scene.fxml"));
+                Parent root = loader.load();
+
+                Stage stage = new Stage();
+                stage.setTitle("Connect");
+                stage.setScene(new Scene(root));
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }*/
+
+            return; // Exit the method to prevent further execution
         }
 
-        else if (!this.store.equals(this.user.getStoreName()) && user.getStore() != 4) {
+        if (!this.store.equals(this.user.getStoreName()) && user.getStore() != 4) {
             Warning warning = new Warning("You Can Only Order From The Store: " + user.getStoreName());
             EventBus.getDefault().post(new WarningEvent(warning));
-        }
-        else if (selectedFlower != null) {
+        } else if (selectedFlower != null) {
             int quantity = quantitySpinner.getValue();
             System.out.println("The store of the flower is:" + this.store);
             CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
             cartItems.add(cartItem);
-            
+
             // Show confirmation
             Warning warning = new Warning("Item added to cart successfully!");
             EventBus.getDefault().post(new WarningEvent(warning));
         }
+
         // Close current window
         Stage stage = (Stage) addToCartButton.getScene().getWindow();
         stage.close();

@@ -252,13 +252,10 @@ public class CatalogController {
         this.user = user;
         System.out.println("the user is " + user.getUsername());
         System.out.println(" user send: " + user.get_send_complain());
-
-
     }
     public LoginRegCheck getUser() {
         return user;
     }
-
     public void  set_type(int value)
     {
         type=value;
@@ -273,6 +270,8 @@ public class CatalogController {
     }
     int add_flower_flag=0;
     String flower_name="";
+
+
     @FXML
     void initialize() {
         System.out.println("CatalogController initialized");
@@ -425,8 +424,7 @@ public class CatalogController {
         System.out.println("Catalog cleared.");
     }
     @Subscribe
-    public void handleCatalogUpdate(discount_for_1_flower event)throws IOException
-    {
+    public void handleCatalogUpdate(discount_for_1_flower event)throws IOException {
 
         if(event.get_catalog_type()==1)
         {
@@ -455,8 +453,7 @@ public class CatalogController {
 
     }
     @Subscribe
-    public void handleCatalogUpdate(Add_flower_event event)throws IOException
-    {
+    public void handleCatalogUpdate(Add_flower_event event)throws IOException {
 
         System.out.println("enter handle " );
 
@@ -496,8 +493,7 @@ public class CatalogController {
 
     }
     @Subscribe
-    public void handleCatalogUpdate(update_local_catalog event)
-    {
+    public void handleCatalogUpdate(update_local_catalog event) {
         System.out.println("enter ok");
         if(type== event.get_catalog_type())
         {
@@ -506,8 +502,6 @@ public class CatalogController {
             return;
         }
     }
-
-
     public void setCatalogData(List<Flower> flowerList) {
         if(type==0||type==4)
         {
@@ -582,7 +576,7 @@ public class CatalogController {
             }
         });
         sort_image.setVisible(true);
-         message = message + "_" + type;
+        message = message + "_" + type;
         System.out.println("message: " + message);
         SimpleClient.getClient().sendToServer(message);
 
@@ -665,6 +659,9 @@ public class CatalogController {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("my_account.fxml"));
                 Parent root = fxmlLoader.load();
+                MyAccountController myAccountController = fxmlLoader.getController();
+                myAccountController.setCurrentUser(user);
+                myAccountController.setCatalogController(this);
                 Stage stage = new Stage();
                 stage.setTitle("My Account");
                 stage.setScene(new Scene(root));
@@ -721,7 +718,6 @@ public class CatalogController {
             Warning warning = new Warning("not available for guest");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
-
         }
         if(user.isReceive_answer())
         {
@@ -844,8 +840,7 @@ public class CatalogController {
     private void openCart(ActionEvent actionEvent) {
         System.out.println("CatalogController: openCart called");
         System.out.println("CatalogController: Current user is: " + (user != null ? user.getUsername() : "null"));
-        System.out.println("CatalogController: SimpleClient.loggedIn is: " + SimpleClient.loggedIn);
-        
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));
             Parent root = loader.load();
@@ -853,6 +848,7 @@ public class CatalogController {
             cartController.setCartItems(OrderPageController.getCartItems());
             cartController.setCurrentUser(user);
             System.out.println("CatalogController: User passed to cart: " + (user != null ? user.getUsername() : "null"));
+            cartController.setCatalogController(this);
 
             Stage stage = new Stage();
             stage.setTitle("Shopping Cart");

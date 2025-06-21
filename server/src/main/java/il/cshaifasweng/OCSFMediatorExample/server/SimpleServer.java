@@ -4,7 +4,10 @@ package il.cshaifasweng.OCSFMediatorExample.server;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
+
+
 import java.io.IOException;
+import java.util.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -19,6 +22,7 @@ import org.hibernate.service.ServiceRegistry;
 
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
@@ -501,25 +505,92 @@ public class SimpleServer extends AbstractServer {
 			}
 			sendToAllClients("new#price#in#flower_" + flowerToUpdate.getFlowerName());
 		}
-		else if (msg.getClass().equals(LoginRegCheck.class))
+		else if (msg.getClass().equals(LoginRegCheck.class)) // login and registration
 		{
 			System.out.println("entered LoginRegCheck");
-			Session session = App.getSessionFactory().openSession();
-			session.beginTransaction();
+			Session session;
 			LoginRegCheck new_user = (LoginRegCheck) msg;
 			System.out.println("new_user name : " + new_user.getUsername());
-			session = App.getSessionFactory().openSession();
-			try {
-				session.beginTransaction();
-				session.save(new_user);
-				session.getTransaction().commit();
-					} catch (Exception e) {
-						session.getTransaction().rollback();
-						e.printStackTrace();
-					} finally {
-						session.close();
-					}// registration
 
+			switch(new_user.getIsLogin()){
+
+				case 0: // registration
+					System.out.println("Trying to Register a new user: " + new_user.getUsername());
+					session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+					List<LoginRegCheck> existingUsers = session.createQuery("FROM LoginRegCheck lr WHERE username = :username", LoginRegCheck.class)
+							.setParameter("username", new_user.getUsername())
+							.getResultList();
+					session.getTransaction().commit();
+					session.close();
+					if(existingUsers.isEmpty()){
+						// we can register.
+						try {
+							session = App.getSessionFactory().openSession();
+							new_user.setId(0); // for insertion
+							session.beginTransaction();
+							session.save(new_user);
+							session.getTransaction().commit();
+							client.sendToClient("#registerSuccess");
+						} catch (Exception e) {
+
+							session.getTransaction().rollback();
+							e.printStackTrace();
+						} finally {
+							session.close();
+						}// registration
+					}
+					else {
+						// user already exists
+						try {
+							client.sendToClient("#registerFailed");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+					break;
+				case 1: // login
+					System.out.println("Trying to Login a user: " + new_user.getUsername());
+					session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+					List<LoginRegCheck> users = session.createQuery("FROM LoginRegCheck lr WHERE username = :username AND password = :password", LoginRegCheck.class)
+							.setParameter("username", new_user.getUsername())
+							.setParameter("password", new_user.getPassword())
+							.getResultList();
+					session.getTransaction().commit();
+					session.close();
+					if(!users.isEmpty()){
+						try{client.sendToClient("#loginSuccess");}catch(IOException e){e.printStackTrace();} // correct user and password
+					}
+					else{ try{client.sendToClient("#loginFailed");}catch(IOException e){e.printStackTrace();}} // user doesn't exist or password is wrong
+
+					break;
+			}
+		}
+		else if (msg.getClass().equals(UpdateUserEvent.class)){ // USER UPDATE
+			LoginRegCheck userToUpdate = ((UpdateUserEvent) msg).getUpdatedUser();
+			Session session = null;
+
+
+			try{
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+				List<LoginRegCheck> existingUser = session.createQuery("FROM LoginRegCheck lr WHERE username = :username", LoginRegCheck.class)
+						.setParameter("username", userToUpdate.getUsername())
+						.getResultList();
+				session.getTransaction().commit();
+				if(!existingUser.isEmpty() && (Objects.equals(existingUser.get(0).getUsername(), userToUpdate.getUsername())) && !(Objects.equals(existingUser.get(0).getId(), userToUpdate.getId()))) {System.err.println("ERROR: Someone tried to set his username into someone else's, NOT ALLOWED!");
+				client.sendToClient(new Warning("#updateFail_UserExists")); session.close(); return;} // user already exists, cannot update
+				session.close();
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				session.update(userToUpdate); // UPDATE statement
+				session.getTransaction().commit();
+				client.sendToClient(userToUpdate);
+			} catch (IOException e) {
+                session.getTransaction().rollback(); e.printStackTrace(); System.err.println("ERROR: Could not send update confirmation to client or update failed.\n");
+            } finally {session.close();}
 		}
 		else if (msg.getClass().equals(change_user_login.class)) {
 			change_user_login wrapper = (change_user_login) msg;
@@ -590,6 +661,7 @@ public class SimpleServer extends AbstractServer {
 				session.beginTransaction();
 				session.save(complain);
 				session.getTransaction().commit();
+				sendToAllClients("update_complainScene_after_change");
 			} catch (Exception e) {
 				session.getTransaction().rollback();
 				e.printStackTrace();
@@ -673,7 +745,7 @@ public class SimpleServer extends AbstractServer {
 			Session session = App.getSessionFactory().openSession();
 			try {
 				session.beginTransaction();
-				
+
 				// Ensure the user is properly managed in the session
 				if (order.getUser() != null) {
 					// Get the user from the database to ensure it's managed
@@ -686,7 +758,7 @@ public class SimpleServer extends AbstractServer {
 						order.setUser(managedUser);
 					}
 				}
-				
+
 				session.save(order);
 				session.getTransaction().commit();
 
@@ -713,21 +785,24 @@ public class SimpleServer extends AbstractServer {
 			Session session = App.getSessionFactory().openSession();
 			try {
 				session.beginTransaction();
-				
+
 				// First get the user
 				CriteriaBuilder builder = session.getCriteriaBuilder();
 				CriteriaQuery<LoginRegCheck> userQuery = builder.createQuery(LoginRegCheck.class);
 				Root<LoginRegCheck> userRoot = userQuery.from(LoginRegCheck.class);
 				userQuery.select(userRoot).where(builder.equal(userRoot.get("username"), username));
 				LoginRegCheck user = session.createQuery(userQuery).uniqueResult();
-				
+
 				if (user != null) {
-					// Get orders for this user
-					CriteriaQuery<Order> orderQuery = builder.createQuery(Order.class);
-					Root<Order> orderRoot = orderQuery.from(Order.class);
-					orderQuery.select(orderRoot).where(builder.equal(orderRoot.get("user"), user));
-					List<Order> userOrders = session.createQuery(orderQuery).getResultList();
-					
+					// Get orders for this user with items eagerly loaded
+					String hql = "SELECT DISTINCT o FROM Order o " +
+							   "LEFT JOIN FETCH o.items i " +
+							   "LEFT JOIN FETCH i.flower " +
+							   "WHERE o.user = :user";
+					List<Order> userOrders = session.createQuery(hql, Order.class)
+							.setParameter("user", user)
+							.getResultList();
+
 					session.getTransaction().commit();
 					client.sendToClient(userOrders);
 				} else {

@@ -315,6 +315,8 @@ public class CatalogController_employee {
     private Text price_12_before_sale;
     @FXML
     private Button discount;
+    @FXML
+    private Button users_btn;
 
     private List<Flower> flowersList_c;
     private Label[] nameLabels;
@@ -343,8 +345,6 @@ public class CatalogController_employee {
         System.out.println("set_user updated");
         System.out.println("user send?"+user.get_send_complain());
         System.out.println("user recieve?"+user.isReceive_answer());
-
-
     }
     boolean is_login=false;
     public void set_isLogin(boolean is_login) {
@@ -417,6 +417,33 @@ public class CatalogController_employee {
             }
         });
     }
+
+
+    @FXML
+    void gotoEmployeeAcc(ActionEvent event){
+        if (user == null) {
+            System.out.println("No user connected");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("my_account_employee.fxml"));
+            Parent root = loader.load();
+
+            EmployeeAccountController controller = loader.getController();
+            controller.setCurrentUser(user);
+
+            Stage stage = new Stage();
+            stage.setTitle("Employee Account");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public void setCatalogSorting(List<Flower> flowerList)
     {
         flowersList_sorting = flowerList;
@@ -518,6 +545,21 @@ public class CatalogController_employee {
         twelve_12.setVisible(false);
         System.out.println("Catalog cleared.");
     }
+    @FXML
+    void show_users(ActionEvent event)
+    {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("users_table.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("User Management");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Subscribe
     public void handleCatalogUpdate(Add_flower_event event)throws IOException
     {
@@ -774,9 +816,6 @@ public class CatalogController_employee {
             alert.setContentText("You dont have any messages");
             alert.showAndWait();
         }
-
-
-
     }
     @FXML
     void add_flower(ActionEvent event) {
@@ -971,9 +1010,6 @@ public class CatalogController_employee {
             return;
 
         }
-
-
-
     }
     @FXML
     void request(ActionEvent event)
@@ -985,12 +1021,10 @@ public class CatalogController_employee {
             return;
         }
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("complain_scene.fxml"));
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("worker_request_scene.fxml"));
             Parent root = fxmlLoader.load();
-            complain_controller Controller = fxmlLoader.getController();
-            Controller.change_head("Request to admin ");
+            worker_request_controller Controller = fxmlLoader.getController();
             Controller.setCatalogController(this);
-
 
             Stage stage = new Stage();
             stage.setTitle("Send request");

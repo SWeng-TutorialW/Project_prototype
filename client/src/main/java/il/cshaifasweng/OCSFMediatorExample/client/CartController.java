@@ -31,17 +31,23 @@ public class CartController {
     @FXML private Label cartTotal;
     @FXML private Button checkoutButton;
     @FXML private Button continueShoppingButton;
-    
-    private ObservableList<CartItem> cartItems;
     private LoginRegCheck currentUser; // Store the current user
-    
+
+    private ObservableList<CartItem> cartItems;
+
+
+    private CatalogController catalogController;
+    public void setCatalogController(CatalogController catalogController) {
+        this.catalogController = catalogController;
+    }
+
     public void initialize() {
         // Set up table columns
         nameColumn.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getFlower().getFlowerName()));
         storeColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getStore()));
-        typeColumn.setCellValueFactory(cellData -> 
+        typeColumn.setCellValueFactory(cellData ->
             new SimpleStringProperty(cellData.getValue().getFlower().getFlowerType()));
         priceColumn.setCellValueFactory(cellData -> 
             new SimpleDoubleProperty(cellData.getValue().getFlower().getFlowerPrice()).asObject());
@@ -82,11 +88,11 @@ public class CartController {
         cartItems.addAll(items);
         updateTotal();
     }
-    
+
     public void setCurrentUser(LoginRegCheck user) {
         this.currentUser = user;
     }
-    
+
     private void updateTotal() {
         double total = cartItems.stream()
                 .mapToDouble(CartItem::getTotalPrice)
@@ -100,7 +106,7 @@ public class CartController {
         System.out.println("Item Removed:" + item);
         System.out.println("cart items" + cartItems);
         updateTotal();
-
+        
         // Show confirmation
         Warning warning = new Warning("Item removed from cart");
         EventBus.getDefault().post(new WarningEvent(warning));
@@ -109,9 +115,7 @@ public class CartController {
     @FXML
     private void checkout() {
         System.out.println("Checkout button clicked");
-        System.out.println("Login status: " + SimpleClient.loggedIn);
         System.out.println("Current user in cart: " + (currentUser != null ? currentUser.getUsername() : "null"));
-        System.out.println("SimpleClient current user: " + (SimpleClient.getCurrentUser() != null ? SimpleClient.getCurrentUser().getUsername() : "null"));
         System.out.println("Cart items size: " + cartItems.size());
         
         if (cartItems.isEmpty()) {
@@ -132,6 +136,8 @@ public class CartController {
                 System.out.println("Attempting to load login screen");
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("login_screen.fxml"));
                 Parent root = loader.load();
+                LoginController loginController = loader.getController();
+                loginController.setCatalogController(catalogController);
                 System.out.println("Login screen loaded successfully");
                 Stage stage = new Stage();
                 stage.setTitle("Login Required");
@@ -146,20 +152,20 @@ public class CartController {
             }
             return;
         }
-        
+
         // Check if current user is available, use SimpleClient as fallback
      /*   if (currentUser == null) {
             currentUser = SimpleClient.getCurrentUser();
             System.out.println("Using SimpleClient current user: " + (currentUser != null ? currentUser.getUsername() : "null"));
         }
-        
+
         if (currentUser == null) {
             System.out.println("Current user is null despite being logged in");
             Warning warning = new Warning("User session not found. Please log in again.");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }*/
-        
+
         System.out.println("User is logged in, proceeding to checkout");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("checkout.fxml"));
@@ -167,7 +173,7 @@ public class CartController {
             CheckoutController checkoutController = loader.getController();
             checkoutController.setCartItems(cartItems);
             checkoutController.setCurrentUser(currentUser); // Pass the user to checkout
-            
+
             Stage stage = new Stage();
             stage.setTitle("Checkout");
             stage.setScene(new Scene(root));

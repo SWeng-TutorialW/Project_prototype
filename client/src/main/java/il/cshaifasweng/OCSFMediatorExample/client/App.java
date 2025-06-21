@@ -44,18 +44,20 @@ public class App extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
         return fxmlLoader.load();
     }
+
     public static Scene getScene() {
         return scene;
     }
     
     
 
+
     @Override
 	public void stop() throws Exception {
 		// TODO Auto-generated method stub
     	EventBus.getDefault().unregister(this);
-        client.sendToServer("remove client");
-        client.closeConnection();
+        SimpleClient.getClient().sendToServer("remove client");
+        SimpleClient.getClient().closeConnection();
 		super.stop();
 	}
     

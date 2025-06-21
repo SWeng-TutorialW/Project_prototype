@@ -6,6 +6,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -45,7 +46,11 @@ public class connect_scene_Con  {
     private Label port;
 
     @FXML
-    private TextField  password;
+    private TextField password;
+
+    @FXML
+    private Button registerBtn;
+
     @FXML
     private PrimaryController ctlr;
     boolean guess = false;
@@ -67,8 +72,34 @@ public class connect_scene_Con  {
         } else {
             EventBus.getDefault().register(this);
         }
+    }
 
 
+
+    @FXML
+    void show_reg(ActionEvent event) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
+
+
+            RegistrationController regController = fxmlLoader.getController();
+
+            fxmlLoader.setControllerFactory(var -> {
+                RegistrationController controller = new RegistrationController();
+                controller.gotFromConnectScene = true;
+                controller.setController(this);
+                return controller;
+            });
+            Parent root = fxmlLoader.load();
+
+            Stage stage = new Stage();
+            stage.setTitle("Create New Account");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     @FXML
     void guess_enter(ActionEvent event)
@@ -127,6 +158,8 @@ public class connect_scene_Con  {
 
     }
 
+
+
     @Subscribe
     public void handleCatalogUpdate(CatalogUpdateEvent event)/// /  this method only for the first time to get the catalog
     {
@@ -182,8 +215,6 @@ public class connect_scene_Con  {
                             System.out.println("type_Employee is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the employee is for store "+type_local);
-                            // Set current user for employee
-                            SimpleClient.setCurrentUser(loginRegCheck);
 
                         }
                         if (!loginRegCheck.isType())
@@ -199,11 +230,9 @@ public class connect_scene_Con  {
                             System.out.println("type_Client is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the user is mnoy to store "+type_local);
-                            SimpleClient.loggedIn = true;  // Set login state to true for client users Yarden added this
                             SimpleClient.isGuest = false; // Yarden added this
-                            // Set current user for client
-                            SimpleClient.setCurrentUser(loginRegCheck);
-                            System.out.println("Login state set to: " + SimpleClient.loggedIn);
+
+
                         }
                         change_user_login wrapper = new change_user_login(user,1);
                         try {
@@ -211,6 +240,7 @@ public class connect_scene_Con  {
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+                        loginRegCheck.setIsLogin(1);
                         Platform.runLater(() -> {
                             try {
                                 FXMLLoader loader;

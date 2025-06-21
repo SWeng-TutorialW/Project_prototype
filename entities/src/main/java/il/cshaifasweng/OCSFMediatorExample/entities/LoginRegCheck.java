@@ -9,8 +9,6 @@ import java.io.Serializable;
 @Table(name = "users_tbl")
 public class LoginRegCheck implements Serializable {
 
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -24,6 +22,7 @@ public class LoginRegCheck implements Serializable {
     @Column(name = "emailAdd")
     private String email;
 
+    @Transient // This field is will not be persisted in the database
     private int isLogin; // 1 = login, 0 = registration
     private boolean type;// false = client, true = employee
     private int store;// 1 for store number 1 ,until 3 ,
@@ -36,38 +35,20 @@ public class LoginRegCheck implements Serializable {
 
     @Column(name = "creditCard")
     private String creditCard; // only if accType == 2
+
+    @Column(name = "phoneNum")
+    private String phoneNum;
+
+    @Column(name = "fullName")
+    private String fullName;
+
+
     boolean is_yearly_subscription=false;
     boolean send_complain=false;
     boolean receive_answer=false;
-    public void set_send(boolean send_complain)
-    {
-        this.send_complain=send_complain;
-    }
-    public boolean get_send_complain()
-    {
-        return send_complain;
-    }
-    public void set_receive_answer(boolean receive_answer)
-    {
-        this.receive_answer=receive_answer;
-    }
-    public boolean isReceive_answer()
-    {
-        return receive_answer;
-    }
-
-
-
 
     public LoginRegCheck() {}
 
-    public LoginRegCheck(String username, String password, String email, int isLogin) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.isLogin = isLogin;
-        this.type = false;
-    }
 
     public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store) {
         this.username = username;
@@ -77,17 +58,56 @@ public class LoginRegCheck implements Serializable {
         this.type = type;
         this.store = store;
     }
-    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String idNum, String creditCard, boolean is_yearly_subscription) {
+    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String phoneNum, String fullName) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.isLogin = isLogin;
         this.type = type;
         this.store = store;
+        this.phoneNum = phoneNum;
+        this.fullName = fullName;
+    }
+    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String phoneNum, String fullName, String idNum, String creditCard, boolean is_yearly_subscription) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.isLogin = isLogin;
+        this.type = type;
+        this.store = store;
+        this.phoneNum = phoneNum;
+        this.fullName = fullName;
         this.idNum = idNum;
         this.creditCard = creditCard;
         this.is_yearly_subscription = is_yearly_subscription;
     }
+    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store,  boolean is_yearly_subscription) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.isLogin = isLogin;
+        this.type = type;
+        this.store = store;
+        this.phoneNum = phoneNum;
+        this.fullName = fullName;
+        this.idNum = idNum;
+        this.creditCard = creditCard;
+        this.is_yearly_subscription = is_yearly_subscription;
+    }
+
+    public LoginRegCheck(String regUser, String regPass, String email, int isLogin, boolean b, int store, String phoneNumber, String fullName, String userId, boolean b1) {
+        this.username = regUser;
+        this.password = regPass;
+        this.email = email;
+        this.isLogin = isLogin;
+        this.type = b; // false for client, true for employee
+        this.store = store; // 1-3 for stores, 4 for network manager
+        this.phoneNum = phoneNumber;
+        this.fullName = fullName;
+        this.idNum = userId;
+        this.is_yearly_subscription = b1;
+    }
+
     public Integer getStore() {return store;}
 
     public String getStoreName() {
@@ -102,6 +122,14 @@ public class LoginRegCheck implements Serializable {
     public int getIsLogin() { return isLogin; }
     public boolean isType() { return type; }
 
+    public String getIdNum() { return idNum; }
+    public String getPhoneNum() { return phoneNum; }
+    public String getFullName() { return fullName; }
+    public Integer getId() { return id; }
+
+    public void setPhoneNum(String phoneNum) {
+        this.phoneNum = phoneNum;
+    }
     public void setUsername(String username) {
         this.username = username;
     }
@@ -119,6 +147,33 @@ public class LoginRegCheck implements Serializable {
     }
     public boolean is_yearly_subscription() {
         return is_yearly_subscription;
+    }
+    public void set_send(boolean send_complain)
+    {
+        this.send_complain=send_complain;
+    }
+    public boolean get_send_complain()
+    {
+        return send_complain;
+    }
+    public void set_receive_answer(boolean receive_answer)
+    {
+        this.receive_answer=receive_answer;
+    }
+    public boolean isReceive_answer()
+    {
+        return receive_answer;
+    }
+    public void set_yearly_subscription(boolean is_yearly_subscription)
+    {
+        this.is_yearly_subscription=is_yearly_subscription;
+    }
+    public void setStore(int store) {
+        this.store = store;
+    }
+
+    public void setIdNum(String idNum) {
+        this.idNum = idNum;
     }
 }
 
