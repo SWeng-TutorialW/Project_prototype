@@ -315,6 +315,8 @@ public class CatalogController_employee {
     private Text price_12_before_sale;
     @FXML
     private Button discount;
+    @FXML
+    private Button users_btn;
 
     private List<Flower> flowersList_c;
     private Label[] nameLabels;
@@ -543,6 +545,21 @@ public class CatalogController_employee {
         twelve_12.setVisible(false);
         System.out.println("Catalog cleared.");
     }
+    @FXML
+    void show_users(ActionEvent event)
+    {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("users_table.fxml"));
+            Parent root = loader.load();
+            Stage stage = new Stage();
+            stage.setTitle("User Management");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Subscribe
     public void handleCatalogUpdate(Add_flower_event event)throws IOException
     {
