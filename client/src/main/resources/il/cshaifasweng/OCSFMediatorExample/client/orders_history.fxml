@@ -20,8 +20,9 @@
             <TableColumn fx:id="statusColumn" prefWidth="90.0" text="Status" />
             <TableColumn fx:id="totalAmountColumn" prefWidth="90.0" text="Total Amount" />
             <TableColumn fx:id="deliveryColumn" prefWidth="90.0" text="Delivery" />
-            <TableColumn fx:id="addressColumn" prefWidth="180.0" text="Address" />
-            <TableColumn fx:id="detailsColumn" prefWidth="100.0" text="Details" />
+            <TableColumn fx:id="addressColumn" prefWidth="150.0" text="Address" />
+            <TableColumn fx:id="detailsColumn" prefWidth="80.0" text="Details" />
+            <TableColumn fx:id="cancelColumn" prefWidth="100.0" text="Cancel" />
          </columns>
       </TableView>
       

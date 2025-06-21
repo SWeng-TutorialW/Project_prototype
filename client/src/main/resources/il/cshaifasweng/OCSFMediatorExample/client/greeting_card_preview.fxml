@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.DropShadow?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:controller="il.cshaifasweng.OCSFMediatorExample.client.GreetingCardPreviewController"
+            prefHeight="450.0" prefWidth="500.0"
+            style="-fx-background-color: #EFE7F6;"
+            xmlns="http://javafx.com/javafx/23.0.1"
+            xmlns:fx="http://javafx.com/fxml/1">
+
+    <children>
+        <!-- Title -->
+        <Label text="Greeting Card Preview"
+               alignment="CENTER"
+               layoutX="150.0" layoutY="20.0"
+               prefHeight="30.0" prefWidth="200.0"
+               textAlignment="CENTER"
+               textFill="#4B275F">
+            <font>
+                <Font name="Segoe UI Light" size="24.0" />
+            </font>
+        </Label>
+
+        <!-- Background Theme Label -->
+        <Label fx:id="backgroundThemeLabel"
+               text="Background Theme"
+               alignment="CENTER"
+               layoutX="150.0" layoutY="50.0"
+               prefHeight="20.0" prefWidth="200.0"
+               textAlignment="CENTER"
+               textFill="#666">
+            <font>
+                <Font name="Segoe UI" size="14.0" />
+            </font>
+        </Label>
+
+        <!-- Greeting Card Container (Now StackPane) -->
+        <StackPane fx:id="greetingCardContainer"
+                   layoutX="50.0" layoutY="70.0"
+                   prefHeight="300.0" prefWidth="400.0"
+                   style="-fx-border-color: #B79DD9; -fx-border-width: 2;">
+
+            <!-- Background Image -->
+            <ImageView fx:id="backgroundImageView"
+                       fitWidth="400.0" fitHeight="300.0"
+                       preserveRatio="false" pickOnBounds="true"/>
+
+            <!-- Message Overlay -->
+            <Label fx:id="messageLabel"
+                   alignment="CENTER"
+                   textAlignment="CENTER"
+                   wrapText="true"
+                   style="-fx-text-fill: #333; -fx-background-color: rgba(255,255,255,0.6); -fx-padding: 20; -fx-background-radius: 10;">
+                <font>
+                    <Font name="Arial" size="16.0" />
+                </font>
+                <effect>
+                    <DropShadow color="#444" radius="4.0" offsetX="1.5" offsetY="1.5"/>
+                </effect>
+            </Label>
+        </StackPane>
+
+        <!-- Close Button -->
+        <Button fx:id="closeButton"
+                text="Close Preview"
+                layoutX="200.0" layoutY="390.0"
+                prefHeight="35.0" prefWidth="100.0"
+                style="-fx-background-color: #9B6B9E; -fx-text-fill: #fff;">
+            <font>
+                <Font size="14.0" />
+            </font>
+        </Button>
+    </children>
+</AnchorPane>

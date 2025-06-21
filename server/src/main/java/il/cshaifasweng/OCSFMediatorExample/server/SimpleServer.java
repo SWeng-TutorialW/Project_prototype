@@ -28,6 +28,8 @@ import java.util.List;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 import org.hibernate.Session;
 
+import il.cshaifasweng.OCSFMediatorExample.server.EmailService;
+
 
 
 public class SimpleServer extends AbstractServer {
@@ -767,6 +769,10 @@ public class SimpleServer extends AbstractServer {
 
 				// Notify all clients about the new order
 				sendToAllClients("update_catalog_after_change");
+
+				// Call EmailService after successful order save
+				EmailService.sendOrderConfirmationEmail(order);
+
 			} catch (Exception e) {
 				session.getTransaction().rollback();
 				e.printStackTrace();
@@ -1249,6 +1255,100 @@ public class SimpleServer extends AbstractServer {
 				e.printStackTrace();
 			} finally {
 				if (session != null) session.close();
+			}
+		}
+		else if (msgString.startsWith("testEmail")) {
+			// Test email configuration
+			System.out.println("Testing email configuration...");
+			boolean emailTest = EmailService.testEmailConfiguration();
+			try {
+				if (emailTest) {
+					client.sendToClient("Email configuration test successful!");
+				} else {
+					client.sendToClient("Email configuration test failed. Check server logs for details.");
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else if (msg instanceof OrderCancellationRequest) {
+			OrderCancellationRequest request = (OrderCancellationRequest) msg;
+			Session session = App.getSessionFactory().openSession();
+			
+			try {
+				session.beginTransaction();
+				
+				// Get the order
+				Order order = session.get(Order.class, request.getOrderId());
+				
+				if (order == null) {
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						false, "Order not found", 0.0, "", request.getOrderId());
+					client.sendToClient(response);
+					return;
+				}
+				
+				// Verify the user owns this order
+				if (order.getUser() == null || !order.getUser().getUsername().equals(request.getUsername())) {
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						false, "You can only cancel your own orders", 0.0, "", request.getOrderId());
+					client.sendToClient(response);
+					return;
+				}
+				
+				// Check if order can be cancelled
+				if ("CANCELLED".equals(order.getStatus())) {
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						false, "Order is already cancelled", 0.0, "", request.getOrderId());
+					client.sendToClient(response);
+					return;
+				}
+				
+				if ("DELIVERED".equals(order.getStatus())) {
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						false, "Cannot cancel delivered orders", 0.0, "", request.getOrderId());
+					client.sendToClient(response);
+					return;
+				}
+				
+				// Calculate refund before cancellation
+				double refundPercentage = order.calculateRefundPercentage();
+				String refundPolicy = order.getRefundPolicyDescription();
+				
+				// Cancel the order
+				boolean cancelled = order.cancelOrder(request.getCancellationReason());
+				
+				if (cancelled) {
+					session.update(order);
+					session.getTransaction().commit();
+					
+					// Send cancellation confirmation email
+					EmailService.sendOrderCancellationEmail(order);
+					
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						true, "Order cancelled successfully", order.getRefundAmount(), refundPolicy, request.getOrderId());
+					client.sendToClient(response);
+					
+					// Notify all clients about the order update
+					sendToAllClients("update_catalog_after_change");
+				} else {
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						false, "Failed to cancel order", 0.0, "", request.getOrderId());
+					client.sendToClient(response);
+				}
+				
+			} catch (Exception e) {
+				session.getTransaction().rollback();
+				e.printStackTrace();
+				try {
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						false, "Error cancelling order: " + e.getMessage(), 0.0, "", request.getOrderId());
+					client.sendToClient(response);
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			} finally {
+				session.close();
 			}
 		}
 
