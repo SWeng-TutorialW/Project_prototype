@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="my_account_data" prefHeight="400.0" prefWidth="500.0" style="-fx-background-color: #f8d5ec;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.EmployeeAccountController">
+
+    <children>
+        <AnchorPane fx:id="myAccUsers" layoutX="20.0" layoutY="20.0" prefHeight="360.0" prefWidth="460.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-border-color: #e9a4c7; -fx-border-width: 1.5;">
+            <children>
+
+                <!-- כותרת -->
+                <Label fx:id="myAccountLbl" layoutX="100.0" layoutY="22.0" text="My Account - Employee">
+                    <font>
+                        <Font name="Segoe UI Semibold" size="24.0" />
+                    </font>
+                </Label>
+
+                <!-- Username -->
+                <Label fx:id="usernameLbl" layoutX="60.0" layoutY="80.0" text="Username:">
+                    <font>
+                        <Font name="Segoe UI" size="13.0" />
+                    </font>
+                </Label>
+                <Label fx:id="usernameEmptyLbl" layoutX="160.0" layoutY="80.0" prefWidth="200.0" text="___" />
+
+                <!-- Email -->
+                <Label fx:id="emailLbl" layoutX="60.0" layoutY="120.0" text="Email:">
+                    <font>
+                        <Font name="Segoe UI" size="13.0" />
+                    </font>
+                </Label>
+                <Label fx:id="emailEmptyLbl" layoutX="160.0" layoutY="120.0" prefWidth="200.0" text="___" />
+
+                <!-- Account Type -->
+                <Label fx:id="accountTypeLbl" layoutX="60.0" layoutY="160.0" text="Position">
+                    <font>
+                        <Font name="Segoe UI" size="13.0" />
+                    </font>
+                </Label>
+                <Label fx:id="accountTypeEmptyLbl" layoutX="160.0" layoutY="160.0" prefWidth="200.0" text="___" />
+
+            </children>
+        </AnchorPane>
+    </children>
+</AnchorPane>

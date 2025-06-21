@@ -345,8 +345,6 @@ public class CatalogController_employee {
         System.out.println("set_user updated");
         System.out.println("user send?"+user.get_send_complain());
         System.out.println("user recieve?"+user.isReceive_answer());
-
-
     }
     boolean is_login=false;
     public void set_isLogin(boolean is_login) {
@@ -420,6 +418,33 @@ public class CatalogController_employee {
             }
         });
     }
+
+
+    @FXML
+    void gotoEmployeeAcc(ActionEvent event){
+        if (user == null) {
+            System.out.println("No user connected");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("my_account_employee.fxml"));
+            Parent root = loader.load();
+
+            EmployeeAccountController controller = loader.getController();
+            controller.setCurrentUser(user);
+
+            Stage stage = new Stage();
+            stage.setTitle("Employee Account");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     public void setCatalogSorting(List<Flower> flowerList)
     {
         flowersList_sorting = flowerList;
@@ -792,9 +817,6 @@ public class CatalogController_employee {
             alert.setContentText("You dont have any messages");
             alert.showAndWait();
         }
-
-
-
     }
     @FXML
     void add_flower(ActionEvent event) {
@@ -989,9 +1011,6 @@ public class CatalogController_employee {
             return;
 
         }
-
-
-
     }
     @FXML
     void request(ActionEvent event)

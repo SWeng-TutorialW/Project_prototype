@@ -235,12 +235,6 @@ public class CatalogController {
     }
     @FXML
     private ComboBox<String> Stores;
-    private  connect_scene_Con connect_scene_Con;
-
-    public void set_connect_controller(connect_scene_Con connect_scene_Con) {
-       this.connect_scene_Con = connect_scene_Con;
-    }
-
 
     private List<Flower> flowersList_c;
     private Label[] nameLabels;
@@ -258,13 +252,10 @@ public class CatalogController {
         this.user = user;
         System.out.println("the user is " + user.getUsername());
         System.out.println(" user send: " + user.get_send_complain());
-
-
     }
     public LoginRegCheck getUser() {
         return user;
     }
-
     public void  set_type(int value)
     {
         type=value;
@@ -279,6 +270,8 @@ public class CatalogController {
     }
     int add_flower_flag=0;
     String flower_name="";
+
+
     @FXML
     void initialize() {
         System.out.println("CatalogController initialized");
@@ -431,8 +424,7 @@ public class CatalogController {
         System.out.println("Catalog cleared.");
     }
     @Subscribe
-    public void handleCatalogUpdate(discount_for_1_flower event)throws IOException
-    {
+    public void handleCatalogUpdate(discount_for_1_flower event)throws IOException {
 
         if(event.get_catalog_type()==1)
         {
@@ -461,8 +453,7 @@ public class CatalogController {
 
     }
     @Subscribe
-    public void handleCatalogUpdate(Add_flower_event event)throws IOException
-    {
+    public void handleCatalogUpdate(Add_flower_event event)throws IOException {
 
         System.out.println("enter handle " );
 
@@ -502,8 +493,7 @@ public class CatalogController {
 
     }
     @Subscribe
-    public void handleCatalogUpdate(update_local_catalog event)
-    {
+    public void handleCatalogUpdate(update_local_catalog event) {
         System.out.println("enter ok");
         if(type== event.get_catalog_type())
         {
@@ -512,8 +502,6 @@ public class CatalogController {
             return;
         }
     }
-
-
     public void setCatalogData(List<Flower> flowerList) {
         if(type==0||type==4)
         {
@@ -657,7 +645,6 @@ public class CatalogController {
                     Parent root = fxmlLoader.load();
                     RegistrationController regController = fxmlLoader.getController();
                     regController.setCatalogController(this);
-                    regController.setController(connect_scene_Con);
                     Stage stage = new Stage();
                     stage.setTitle("Create New Account");
                     stage.setScene(new Scene(root));
@@ -674,8 +661,7 @@ public class CatalogController {
                 Parent root = fxmlLoader.load();
                 MyAccountController myAccountController = fxmlLoader.getController();
                 myAccountController.setCurrentUser(user);
-
-
+                myAccountController.setCatalogController(this);
                 Stage stage = new Stage();
                 stage.setTitle("My Account");
                 stage.setScene(new Scene(root));
