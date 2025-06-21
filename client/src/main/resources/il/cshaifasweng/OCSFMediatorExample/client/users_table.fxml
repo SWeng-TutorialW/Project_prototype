@@ -11,7 +11,7 @@
             <TableColumn fx:id="storeCol" text="Store" />
             <TableColumn fx:id="typeCol" text="Type" />
             <TableColumn fx:id="subscriptionCol" text="yearly subscription" />
+            <TableColumn fx:id="isLoginCol" text="Login Mode" />
         </columns>
     </TableView>
-    <Button layoutY="430.0" layoutX="500.0" text="Save Changes" onAction="#saveChanges"/>
 </AnchorPane>

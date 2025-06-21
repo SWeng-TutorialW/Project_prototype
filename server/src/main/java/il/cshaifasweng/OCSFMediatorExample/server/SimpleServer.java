@@ -602,6 +602,69 @@ public class SimpleServer extends AbstractServer {
 
 
 		}
+		else if (msg instanceof update_user_values)
+		{
+			update_user_values update = (update_user_values) msg;
+
+			Session session = App.getSessionFactory().openSession();
+
+			try {
+				session.beginTransaction();
+
+
+				LoginRegCheck user = session.get(LoginRegCheck.class, update.getUser().getId());
+				if (user == null) {
+					System.out.println("User not found in database (ID = " + update.getUser().getId() + ")");
+					session.getTransaction().rollback();
+					return;
+				}
+
+				String column = update.getColumn();
+				String newVal = update.getNew_value();
+				System.out.println("User is " + user.getUsername());
+				System.out.println("column is " + update.getColumn());
+				System.out.println("newVal is " + newVal);
+
+
+
+				switch (column) {
+					case "username":
+						user.setUsername(newVal);
+						break;
+					case "email":
+						user.setEmail(newVal);
+						break;
+					case "store":
+						int new_value = 0;
+						if (update.getNew_value().equals("Haifa"))
+							new_value = 1;
+						else if (update.getNew_value().equals("Krayot"))
+							new_value = 2;
+						else if (update.getNew_value().equals("Nahariyya"))
+							new_value = 3;
+						else if (update.getNew_value().equals("Network"))
+							new_value = 4;
+						user.setStore(new_value);
+				}
+
+
+
+
+
+				session.update(user);
+				session.getTransaction().commit();
+				System.out.println("User successfully updated: " + user.getUsername());
+
+			} catch (Exception e) {
+				if (session.getTransaction() != null) {
+					session.getTransaction().rollback();
+				}
+				e.printStackTrace();
+			} finally {
+				session.close();
+			}
+
+		}
 		else if (msg.getClass().equals(change_sendOrRecieve_messages.class)) {
 			change_sendOrRecieve_messages wrapper = (change_sendOrRecieve_messages) msg;
 
