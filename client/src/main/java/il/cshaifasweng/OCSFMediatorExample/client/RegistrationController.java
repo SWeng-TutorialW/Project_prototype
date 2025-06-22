@@ -1,6 +1,4 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
-
-
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -19,13 +17,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-import javafx.application.Platform;
 import javafx.scene.control.Alert;
-
-import java.awt.*;
 import java.io.IOException;
 import java.util.List;
-
 
 /**
  * Sample Skeleton for 'registration_screen.fxml' Controller Class
@@ -33,10 +27,10 @@ import java.util.List;
 
 public class RegistrationController {
 
+    public Button logBtn;
     @FXML private Label credit_Card;
     @FXML private PasswordField credit_card_box;
     @FXML private Label id;
-    @FXML private PasswordField id_text;
     @FXML private AnchorPane regAnchPane;
     @FXML private Button regBtn;
     @FXML private TextField regEmailTxtB;
@@ -56,32 +50,26 @@ public class RegistrationController {
     @FXML private AnchorPane logAnchPane;
     @FXML
     private Label regPassLbl;
-
-
-
     @FXML
     private Label regPhoneLbl;
-
     @FXML
     private Label regUserLbl;
-
     @FXML
     private Label regUserLbl1;
-
     @FXML
     private Label regUserLbl11;
-
     @FXML
     private Label selectStoreLbl;
-
-
     @FXML
     private Button switchLoginRegbtn;
-
     @FXML
     private TextField userLogTxtB;
     @FXML
     private PasswordField passLogTxtB;
+    @FXML
+    private TextField regIdTxtB;
+
+
 
     private CatalogController catalogController;
     public void setCatalogController(CatalogController controller) {
@@ -110,9 +98,6 @@ public class RegistrationController {
         LoginRegCheck userLogin = new LoginRegCheck(user, pass, "", 1, false, -1);
         SimpleClient.getClient().sendToServer(userLogin);
         tempUser = userLogin;
-
-
-
     }
 
     @Subscribe
@@ -177,11 +162,11 @@ public class RegistrationController {
         if (!email.contains("@") || !email.contains(".")) {
             return "Invalid email format";
         }
-        /*if (is_yearly_subscription) {
+        /*
             if (userId == null || !userId.matches("\\d{9}")) {
                 return "ID must be exactly 9 digits";
             }
-        }*/
+        */
         return null;
     }
 
@@ -196,7 +181,7 @@ public class RegistrationController {
         String regPass = regShowPassCB.isSelected() ? regPassVisibleTxtB.getText() : regPassTxtB.getText();
         String confPass = regShowPassCB.isSelected() ? regPassConfVisibleTxtB.getText() : regPassConfTxtB.getText();
         String account_type = select_account_type.getValue();
-        String userId = id_text.getText();
+        String userId = regIdTxtB.getText();
 
 //        String check = checkIfValid(regUser, email, regPass, confPass, fullName, phoneNumber, account_type, userId);
 //        if (check != null) {
@@ -205,8 +190,8 @@ public class RegistrationController {
 //            return;
 //        }
 
-        //int isLogin = con != null ? 0 : 1; // need further checking to see if this is necessary
-        LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, phoneNumber, fullName, userId, false); // for now it's it meant to be for registration only.
+        boolean isConnected = catalogController != null;
+        LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, phoneNumber, fullName, userId, false ,isConnected ); // for now it's it meant to be for registration only.
 
         Runnable sendAndClose = () -> {
             try {
@@ -241,6 +226,7 @@ public class RegistrationController {
     @FXML
     void initialize() throws IOException {
         EventBus.getDefault().register(this);
+        System.out.println("Registration Screen Initialized");
         if(gotFromConnectScene){
             gotFromConnectScene = false;
             logAnchPane.setVisible(false);
@@ -320,6 +306,7 @@ public class RegistrationController {
                 select_store_label.setVisible(true);
                 select_store.setVisible(true);
                 select_store.setValue(null);
+
             }
             case "Network" -> {
                 alert.setTitle("Network Subscription");
@@ -369,8 +356,6 @@ public class RegistrationController {
     @FXML
     void decideLogOrReg(MouseEvent event) // whenever we press on the "Go to Registration/Login" button
     {
-        logOrReg++; // toggle between 0 and 1
-
         if (logOrReg % 2 == 1) { // we went from registration(0) to login(1)
             logAnchPane.setVisible(true);
             regAnchPane.setVisible(false);
@@ -381,6 +366,7 @@ public class RegistrationController {
             regAnchPane.setVisible(true);
             switchLoginRegbtn.setText("Go to Login");
         }
+        logOrReg++; // toggle between 0 and 1
     }
 
 

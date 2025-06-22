@@ -28,13 +28,13 @@ public class LoginRegCheck implements Serializable {
     private int store;// 1 for store number 1 ,until 3 ,
     // if the value is 4 is for all the stores -workes must be between 1-2-3
     // worker with value 4 is the מנהל רשת
-
+    private boolean isManager;
 
     @Column(name = "userIdNum")
-    private String idNum; // only if accType == 2
+    private String idNum;
 
-//    @Column(name = "creditCard")
-//    private String creditCard; // only if accType == 2
+    @Column(name = "isConnected")
+    private boolean isConnected;
 
     @Column(name = "phoneNum")
     private String phoneNum;
@@ -95,7 +95,7 @@ public class LoginRegCheck implements Serializable {
 //        this.is_yearly_subscription = is_yearly_subscription;
 //    }
 
-    public LoginRegCheck(String regUser, String regPass, String email, int isLogin, boolean b, int store, String phoneNumber, String fullName, String userId, boolean b1) {
+    public LoginRegCheck(String regUser, String regPass, String email, int isLogin, boolean b, int store, String phoneNumber, String fullName, String userId, boolean subscription , boolean isConnected) {
         this.username = regUser;
         this.password = regPass;
         this.email = email;
@@ -105,7 +105,8 @@ public class LoginRegCheck implements Serializable {
         this.phoneNum = phoneNumber;
         this.fullName = fullName;
         this.idNum = userId;
-        this.is_yearly_subscription = b1;
+        this.is_yearly_subscription = subscription;
+        this.isConnected = isConnected;
     }
 
     public Integer getStore() {return store;}

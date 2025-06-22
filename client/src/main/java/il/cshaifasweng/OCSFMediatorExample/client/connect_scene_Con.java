@@ -80,10 +80,7 @@ public class connect_scene_Con  {
     void show_reg(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
-
-
             RegistrationController regController = fxmlLoader.getController();
-
             fxmlLoader.setControllerFactory(var -> {
                 RegistrationController controller = new RegistrationController();
                 controller.gotFromConnectScene = true;
