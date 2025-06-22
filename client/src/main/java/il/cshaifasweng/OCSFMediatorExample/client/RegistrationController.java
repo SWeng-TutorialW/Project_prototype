@@ -62,8 +62,6 @@ public class RegistrationController {
     @FXML
     private Label regPhoneLbl;
 
-
-
     @FXML
     private Label regUserLbl;
 
@@ -207,7 +205,7 @@ public class RegistrationController {
 //            return;
 //        }
 
-         int isLogin = con != null ? 0 : 1; // need further checking to see if this is necessary
+        //int isLogin = con != null ? 0 : 1; // need further checking to see if this is necessary
         LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, phoneNumber, fullName, userId, false); // for now it's it meant to be for registration only.
 
         Runnable sendAndClose = () -> {

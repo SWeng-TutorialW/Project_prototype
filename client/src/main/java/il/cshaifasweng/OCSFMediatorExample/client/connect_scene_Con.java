@@ -202,6 +202,8 @@ public class connect_scene_Con  {
                 for (LoginRegCheck loginRegCheck : users) {
                     user = loginRegCheck;
                     if (loginRegCheck.getUsername().equals(user_Name) && loginRegCheck.getPassword().equals(passWord)) {
+                        SimpleClient.setCurrentUser(user); // I forgot to add this. Now when logging in, the SimpleClient.currentUser isn't NULL. :)
+                        System.out.println("User Logged-In: " + loginRegCheck.getUsername());
                         if (loginRegCheck.isType())
                         {
                             if(loginRegCheck.getIsLogin()==1)
@@ -306,6 +308,7 @@ public class connect_scene_Con  {
                                 App.getStage().setWidth(800);
                                 App.getStage().setHeight(750);
                                 App.getStage().centerOnScreen();
+
                                 System.out.println("show the catalog as user/employee first time");
 
                             } catch (IOException e) {

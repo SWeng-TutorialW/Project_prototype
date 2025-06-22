@@ -129,6 +129,7 @@ public class MyAccountController {
             SimpleClient.setCurrentUser(user.getUpdatedUser());
             loadUserInfo();
         }
+
     }
     @FXML
     void sendUserUpdate(ActionEvent event){

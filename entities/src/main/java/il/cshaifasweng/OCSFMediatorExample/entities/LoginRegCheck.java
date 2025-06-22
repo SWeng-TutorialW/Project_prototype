@@ -22,7 +22,7 @@ public class LoginRegCheck implements Serializable {
     @Column(name = "emailAdd")
     private String email;
 
-    @Transient // This field is will not be persisted in the database
+   // @Transient // This field is will not be persisted in the database
     private int isLogin; // 1 = login, 0 = registration
     private boolean type;// false = client, true = employee
     private int store;// 1 for store number 1 ,until 3 ,
