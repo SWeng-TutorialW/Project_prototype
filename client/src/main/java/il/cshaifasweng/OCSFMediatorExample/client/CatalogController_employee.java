@@ -367,6 +367,7 @@ public class CatalogController_employee {
     }
     int add_flower_flag=0;
     String flower_name="";
+
     @FXML
     void initialize() {
         if (!EventBus.getDefault().isRegistered(this)) {

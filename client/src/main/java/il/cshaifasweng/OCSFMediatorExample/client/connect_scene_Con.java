@@ -182,7 +182,7 @@ public class connect_scene_Con  {
                     {
                         type_guess = true;
                         System.out.println("show the catalog first time as guest");
-                        App.getStage().setWidth(800);
+                        App.getStage().setWidth(980);
                         App.getStage().setHeight(750);
                         App.getStage().centerOnScreen();
                     }
@@ -305,7 +305,7 @@ public class connect_scene_Con  {
                                     }
                                 }
                                 App.getScene().setRoot(root);
-                                App.getStage().setWidth(800);
+                                App.getStage().setWidth(980);
                                 App.getStage().setHeight(750);
                                 App.getStage().centerOnScreen();
 
