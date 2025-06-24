@@ -80,9 +80,18 @@ public class connect_scene_Con  {
     void show_reg(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
-            Parent root = fxmlLoader.load();
+
+
             RegistrationController regController = fxmlLoader.getController();
-            regController.setController(this);
+
+            fxmlLoader.setControllerFactory(var -> {
+                RegistrationController controller = new RegistrationController();
+                controller.gotFromConnectScene = true;
+                controller.setController(this);
+                return controller;
+            });
+            Parent root = fxmlLoader.load();
+
             Stage stage = new Stage();
             stage.setTitle("Create New Account");
             stage.setScene(new Scene(root));
@@ -92,8 +101,6 @@ public class connect_scene_Con  {
             e.printStackTrace();
         }
     }
-
-
     @FXML
     void guess_enter(ActionEvent event)
     {
@@ -120,6 +127,7 @@ public class connect_scene_Con  {
             e.printStackTrace();
 
         }
+
     }
     @Subscribe
     public void handleCatalogUpdate(catalog_sort_event event)
@@ -149,6 +157,8 @@ public class connect_scene_Con  {
         }
 
     }
+
+
 
     @Subscribe
     public void handleCatalogUpdate(CatalogUpdateEvent event)/// /  this method only for the first time to get the catalog
@@ -192,6 +202,8 @@ public class connect_scene_Con  {
                 for (LoginRegCheck loginRegCheck : users) {
                     user = loginRegCheck;
                     if (loginRegCheck.getUsername().equals(user_Name) && loginRegCheck.getPassword().equals(passWord)) {
+                        SimpleClient.setCurrentUser(user); // I forgot to add this. Now when logging in, the SimpleClient.currentUser isn't NULL. :)
+                        System.out.println("User Logged-In: " + loginRegCheck.getUsername());
                         if (loginRegCheck.isType())
                         {
                             if(loginRegCheck.getIsLogin()==1)
@@ -205,7 +217,6 @@ public class connect_scene_Con  {
                             System.out.println("type_Employee is true");
                             type_local=loginRegCheck.getStore();
                             System.out.println("the employee is for store "+type_local);
-                         
 
                         }
                         if (!loginRegCheck.isType())
@@ -223,15 +234,13 @@ public class connect_scene_Con  {
                             System.out.println("the user is mnoy to store "+type_local);
                             SimpleClient.isGuest = false; // Yarden added this
 
-                            
+
                         }
                         change_user_login wrapper = new change_user_login(user,1);
-
                         try {
                             SimpleClient.getClient().sendToServer(wrapper);
                         } catch (IOException e) {
                             e.printStackTrace();
-
                         }
                         loginRegCheck.setIsLogin(1);
                         Platform.runLater(() -> {
@@ -292,12 +301,14 @@ public class connect_scene_Con  {
                                         controller.set_user(loginRegCheck);
                                         controller.setCatalogData(event.getUpdatedItems());
                                         catalogController=controller;
+
                                     }
                                 }
                                 App.getScene().setRoot(root);
                                 App.getStage().setWidth(800);
                                 App.getStage().setHeight(750);
                                 App.getStage().centerOnScreen();
+
                                 System.out.println("show the catalog as user/employee first time");
 
                             } catch (IOException e) {

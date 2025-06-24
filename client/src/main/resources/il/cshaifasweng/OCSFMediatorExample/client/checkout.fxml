@@ -146,6 +146,55 @@
                                      prefWidth="80.0"
                                      style="-fx-border-color: #B79DD9;"/>
                         </HBox>
+
+                        <Label text="Greeting Card (Optional)" textFill="#4B275F"
+                               style="-fx-font-weight: bold;"
+                               GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="11">
+                            <font>
+                                <Font size="21.0" />
+                            </font>
+                        </Label>
+
+                        <Label text="Include Greeting Card:" textFill="#333"
+                               GridPane.rowIndex="12">
+                            <font>
+                                <Font size="18.0" />
+                            </font>
+                        </Label>
+                        <CheckBox fx:id="includeGreetingCardCheckBox"
+                                  text="Add a personalized greeting card"
+                                  GridPane.columnIndex="1" GridPane.rowIndex="12"/>
+
+                        <Label text="Card Background:" textFill="#333"
+                               GridPane.rowIndex="13">
+                            <font>
+                                <Font size="18.0" />
+                            </font>
+                        </Label>
+                        <ComboBox fx:id="greetingCardBackgroundComboBox"
+                                  prefWidth="200.0"
+                                  style="-fx-border-color: #B79DD9;"
+                                  GridPane.columnIndex="1" GridPane.rowIndex="13"/>
+
+                        <Label text="Greeting Message:" textFill="#333"
+                               GridPane.rowIndex="14">
+                            <font>
+                                <Font size="18.0" />
+                            </font>
+                        </Label>
+                        <VBox spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="14">
+                            <TextArea fx:id="greetingCardMessageTextArea"
+                                      prefHeight="80.0" prefWidth="200.0"
+                                      promptText="Enter your greeting message (max 300 characters)"
+                                      style="-fx-border-color: #B79DD9;"/>
+                            <Label fx:id="characterCountLabel" text="0/300 characters" 
+                                   style="-fx-font-size: 12; -fx-text-fill: #666;"/>
+                            <Button fx:id="previewGreetingCardButton" 
+                                    text="Preview Greeting Card"
+                                    style="-fx-background-color: #9B6B9E; -fx-text-fill: #fff;"
+                                    prefWidth="150.0" prefHeight="30.0"
+                                    onAction="#previewGreetingCard"/>
+                        </VBox>
                     </GridPane>
 
                     <Label text="Order Items" textFill="#4B275F" style="-fx-font-weight: bold;">

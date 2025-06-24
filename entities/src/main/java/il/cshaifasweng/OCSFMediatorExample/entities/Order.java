@@ -20,7 +20,18 @@ public class Order implements Serializable {
     
     private String customerName;
     private String customerEmail;
-    private String status; // PENDING, CONFIRMED, SHIPPED, DELIVERED
+    private String status; // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+    
+    // Cancellation fields
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date cancellationDate;
+    private double refundAmount;
+    private String cancellationReason;
+    
+    // Greeting card fields
+    private boolean includeGreetingCard;
+    private String greetingCardBackground;
+    private String greetingCardMessage;
     
     // New fields for address
     private String city;
@@ -186,5 +197,127 @@ public class Order implements Serializable {
         this.totalAmount = items.stream()
                 .mapToDouble(CartItem::getTotalPrice)
                 .sum();
+    }
+    
+    // Cancellation methods
+    public Date getCancellationDate() {
+        return cancellationDate;
+    }
+    
+    public void setCancellationDate(Date cancellationDate) {
+        this.cancellationDate = cancellationDate;
+    }
+    
+    public double getRefundAmount() {
+        return refundAmount;
+    }
+    
+    public void setRefundAmount(double refundAmount) {
+        this.refundAmount = refundAmount;
+    }
+    
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+    
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
+    }
+    
+    /**
+     * Calculate refund amount based on delivery time
+     * @return refund amount (0.0 for no refund, 0.5 for 50% refund, 1.0 for full refund)
+     */
+    public double calculateRefundPercentage() {
+        if (this.deliveryTime == null || this.orderDate == null) {
+            return 0.0; // No delivery time set, no refund
+        }
+        
+        long currentTime = System.currentTimeMillis();
+        long deliveryTimeMillis = this.deliveryTime.getTime();
+        long orderTimeMillis = this.orderDate.getTime();
+        
+        // Calculate time until delivery in hours
+        long timeUntilDelivery = deliveryTimeMillis - currentTime;
+        long timeSinceOrder = currentTime - orderTimeMillis;
+        
+        // If delivery time has passed, no refund
+        if (timeUntilDelivery <= 0) {
+            return 0.0;
+        }
+        
+        double hoursUntilDelivery = timeUntilDelivery / (1000.0 * 60 * 60);
+        
+        // Refund policy:
+        // More than 3 hours: 100% refund
+        // Between 1-3 hours: 50% refund
+        // Less than 1 hour: 0% refund
+        if (hoursUntilDelivery > 3.0) {
+            return 1.0; // Full refund
+        } else if (hoursUntilDelivery > 1.0) {
+            return 0.5; // 50% refund
+        } else {
+            return 0.0; // No refund
+        }
+    }
+    
+    /**
+     * Cancel the order and calculate refund
+     * @param reason cancellation reason
+     * @return true if cancellation was successful
+     */
+    public boolean cancelOrder(String reason) {
+        if ("CANCELLED".equals(this.status) || "DELIVERED".equals(this.status)) {
+            return false; // Cannot cancel already cancelled or delivered orders
+        }
+        
+        this.status = "CANCELLED";
+        this.cancellationDate = new Date();
+        this.cancellationReason = reason;
+        
+        double refundPercentage = calculateRefundPercentage();
+        this.refundAmount = this.getTotalAmount() * refundPercentage;
+        
+        return true;
+    }
+    
+    /**
+     * Get refund policy description
+     * @return description of refund policy
+     */
+    public String getRefundPolicyDescription() {
+        double refundPercentage = calculateRefundPercentage();
+        if (refundPercentage == 1.0) {
+            return "Full refund (100%)";
+        } else if (refundPercentage == 0.5) {
+            return "Partial refund (50%)";
+        } else {
+            return "No refund";
+        }
+    }
+    
+    // Greeting card methods
+    public boolean isIncludeGreetingCard() {
+        return includeGreetingCard;
+    }
+    
+    public void setIncludeGreetingCard(boolean includeGreetingCard) {
+        this.includeGreetingCard = includeGreetingCard;
+    }
+    
+    public String getGreetingCardBackground() {
+        return greetingCardBackground;
+    }
+    
+    public void setGreetingCardBackground(String greetingCardBackground) {
+        this.greetingCardBackground = greetingCardBackground;
+    }
+    
+    public String getGreetingCardMessage() {
+        return greetingCardMessage;
+    }
+    
+    public void setGreetingCardMessage(String greetingCardMessage) {
+        this.greetingCardMessage = greetingCardMessage;
     }
 } 

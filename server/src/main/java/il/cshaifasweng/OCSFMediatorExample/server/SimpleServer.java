@@ -4,10 +4,10 @@ package il.cshaifasweng.OCSFMediatorExample.server;
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.AbstractServer;
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.ConnectionToClient;
+
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
@@ -27,6 +27,8 @@ import java.util.List;
 
 import il.cshaifasweng.OCSFMediatorExample.server.ocsf.SubscribedClient;
 import org.hibernate.Session;
+
+import il.cshaifasweng.OCSFMediatorExample.server.EmailService;
 
 
 
@@ -503,25 +505,92 @@ public class SimpleServer extends AbstractServer {
 			}
 			sendToAllClients("new#price#in#flower_" + flowerToUpdate.getFlowerName());
 		}
-		else if (msg.getClass().equals(LoginRegCheck.class))
+		else if (msg.getClass().equals(LoginRegCheck.class)) // login and registration
 		{
 			System.out.println("entered LoginRegCheck");
-			Session session = App.getSessionFactory().openSession();
-			session.beginTransaction();
+			Session session;
 			LoginRegCheck new_user = (LoginRegCheck) msg;
 			System.out.println("new_user name : " + new_user.getUsername());
-			session = App.getSessionFactory().openSession();
-			try {
+
+			switch(new_user.getIsLogin()){
+
+				case 0: // registration
+					System.out.println("Trying to Register a new user: " + new_user.getUsername());
+					session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+					List<LoginRegCheck> existingUsers = session.createQuery("FROM LoginRegCheck lr WHERE username = :username", LoginRegCheck.class)
+							.setParameter("username", new_user.getUsername())
+							.getResultList();
+					session.getTransaction().commit();
+					session.close();
+					if(existingUsers.isEmpty()){
+						// we can register.
+						try {
+							session = App.getSessionFactory().openSession();
+							new_user.setId(0); // for insertion
+							session.beginTransaction();
+							session.save(new_user);
+							session.getTransaction().commit();
+							client.sendToClient("#registerSuccess");
+						} catch (Exception e) {
+
+							session.getTransaction().rollback();
+							e.printStackTrace();
+						} finally {
+							session.close();
+						}// registration
+					}
+					else {
+						// user already exists
+						try {
+							client.sendToClient("#registerFailed");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+					break;
+				case 1: // login
+					System.out.println("Trying to Login a user: " + new_user.getUsername());
+					session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+					List<LoginRegCheck> users = session.createQuery("FROM LoginRegCheck lr WHERE username = :username AND password = :password", LoginRegCheck.class)
+							.setParameter("username", new_user.getUsername())
+							.setParameter("password", new_user.getPassword())
+							.getResultList();
+					session.getTransaction().commit();
+					session.close();
+					if(!users.isEmpty()){
+						try{client.sendToClient("#loginSuccess");}catch(IOException e){e.printStackTrace();} // correct user and password
+					}
+					else{ try{client.sendToClient("#loginFailed");}catch(IOException e){e.printStackTrace();}} // user doesn't exist or password is wrong
+
+					break;
+			}
+		}
+		else if (msg.getClass().equals(UpdateUserEvent.class)){ // USER UPDATE
+			LoginRegCheck userToUpdate = ((UpdateUserEvent) msg).getUpdatedUser();
+			Session session = null;
+
+
+			try{
+				session = App.getSessionFactory().openSession();
 				session.beginTransaction();
-				session.save(new_user);
+				List<LoginRegCheck> existingUser = session.createQuery("FROM LoginRegCheck lr WHERE username = :username", LoginRegCheck.class)
+						.setParameter("username", userToUpdate.getUsername())
+						.getResultList();
 				session.getTransaction().commit();
-					} catch (Exception e) {
-						session.getTransaction().rollback();
-						e.printStackTrace();
-						System.err.println("SERVER ERROR: " + e.getMessage());
-					} finally {
-						session.close();
-					}// registration
+				if(!existingUser.isEmpty() && (Objects.equals(existingUser.get(0).getUsername(), userToUpdate.getUsername())) && !(Objects.equals(existingUser.get(0).getId(), userToUpdate.getId()))) {System.err.println("ERROR: Someone tried to set his username into someone else's, NOT ALLOWED!");
+				client.sendToClient(new Warning("#updateFail_UserExists")); session.close(); return;} // user already exists, cannot update
+				session.close();
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				session.update(userToUpdate); // UPDATE statement
+				session.getTransaction().commit();
+				client.sendToClient(userToUpdate);
+			} catch (IOException e) {
+                session.getTransaction().rollback(); e.printStackTrace(); System.err.println("ERROR: Could not send update confirmation to client or update failed.\n");
+            } finally {session.close();}
 		}
 		else if (msg.getClass().equals(change_user_login.class)) {
 			change_user_login wrapper = (change_user_login) msg;
@@ -760,6 +829,10 @@ public class SimpleServer extends AbstractServer {
 
 				// Notify all clients about the new order
 				sendToAllClients("update_catalog_after_change");
+
+				// Call EmailService after successful order save
+				EmailService.sendOrderConfirmationEmail(order);
+
 			} catch (Exception e) {
 				session.getTransaction().rollback();
 				e.printStackTrace();
@@ -1242,6 +1315,100 @@ public class SimpleServer extends AbstractServer {
 				e.printStackTrace();
 			} finally {
 				if (session != null) session.close();
+			}
+		}
+		else if (msgString.startsWith("testEmail")) {
+			// Test email configuration
+			System.out.println("Testing email configuration...");
+			boolean emailTest = EmailService.testEmailConfiguration();
+			try {
+				if (emailTest) {
+					client.sendToClient("Email configuration test successful!");
+				} else {
+					client.sendToClient("Email configuration test failed. Check server logs for details.");
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		else if (msg instanceof OrderCancellationRequest) {
+			OrderCancellationRequest request = (OrderCancellationRequest) msg;
+			Session session = App.getSessionFactory().openSession();
+			
+			try {
+				session.beginTransaction();
+				
+				// Get the order
+				Order order = session.get(Order.class, request.getOrderId());
+				
+				if (order == null) {
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						false, "Order not found", 0.0, "", request.getOrderId());
+					client.sendToClient(response);
+					return;
+				}
+				
+				// Verify the user owns this order
+				if (order.getUser() == null || !order.getUser().getUsername().equals(request.getUsername())) {
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						false, "You can only cancel your own orders", 0.0, "", request.getOrderId());
+					client.sendToClient(response);
+					return;
+				}
+				
+				// Check if order can be cancelled
+				if ("CANCELLED".equals(order.getStatus())) {
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						false, "Order is already cancelled", 0.0, "", request.getOrderId());
+					client.sendToClient(response);
+					return;
+				}
+				
+				if ("DELIVERED".equals(order.getStatus())) {
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						false, "Cannot cancel delivered orders", 0.0, "", request.getOrderId());
+					client.sendToClient(response);
+					return;
+				}
+				
+				// Calculate refund before cancellation
+				double refundPercentage = order.calculateRefundPercentage();
+				String refundPolicy = order.getRefundPolicyDescription();
+				
+				// Cancel the order
+				boolean cancelled = order.cancelOrder(request.getCancellationReason());
+				
+				if (cancelled) {
+					session.update(order);
+					session.getTransaction().commit();
+					
+					// Send cancellation confirmation email
+					EmailService.sendOrderCancellationEmail(order);
+					
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						true, "Order cancelled successfully", order.getRefundAmount(), refundPolicy, request.getOrderId());
+					client.sendToClient(response);
+					
+					// Notify all clients about the order update
+					sendToAllClients("update_catalog_after_change");
+				} else {
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						false, "Failed to cancel order", 0.0, "", request.getOrderId());
+					client.sendToClient(response);
+				}
+				
+			} catch (Exception e) {
+				session.getTransaction().rollback();
+				e.printStackTrace();
+				try {
+					OrderCancellationResponse response = new OrderCancellationResponse(
+						false, "Error cancelling order: " + e.getMessage(), 0.0, "", request.getOrderId());
+					client.sendToClient(response);
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			} finally {
+				session.close();
 			}
 		}
 

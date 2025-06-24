@@ -20,9 +20,10 @@ import org.hibernate.service.ServiceRegistry;
  * Hello world!
  *
  */
-public class App {
+public class App
+{
 
-    private static SimpleServer server;
+	private static SimpleServer server;
 
     private static Session session;
     private static SessionFactory sessionFactory = null;
