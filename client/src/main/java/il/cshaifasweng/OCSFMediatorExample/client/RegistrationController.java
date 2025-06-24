@@ -1,7 +1,9 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Store;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.change_user_login;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -108,11 +110,6 @@ public class RegistrationController {
                 EventBus.getDefault().post(new WarningEvent(warn));
                 return;
            }
-
-        LoginRegCheck userLogin = new LoginRegCheck(user, pass, "", 1, false, -1);
-        SimpleClient.getClient().sendToServer(userLogin);
-        tempUser = userLogin;
-
 
 
     }

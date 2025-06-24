@@ -138,7 +138,10 @@ public class App
     System.err.println("An error occured, changes have been rolled back.");
             exception.printStackTrace();
 } finally {
-    session.close();
+            if (session != null){
+                session.close();
+            }
+
 }
         server = new SimpleServer(3000);
         server.listen();
