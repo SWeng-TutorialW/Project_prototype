@@ -1,12 +1,17 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 
 import java.io.IOException;
 
+import java.io.InputStream;
 import java.util.List;
+import java.util.Random;
 
 
 import javafx.event.EventHandler;
@@ -29,6 +34,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
@@ -229,6 +235,12 @@ public class CatalogController {
     private Text price_11_before_sale;
     @FXML
     private Text price_12_before_sale;
+    @FXML
+    private AnchorPane custom;
+    @FXML
+    private Label cus_label;
+
+
     boolean is_login=false;
     public void set_isLogin(boolean is_login) {
         this.is_login = is_login;
@@ -270,11 +282,69 @@ public class CatalogController {
     }
     int add_flower_flag=0;
     String flower_name="";
+    @FXML
+    private ImageView cus_img;
+    @FXML
+    private Button bouqut_btn;
+
+
+    private int currentIndex = 0;
+    private final String[] imagePaths = {
+            "/images/mix.jpg",
+            "/images/lily_jaca.jpg",
+            "/images/lily_daffodil.jpg",
+            "/images/sunflower_rose.jpg",
+            "/images/orchid_hyacinth.jpg",
+            "/images/rose_tulip.jpg"
+    };
+
+    @FXML
+    void create_bouqut(ActionEvent event)
+    {
+        Platform.runLater(() -> {
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("bouquet.fxml"));
+                Parent root = fxmlLoader.load();
+                bouquet_controller regController = fxmlLoader.getController();
+                regController.setCatalogController(this);
+                regController.setFlowersList(flowersList_c);
+                Stage stage = new Stage();
+                stage.setTitle("Create New Account");
+                stage.setScene(new Scene(root));
+                stage.show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+    }
 
 
     @FXML
     void initialize() {
         System.out.println("CatalogController initialized");
+        TranslateTransition transition = new TranslateTransition();
+        transition.setNode(cus_label);
+        transition.setDuration(Duration.seconds(3));
+        transition.setFromX(0);
+        transition.setToX(300);
+        transition.setAutoReverse(true);
+        transition.setCycleCount(TranslateTransition.INDEFINITE);
+        transition.play();
+        Random random = new Random();
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(3), e -> {
+            currentIndex = random.nextInt(imagePaths.length);
+            String fullPath = imagePaths[currentIndex];
+
+
+            String filename = fullPath.substring(fullPath.lastIndexOf("/") + 1);
+            String flowerName = filename.substring(0, filename.lastIndexOf("."));
+
+
+            setImage(cus_img, flowerName);
+        }));
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
         combo.getItems().addAll("Price High to LOW", "Price Low to HIGH");
         combo.setValue("Sort");
         Stores.getItems().addAll("Haifa", "Krayot","Nahariyya","network");

@@ -44,16 +44,16 @@ public class CartController {
     public void initialize() {
         // Set up table columns
         nameColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getFlower().getFlowerName()));
+            new SimpleStringProperty(cellData.getValue().getFlower().getFlowerName()));
         storeColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getStore()));
         typeColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getFlower().getFlowerType()));
+            new SimpleStringProperty(cellData.getValue().getFlower().getFlowerType()));
         priceColumn.setCellValueFactory(cellData ->
-                new SimpleDoubleProperty(cellData.getValue().getFlower().getFlowerPrice()).asObject());
+            new SimpleDoubleProperty(cellData.getValue().getFlower().getFlowerPrice()).asObject());
         quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         totalColumn.setCellValueFactory(cellData ->
-                new SimpleDoubleProperty(cellData.getValue().getTotalPrice()).asObject());
+            new SimpleDoubleProperty(cellData.getValue().getTotalPrice()).asObject());
 
         // Add remove button to action column
         actionColumn.setCellFactory(col -> new TableCell<>() {
