@@ -4,6 +4,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -11,8 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.util.Duration;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class bouquet_controller {
@@ -25,10 +25,11 @@ public class bouquet_controller {
         this.catalogController = controller;
     }
     private List<Flower> flowersList_c;
+    List<String> flowerNames;
     public void setFlowersList(List<Flower> flowersList)
     {
         this.flowersList_c = flowersList;
-        List<String> flowerNames = flowersList.stream()
+         flowerNames = flowersList.stream()
                 .map(Flower::getFlowerName)
                 .collect(Collectors.toList());
 
@@ -75,18 +76,32 @@ public class bouquet_controller {
     private Label name_labl;
     @FXML
     private TextField calc_price;
+    private ComboBox<String>[] flowerBoxes;
 
     @FXML
     private Label price;
+    int flowers_number=-1;
+
     @FXML
     void initialize() {
 
         flower_num.getItems().addAll("2", "3","4","5");
+        flowerBoxes = new ComboBox[]{flower_num1, flower_num2, flower_num3, flower_num4, flower_num5};
+
+
     }
+
+
+
+
+
     @FXML
     void flowers_num(ActionEvent event)
     {
         String selected = flower_num.getValue();
+        flowers_number=Integer.parseInt(selected);
+
+
 
         if (selected.equals("2"))
         {
@@ -147,20 +162,99 @@ public class bouquet_controller {
         }
 
     }
+    boolean[] used = new boolean[5];
+    String[] names = new String[5];
+    List<String> choosen_flowers = new ArrayList<>();
+    private boolean isUpdating = false;
+
+
     @FXML
     void calc(ActionEvent event) {
+        if (isUpdating) return;
+
         String selectedNumStr = flower_num.getValue();
         int selectedNum = Integer.parseInt(selectedNumStr);
         double totalPrice = 0.0;
 
+        ComboBox<String> source = (ComboBox<String>) event.getSource();
+        String sourceId = source.getId();
+        String selectedFlower = source.getValue();
+        if (selectedFlower == null) return;
 
         ComboBox<String>[] boxes = new ComboBox[]{flower_num1, flower_num2, flower_num3, flower_num4, flower_num5};
 
-        for (int i = 0; i < selectedNum; i++) {
+
+        int sourceIndex = -1;
+        for (int i = 0; i < boxes.length; i++)
+        {
+            if (boxes[i].getId().equals(sourceId))
+            {
+                if(used[i])
+                {
+                    choosen_flowers.remove(names[i]);
+                }
+                used[i]=true;
+                names[i]=selectedFlower;
+                choosen_flowers.add(selectedFlower);
+                sourceIndex = i;
+                break;
+            }
+        }
+        System.out.println("used array:");
+        for (int i = 0; i < used.length; i++) {
+            System.out.println("used[" + i + "] = " + used[i]);
+        }
+
+        System.out.println("choosen");
+        for (String flower : choosen_flowers) {
+            System.out.println(flower);
+        }
+        for (int i = 0; i < 5; i++)
+        {
+            isUpdating = true;
+            if (i != sourceIndex )
+            {
+                if(used[i])
+                {
+                    System.out.println("inside used box "+i);
+
+
+                    String previousSelection = boxes[i].getValue();
+                    List<String> flowerNames_modifi = new ArrayList<>(flowerNames);
+                    flowerNames_modifi.removeAll(choosen_flowers);
+                    flowerNames_modifi.add(previousSelection);
+                    System.out.println("modified");
+                    for (String flower :flowerNames_modifi) {
+                        System.out.println(flower);
+                    }
+                    boxes[i].getItems().setAll(flowerNames_modifi);
+                    boxes[i].setValue(previousSelection);
+                    System.out.println("setvalueto"+previousSelection);
+                    if(i==1)
+                    {
+                        System.out.println("modified");
+                    }
+                    continue;
+                }
+                List<String> flowerNames_modifi = new ArrayList<>(flowerNames);
+                flowerNames_modifi.removeAll(choosen_flowers);
+                boxes[i].getItems().setAll(flowerNames_modifi);
+                System.out.println("modified");
+                for (String flower :flowerNames_modifi) {
+                    System.out.println(flower);
+                }
+
+            }
+
+        }
+        isUpdating = false;
+
+
+        for (int i = 0; i < selectedNum; i++)
+        {
             String flowerName = boxes[i].getValue();
 
             if (flowerName == null) {
-
                 calc_price.setText("");
                 return;
             }
@@ -179,7 +273,10 @@ public class bouquet_controller {
         }
 
         calc_price.setText(String.format("%.2f", totalPrice));
+
+
     }
+
 
 
 }
