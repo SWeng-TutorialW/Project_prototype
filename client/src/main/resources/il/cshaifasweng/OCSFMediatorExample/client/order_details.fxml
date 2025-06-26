@@ -159,6 +159,7 @@
                      <children>
                         <Label fx:id="subtotalLabel" text="₪0.00" />
                         <Label fx:id="deliveryFeeLabel" text="₪0.00" />
+                        <Label fx:id="discountLabel" text="" visible="false" style="-fx-text-fill: #388e3c; -fx-font-size: 16; -fx-font-weight: bold;" />
                         <Label fx:id="totalAmountLabel" text="₪0.00" style="-fx-font-size: 16;" />
                      </children>
                   </VBox>

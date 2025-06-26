@@ -121,6 +121,11 @@ public class App
         LoginRegCheck tamar = new  LoginRegCheck("tamar","123","Asaf@",0,false,1);
         session.save(tamar);
         session.flush();
+
+        LoginRegCheck amit = new  LoginRegCheck("amit","123","amit@",0,false,1);
+        session.save(amit);
+        session.flush();
+
         LoginRegCheck malci = new  LoginRegCheck("malci","123","Asaf@",0,true,4);
         session.save( malci);
         session.flush();
