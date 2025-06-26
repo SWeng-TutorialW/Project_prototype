@@ -94,8 +94,6 @@ public class SimpleClient extends AbstractClient {
 
 		}
 		else if(msg.getClass().equals(UpdateUserEvent.class)){ // Update user event has been received
-			SimpleClient.currentUser = ((UpdateUserEvent) msg).getUpdatedUser();
-			System.out.println("Client: New Details for: " + SimpleClient.currentUser.getUsername());
 			EventBus.getDefault().post(msg);
 			EventBus.getDefault().post("#userUpdateSuccess");
 		}

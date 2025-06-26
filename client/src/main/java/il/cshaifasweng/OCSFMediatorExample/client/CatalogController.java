@@ -269,6 +269,9 @@ public class CatalogController {
         System.out.println("user recieve?"+user.isReceive_answer());
         // Don't call updateMailboxIcon here - it will be called after FXML injection
     }
+    public connect_scene_Con getController() {
+        return con;
+    }
     public LoginRegCheck getUser() {
         return user;
     }
@@ -290,7 +293,8 @@ public class CatalogController {
     private ImageView cus_img;
     @FXML
     private Button bouqut_btn;
-
+    private connect_scene_Con con;
+    public void setController(connect_scene_Con controller) { con = controller; }
 
     private int currentIndex = 0;
     private final String[] imagePaths = {
@@ -518,6 +522,14 @@ public class CatalogController {
             set_sorting_type(4);
             return;
         }
+        if(event.get_catalog_type()==-2)
+        {
+
+            add_flower_flag=0;
+            setCatalogSorting(event.get_flowers());
+            set_sorting_type(4);
+            return;
+        }
         if(type!=4)
         {
             System.out.println("send message to server "+type);
@@ -721,6 +733,7 @@ public class CatalogController {
                     Parent root = fxmlLoader.load();
                     RegistrationController regController = fxmlLoader.getController();
                     regController.setCatalogController(this);
+                    regController.setController(con);
                     Stage stage = new Stage();
                     stage.setTitle("Create New Account");
                     stage.setScene(new Scene(root));

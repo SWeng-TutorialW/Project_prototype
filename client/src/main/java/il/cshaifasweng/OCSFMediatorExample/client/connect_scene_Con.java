@@ -62,6 +62,22 @@ public class connect_scene_Con  {
     public void setCatalogController(PrimaryController controller) {
         this.ctlr = controller;
     }
+    public void set_user(LoginRegCheck user) {
+        this.user = user;
+    }
+    public void  set_guest(boolean value)
+    {
+        guess=value;
+    }
+    public void set_type_client(boolean type_client) {
+        type_Client=type_client;
+    }
+    public void set_type_local(int type_guess) {
+        type_local=type_guess;
+    }
+    public void set_type_employee(boolean type_employee) {
+        type_Employee=type_employee;
+    }
     private  CatalogController catalogController;
     private CatalogController_employee employeeController;
     @FXML
@@ -177,6 +193,7 @@ public class connect_scene_Con  {
                     CatalogController controller = loader.getController();
                     controller.setCatalogData(event.getUpdatedItems());
                     catalogController=controller;
+                    controller.setController(this);
                     App.getScene().setRoot(root);
                     if(!type_guess)//to know this is the first time
                     {
@@ -293,6 +310,7 @@ public class connect_scene_Con  {
                                         controller.set_user(loginRegCheck);
                                         controller.setCatalogData(event.getUpdatedItems());
                                         catalogController=controller;
+                                        controller.setController(this);
 
                                     }
                                     else
@@ -305,6 +323,7 @@ public class connect_scene_Con  {
                                         controller.set_user(loginRegCheck);
                                         controller.setCatalogData(event.getUpdatedItems());
                                         catalogController=controller;
+                                        controller.setController(this);
 
                                     }
                                     

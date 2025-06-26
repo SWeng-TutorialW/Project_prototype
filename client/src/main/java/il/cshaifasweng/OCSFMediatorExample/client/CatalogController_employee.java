@@ -643,6 +643,15 @@ public class CatalogController_employee {
             set_sorting_type(4);
             return;
         }
+        if(event.get_catalog_type()==-2)
+        {
+
+            add_flower_flag=0;
+            setCatalogSorting(event.get_flowers());
+            set_sorting_type(4);
+            return;
+        }
+
         if(type!=4)
         {
             System.out.println("send message to server "+type);
@@ -1032,7 +1041,7 @@ public class CatalogController_employee {
                 Parent root = fxmlLoader.load();
                 discount_Controller controller = fxmlLoader.getController();
                 controller.setCatalogController(this);
-                controller.setFlowersList_c(flowersList_c);
+                controller.setFlowersList(flowersList_c);
 
                 Stage stage = new Stage();
                 stage.setTitle("Set discount");
@@ -1093,10 +1102,29 @@ public class CatalogController_employee {
         }
 
     }
+    boolean sale=false;
+    @FXML
+    private Button end_sale_btn;
+    @FXML
+    void end_sale(ActionEvent event)
+    {
+        try {
+            SimpleClient.getClient().sendToServer("end_sale");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        sale=false;
+        end_sale_btn.setVisible(false);
+
+
+    }
+
     public void receivediscount(int discount,Flower flower) {
         System.out.println("Received discount: " + discount);
         if(flower!=null)
         {
+            sale=true;
+            end_sale_btn.setVisible(true);
             System.out.println("On flower: " + flower.getFlowerName());
             FlowerDiscountWrapper wrapper = new FlowerDiscountWrapper(flower, discount);
             try {
@@ -1110,6 +1138,8 @@ public class CatalogController_employee {
         else
         {
             System.out.println("for all flowers");
+            sale=true;
+            end_sale_btn.setVisible(true);
             try {
                 SimpleClient.getClient().sendToServer(discount);
             } catch (IOException e) {

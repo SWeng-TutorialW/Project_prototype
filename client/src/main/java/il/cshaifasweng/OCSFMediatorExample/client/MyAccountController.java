@@ -31,7 +31,7 @@ public class MyAccountController {
     @FXML private Button myOrdersButton, subscribeBtn, changeBtn;
     @FXML private AnchorPane myAccUsers, my_account_data;
     @FXML private PasswordField newPassTxtB, confNewPassTxtB;
-    private LoginRegCheck tempUser;
+    private LoginRegCheck current_User;
 
     private CatalogController catalogController;
 
@@ -40,7 +40,7 @@ public class MyAccountController {
     }
 
     public void setCurrentUser(LoginRegCheck user) {
-        SimpleClient.setCurrentUser(user);
+        this.current_User = user;
         loadUserInfo();
     }
 
@@ -57,7 +57,7 @@ public class MyAccountController {
 
     @FXML
     private void handleMyOrdersButton() {
-        if (SimpleClient.getCurrentUser() == null) {
+        if (current_User == null) {
             System.out.println("No user logged in");
             return;
         }
@@ -66,7 +66,7 @@ public class MyAccountController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("orders_history.fxml"));
             Parent root = loader.load();
             OrdersHistoryController controller = loader.getController();
-            controller.setCurrentUser(SimpleClient.getCurrentUser());
+            controller.setCurrentUser(current_User);
             controller.loadUserOrders();
 
             Stage stage = new Stage();
@@ -81,19 +81,19 @@ public class MyAccountController {
     }
 
     public void loadUserInfo() {
-        if (SimpleClient.getCurrentUser() == null) return;
+        if (current_User == null) return;
 
-        userChangeTxtB.setText(SimpleClient.getCurrentUser().getUsername());
-        emailChangeTxtB.setText(SimpleClient.getCurrentUser().getEmail()); // what if the user changes their info?
-        phoneChangeTxtB.setText(SimpleClient.getCurrentUser().getPhoneNum());
-        String accountType = switch (SimpleClient.getCurrentUser().getStore()) {
-            case 4 -> SimpleClient.getCurrentUser().is_yearly_subscription() ? "Yearly Subscription" : "Network";
-            case 1, 2, 3 -> "Store - " + SimpleClient.getCurrentUser().getStoreName();
+        userChangeTxtB.setText(current_User.getUsername());
+        emailChangeTxtB.setText(current_User.getEmail()); // what if the user changes their info?
+        phoneChangeTxtB.setText(current_User.getPhoneNum());
+        String accountType = switch (current_User.getStore()) {
+            case 4 -> current_User.is_yearly_subscription() ? "Yearly Subscription" : "Network";
+            case 1, 2, 3 -> "Store - " + current_User.getStoreName();
             default -> "Guest"; // shouldn't happen
         };
 
         accountTypeEmptyLbl.setText(accountType);
-        subscribeBtn.setVisible(!SimpleClient.getCurrentUser().is_yearly_subscription());
+        subscribeBtn.setVisible(!current_User.is_yearly_subscription());
     }
     @Subscribe
     public void onFailedUpdate(WarningEvent warning){
@@ -105,7 +105,7 @@ public class MyAccountController {
                     alert.setHeaderText("Username Already Exists");
                     alert.setContentText("The username you entered is already taken. Please choose a different username.");
                     alert.showAndWait();
-                    userChangeTxtB.setText(SimpleClient.getCurrentUser().getUsername());
+                    userChangeTxtB.setText(current_User.getUsername());
                 });
         }
 
@@ -125,8 +125,8 @@ public class MyAccountController {
     }
     @Subscribe
     public void getUserDetails(UpdateUserEvent user) {
-        if(Objects.equals(user.getUpdatedUser().getId(), SimpleClient.getCurrentUser().getId())) { // just to make sure we are updating the correct user
-            SimpleClient.setCurrentUser(user.getUpdatedUser());
+        if(Objects.equals(user.getUpdatedUser().getId(), current_User.getId())) { // just to make sure we are updating the correct user
+            catalogController.set_user(current_User);
             loadUserInfo();
         }
 
@@ -137,7 +137,7 @@ public class MyAccountController {
             if(newPassTxtB.getText().equals(confNewPassTxtB.getText())) {
                 passErrorMsgLbl.setVisible(false);
                 UpdateUserEvent updatedUser;
-                LoginRegCheck currentUser = SimpleClient.getCurrentUser();
+                LoginRegCheck currentUser = current_User;
 
                 currentUser.setUsername(userChangeTxtB.getText());
                 currentUser.setEmail(emailChangeTxtB.getText());
@@ -154,18 +154,18 @@ public class MyAccountController {
     }
     @FXML
     void onSubscribe(ActionEvent event) {
-        if (SimpleClient.getCurrentUser() == null) { // Good, we're making sure the user is indeed logged in
+        if (current_User == null) { // Good, we're making sure the user is indeed logged in
             System.out.println("No user logged in");
             return;
         }
 
-        if (SimpleClient.getCurrentUser().getStore() >= 1 && SimpleClient.getCurrentUser().getStore() <= 3) {
+        if (current_User.getStore() >= 1 && current_User.getStore() <= 3) {
             if (!showConfirmation("Upgrade Required",
                     "To subscribe to the yearly plan, you must first upgrade to a network subscription.",
                     "Do you want to proceed?")) {
                 return;
             }
-            SimpleClient.getCurrentUser().setStore(4);
+            current_User.setStore(4);
             showAlert(Alert.AlertType.INFORMATION, "Upgraded", null,
                     "Your account has been upgraded to a Network account.\nYou may now proceed to register for the yearly subscription.");
         }
@@ -185,18 +185,18 @@ public class MyAccountController {
 
             Runnable sendUpdateToServer = () -> {
                 try {
-                    SimpleClient.getClient().sendToServer(SimpleClient.getCurrentUser());
+                    SimpleClient.getClient().sendToServer(new UpdateUserEvent(current_User));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             };
 
             paymentController.setOnPaymentSuccess(() -> {
-                SimpleClient.getCurrentUser().set_yearly_subscription(true);
+                current_User.set_yearly_subscription(true);
                 sendUpdateToServer.run();
 
                 if (catalogController != null) {
-                    catalogController.set_user(SimpleClient.getCurrentUser());
+                    catalogController.set_user(current_User);
                     catalogController.set_type(4);
                 }
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -13,21 +14,11 @@
             <Font name="Segoe UI Light" size="48.0" />
          </font>
       </Label>
-      <Label fx:id="name_labl" layoutX="2.0" layoutY="142.0" prefHeight="44.0" prefWidth="254.0" text="Enter the Flower name:" textFill="WHITE">
-         <font>
-            <Font size="24.0" />
-         </font>
-      </Label>
       <Label fx:id="name_labl1" layoutX="14.0" layoutY="190.0" prefHeight="44.0" prefWidth="210.0" text="Enter % discount:" textFill="WHITE">
          <font>
             <Font size="24.0" />
          </font>
       </Label>
-      <TextField fx:id="flower_name" layoutX="282.0" layoutY="139.0" prefHeight="25.0" prefWidth="224.0">
-         <font>
-            <Font size="24.0" />
-         </font>
-      </TextField>
       <TextField fx:id="percent_for_one" layoutX="282.0" layoutY="198.0" prefHeight="25.0" prefWidth="224.0">
          <font>
             <Font size="24.0" />
@@ -38,7 +29,7 @@
             <Font size="24.0" />
          </font>
       </Button>
-      <Label fx:id="name_labl2" layoutX="14.0" layoutY="94.0" prefHeight="44.0" prefWidth="210.0" text="CHOOSE FLOWER:" textFill="WHITE">
+      <Label fx:id="name_labl2" layoutX="7.0" layoutY="151.0" prefHeight="44.0" prefWidth="210.0" text="CHOOSE FLOWER:" textFill="WHITE">
          <font>
             <Font size="24.0" />
          </font>
@@ -78,5 +69,6 @@
             <Font size="24.0" />
          </font>
       </Button>
+      <ComboBox fx:id="flower_num" layoutX="270.0" layoutY="151.0" prefHeight="25.0" prefWidth="224.0" style="-fx-background-color: #ffffff;" />
    </children>
 </AnchorPane>
