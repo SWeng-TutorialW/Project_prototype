@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #C8A2C8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.bouquet_controller">
+    <children>
+        <Label alignment="TOP_CENTER" layoutX="2.0" layoutY="-2.0" prefHeight="96.0" prefWidth="800.0" text="My Bouquet" textAlignment="CENTER" textFill="WHITE">
+            <font>
+                <Font name="Segoe UI Light" size="48.0" />
+            </font>
+        </Label>
+        <Label fx:id="name_labl" layoutX="14.0" layoutY="164.0" prefHeight="44.0" prefWidth="493.0" text="how many flowers you want in your bouquet?" textFill="WHITE">
+            <font>
+                <Font size="24.0" />
+            </font>
+        </Label>
+      <ComboBox fx:id="flower_num" layoutX="515.0" layoutY="174.0" onAction="#flowers_num" prefWidth="150.0" style="-fx-background-color: #ffffff;" />
+      <Label fx:id="f_1" layoutX="61.0" layoutY="238.0" prefHeight="79.0" prefWidth="207.0" text="Flower number 1 :" textFill="WHITE" visible="false">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label fx:id="f_2" layoutX="61.0" layoutY="293.0" prefHeight="79.0" prefWidth="207.0" text="Flower number 2 :" textFill="WHITE" visible="false">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label fx:id="f_3" layoutX="61.0" layoutY="342.0" prefHeight="79.0" prefWidth="207.0" text="Flower number 3 :" textFill="WHITE" visible="false">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label fx:id="f_4" layoutX="61.0" layoutY="393.0" prefHeight="79.0" prefWidth="207.0" text="Flower number 4 :" textFill="WHITE" visible="false">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label fx:id="f_5" layoutX="61.0" layoutY="442.0" prefHeight="79.0" prefWidth="207.0" text="Flower number 5 :" textFill="WHITE" visible="false">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <ComboBox fx:id="flower_num1" layoutX="301.0" layoutY="265.0" onAction="#calc" prefHeight="25.0" prefWidth="232.0" style="-fx-background-color: #ffffff;" visible="false" />
+      <ComboBox fx:id="flower_num3" layoutX="301.0" layoutY="369.0" onAction="#calc" prefHeight="25.0" prefWidth="232.0" style="-fx-background-color: #ffffff;" visible="false" />
+      <ComboBox fx:id="flower_num2" layoutX="301.0" layoutY="320.0" onAction="#calc" prefHeight="25.0" prefWidth="232.0" style="-fx-background-color: #ffffff;" visible="false" />
+      <ComboBox fx:id="flower_num4" layoutX="301.0" layoutY="420.0" onAction="#calc" prefHeight="25.0" prefWidth="232.0" style="-fx-background-color: #ffffff;" visible="false" />
+      <ComboBox fx:id="flower_num5" layoutX="301.0" layoutY="469.0" onAction="#calc" prefHeight="25.0" prefWidth="232.0" style="-fx-background-color: #ffffff;" visible="false" />
+      <Label fx:id="price" layoutX="533.0" layoutY="482.0" prefHeight="79.0" prefWidth="207.0" text="price:" textFill="WHITE">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <TextField fx:id="calc_price" layoutX="605.0" layoutY="509.0" prefHeight="25.0" prefWidth="165.0" />
+    </children>
+</AnchorPane>

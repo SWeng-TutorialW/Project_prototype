@@ -567,6 +567,7 @@ public class SimpleServer extends AbstractServer {
 					break;
 			}
 		}
+
 		else if (msg.getClass().equals(UpdateUserEvent.class)){ // USER UPDATE
 			LoginRegCheck userToUpdate = ((UpdateUserEvent) msg).getUpdatedUser();
 			Session session = null;

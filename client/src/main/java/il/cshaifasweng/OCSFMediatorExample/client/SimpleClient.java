@@ -58,6 +58,9 @@ public class SimpleClient extends AbstractClient {
 		else if(msg.getClass().equals(CustomerOrdersResponse.class)){
 			EventBus.getDefault().post(msg); // post the customer orders response to UI
 		}
+		else if(msg.getClass().equals(OrderCancellationResponse.class)){
+			EventBus.getDefault().post(msg); // post the order cancellation response to UI
+		}
 		else if(msgString.equals("error_fetching_orders")){
 			EventBus.getDefault().post(msgString); // post the error message to UI
 		}
@@ -91,8 +94,6 @@ public class SimpleClient extends AbstractClient {
 
 		}
 		else if(msg.getClass().equals(UpdateUserEvent.class)){ // Update user event has been received
-			SimpleClient.currentUser = ((UpdateUserEvent) msg).getUpdatedUser();
-			System.out.println("Client: New Details for: " + SimpleClient.currentUser.getUsername());
 			EventBus.getDefault().post(msg);
 			EventBus.getDefault().post("#userUpdateSuccess");
 		}
@@ -118,6 +119,14 @@ public class SimpleClient extends AbstractClient {
 		else if(msgString.startsWith("#user_exists") || msgString.startsWith("#login_failed") || msgString.startsWith("#login/reg_ok")){
 			EventBus.getDefault().post((String)msg);
 			System.out.println("I GOT THE MESSAGE");
+		}
+		else if(msgString.startsWith("Email configuration test successful!")) {
+			EventBus.getDefault().post("Email test successful!");
+			System.out.println("Email configuration test successful!");
+		}
+		else if(msgString.startsWith("Email configuration test failed")) {
+			EventBus.getDefault().post("Email test failed!");
+			System.out.println("Email configuration test failed!");
 		}
 
 
