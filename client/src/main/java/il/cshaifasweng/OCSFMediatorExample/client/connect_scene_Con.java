@@ -274,7 +274,11 @@ public class connect_scene_Con  {
                                         controller.setCatalogData(event.getUpdatedItems());
                                         employeeController=controller;
                                     }
-
+                                    
+                                    // Add this line to update the mailbox icon after everything is set up
+                                    Platform.runLater(() -> {
+                                        controller.updateMailboxIcon();
+                                    });
                                 }
                                 else {
                                     loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
@@ -303,6 +307,11 @@ public class connect_scene_Con  {
                                         catalogController=controller;
 
                                     }
+                                    
+                                    // Add this line to update the mailbox icon after everything is set up
+                                    Platform.runLater(() -> {
+                                        controller.updateMailboxIcon();
+                                    });
                                 }
                                 App.getScene().setRoot(root);
                                 App.getStage().setWidth(980);

@@ -239,6 +239,8 @@ public class CatalogController {
     private AnchorPane custom;
     @FXML
     private Label cus_label;
+    @FXML
+    private ImageView mailbox_icon;
 
 
     boolean is_login=false;
@@ -262,8 +264,10 @@ public class CatalogController {
     private LoginRegCheck user;
     public void set_user(LoginRegCheck user) {
         this.user = user;
-        System.out.println("the user is " + user.getUsername());
-        System.out.println(" user send: " + user.get_send_complain());
+        System.out.println("set_user updated");
+        System.out.println("user send?"+user.get_send_complain());
+        System.out.println("user recieve?"+user.isReceive_answer());
+        // Don't call updateMailboxIcon here - it will be called after FXML injection
     }
     public LoginRegCheck getUser() {
         return user;
@@ -322,6 +326,11 @@ public class CatalogController {
 
     @FXML
     void initialize() {
+        // Register for EventBus events
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+        
         System.out.println("CatalogController initialized");
         TranslateTransition transition = new TranslateTransition();
         transition.setNode(cus_label);
@@ -375,12 +384,6 @@ public class CatalogController {
         priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
         imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12 };
         price_Before_sale = new Text[] { price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale };
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-            System.out.println("CatalogController_ registered");
-        } else {
-            System.out.println("CatalogController_ already registered");
-        }
         Stage stage = App.getStage();
         stage.setOnCloseRequest(event1 -> {
             try {
@@ -393,6 +396,9 @@ public class CatalogController {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        });
+        Platform.runLater(() -> {
+            updateMailboxIcon();
         });
     }
     public void setCatalogSorting(List<Flower> flowerList) {
@@ -928,6 +934,49 @@ public class CatalogController {
             e.printStackTrace();
             Warning warning = new Warning("Error opening cart");
             EventBus.getDefault().post(new WarningEvent(warning));
+        }
+    }
+
+    public void updateMailboxIcon() {
+        System.out.println("updateMailboxIcon called");
+        System.out.println("mailbox_icon is null: " + (mailbox_icon == null));
+        
+        // Check if mailbox_icon is null (FXML injection not complete yet)
+        if (mailbox_icon == null) {
+            System.out.println("mailbox_icon is null, returning");
+            return;
+        }
+        
+        if (user != null && user.isReceive_answer()) {
+            System.out.println("Setting mailbox icon visible for user: " + user.getUsername());
+            mailbox_icon.setVisible(true);
+        } else {
+            System.out.println("Setting mailbox icon invisible");
+            mailbox_icon.setVisible(false);
+        }
+    }
+
+    @Subscribe
+    public void handleUserUpdate(Add_flower_event event) {
+        if (event.getUser() != null && user != null && 
+            event.getUser().getUsername().equals(user.getUsername())) {
+            
+            // Update the user object with new data from server
+            this.user = event.getUser();
+            
+            // Check if this is a new message notification
+            if (user.isReceive_answer()) {
+                // Show warning notification for new message
+                Platform.runLater(() -> {
+                    Warning warning = new Warning("You have a new message from the admin!");
+                    EventBus.getDefault().post(new WarningEvent(warning));
+                });
+            }
+            
+            // Update the mailbox icon
+            Platform.runLater(() -> {
+                updateMailboxIcon();
+            });
         }
     }
 }

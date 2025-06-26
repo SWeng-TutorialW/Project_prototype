@@ -318,6 +318,9 @@ public class CatalogController_employee {
     @FXML
     private Button users_btn;
 
+    @FXML
+    private ImageView mailbox_icon;
+
     private List<Flower> flowersList_c;
     private Label[] nameLabels;
     private Label[] typeLabels;
@@ -417,8 +420,26 @@ public class CatalogController_employee {
                 e.printStackTrace();
             }
         });
+        
+        // Add this at the end of initialize method
+        // Use Platform.runLater to ensure FXML injection is complete
+        Platform.runLater(() -> {
+            updateMailboxIcon();
+        });
     }
 
+    public void updateMailboxIcon() {
+        // Check if mailbox_icon is null (FXML injection not complete yet)
+        if (mailbox_icon == null) {
+            return;
+        }
+        
+        if (user != null && user.isReceive_answer()) {
+            mailbox_icon.setVisible(true);
+        } else {
+            mailbox_icon.setVisible(false);
+        }
+    }
 
     @FXML
     void gotoEmployeeAcc(ActionEvent event){
@@ -799,6 +820,7 @@ public class CatalogController_employee {
                 stage.initModality(Modality.WINDOW_MODAL);
                 stage.initOwner(((Node) event.getSource()).getScene().getWindow());
                 stage.show();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -816,6 +838,25 @@ public class CatalogController_employee {
             alert.setHeaderText("");
             alert.setContentText("You dont have any messages");
             alert.showAndWait();
+        }
+    }
+    @FXML
+    void openReports(ActionEvent event) throws IOException {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("report_generator.fxml"));
+            Parent root = fxmlLoader.load();
+
+            ReportGeneratorController controller = fxmlLoader.getController();
+
+            Stage stage = new Stage();
+            stage.setTitle("Report Generator");
+            stage.setScene(new Scene(root));
+            stage.setWidth(1200);
+            stage.setHeight(900);
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
     @FXML
@@ -1128,7 +1169,34 @@ public class CatalogController_employee {
             e.printStackTrace();
         }
     }
+    @Subscribe
+    public void handleUserUpdate(Add_flower_event event) {
+        if (event.getUser() != null && user != null && 
+            event.getUser().getUsername().equals(user.getUsername())) {
+            
+            // Update the user object with new data from server
+            this.user = event.getUser();
+            
+            // Check if this is a new message notification
+            if (user.isReceive_answer()) {
+                // Show warning notification for new message
+                Platform.runLater(() -> {
+                    Warning warning = new Warning("You have a new message from the admin!");
+                    EventBus.getDefault().post(new WarningEvent(warning));
+                });
+            }
+            
+            // Update the mailbox icon
+            Platform.runLater(() -> {
+                updateMailboxIcon();
+            });
+        }
+    }
 
+    // Add this method to be called after FXML injection is complete
+    public void initializeMailboxIcon() {
+        updateMailboxIcon();
+    }
 
 }
 

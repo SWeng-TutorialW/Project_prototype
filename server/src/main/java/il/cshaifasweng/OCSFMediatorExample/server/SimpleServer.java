@@ -784,22 +784,30 @@ public class SimpleServer extends AbstractServer {
 		else if (msgString.startsWith("need#to#change#user#localy"))
 		{
 			Session session = App.getSessionFactory().openSession();
-			session.beginTransaction();
-			String[] parts = msgString.split("_");
-			String username = parts[1];
-			CriteriaBuilder builder = session.getCriteriaBuilder();
-			CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
-			Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
-			query.select(root).where(builder.equal(root.get("username"), username));
-			LoginRegCheck user = session.createQuery(query).uniqueResult();
 			try {
-				Add_flower_event event = new Add_flower_event(null,0,user);
-				client.sendToClient(event);
+				session.beginTransaction();
+				String[] parts = msgString.split("_");
+				String username = parts[1];
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
+				Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
+				query.select(root).where(builder.equal(root.get("username"), username));
+				LoginRegCheck user = session.createQuery(query).uniqueResult();
+				
+				if (user != null) {
+					Add_flower_event event = new Add_flower_event(null, 0, user);
+					client.sendToClient(event);
+				}
+				
+				session.getTransaction().commit();
 			} catch (Exception e) {
+				if (session.getTransaction() != null) {
+					session.getTransaction().rollback();
+				}
 				e.printStackTrace();
+			} finally {
+				session.close();
 			}
-
-
 		}
 		else if (msg instanceof Order)
 		{
