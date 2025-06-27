@@ -150,7 +150,11 @@ public class App
 }
         server = new SimpleServer(3000);
         server.listen();
-}
+
+        // Start the order status scheduler
+        OrderStatusScheduler scheduler = new OrderStatusScheduler();
+        scheduler.start();
+    }
 
 
     }

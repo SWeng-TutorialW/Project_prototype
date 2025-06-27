@@ -213,6 +213,11 @@ public class SimpleServer extends AbstractServer {
 			}
 		}
 
+		else if (msgString.startsWith("price_changed"))
+		{
+			List<Store> stores = App.get_stores();
+			Store store = stores.get(0);
+		}
 		else if (msgString.startsWith("update_catalog_after_manager_add_flower"))
 		{
 			Session session = App.getSessionFactory().openSession();
@@ -569,26 +574,68 @@ public class SimpleServer extends AbstractServer {
 			}
 			sendToAllClients("new#price#in#flower_" + flowerToUpdate.getFlowerName());
 		}
-		else if (msg.getClass().equals(LoginRegCheck.class))
+		else if (msg.getClass().equals(LoginRegCheck.class)) // login and registration
 		{
 			System.out.println("entered LoginRegCheck");
-			Session session = App.getSessionFactory().openSession();
-			session.beginTransaction();
+			Session session;
 			LoginRegCheck new_user = (LoginRegCheck) msg;
 			System.out.println("new_user name : " + new_user.getUsername());
-			session = App.getSessionFactory().openSession();
-			try {
-				session.beginTransaction();
-				session.save(new_user);
-				session.getTransaction().commit();
-			} catch (Exception e) {
-				session.getTransaction().rollback();
-				e.printStackTrace();
-			} finally {
-				session.close();
-			}// registration
 
+			switch(new_user.getIsLogin()){
+				case 0: // registration
+					System.out.println("Trying to Register a new user: " + new_user.getUsername());
+					session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+					List<LoginRegCheck> existingUsers = session.createQuery("FROM LoginRegCheck lr WHERE username = :username", LoginRegCheck.class)
+							.setParameter("username", new_user.getUsername())
+							.getResultList();
+					session.getTransaction().commit();
+					session.close();
+					if(existingUsers.isEmpty()){
+						// we can register.
+						try {
+							session = App.getSessionFactory().openSession();
+							new_user.setId(0); // for insertion
+							session.beginTransaction();
+							session.save(new_user);
+							session.getTransaction().commit();
+							client.sendToClient("#registerSuccess");
+						} catch (Exception e) {
+
+							session.getTransaction().rollback();
+							e.printStackTrace();
+						} finally {
+							session.close();
+						}// registration
+					}
+					else {
+						// user already exists
+						try {
+							client.sendToClient("#registerFailed");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+					break;
+				case 1: // login
+					System.out.println("Trying to Login a user: " + new_user.getUsername());
+					session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+					List<LoginRegCheck> users = session.createQuery("FROM LoginRegCheck lr WHERE username = :username AND password = :password", LoginRegCheck.class)
+							.setParameter("username", new_user.getUsername())
+							.setParameter("password", new_user.getPassword())
+							.getResultList();
+					session.getTransaction().commit();
+					session.close();
+					if(!users.isEmpty()){
+						try{client.sendToClient("#loginSuccess");}catch(IOException e){e.printStackTrace();} // correct user and password
+					}
+					else{ try{client.sendToClient("#loginFailed");}catch(IOException e){e.printStackTrace();}} // user doesn't exist or password is wrong
+
+					break;
+			}
 		}
+
 		else if (msg.getClass().equals(UpdateUserEvent.class)){ // USER UPDATE
 			LoginRegCheck userToUpdate = ((UpdateUserEvent) msg).getUpdatedUser();
 			Session session = null;
@@ -613,6 +660,29 @@ public class SimpleServer extends AbstractServer {
 			} catch (IOException e) {
                 session.getTransaction().rollback(); e.printStackTrace(); System.err.println("ERROR: Could not send update confirmation to client or update failed.\n");
             } finally {session.close();}
+		}
+		else if(msg.getClass().equals(GetUserDetails.class)) {
+			Session session = null;
+			LoginRegCheck user = ((GetUserDetails) msg).getUser();
+			try {
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+				List<LoginRegCheck> userRequestedList = session.createQuery("FROM LoginRegCheck lr WHERE id = :userID", LoginRegCheck.class)
+						.setParameter("userID", user.getId())
+						.getResultList();
+				session.getTransaction().commit();
+				if (!userRequestedList.isEmpty()) {
+					LoginRegCheck userRequested = userRequestedList.get(0);
+					System.out.println("User requested: " + userRequested.getUsername());
+					client.sendToClient(new GetUserDetails(userRequested));
+				} else {
+					System.err.println("ERROR: User with ID: " + user.getId() + " not found.");
+					client.sendToClient(new Warning("UserNotFoundException"));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
 		}
 		else if (msg.getClass().equals(change_user_login.class)) {
 			change_user_login wrapper = (change_user_login) msg;
@@ -736,7 +806,18 @@ public class SimpleServer extends AbstractServer {
 						else if (update.getNew_value().equals("Network"))
 							new_value = 4;
 						user.setStore(new_value);
+						break;
+					case "phoneNum":
+						user.setPhoneNum(newVal);
+						break;
+					case "fullName":
+						user.setFullName(newVal);
+						break;
+					case "idNum":
+						user.setIdNum(newVal);
+						break;
 				}
+
 
 
 
@@ -803,6 +884,7 @@ public class SimpleServer extends AbstractServer {
 
 			}
 		}
+
 		else if (msgString.startsWith("need#to#change#user#localy"))
 		{
 			Session session = App.getSessionFactory().openSession();
@@ -840,6 +922,28 @@ public class SimpleServer extends AbstractServer {
 					LoginRegCheck managedUser = session.createQuery(query).uniqueResult();
 					if (managedUser != null) {
 						order.setUser(managedUser);
+					}
+				}
+
+				// Fix: Ensure 'Yearly Subscription' flower is not duplicated
+				for (CartItem item : order.getItems()) {
+					Flower flower = item.getFlower();
+					if (flower != null && "Yearly Subscription".equals(flower.getFlowerName())) {
+						// Try to find existing subscription flower
+						CriteriaBuilder builder = session.getCriteriaBuilder();
+						CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
+						Root<Flower> root = query.from(Flower.class);
+						query.select(root).where(builder.equal(root.get("flowerName"), "Yearly Subscription"));
+						Flower existing = null;
+						try {
+							existing = session.createQuery(query).setMaxResults(1).uniqueResult();
+						} catch (Exception ignored) {}
+						if (existing == null) {
+							// Create and persist if not found
+							existing = new Flower("Yearly Subscription", flower.getFlowerPrice(), "Subscription");
+							session.save(existing);
+						}
+						item.setFlower(existing);
 					}
 				}
 

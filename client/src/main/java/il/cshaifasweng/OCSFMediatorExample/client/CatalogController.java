@@ -10,6 +10,7 @@ import javafx.event.ActionEvent;
 import java.io.IOException;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -259,16 +260,16 @@ public class CatalogController {
     private int sorting_type=0 ; //0 for guest, 1 for store 1 ,2 for store 2 ,3 for store 3 ,
     // 4 for the network
     private List<Flower> flowersList_sorting;
-    private LoginRegCheck user;
-    public void set_user(LoginRegCheck user) {
-        this.user = user;
+    private static LoginRegCheck user;
+    public static void set_user(LoginRegCheck usr) {
+        user=usr;
         System.out.println("the user is " + user.getUsername());
         System.out.println(" user send: " + user.get_send_complain());
     }
     public connect_scene_Con getController() {
         return con;
     }
-    public LoginRegCheck getUser() {
+    public static LoginRegCheck getUser() {
         return user;
     }
     public void  set_type(int value)
@@ -278,10 +279,6 @@ public class CatalogController {
     public void  set_sorting_type(int value)
     {
         sorting_type=value;
-    }
-    public  void setFlowersList_c(List<Flower> flowerList)
-    {
-        flowersList_c = flowerList;
     }
     int add_flower_flag=0;
     String flower_name="";
@@ -399,10 +396,175 @@ public class CatalogController {
             }
         });
     }
-    public void setCatalogSorting(List<Flower> flowerList) {
-        flowersList_sorting = flowerList;
+    List<String> colors_in_catalog = new ArrayList<>();
+    @FXML
+    private ComboBox<String> colors;
+    private boolean isUpdating = false;
+    public  void setFlowersList_c(List<Flower> flowerList)
+    {
+        System.out.println("enter flowerList");
+
+
+        flowersList_c = flowerList;
+        if(!colors_in_catalog.isEmpty())
+        {
+            colors_in_catalog.clear();
+        }
+        for (Flower flower : flowerList) {
+            String color = flower.getColor();
+            if (!colors_in_catalog.contains(color)) {
+                colors_in_catalog.add(color);
+                System.out.println("Added color: " + color + " from flower: " + flower.getFlowerType());
+            }
+        }
+        colors_in_catalog.add("all");
+        isUpdating=true;
+
+
+        colors.getItems().setAll(colors_in_catalog);
+        colors.setValue("all");
+        System.out.println("put colors");
+        isUpdating=false;
+    }
+
+
+
+
+    @FXML
+    public void colors_choose(ActionEvent actionEvent) throws IOException
+    {
+        if (isUpdating) return;
+        combo.getSelectionModel().clearSelection();
+        combo.setValue("Sort");
+        combo.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item);
+                setAlignment(Pos.CENTER);
+                setTextFill(Color.web("#FFFAFA"));
+            }
+        });
+        sort_image.setVisible(true);
+
+
+        String selected = colors.getValue();
+        if (selected == null) {
+            System.out.println("No color selected — skipping colors_choose");
+            return;
+        }
+        if (selected.equals("all"))
+        {
+
+            if(flowersList_sorting!=null)
+            {
+                setCatalogSorting(flowersList_sorting);
+                return;
+            }
+            else
+            {
+                setFlowersList_c(flowersList_c);
+                setCatalogData(flowersList_c);
+                return;
+            }
+
+
+
+        }
+        if(flowersList_sorting!=null)
+        {
+            List<Flower> filterFlowersbyColor=filterFlowersByColor(flowersList_sorting,selected);
+            setCatalogSorting_by_color(filterFlowersbyColor);
+            return;
+        }
+        List<Flower> filterFlowersbyColor=filterFlowersByColor(flowersList_c,selected);
+        System.out.println("Received flowers inside colors: " + filterFlowersbyColor.size());
+        for (Flower f : filterFlowersbyColor) {
+            System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
+        }
+
+        setCatalogSorting_by_color(filterFlowersbyColor);
+        return;
+
+    }
+    public static List<Flower> filterFlowersByColor(List<Flower> flowers, String color) {
+        List<Flower> filtered = new ArrayList<>();
+        for (Flower flower : flowers) {
+            if (flower.getColor().equalsIgnoreCase(color)) {
+                filtered.add(flower);
+            }
+        }
+        return filtered;
+    }
+    List<Flower> flowerList_color;
+
+    public void setCatalogSorting_by_color(List<Flower> flowerList)
+    {
+        flowerList_color = flowerList;
 
         Platform.runLater(() -> {
+            clearCatalog();
+
+            System.out.println("Received flowers: " + flowerList.size());
+            for (Flower f : flowerList) {
+                System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
+            }
+
+            for (int i = 0; i < flowerList.size() && i < 12; i++) {
+                Flower f = flowerList.get(i);
+
+                nameLabels[i].setText(f.getFlowerName());
+
+                if (f.isSale()) {
+                    price_Before_sale[i].setVisible(true);
+                    int discount_percent = f.getDiscount();
+                    double remainingPercent = 100.0 - discount_percent;
+                    double originalPrice = f.getFlowerPrice() * 100.0 / remainingPercent;
+                    String originalPriceStr = String.format("%.2f", originalPrice);
+                    price_Before_sale[i].setText(originalPriceStr);
+                }
+
+                priceFields[i].setText(String.format("%.2f", f.getFlowerPrice()));
+                typeLabels[i].setText(f.getFlowerType());
+                setImage(imageViews[i], f.getFlowerType());
+
+                if (i == 8) nine_9.setVisible(true);
+                if (i == 9) ten_10.setVisible(true);
+                if (i == 10) eleven_11.setVisible(true);
+                if (i == 11) twelve_12.setVisible(true);
+            }
+        });
+    }
+    public void setCatalogSorting(List<Flower> flowerList) {
+        flowersList_sorting = flowerList;
+        isUpdating=true;
+
+        if(!colors_in_catalog.isEmpty())
+        {
+            colors_in_catalog.clear();
+        }
+        for (Flower flower : flowerList) {
+            String color = flower.getColor();
+            if (!colors_in_catalog.contains(color)) {
+                colors_in_catalog.add(color);
+                System.out.println("Added color: " + color + " from flower: " + flower.getFlowerType());
+            }
+        }
+        colors_in_catalog.add("all");
+
+
+
+
+
+
+        Platform.runLater(() -> {
+            isUpdating=true;
+
+
+            colors.getItems().setAll(colors_in_catalog);
+            colors.setValue("all");
+            System.out.println("put colors");
+            isUpdating=false;
             if (sorting_type == 0 || sorting_type == 4) {
                 Stores.setValue("network");
             }
@@ -666,42 +828,80 @@ public class CatalogController {
     }
     @FXML
     public void combo_choose(ActionEvent actionEvent) throws IOException {
+
         sort_image.setVisible(false);
+        String color=colors.getValue();
+        if(color==null)
+        {
+            color="all";
+        }
         String selected = combo.getValue();
         String selected_store = Stores.getValue();
-        int localtype=1;
+        if(color.equals("all"))
+        {
 
-        if (selected == null) {
-            return;
-        }
-        if(selected_store.equals("Haifa"))
-        {
-            localtype=1;
-        }
-        if(selected_store.equals("Krayot"))
-        {
-            localtype=2;
-        }
-        if(selected_store.equals("Nahariyya"))
-        {
-            localtype=3;
-        }
-        if(selected_store.equals("network"))
-        {
-            localtype=4;
-        }
-        System.out.println("localtype = " + localtype);
-        String localtypeStr = String.valueOf(localtype);
+            int localtype=1;
+
+            if (selected == null) {
+                return;
+            }
+            if(selected_store.equals("Haifa"))
+            {
+                localtype=1;
+            }
+            if(selected_store.equals("Krayot"))
+            {
+                localtype=2;
+            }
+            if(selected_store.equals("Nahariyya"))
+            {
+                localtype=3;
+            }
+            if(selected_store.equals("network"))
+            {
+                localtype=4;
+            }
+            System.out.println("localtype = " + localtype);
+            String localtypeStr = String.valueOf(localtype);
 
 
-        String message = "";
-        if (selected.equals("Price High to LOW")) {
-            message = "get_flowers_high_to_low_"+localtypeStr+"_"+type;
-        } else if (selected.equals("Price Low to HIGH")) {
-            message = "get_flowers_low_to_high_"+localtypeStr+"_"+type;
+            String message = "";
+            if (selected.equals("Price High to LOW")) {
+                message = "get_flowers_high_to_low_"+localtypeStr+"_"+type;
+            } else if (selected.equals("Price Low to HIGH")) {
+                message = "get_flowers_low_to_high_"+localtypeStr+"_"+type;
+            }
+            System.out.println("message = " + message);
+            SimpleClient.getClient().sendToServer(message);
         }
-        System.out.println("message = " + message);
-        SimpleClient.getClient().sendToServer(message);
+        else
+        {
+            if(selected != null)
+            {
+                if (selected.equals("Price High to LOW"))
+                {
+                    flowerList_color=getFlowersOrdered("desc",flowerList_color);
+                }
+                else if (selected.equals("Price Low to HIGH"))
+                {
+                    flowerList_color=getFlowersOrdered("asc",flowerList_color);
+                }
+                setCatalogSorting_by_color(flowerList_color);
+            }
+
+
+
+        }
+
+    }
+    private List<Flower> getFlowersOrdered(String direction, List<Flower> flowers) {
+        List<Flower> result = new ArrayList<>(flowers);
+        if (direction.equals("desc")) {
+            result.sort((f1, f2) -> Double.compare(f2.getFlowerPrice(), f1.getFlowerPrice()));
+        } else {
+            result.sort((f1, f2) -> Double.compare(f1.getFlowerPrice(), f2.getFlowerPrice()));
+        }
+        return result;
     }
 
     private void setImage(ImageView imageView, String flowerName) {

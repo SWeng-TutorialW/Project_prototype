@@ -1,8 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
-import il.cshaifasweng.OCSFMediatorExample.entities.UpdateUserEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -115,7 +113,7 @@ public class MyAccountController {
             stage.setScene(new Scene(root));
             stage.show();
 
-            ((Stage) myOrdersButton.getScene().getWindow()).close();
+            // ((Stage) myOrdersButton.getScene().getWindow()).close(); // <-- Remove this line to keep My Account open
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -160,16 +158,20 @@ public class MyAccountController {
     }
     @Subscribe
     public void onSuccessfulUpdate(String str) {
+        System.out.println("onSuccessfulUpdate called with: " + str);
         if(str.startsWith("#userUpdateSuccess")) {
+            System.out.println("#userUpdateSuccess detected, posting SuccessEvent");
             Platform.runLater(() -> {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Update Success");
-                alert.setHeaderText("Successfully Updated User Details");
-                alert.setContentText("Your Details Are Up-To-Date.");
-                alert.showAndWait();
+                // Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                // alert.setTitle("Update Success");
+                // alert.setHeaderText("Successfully Updated User Details");
+                // alert.setContentText("Your Details Are Up-To-Date.");
+                // alert.showAndWait();
+                Success success = new Success("Your details are up-to-date.");
+                org.greenrobot.eventbus.EventBus.getDefault().post(new SuccessEvent(success));
             });
             loadUserInfo();
-    }
+        }
     }
     @Subscribe
     public void getUserDetails(UpdateUserEvent user) {
@@ -197,9 +199,21 @@ public class MyAccountController {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                Platform.runLater(() -> {
+                // Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                // alert.setTitle("Update Success");
+                // alert.setHeaderText("Successfully Updated User Details");
+                // alert.setContentText("Your Details Are Up-To-Date.");
+                // alert.showAndWait();
+                Success success = new Success("Your details are up-to-date.");
+                org.greenrobot.eventbus.EventBus.getDefault().post(new SuccessEvent(success));
+            });
             }
             else{passErrorMsgLbl.setVisible(true);}
     }
+
+
     @FXML
     void onSubscribe(ActionEvent event) {
         if (current_User == null) { // Good, we're making sure the user is indeed logged in
@@ -256,6 +270,19 @@ public class MyAccountController {
                 // Notify other controllers (e.g., checkout) of the upgrade
                 EventBus.getDefault().post(new UpdateUserEvent(current_User));
 
+                // Add subscription order to user's orders
+                Order subscriptionOrder = new Order(current_User.getUsername(), current_User.getEmail(), current_User);
+                subscriptionOrder.setStatus("CONFIRMED");
+                subscriptionOrder.setTotalAmount(100.0); // Assuming subscription price is 100
+                subscriptionOrder.setDiscountAmount(0.0);
+                subscriptionOrder.setRequiresDelivery(false);
+                Flower subscriptionFlower = new Flower("Yearly Subscription", 100.0, "Subscription");
+                CartItem subscriptionItem = new CartItem(subscriptionFlower, 1, current_User.getStoreName());
+                subscriptionOrder.addItem(subscriptionItem);
+                // Optionally, persist or notify the system about the new order
+                // For now, just add to OrdersHistoryController if possible
+                OrdersHistoryController.addOrderForUser(current_User, subscriptionOrder);
+
                 if (catalogController != null) {
                     catalogController.set_user(current_User);
                     catalogController.set_type(4);
@@ -267,7 +294,7 @@ public class MyAccountController {
                 Platform.runLater(() -> {
                     loadUserInfo();
                     paymentStage.close();
-                    ((Stage) subscribeBtn.getScene().getWindow()).close();
+                    // ((Stage) subscribeBtn.getScene().getWindow()).close(); // <-- Remove this line to keep My Account open
                 });
             });
 
