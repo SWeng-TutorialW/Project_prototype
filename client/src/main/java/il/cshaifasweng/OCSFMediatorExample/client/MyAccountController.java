@@ -19,6 +19,7 @@ import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.security.Key;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -30,8 +31,12 @@ public class MyAccountController {
     @FXML private Button myOrdersButton, subscribeBtn, changeBtn;
     @FXML private AnchorPane myAccUsers, my_account_data;
     @FXML private PasswordField newPassTxtB, confNewPassTxtB;
-    private LoginRegCheck current_User;
+    @FXML private Label subscriptionDateLbl;
+    @FXML private Label subscriptionStartLbl;
+    @FXML private TextField idNumTxtB;
 
+
+    private LoginRegCheck current_User;
     private CatalogController catalogController;
 
     static Stage myAccountStage = null;
@@ -123,12 +128,20 @@ public class MyAccountController {
         userChangeTxtB.setText(current_User.getUsername());
         emailChangeTxtB.setText(current_User.getEmail()); // what if the user changes their info?
         phoneChangeTxtB.setText(current_User.getPhoneNum());
+        idNumTxtB.setText(current_User.getIdNum());
         String accountType = switch (current_User.getStore()) {
             case 4 -> current_User.is_yearly_subscription() ? "Yearly Subscription" : "Network";
             case 1, 2, 3 -> "Store - " + current_User.getStoreName();
             default -> "Guest"; // shouldn't happen
         };
-
+        if (current_User.is_yearly_subscription() && current_User.getSubscriptionStartDate() != null) {
+            subscriptionStartLbl.setVisible(true);
+            subscriptionStartLbl.setVisible(true);
+            subscriptionDateLbl.setText(current_User.getSubscriptionStartDate().toString());
+        } else {
+            subscriptionDateLbl.setVisible(false);
+            subscriptionStartLbl.setVisible(false);
+        }
         accountTypeEmptyLbl.setText(accountType);
         subscribeBtn.setVisible(!current_User.is_yearly_subscription());
     }
@@ -174,12 +187,13 @@ public class MyAccountController {
             if(newPassTxtB.getText().equals(confNewPassTxtB.getText())) {
                 passErrorMsgLbl.setVisible(false);
                 UpdateUserEvent updatedUser;
-                LoginRegCheck currentUser = current_User;
 
+                LoginRegCheck currentUser = current_User;
                 currentUser.setUsername(userChangeTxtB.getText());
                 currentUser.setEmail(emailChangeTxtB.getText());
                 currentUser.setPhoneNum(phoneChangeTxtB.getText());
                 currentUser.setPassword(newPassTxtB.getText());
+                currentUser.setIdNum(idNumTxtB.getText());
                 updatedUser = new UpdateUserEvent(currentUser);
                 try {
                     SimpleClient.client.sendToServer(updatedUser);
@@ -238,6 +252,8 @@ public class MyAccountController {
 
             paymentController.setOnPaymentSuccess(() -> {
                 current_User.set_yearly_subscription(true);
+                current_User.setSubscriptionStartDate(LocalDate.now());
+
                 sendUpdateToServer.run();
 
                 // Notify other controllers (e.g., checkout) of the upgrade
