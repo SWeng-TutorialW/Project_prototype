@@ -31,7 +31,7 @@ public class MyAccountController {
     @FXML private Button myOrdersButton, subscribeBtn, changeBtn;
     @FXML private AnchorPane myAccUsers, my_account_data;
     @FXML private PasswordField newPassTxtB, confNewPassTxtB;
-    private LoginRegCheck tempUser;
+    private LoginRegCheck currentUser;
 
     private CatalogController catalogController;
 
@@ -41,6 +41,7 @@ public class MyAccountController {
 
     public void setCurrentUser(LoginRegCheck user) {
         SimpleClient.setCurrentUser(user);
+        this.currentUser = user;
         loadUserInfo();
     }
 
@@ -57,7 +58,7 @@ public class MyAccountController {
 
     @FXML
     private void handleMyOrdersButton() {
-        if (SimpleClient.getCurrentUser() == null) {
+        if (currentUser == null) {
             System.out.println("No user logged in");
             return;
         }
@@ -66,7 +67,7 @@ public class MyAccountController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("orders_history.fxml"));
             Parent root = loader.load();
             OrdersHistoryController controller = loader.getController();
-            controller.setCurrentUser(SimpleClient.getCurrentUser());
+            controller.setCurrentUser(currentUser);
             controller.loadUserOrders();
 
             Stage stage = new Stage();
