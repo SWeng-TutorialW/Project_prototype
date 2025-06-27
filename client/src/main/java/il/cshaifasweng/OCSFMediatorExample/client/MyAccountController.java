@@ -1,5 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.GetUserDetails;
 import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.UpdateUserEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
@@ -83,6 +84,8 @@ public class MyAccountController {
     void initialize()  {
         EventBus.getDefault().register(this);
         // AnchorPane margins
+
+        current_User = CatalogController.getUser();
         try{loadUserInfo();} catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -91,11 +94,7 @@ public class MyAccountController {
         AnchorPane.setTopAnchor(my_account_data, 58.0);
         AnchorPane.setRightAnchor(my_account_data, 89.0);
         AnchorPane.setLeftAnchor(my_account_data, 89.0);
-        if(current_User.isType()) // if user is an employee
-        {
-            myOrdersButton.setVisible(false);
-            subscribeBtn.setVisible(false);
-        }
+
     }
 
     @FXML
@@ -127,9 +126,9 @@ public class MyAccountController {
     }
 
     @Subscribe
-    public void getUserUpdateResponse(UpdateUserEvent user) { // once we get a response from the server, we update the user info
-        if (user.getUpdatedUser() != null && Objects.equals(user.getUpdatedUser().getId(), current_User.getId())) {
-            current_User = user.getUpdatedUser();
+    public void getUserUpdateResponse(GetUserDetails user) { // once we get a response from the server, we update the user info
+        if (user.getUser() != null && Objects.equals(user.getUser().getId(), current_User.getId())) {
+            current_User = user.getUser();
             userChangeTxtB.setText(current_User.getUsername());
             emailChangeTxtB.setText(current_User.getEmail()); // what if the user changes their info?
             phoneChangeTxtB.setText(current_User.getPhoneNum());
@@ -146,15 +145,21 @@ public class MyAccountController {
                 catalogController.set_user(current_User);
               //  catalogController.set_type(current_User.getStore()); type in the catalog and in the database is different.
             }
+            if(current_User.isType()) // if user is an employee
+            {
+                myOrdersButton.setVisible(false);
+                subscribeBtn.setVisible(false);
+            }
         }
     }
 
     public void loadUserInfo() throws IOException {
         if (current_User != null){
-            SimpleClient.getClient().sendToServer("#getUserDetails");
+            SimpleClient.getClient().sendToServer(new GetUserDetails(current_User));
+            // send a request to the server to get the user details
         }
-
     }
+
     @Subscribe
     public void onFailedUpdate(WarningEvent warning){
 
@@ -170,6 +175,7 @@ public class MyAccountController {
         }
 
     }
+
     @Subscribe
     public void onSuccessfulUpdate(String str) {
         if(str.startsWith("#userUpdateSuccess")) {
@@ -181,7 +187,7 @@ public class MyAccountController {
                 alert.showAndWait();
             });
 
-    }
+        }
     }
  /*   @Subscribe
     public void getUserDetails(UpdateUserEvent user) {
@@ -191,6 +197,7 @@ public class MyAccountController {
         }
 
     }*/
+
     @FXML
     void sendUserUpdate(ActionEvent event){
 
@@ -203,6 +210,7 @@ public class MyAccountController {
                 currentUser.setEmail(emailChangeTxtB.getText());
                 currentUser.setPhoneNum(phoneChangeTxtB.getText());
                 currentUser.setPassword(newPassTxtB.getText());
+                currentUser.setIdNum(idNumTxtB.getText());
                 updatedUser = new UpdateUserEvent(currentUser);
                 try {
                     SimpleClient.client.sendToServer(updatedUser);
@@ -211,7 +219,7 @@ public class MyAccountController {
                 }
             }
             else{
-                passErrorMsgLbl.setText("Passwords do not match or less than 4 characters.");
+                passErrorMsgLbl.setText("Passwords do not match or are less than 4 characters.");
                 passErrorMsgLbl.setVisible(true);}
     }
     @FXML

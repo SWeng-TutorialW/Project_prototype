@@ -593,6 +593,29 @@ public class SimpleServer extends AbstractServer {
                 session.getTransaction().rollback(); e.printStackTrace(); System.err.println("ERROR: Could not send update confirmation to client or update failed.\n");
             } finally {session.close();}
 		}
+		else if(msg.getClass().equals(GetUserDetails.class)) {
+			Session session = null;
+			LoginRegCheck user = ((GetUserDetails) msg).getUser();
+			try {
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+				List<LoginRegCheck> userRequestedList = session.createQuery("FROM LoginRegCheck lr WHERE id = :userID", LoginRegCheck.class)
+						.setParameter("userID", user.getId())
+						.getResultList();
+				session.getTransaction().commit();
+				if (!userRequestedList.isEmpty()) {
+					LoginRegCheck userRequested = userRequestedList.get(0);
+					System.out.println("User requested: " + userRequested.getUsername());
+					client.sendToClient(new GetUserDetails(userRequested));
+				} else {
+					System.err.println("ERROR: User with ID: " + user.getId() + " not found.");
+					client.sendToClient(new Warning("UserNotFoundException"));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
 		else if (msg.getClass().equals(change_user_login.class)) {
 			change_user_login wrapper = (change_user_login) msg;
 			LoginRegCheck user = wrapper.get_user();

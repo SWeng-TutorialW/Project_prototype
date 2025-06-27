@@ -97,6 +97,9 @@ public class SimpleClient extends AbstractClient {
 			EventBus.getDefault().post(msg);
 			EventBus.getDefault().post("#userUpdateSuccess");
 		}
+		else if(msg.getClass().equals(GetUserDetails.class)){
+			EventBus.getDefault().post(msg); // This will send the user details to the UI
+		}
 		else if(msgString.startsWith("user_"))
 		{
 			String[] parts = msgString.split("_");

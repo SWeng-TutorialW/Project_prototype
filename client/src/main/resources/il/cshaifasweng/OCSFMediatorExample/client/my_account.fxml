@@ -122,7 +122,7 @@
                         <Font name="Segoe UI" size="13.0" />
                      </font>
                   </Label>
-                  <TextField fx:id="phoneChangeTxtB1" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <TextField fx:id="idNumTxtB" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                </children>
             </GridPane>
 

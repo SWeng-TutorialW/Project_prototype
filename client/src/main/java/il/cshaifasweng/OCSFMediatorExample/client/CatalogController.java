@@ -242,6 +242,9 @@ public class CatalogController {
 
 
     boolean is_login=false;
+
+
+
     public void set_isLogin(boolean is_login) {
         this.is_login = is_login;
     }
@@ -259,18 +262,19 @@ public class CatalogController {
     private int sorting_type=0 ; //0 for guest, 1 for store 1 ,2 for store 2 ,3 for store 3 ,
     // 4 for the network
     private List<Flower> flowersList_sorting;
-    private LoginRegCheck user;
-    public void set_user(LoginRegCheck user) {
-        this.user = user;
+    private static LoginRegCheck user;
+    public static void set_user(LoginRegCheck usr) {
+        user=usr;
         System.out.println("the user is " + user.getUsername());
         System.out.println(" user send: " + user.get_send_complain());
     }
     public connect_scene_Con getController() {
         return con;
     }
-    public LoginRegCheck getUser() {
+    public static LoginRegCheck getUser() {
         return user;
     }
+
     public void  set_type(int value)
     {
         type=value;
