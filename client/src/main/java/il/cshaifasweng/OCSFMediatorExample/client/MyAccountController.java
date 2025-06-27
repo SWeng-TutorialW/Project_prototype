@@ -28,6 +28,9 @@ public class MyAccountController {
     @FXML private Button myOrdersButton, subscribeBtn, changeBtn;
     @FXML private AnchorPane myAccUsers, my_account_data;
     @FXML private PasswordField newPassTxtB, confNewPassTxtB;
+    @FXML private Label subscriptionDateLbl;
+    @FXML private Label subscriptionStartLbl;
+
     private LoginRegCheck current_User;
 
     private CatalogController catalogController;
