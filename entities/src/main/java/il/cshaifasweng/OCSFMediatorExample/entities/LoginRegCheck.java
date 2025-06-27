@@ -67,6 +67,7 @@ public class LoginRegCheck implements Serializable {
         this.phoneNum = phoneNum;
         this.fullName = fullName;
     }
+
     public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String phoneNum, String fullName, String idNum, boolean is_yearly_subscription) {
         this.username = username;
         this.password = password;
@@ -82,6 +83,7 @@ public class LoginRegCheck implements Serializable {
             this.subscriptionStartDate = LocalDate.now();
         }
     }
+
     public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store,  boolean is_yearly_subscription) {
         this.username = username;
         this.password = password;

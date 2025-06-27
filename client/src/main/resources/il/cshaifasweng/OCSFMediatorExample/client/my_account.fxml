@@ -26,10 +26,12 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+
               </rowConstraints>
                <children>
-      
-                      <!-- כפתור להזמנות -->
+
+                   <!-- כפתור להזמנות -->
                       <Button fx:id="myOrdersButton" onAction="#handleMyOrdersButton" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white;" text="My Orders" GridPane.rowIndex="1">
                           <font>
                         <Font name="Segoe UI" size="14.0" />
@@ -47,6 +49,7 @@
                         <Font name="Segoe UI" size="13.0" />
                      </font>
                   </Button>
+
                </children>
             </GridPane>
             <GridPane layoutX="21.0" layoutY="49.0" prefHeight="366.0" prefWidth="315.0">
@@ -117,6 +120,14 @@
                         <Font name="Segoe UI Bold" size="13.0" />
                      </font>
                   </Label>
+
+                   <Label fx:id="subscriptionStartLbl" text="Subscription Start Date :" GridPane.rowIndex="4">
+                       <font>
+                           <Font name="Segoe UI" size="13.0" />
+                       </font>
+                   </Label>
+                   <Label fx:id="subscriptionDateLbl" text=" " GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
                </children>
             </GridPane>
 
