@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
 import java.util.List;
@@ -41,6 +42,20 @@ public class CartController {
         this.catalogController = catalogController;
     }
 
+    static Stage cartStage = null;
+
+    public static boolean isCartOpen() {
+        return cartStage != null && cartStage.isShowing();
+    }
+
+    public static void setCartStage(Stage stage) {
+        cartStage = stage;
+        if (cartStage != null) {
+            cartStage.setOnHidden(e -> cartStage = null);
+        }
+    }
+
+    @FXML
     public void initialize() {
         // Set up table columns
         nameColumn.setCellValueFactory(cellData ->
@@ -80,6 +95,21 @@ public class CartController {
         // Update total when items change
         cartItems.addListener((javafx.collections.ListChangeListener.Change<? extends CartItem> change) -> {
             updateTotal();
+        });
+
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+
+        // Unregister from EventBus when window closes
+        cartTable.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.getWindow().setOnHidden(e -> {
+                    if (EventBus.getDefault().isRegistered(this)) {
+                        EventBus.getDefault().unregister(this);
+                    }
+                });
+            }
         });
     }
 
@@ -153,18 +183,10 @@ public class CartController {
             return;
         }
 
-        // Check if current user is available, use SimpleClient as fallback
-     /*   if (currentUser == null) {
-            currentUser = SimpleClient.getCurrentUser();
-            System.out.println("Using SimpleClient current user: " + (currentUser != null ? currentUser.getUsername() : "null"));
+        if (CheckoutController.isCheckoutOpen()) {
+            CheckoutController.checkoutStage.close();
+            // Do not return; continue to open a new window
         }
-
-        if (currentUser == null) {
-            System.out.println("Current user is null despite being logged in");
-            Warning warning = new Warning("User session not found. Please log in again.");
-            EventBus.getDefault().post(new WarningEvent(warning));
-            return;
-        }*/
 
         System.out.println("User is logged in, proceeding to checkout");
         try {
@@ -175,6 +197,7 @@ public class CartController {
             checkoutController.setCurrentUser(currentUser); // Pass the user to checkout
 
             Stage stage = new Stage();
+            CheckoutController.setCheckoutStage(stage);
             stage.setTitle("Checkout");
             stage.setScene(new Scene(root));
             stage.show();
@@ -203,5 +226,23 @@ public class CartController {
             Warning warning = new Warning("Error returning to catalog");
             EventBus.getDefault().post(new WarningEvent(warning));
         }
+    }
+
+    @FXML
+    private void openCartWarningIfOpen() {
+        if (CartController.isCartOpen()) {
+            Warning warning = new Warning("The cart window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            CartController.setCartStage(CartController.cartStage); // bring to front
+            CartController.cartStage.toFront();
+            CartController.cartStage.requestFocus();
+            return;
+        }
+        // ... existing open cart logic ...
+    }
+
+    @Subscribe
+    public void onCartUpdated(CartUpdatedEvent event) {
+        setCartItems(OrderPageController.getCartItems());
     }
 }

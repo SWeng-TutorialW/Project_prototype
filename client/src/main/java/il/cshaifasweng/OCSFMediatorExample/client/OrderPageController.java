@@ -100,19 +100,6 @@ public class OrderPageController {
             System.out.println("User not logged in");
             Warning warning = new Warning("Please log in to add items to cart");
             EventBus.getDefault().post(new WarningEvent(warning));
-
-          /*  try {
-                 FXMLLoader loader = new FXMLLoader(getClass().getResource("connect_scene.fxml"));
-                Parent root = loader.load();
-
-                Stage stage = new Stage();
-                stage.setTitle("Connect");
-                stage.setScene(new Scene(root));
-                stage.show();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
-
             return; // Exit the method to prevent further execution
         }
 
@@ -121,13 +108,23 @@ public class OrderPageController {
             EventBus.getDefault().post(new WarningEvent(warning));
         } else if (selectedFlower != null) {
             int quantity = quantitySpinner.getValue();
-            System.out.println("The store of the flower is:" + this.store);
-            CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
-            cartItems.add(cartItem);
-
+            boolean found = false;
+            for (CartItem item : cartItems) {
+                if (item.getFlower().getId() == selectedFlower.getId() && item.getStore().equals(this.store)) {
+                    item.setQuantity(item.getQuantity() + quantity);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
+                cartItems.add(cartItem);
+            }
             // Show confirmation
             Warning warning = new Warning("Item added to cart successfully!");
             EventBus.getDefault().post(new WarningEvent(warning));
+            // Notify cart window to refresh
+            EventBus.getDefault().post(new CartUpdatedEvent());
         }
 
         // Close current window
@@ -137,13 +134,22 @@ public class OrderPageController {
     
     @FXML
     private void viewCart() {
+        if (CartController.isCartOpen()) {
+            Warning warning = new Warning("The cart window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            CartController.setCartStage(CartController.cartStage); // bring to front
+            CartController.cartStage.toFront();
+            CartController.cartStage.requestFocus();
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));
             Parent root = loader.load();
             CartController cartController = loader.getController();
             cartController.setCartItems(cartItems);
-            
+
             Stage stage = new Stage();
+            CartController.setCartStage(stage);
             stage.setTitle("Shopping Cart");
             stage.setScene(new Scene(root));
             stage.show();

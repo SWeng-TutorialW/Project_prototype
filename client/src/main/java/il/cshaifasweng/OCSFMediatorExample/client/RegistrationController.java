@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Store;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import il.cshaifasweng.OCSFMediatorExample.entities.change_user_login;
 import javafx.application.Platform;
@@ -167,13 +168,14 @@ public class RegistrationController {
         if (!email.contains("@") || !email.contains(".")) {
             return "Invalid email format";
         }
-        /*if (is_yearly_subscription) {
+        if (is_yearly_subscription) {
             if (userId == null || !userId.matches("\\d{9}")) {
                 return "ID must be exactly 9 digits";
             }
-        }*/
+        }
         return null;
     }
+
 
 
     @FXML
@@ -356,10 +358,11 @@ public class RegistrationController {
         regPassConfTxtB.setVisible(!show);
     }
 
+
     @FXML
     void decideLogOrReg(MouseEvent event) // whenever we press on the "Go to Registration/Login" button
     {
-
+        // toggle between 0 and 1
 
         if (logOrReg % 2 == 1) { // we went from registration(0) to login(1)
             logAnchPane.setVisible(true);
@@ -370,6 +373,7 @@ public class RegistrationController {
             logAnchPane.setVisible(false);
             regAnchPane.setVisible(true);
             switchLoginRegbtn.setText("Go to Login");
+
         }
         logOrReg++;// toggle between 0 and 1
     }
