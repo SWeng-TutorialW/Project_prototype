@@ -4,6 +4,7 @@ import il.cshaifasweng.OCSFMediatorExample.entities.CartItem;
 import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.Order;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.UpdateUserEvent;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -16,12 +17,14 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 
@@ -34,7 +37,7 @@ public class CheckoutController {
     @FXML private TextField apartmentField;
     @FXML private ComboBox<String> deliveryTypeComboBox;
     @FXML private DatePicker deliveryDatePicker;
-    @FXML private Spinner<Integer> deliveryHourSpinner;
+    @FXML private ComboBox<String> deliveryTimeComboBox;
     @FXML private TableView<CartItem> orderTable;
     @FXML private TableColumn<CartItem, String> nameColumn;
     @FXML private TableColumn<CartItem, String> typeColumn;
@@ -65,6 +68,49 @@ public class CheckoutController {
     private LoginRegCheck currentUser; // Store the current user
     private static final double DELIVERY_FEE = 20.0;
     
+    @FXML private Label discountLabel;
+    
+    private Stage previewStage = null;
+    private GreetingCardPreviewController previewController = null;
+    
+    static Stage checkoutStage = null;
+    public static boolean isCheckoutOpen() {
+        return checkoutStage != null && checkoutStage.isShowing();
+    }
+    public static void setCheckoutStage(Stage stage) {
+        checkoutStage = stage;
+        if (checkoutStage != null) {
+            checkoutStage.setOnHidden(e -> {
+                checkoutStage = null;
+                if (isGreetingCardPreviewOpen()) {
+                    greetingCardPreviewStage.close();
+                }
+            });
+        }
+    }
+    
+    private static Stage greetingCardPreviewStage = null;
+    public static boolean isGreetingCardPreviewOpen() {
+        return greetingCardPreviewStage != null && greetingCardPreviewStage.isShowing();
+    }
+    public static void setGreetingCardPreviewStage(Stage stage) {
+        greetingCardPreviewStage = stage;
+        if (greetingCardPreviewStage != null) {
+            greetingCardPreviewStage.setOnHidden(e -> greetingCardPreviewStage = null);
+        }
+    }
+    
+    private static Stage paymentStageInstance = null;
+    public static boolean isPaymentStageOpen() {
+        return paymentStageInstance != null && paymentStageInstance.isShowing();
+    }
+    public static void setPaymentStageInstance(Stage stage) {
+        paymentStageInstance = stage;
+        if (paymentStageInstance != null) {
+            paymentStageInstance.setOnHidden(e -> paymentStageInstance = null);
+        }
+    }
+    
     public void initialize() {
         // Set up table columns
         nameColumn.setCellValueFactory(cellData -> 
@@ -85,13 +131,29 @@ public class CheckoutController {
 
         
         // Set default delivery type
-        //deliveryTypeComboBox.setValue("Delivery");
+        deliveryTypeComboBox.setValue("Delivery"); // זהו הערך הדיפולטיבי
+
         
-        // Set default delivery date to tomorrow
-        deliveryDatePicker.setValue(LocalDate.now().plusDays(1));
+        // Set default delivery date to today
+        deliveryDatePicker.setValue(LocalDate.now());
         
         // Initialize greeting card options
         initializeGreetingCardOptions();
+        
+        // Replace deliveryHourSpinner with deliveryTimeComboBox
+        updateDeliveryTimeOptions(LocalDate.now());
+        deliveryDatePicker.setDayCellFactory(picker -> new DateCell() {
+            @Override
+            public void updateItem(LocalDate date, boolean empty) {
+                super.updateItem(date, empty);
+                setDisable(empty || date.isBefore(LocalDate.now()));
+            }
+        });
+        deliveryDatePicker.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                updateDeliveryTimeOptions(newVal);
+            }
+        });
         
         // Add listeners
         deliveryTypeComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
@@ -130,12 +192,35 @@ public class CheckoutController {
             } else {
                 characterCountLabel.setText("0/300 characters");
             }
+            // Live update preview if open
+            if (previewController != null && isGreetingCardPreviewOpen()) {
+                previewController.setGreetingCardData(
+                    greetingCardBackgroundComboBox.getValue(),
+                    greetingCardMessageTextArea.getText().trim()
+                );
+            }
+        });
+
+        // Live update preview when background changes
+        greetingCardBackgroundComboBox.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (previewController != null && isGreetingCardPreviewOpen()) {
+                previewController.setGreetingCardData(
+                    greetingCardBackgroundComboBox.getValue(),
+                    greetingCardMessageTextArea.getText().trim()
+                );
+            }
         });
         
         // Update total when items change
         orderItems.addListener((javafx.collections.ListChangeListener.Change<? extends CartItem> change) -> {
             updateTotal();
         });
+
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+        // Ensure discount is shown immediately if user is a yearly subscriber
+        updateTotal();
     }
     
     public void setCartItems(List<CartItem> items) {
@@ -147,6 +232,19 @@ public class CheckoutController {
     public void setCurrentUser(LoginRegCheck user) {
         this.currentUser = user;
         System.out.println("CheckoutController: User set to: " + (user != null ? user.getUsername() : "null"));
+        // Autofill fields if user is available
+        if (user != null) {
+            if (user.getFullName() != null && !user.getFullName().isEmpty()) {
+                nameField.setText(user.getFullName());
+            }
+            if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+                emailField.setText(user.getEmail());
+            }
+            if (user.getPhoneNum() != null && !user.getPhoneNum().isEmpty()) {
+                phoneField.setText(user.getPhoneNum());
+            }
+            // Optionally, autofill address if you store it in user entity
+        }
     }
     
     private void updateDeliveryFee() {
@@ -162,6 +260,15 @@ public class CheckoutController {
                 .sum();
         double deliveryFee = "Delivery".equals(deliveryTypeComboBox.getValue()) ? DELIVERY_FEE : 0.0;
         double total = itemsTotal + deliveryFee;
+        double discount = 0.0;
+        if (currentUser != null && currentUser.is_yearly_subscription() && total >= 50.0) {
+            discount = total * 0.10;
+            total -= discount;
+            discountLabel.setText(String.format("Yearly Subscriber Discount: -₪%.2f", discount));
+            discountLabel.setVisible(true);
+        } else {
+            discountLabel.setVisible(false);
+        }
         orderTotal.setText(String.format("Total: ₪%.2f", total));
     }
     
@@ -169,10 +276,9 @@ public class CheckoutController {
         // Add greeting card background options
         greetingCardBackgroundComboBox.getItems().addAll(
             "Background 1",
-            "Background 2 ", 
+            "Background 2", 
             "Background 3",
             "Background 4"
-     
         );
         
         // Initially disable greeting card options
@@ -215,18 +321,6 @@ public class CheckoutController {
                 return;
             }
 
-            if (deliveryDatePicker.getValue() == null) {
-                Warning warning = new Warning("Please select a delivery date");
-                EventBus.getDefault().post(new WarningEvent(warning));
-                return;
-            }
-
-            // Check if delivery time is in the future
-            if (deliveryDatePicker.getValue().isBefore(LocalDate.now())) {
-                Warning warning = new Warning("Delivery date must be in the future");
-                EventBus.getDefault().post(new WarningEvent(warning));
-                return;
-            }
         }
         
         // Validate greeting card if selected
@@ -267,20 +361,46 @@ public class CheckoutController {
             order.setGreetingCardMessage(greetingCardMessageTextArea.getText().trim());
         }
         
-        if (order.isRequiresDelivery()) {
-            // Convert LocalDate and hour to Date for delivery time
-            LocalDateTime deliveryDateTime = LocalDateTime.of(
-                deliveryDatePicker.getValue(),
-                LocalTime.of(deliveryHourSpinner.getValue(), 0)
-            );
-            Date deliveryDate = Date.from(deliveryDateTime.atZone(ZoneId.systemDefault()).toInstant());
-            order.setDeliveryTime(deliveryDate);
+       
+        // Convert LocalDate and time string to Date for delivery time
+        String timeStr = deliveryTimeComboBox.getValue();
+        int hour = 12;
+        int minute = 0;
+        if (timeStr != null && timeStr.contains(":")) {
+            String[] parts = timeStr.split(":");
+            hour = Integer.parseInt(parts[0]);
+            minute = Integer.parseInt(parts[1]);
         }
+        LocalDateTime deliveryDateTime = LocalDateTime.of(
+            deliveryDatePicker.getValue(),
+            LocalTime.of(hour, minute)
+        );
+        Date deliveryDate = Date.from(deliveryDateTime.atZone(ZoneId.systemDefault()).toInstant());
+        order.setDeliveryTime(deliveryDate);
+        
 
         // Add items to order
         orderItems.forEach(item -> order.addItem(item));
+        // Apply discount if eligible
+        double itemsTotal = orderItems.stream().mapToDouble(CartItem::getTotalPrice).sum();
+        double deliveryFee = "Delivery".equals(deliveryTypeComboBox.getValue()) ? DELIVERY_FEE : 0.0;
+        double total = itemsTotal + deliveryFee;
+        double discount = 0.0;
+        if (currentUser != null && currentUser.is_yearly_subscription() && total >= 50.0) {
+            discount = total * 0.10;
+            total -= discount;
+        }
+        order.setTotalAmount(total); // set the discounted total
+        order.setDiscountAmount(discount); // set the discount amount
 
         // Open payment page
+        if (isPaymentStageOpen()) {
+            Warning warning = new Warning("The payment window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            paymentStageInstance.toFront();
+            paymentStageInstance.requestFocus();
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/payment.fxml"));
             Parent root = loader.load();
@@ -290,6 +410,7 @@ public class CheckoutController {
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
+            setPaymentStageInstance(stage);
             stage.setTitle("Secure Payment");
             stage.setScene(scene);
             stage.show();
@@ -327,37 +448,72 @@ public class CheckoutController {
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
-        
         if (greetingCardBackgroundComboBox.getValue() == null || greetingCardBackgroundComboBox.getValue().isEmpty()) {
             Warning warning = new Warning("Please select a greeting card background");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
-        
         if (greetingCardMessageTextArea.getText() == null || greetingCardMessageTextArea.getText().trim().isEmpty()) {
             Warning warning = new Warning("Please enter a greeting message");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
-        
+        if (isGreetingCardPreviewOpen()) {
+            Warning warning = new Warning("The greeting card preview window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            setGreetingCardPreviewStage(greetingCardPreviewStage);
+            greetingCardPreviewStage.toFront();
+            greetingCardPreviewStage.requestFocus();
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("greeting_card_preview.fxml"));
             Parent root = loader.load();
-            GreetingCardPreviewController previewController = loader.getController();
+            previewController = loader.getController();
             previewController.setGreetingCardData(
                 greetingCardBackgroundComboBox.getValue(),
                 greetingCardMessageTextArea.getText().trim()
             );
-            
             Stage stage = new Stage();
+            setGreetingCardPreviewStage(stage);
             stage.setTitle("Greeting Card Preview");
             stage.setScene(new Scene(root));
             stage.setResizable(false);
             stage.show();
+            stage.setOnHidden(e -> {
+                setGreetingCardPreviewStage(null);
+                previewController = null;
+            });
         } catch (IOException e) {
             e.printStackTrace();
             Warning warning = new Warning("Failed to open greeting card preview");
             EventBus.getDefault().post(new WarningEvent(warning));
+        }
+    }
+
+    @Subscribe
+    public void onUserUpdated(UpdateUserEvent event) {
+        if (currentUser != null && event.getUpdatedUser().getId().equals(currentUser.getId())) {
+            currentUser = event.getUpdatedUser();
+            updateTotal();
+        }
+    }
+
+    private void updateDeliveryTimeOptions(LocalDate selectedDate) {
+        deliveryTimeComboBox.getItems().clear();
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now().truncatedTo(ChronoUnit.MINUTES);
+        boolean isToday = selectedDate.equals(today);
+        for (int hour = 8; hour <= 21; hour++) {
+            for (int min : new int[]{0, 30}) {
+                LocalTime slot = LocalTime.of(hour, min);
+                if (isToday && slot.isBefore(now.plusHours(2))) continue;
+                deliveryTimeComboBox.getItems().add(String.format("%02d:%02d", hour, min));
+            }
+        }
+        // Set default value to the first available slot
+        if (!deliveryTimeComboBox.getItems().isEmpty()) {
+            deliveryTimeComboBox.setValue(deliveryTimeComboBox.getItems().get(0));
         }
     }
 } 

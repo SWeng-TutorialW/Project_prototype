@@ -1,9 +1,6 @@
-
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
-import il.cshaifasweng.OCSFMediatorExample.entities.UpdateUserEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -20,6 +17,7 @@ import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.security.Key;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -31,9 +29,45 @@ public class MyAccountController {
     @FXML private Button myOrdersButton, subscribeBtn, changeBtn;
     @FXML private AnchorPane myAccUsers, my_account_data;
     @FXML private PasswordField newPassTxtB, confNewPassTxtB;
+    @FXML private Label subscriptionDateLbl;
+    @FXML private Label subscriptionStartLbl;
+
     private LoginRegCheck current_User;
 
     private CatalogController catalogController;
+
+    static Stage myAccountStage = null;
+    public static boolean isMyAccountOpen() {
+        return myAccountStage != null && myAccountStage.isShowing();
+    }
+    public static void setMyAccountStage(Stage stage) {
+        myAccountStage = stage;
+        if (myAccountStage != null) {
+            myAccountStage.setOnHidden(e -> myAccountStage = null);
+        }
+    }
+
+    private static Stage paymentStageInstance = null;
+    public static boolean isPaymentStageOpen() {
+        return paymentStageInstance != null && paymentStageInstance.isShowing();
+    }
+    public static void setPaymentStageInstance(Stage stage) {
+        paymentStageInstance = stage;
+        if (paymentStageInstance != null) {
+            paymentStageInstance.setOnHidden(e -> paymentStageInstance = null);
+        }
+    }
+
+    private static Stage myOrdersStage = null;
+    public static boolean isMyOrdersOpen() {
+        return myOrdersStage != null && myOrdersStage.isShowing();
+    }
+    public static void setMyOrdersStage(Stage stage) {
+        myOrdersStage = stage;
+        if (myOrdersStage != null) {
+            myOrdersStage.setOnHidden(e -> myOrdersStage = null);
+        }
+    }
 
     public void setCatalogController(CatalogController catalogController) {
         this.catalogController = catalogController;
@@ -62,6 +96,10 @@ public class MyAccountController {
             return;
         }
 
+        if (isMyOrdersOpen()) {
+            myOrdersStage.close();
+            // Do not return; continue to open a new window
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("orders_history.fxml"));
             Parent root = loader.load();
@@ -70,11 +108,12 @@ public class MyAccountController {
             controller.loadUserOrders();
 
             Stage stage = new Stage();
+            setMyOrdersStage(stage);
             stage.setTitle("My Order History");
             stage.setScene(new Scene(root));
             stage.show();
 
-            ((Stage) myOrdersButton.getScene().getWindow()).close();
+            // ((Stage) myOrdersButton.getScene().getWindow()).close(); // <-- Remove this line to keep My Account open
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -91,7 +130,14 @@ public class MyAccountController {
             case 1, 2, 3 -> "Store - " + current_User.getStoreName();
             default -> "Guest"; // shouldn't happen
         };
-
+        if (current_User.is_yearly_subscription() && current_User.getSubscriptionStartDate() != null) {
+            subscriptionStartLbl.setVisible(true);
+            subscriptionStartLbl.setVisible(true);
+            subscriptionDateLbl.setText(current_User.getSubscriptionStartDate().toString());
+        } else {
+            subscriptionDateLbl.setVisible(false);
+            subscriptionStartLbl.setVisible(false);
+        }
         accountTypeEmptyLbl.setText(accountType);
         subscribeBtn.setVisible(!current_User.is_yearly_subscription());
     }
@@ -112,16 +158,20 @@ public class MyAccountController {
     }
     @Subscribe
     public void onSuccessfulUpdate(String str) {
+        System.out.println("onSuccessfulUpdate called with: " + str);
         if(str.startsWith("#userUpdateSuccess")) {
+            System.out.println("#userUpdateSuccess detected, posting SuccessEvent");
             Platform.runLater(() -> {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Update Success");
-                alert.setHeaderText("Successfully Updated User Details");
-                alert.setContentText("Your Details Are Up-To-Date.");
-                alert.showAndWait();
+                // Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                // alert.setTitle("Update Success");
+                // alert.setHeaderText("Successfully Updated User Details");
+                // alert.setContentText("Your Details Are Up-To-Date.");
+                // alert.showAndWait();
+                Success success = new Success("Your details are up-to-date.");
+                org.greenrobot.eventbus.EventBus.getDefault().post(new SuccessEvent(success));
             });
             loadUserInfo();
-    }
+        }
     }
     @Subscribe
     public void getUserDetails(UpdateUserEvent user) {
@@ -149,9 +199,21 @@ public class MyAccountController {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                Platform.runLater(() -> {
+                // Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                // alert.setTitle("Update Success");
+                // alert.setHeaderText("Successfully Updated User Details");
+                // alert.setContentText("Your Details Are Up-To-Date.");
+                // alert.showAndWait();
+                Success success = new Success("Your details are up-to-date.");
+                org.greenrobot.eventbus.EventBus.getDefault().post(new SuccessEvent(success));
+            });
             }
             else{passErrorMsgLbl.setVisible(true);}
     }
+
+
     @FXML
     void onSubscribe(ActionEvent event) {
         if (current_User == null) { // Good, we're making sure the user is indeed logged in
@@ -174,12 +236,20 @@ public class MyAccountController {
     }
 
     private void openPaymentWindow() {
+        if (isPaymentStageOpen()) {
+            Warning warning = new Warning("The subscription/payment window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            paymentStageInstance.toFront();
+            paymentStageInstance.requestFocus();
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("payment.fxml"));
             Parent root = loader.load();
             PaymentController paymentController = loader.getController();
 
             Stage paymentStage = new Stage();
+            setPaymentStageInstance(paymentStage);
             paymentController.setStage(paymentStage);
             paymentController.setPayUpgrade(true);
 
@@ -193,7 +263,25 @@ public class MyAccountController {
 
             paymentController.setOnPaymentSuccess(() -> {
                 current_User.set_yearly_subscription(true);
+                current_User.setSubscriptionStartDate(LocalDate.now());
+
                 sendUpdateToServer.run();
+
+                // Notify other controllers (e.g., checkout) of the upgrade
+                EventBus.getDefault().post(new UpdateUserEvent(current_User));
+
+                // Add subscription order to user's orders
+                Order subscriptionOrder = new Order(current_User.getUsername(), current_User.getEmail(), current_User);
+                subscriptionOrder.setStatus("CONFIRMED");
+                subscriptionOrder.setTotalAmount(100.0); // Assuming subscription price is 100
+                subscriptionOrder.setDiscountAmount(0.0);
+                subscriptionOrder.setRequiresDelivery(false);
+                Flower subscriptionFlower = new Flower("Yearly Subscription", 100.0, "Subscription");
+                CartItem subscriptionItem = new CartItem(subscriptionFlower, 1, current_User.getStoreName());
+                subscriptionOrder.addItem(subscriptionItem);
+                // Optionally, persist or notify the system about the new order
+                // For now, just add to OrdersHistoryController if possible
+                OrdersHistoryController.addOrderForUser(current_User, subscriptionOrder);
 
                 if (catalogController != null) {
                     catalogController.set_user(current_User);
@@ -206,7 +294,7 @@ public class MyAccountController {
                 Platform.runLater(() -> {
                     loadUserInfo();
                     paymentStage.close();
-                    ((Stage) subscribeBtn.getScene().getWindow()).close();
+                    // ((Stage) subscribeBtn.getScene().getWindow()).close(); // <-- Remove this line to keep My Account open
                 });
             });
 
@@ -217,8 +305,6 @@ public class MyAccountController {
                         "You remain on your current account type.");
                 loadUserInfo();
             });
-
-            paymentStage.setOnCloseRequest(e -> paymentController.getOnPaymentCancel().run());
 
             paymentController.postInitialize();
             paymentStage.setTitle("Yearly Subscription Payment");

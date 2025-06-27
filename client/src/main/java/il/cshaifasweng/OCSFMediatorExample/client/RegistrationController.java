@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Store;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import il.cshaifasweng.OCSFMediatorExample.entities.change_user_login;
 import javafx.application.Platform;
@@ -25,6 +26,7 @@ import javafx.scene.control.Alert;
 
 import java.awt.*;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -37,7 +39,6 @@ public class RegistrationController {
     @FXML private Label credit_Card;
     @FXML private PasswordField credit_card_box;
     @FXML private Label id;
-    @FXML private PasswordField id_text;
     @FXML private AnchorPane regAnchPane;
     @FXML private Button regBtn;
     @FXML private TextField regEmailTxtB;
@@ -57,35 +58,26 @@ public class RegistrationController {
     @FXML private AnchorPane logAnchPane;
     @FXML
     private Label regPassLbl;
-
-
-
     @FXML
     private Label regPhoneLbl;
-
-
-
     @FXML
     private Label regUserLbl;
-
     @FXML
     private Label regUserLbl1;
-
     @FXML
     private Label regUserLbl11;
-
     @FXML
     private Label selectStoreLbl;
-
-
     @FXML
     private Button switchLoginRegbtn;
-    @FXML
-    private TextField regIdTxtB;
     @FXML
     private TextField userLogTxtB;
     @FXML
     private PasswordField passLogTxtB;
+    @FXML
+    private TextField regIdTxtB;
+
+
 
     private CatalogController catalogController;
     public void setCatalogController(CatalogController controller) {
@@ -101,7 +93,6 @@ public class RegistrationController {
     LoginRegCheck tempUser = null;
 
     public void setController(connect_scene_Con controller) { con = controller; }
-
     @FXML
     void logToSys(MouseEvent event) throws IOException {
         String user = userLogTxtB.getText();
@@ -125,15 +116,21 @@ public class RegistrationController {
                 con.set_type_local(loginRegCheck.getStore());
                 ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
 
-                return;
 
+                if (loginRegCheck.isYearlySubscriptionExpired()) {
+                    loginRegCheck.set_yearly_subscription(false);
+                    loginRegCheck.setSubscriptionStartDate(null);
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Subscription Expired");
+                    alert.setHeaderText("Your yearly subscription has expired.");
+                    alert.setContentText("You have been moved to a regular network account. You may renew your yearly plan at any time.");
+                    alert.showAndWait();
+                }
+                return;
             }
 
         }
     }
-
-
-
 
 
     public String checkIfValid(String regUser, String email, String regPass, String confPass, String fullName, String phoneNumber, String account_type, String userId) {
@@ -188,14 +185,13 @@ public class RegistrationController {
         String account_type = select_account_type.getValue();
         String userId = regIdTxtB.getText();
 
-        String check = checkIfValid(regUser, email, regPass, confPass, fullName, phoneNumber, account_type, userId);
-        if (check != null) {
-            Warning warning = new Warning(check);
-            EventBus.getDefault().post(new WarningEvent(warning));
-            return;
-        }
+//        String check = checkIfValid(regUser, email, regPass, confPass, fullName, phoneNumber, account_type, userId);
+//        if (check != null) {
+//            Warning warning = new Warning(check);
+//            EventBus.getDefault().post(new WarningEvent(warning));
+//            return;
+//        }
 
-        // int isLogin = con != null ? 0 : 1; // need further checking to see if this is necessary
         LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, phoneNumber, fullName, userId, false); // for now it's it meant to be for registration only.
 
         Runnable sendAndClose = () -> {
@@ -217,6 +213,7 @@ public class RegistrationController {
         if (is_yearly_subscription) {
             openPaymentWindow(() -> {
                 new_user.set_yearly_subscription(true);
+                new_user.setSubscriptionStartDate(LocalDate.now());
                 sendAndClose.run();
             }, sendAndClose, event);
         } else {
@@ -360,8 +357,6 @@ public class RegistrationController {
     @FXML
     void decideLogOrReg(MouseEvent event) // whenever we press on the "Go to Registration/Login" button
     {
-        // toggle between 0 and 1
-
         if (logOrReg % 2 == 1) { // we went from registration(0) to login(1)
             logAnchPane.setVisible(true);
             regAnchPane.setVisible(false);
@@ -373,7 +368,7 @@ public class RegistrationController {
             switchLoginRegbtn.setText("Go to Login");
 
         }
-        logOrReg++;
+        logOrReg++;// toggle between 0 and 1
     }
 
 

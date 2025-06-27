@@ -97,6 +97,9 @@ public class SimpleClient extends AbstractClient {
 			EventBus.getDefault().post(msg);
 			EventBus.getDefault().post("#userUpdateSuccess");
 		}
+		else if(msg.getClass().equals(GetUserDetails.class)){
+			EventBus.getDefault().post(msg); // This will send the user details to the UI
+		}
 		else if(msgString.startsWith("user_"))
 		{
 			String[] parts = msgString.split("_");
@@ -128,7 +131,9 @@ public class SimpleClient extends AbstractClient {
 			EventBus.getDefault().post("Email test failed!");
 			System.out.println("Email configuration test failed!");
 		}
-
+		else if(msgString.equals("order_success")) {
+			EventBus.getDefault().post("order_success");
+		}
 
 	}
 
@@ -158,5 +163,4 @@ public class SimpleClient extends AbstractClient {
 		currentUser = user;
 		System.out.println("SimpleClient: Current user set to: " + (user != null ? user.getUsername() : "null"));
 	}
-
 }

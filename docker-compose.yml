@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8
+    container_name: flowershop-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 201234
+      MYSQL_DATABASE: flowers_db
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-net
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flowershop-server
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql
+    networks:
+      - app-net
+
+volumes:
+  mysql-data:
+
+networks:
+  app-net:

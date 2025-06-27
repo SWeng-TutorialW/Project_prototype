@@ -96,10 +96,7 @@ public class connect_scene_Con  {
     void show_reg(ActionEvent event) {
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
-
-
             RegistrationController regController = fxmlLoader.getController();
-
             fxmlLoader.setControllerFactory(var -> {
                 RegistrationController controller = new RegistrationController();
                 controller.gotFromConnectScene = true;
@@ -219,7 +216,7 @@ public class connect_scene_Con  {
                 for (LoginRegCheck loginRegCheck : users) {
                     user = loginRegCheck;
                     if (loginRegCheck.getUsername().equals(user_Name) && loginRegCheck.getPassword().equals(passWord)) {
-                        SimpleClient.setCurrentUser(user); // I forgot to add this. Now when logging in, the SimpleClient.currentUser isn't NULL. :)
+                        CatalogController.set_user(user); // I forgot to add this. Now when logging in, the SimpleClient.currentUser isn't NULL. :)
                         System.out.println("User Logged-In: " + loginRegCheck.getUsername());
                         if (loginRegCheck.isType())
                         {

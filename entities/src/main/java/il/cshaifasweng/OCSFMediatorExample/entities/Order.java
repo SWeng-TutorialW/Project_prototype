@@ -42,7 +42,7 @@ public class Order implements Serializable {
     private boolean requiresDelivery;
     private double deliveryFee;
     
-    // Delivery time
+    // Delivery or pickup time (used for both delivery and pickup orders)
     @Temporal(TemporalType.TIMESTAMP)
     private Date deliveryTime;
     
@@ -55,6 +55,7 @@ public class Order implements Serializable {
     private List<CartItem> items = new ArrayList<>();
     
     private double totalAmount;
+    private double discountAmount = 0.0;
     
     public Order() {
         this.orderDate = new Date();
@@ -198,6 +199,10 @@ public class Order implements Serializable {
                 .mapToDouble(CartItem::getTotalPrice)
                 .sum();
     }
+
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = totalAmount;
+    }
     
     // Cancellation methods
     public Date getCancellationDate() {
@@ -319,5 +324,13 @@ public class Order implements Serializable {
     
     public void setGreetingCardMessage(String greetingCardMessage) {
         this.greetingCardMessage = greetingCardMessage;
+    }
+
+    public double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(double discountAmount) {
+        this.discountAmount = discountAmount;
     }
 } 
