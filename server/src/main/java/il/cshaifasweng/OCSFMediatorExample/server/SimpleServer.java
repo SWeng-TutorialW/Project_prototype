@@ -806,7 +806,18 @@ public class SimpleServer extends AbstractServer {
 						else if (update.getNew_value().equals("Network"))
 							new_value = 4;
 						user.setStore(new_value);
+						break;
+					case "phoneNum":
+						user.setPhoneNum(newVal);
+						break;
+					case "fullName":
+						user.setFullName(newVal);
+						break;
+					case "idNum":
+						user.setIdNum(newVal);
+						break;
 				}
+
 
 
 

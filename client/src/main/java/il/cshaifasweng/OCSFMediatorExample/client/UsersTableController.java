@@ -29,6 +29,9 @@ public class UsersTableController {
     @FXML private TableColumn<LoginRegCheck, String> storeCol;
     @FXML private TableColumn<LoginRegCheck, Boolean> subscriptionCol;
     @FXML private TableColumn<LoginRegCheck, String> isLoginCol;
+    @FXML private TableColumn<LoginRegCheck, String> phoneCol;
+    @FXML private TableColumn<LoginRegCheck, String> fullNameCol;
+    @FXML private TableColumn<LoginRegCheck, String> idNumCol;
 
     private ObservableList<LoginRegCheck> users_date;
     List<LoginRegCheck> users ;
@@ -41,12 +44,46 @@ public class UsersTableController {
     public void initialize() throws IOException {
         usernameCol.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getUsername()));
         emailCol.setCellValueFactory(cellData -> new javafx.beans.property.SimpleStringProperty(cellData.getValue().getEmail()));
+        phoneCol.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getPhoneNum()));
+        fullNameCol.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getFullName()));
+        idNumCol.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getIdNum()));
+
 
 
         typeCol.setCellValueFactory(cellData -> {
             String typeString = cellData.getValue().isType() ? "employee" : "client";
             return new ReadOnlyStringWrapper(typeString);
         });
+        phoneCol.setCellFactory(col -> new TextFieldTableCell<>(new DefaultStringConverter()));
+        phoneCol.setOnEditCommit(event -> {
+            LoginRegCheck user = event.getRowValue();
+            String newPhone = event.getNewValue();
+            if (!newPhone.equals(user.getPhoneNum())) {
+                user.setPhoneNum(newPhone);
+                saveChanges(user, "phoneNum", newPhone);
+            }
+        });
+
+        fullNameCol.setCellFactory(col -> new TextFieldTableCell<>(new DefaultStringConverter()));
+        fullNameCol.setOnEditCommit(event -> {
+            LoginRegCheck user = event.getRowValue();
+            String newName = event.getNewValue();
+            if (!newName.equals(user.getFullName())) {
+                user.setFullName(newName);
+                saveChanges(user, "fullName", newName);
+            }
+        });
+
+        idNumCol.setCellFactory(col -> new TextFieldTableCell<>(new DefaultStringConverter()));
+        idNumCol.setOnEditCommit(event -> {
+            LoginRegCheck user = event.getRowValue();
+            String newId = event.getNewValue();
+            if (!newId.equals(user.getIdNum())) {
+                user.setIdNum(newId);
+                saveChanges(user, "idNum", newId);
+            }
+        });
+
 
 
         storeCol.setCellValueFactory(cellData -> {
@@ -81,6 +118,19 @@ public class UsersTableController {
                 System.out.println("username not changed");
                 return;
             }
+            boolean usernameExists = users.stream()
+                    .anyMatch(u -> u.getUsername().equals(newUsername) && !u.getId().equals(user.getId()));
+
+            if (usernameExists) {
+
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Duplicate Username");
+                alert.setHeaderText(null);
+                alert.setContentText("The username '" + newUsername + "' is already taken. Please choose another one.");
+                alert.showAndWait();
+                usersTable.refresh();
+                return;
+            }
 
             user.setUsername(newUsername);
             saveChanges(user, "username", newUsername);
@@ -91,6 +141,16 @@ public class UsersTableController {
             LoginRegCheck user = event.getRowValue();
             String newEmail = event.getNewValue();
             String oldEmail = event.getOldValue();
+            if (!newEmail.contains("@") || !newEmail.contains(".")) {
+                System.out.println("Invalid email format: " + newEmail);
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Email");
+                alert.setHeaderText(null);
+                alert.setContentText("Please enter a valid email address containing '@' and '.'");
+                alert.showAndWait();
+                usersTable.refresh(); // מחזיר את הערך הישן בתצוגה
+                return;
+            }
 
             if (oldEmail.equals(newEmail)) {
                 System.out.println("email not changed");

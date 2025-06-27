@@ -179,5 +179,8 @@ public class LoginRegCheck implements Serializable {
         this.subscriptionStartDate = subscriptionStartDate;
     }
 
+    public void setFullName(String newName) {
+        this.fullName = newName;
+    }
 }
 
