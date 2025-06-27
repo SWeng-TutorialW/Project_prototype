@@ -7,17 +7,33 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class discount_Controller {
     private CatalogController_employee catalogController;
     public void setCatalogController(CatalogController_employee controller) {
         this.catalogController = controller;
+    }
+    @FXML
+    private ComboBox<String> flower_num;
+    public void setFlowersList(List<Flower> flowersList)
+    {
+        this.flowersList_c = flowersList;
+        List<String> flowerNames = flowersList.stream()
+                .map(Flower::getFlowerName)
+                .collect(Collectors.toList());
+
+
+
+        flower_num.getItems().setAll(flowerNames);
+
     }
 
     @FXML
@@ -26,8 +42,7 @@ public class discount_Controller {
     @FXML
     private Button discount_to_specip_flower;
 
-    @FXML
-    private TextField flower_name;
+
 
     @FXML
     private Label name_labl;
@@ -56,9 +71,6 @@ public class discount_Controller {
     @FXML
     private Button specip_price;
     private List<Flower> flowersList_c;
-    public void setFlowersList_c(List<Flower> arr) {
-        flowersList_c = arr;
-    }
 
     @FXML
     void all(ActionEvent event)
@@ -91,9 +103,9 @@ public class discount_Controller {
     @FXML
     void new_price(ActionEvent event) {
         String text = new_price_box.getText().trim();
-        String name=flower_name.getText().trim();
-        if (name.isEmpty()) {
-            Warning warning = new Warning("Please fill in the name field");
+        String name=flower_num.getValue();
+        if (name == null || name.trim().isEmpty()) {
+            Warning warning = new Warning("Please select a flower name");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
@@ -116,7 +128,7 @@ public class discount_Controller {
             Warning warning = new Warning("Price must be a valid number");
             EventBus.getDefault().post(new WarningEvent(warning));
         }
-        String str_flower = flower_name.getText().trim();
+        String str_flower = flower_num.getValue();
         boolean found = false;
         Flower targetFlower = null;
         for (Flower flower : flowersList_c) {
@@ -165,7 +177,7 @@ public class discount_Controller {
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
-        String str_flower = flower_name.getText().trim();
+        String str_flower = flower_num.getValue();
         boolean found = false;
         Flower targetFlower = null;
         for (Flower flower : flowersList_c) {

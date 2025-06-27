@@ -43,46 +43,46 @@ public class CartController {
 
     public void initialize() {
         // Set up table columns
-        nameColumn.setCellValueFactory(cellData -> 
+        nameColumn.setCellValueFactory(cellData ->
             new SimpleStringProperty(cellData.getValue().getFlower().getFlowerName()));
         storeColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getStore()));
         typeColumn.setCellValueFactory(cellData ->
             new SimpleStringProperty(cellData.getValue().getFlower().getFlowerType()));
-        priceColumn.setCellValueFactory(cellData -> 
+        priceColumn.setCellValueFactory(cellData ->
             new SimpleDoubleProperty(cellData.getValue().getFlower().getFlowerPrice()).asObject());
         quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        totalColumn.setCellValueFactory(cellData -> 
+        totalColumn.setCellValueFactory(cellData ->
             new SimpleDoubleProperty(cellData.getValue().getTotalPrice()).asObject());
-        
+
         // Add remove button to action column
         actionColumn.setCellFactory(col -> new TableCell<>() {
             private final Button removeButton = new Button("Remove");
-            
+
             {
                 removeButton.setOnAction(event -> {
                     CartItem item = getTableView().getItems().get(getIndex());
                     removeItem(item);
                 });
             }
-            
+
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
                 setGraphic(empty ? null : removeButton);
             }
         });
-        
+
         // Initialize cart items list
         cartItems = FXCollections.observableArrayList();
         cartTable.setItems(cartItems);
-        
+
         // Update total when items change
         cartItems.addListener((javafx.collections.ListChangeListener.Change<? extends CartItem> change) -> {
             updateTotal();
         });
     }
-    
+
     public void setCartItems(List<CartItem> items) {
         cartItems.clear();
         cartItems.addAll(items);
@@ -99,25 +99,25 @@ public class CartController {
                 .sum();
         cartTotal.setText(String.format("Total: $%.2f", total));
     }
-    
+
     private void removeItem(CartItem item) {
         cartItems.remove(item);
         OrderPageController.getCartItems().remove(item);
         System.out.println("Item Removed:" + item);
         System.out.println("cart items" + cartItems);
         updateTotal();
-        
+
         // Show confirmation
         Warning warning = new Warning("Item removed from cart");
         EventBus.getDefault().post(new WarningEvent(warning));
     }
-    
+
     @FXML
     private void checkout() {
         System.out.println("Checkout button clicked");
         System.out.println("Current user in cart: " + (currentUser != null ? currentUser.getUsername() : "null"));
         System.out.println("Cart items size: " + cartItems.size());
-        
+
         if (cartItems.isEmpty()) {
             System.out.println("Cart is empty");
             Warning warning = new Warning("Your cart is empty!");
@@ -130,7 +130,7 @@ public class CartController {
             System.out.println("User not logged in, opening login window");
             Warning warning = new Warning("Please log in to proceed with checkout");
             EventBus.getDefault().post(new WarningEvent(warning));
-            
+
             // Open login window
             try {
                 System.out.println("Attempting to load login screen");
@@ -178,7 +178,7 @@ public class CartController {
             stage.setTitle("Checkout");
             stage.setScene(new Scene(root));
             stage.show();
-            
+
             // Close cart window
             ((Stage) cartTable.getScene().getWindow()).close();
         } catch (IOException e) {
@@ -186,13 +186,13 @@ public class CartController {
             e.printStackTrace();
         }
     }
-    
+
     @FXML
     private void continueShopping() {
         // Close cart window
         ((Stage) cartTable.getScene().getWindow()).close();
     }
-    
+
     @FXML
     private void goBackToCatalog() {
         try {
@@ -204,4 +204,4 @@ public class CartController {
             EventBus.getDefault().post(new WarningEvent(warning));
         }
     }
-} 
+}

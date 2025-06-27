@@ -96,7 +96,7 @@
       </AnchorPane>
 
       <!-- Switch Button -->
-      <Button fx:id="switchLoginRegbtn" layoutX="142.0" layoutY="640.0"  onMouseClicked="#decideLogOrReg" prefHeight="30.0" prefWidth="165.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white; -fx-background-radius: 8;" text="Go to Login">
+      <Button fx:id="switchLoginRegbtn" layoutX="142.0" layoutY="640.0" onMouseClicked="#decideLogOrReg" prefHeight="30.0" prefWidth="165.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white; -fx-background-radius: 8;" text="Go to Registration">
          <font><Font name="Segoe UI" size="13.0" /></font>
       </Button>
    </children>

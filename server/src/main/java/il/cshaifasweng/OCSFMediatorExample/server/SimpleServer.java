@@ -213,11 +213,6 @@ public class SimpleServer extends AbstractServer {
 			}
 		}
 
-		else if (msgString.startsWith("price_changed"))
-		{
-			List<Store> stores = App.get_stores();
-			Store store = stores.get(0);
-		}
 		else if (msgString.startsWith("update_catalog_after_manager_add_flower"))
 		{
 			Session session = App.getSessionFactory().openSession();
@@ -293,6 +288,21 @@ public class SimpleServer extends AbstractServer {
 			String flower_name=parts[1];
 			if(flower_name.equals("all"))
 			{
+				if(parts.length>2)
+				{
+					String hql = "FROM Flower";
+					List<Flower> flowers = session.createQuery(hql, Flower.class).getResultList();
+					session.getTransaction().commit();
+					session.close();
+					try {
+						discount_for_1_flower event = new discount_for_1_flower(flowers,-2,flower_name);
+						client.sendToClient(event);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					return;
+
+				}
 				String hql = "FROM Flower";
 				List<Flower> flowers = session.createQuery(hql, Flower.class).getResultList();
 				session.getTransaction().commit();
@@ -340,6 +350,59 @@ public class SimpleServer extends AbstractServer {
 			}
 			System.out.println("server send message to client");
 			sendToAllClients("The network manager has added a flower.");
+
+		}
+		if(msg.equals("end_sale"))
+		{
+			try {
+				Session session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				System.out.println("finish sale for all");
+
+
+				String hql = "FROM Flower";
+				List<Flower> flowersFromDB = session.createQuery(hql, Flower.class).getResultList();
+
+				for (Flower flower : flowersFromDB) {
+					int discount_percent = flower.getDiscount();
+					double remainingPercent = 100.0 - discount_percent;
+					double originalPrice = flower.getFlowerPrice() * 100.0 / remainingPercent;
+
+					System.out.println("  [DB] Flower: " + flower.getFlowerName());
+					System.out.println("    [DB] Original Price: " + originalPrice);
+
+
+					flower.setFlowerPrice(originalPrice);
+					flower.setSale(false);
+					session.update(flower);
+				}
+
+				session.getTransaction().commit();
+				session.close();
+
+
+				for (Store store : App.get_stores()) {
+					List<Flower> updatedList = new ArrayList<>();
+
+					for (Flower flowerInStore : store.getFlowersList()) {
+
+						for (Flower flowerFromDB : flowersFromDB) {
+							if (flowerFromDB.getFlowerName().equals(flowerInStore.getFlowerName())) {
+								updatedList.add(flowerFromDB);
+								break;
+							}
+						}
+					}
+
+					store.setFlowersList(updatedList);
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			sendToAllClients("new#price#in#flower_all_end");
 
 		}
 		else if (msg.getClass().equals(Integer.class)) {
@@ -462,6 +525,7 @@ public class SimpleServer extends AbstractServer {
 				query.select(root).where(builder.equal(root.get("flowerName"), flower.getFlowerName()));
 				Flower flowerToUpdate = session.createQuery(query).uniqueResult();
 				flowerToUpdate.setFlowerPrice(new_price);
+				flowerToUpdate.setSale(false);
 				session.update(flowerToUpdate);
 				session.getTransaction().commit();
 				System.out.println("Flower : " + flowerToUpdate.getFlowerName());
@@ -505,67 +569,25 @@ public class SimpleServer extends AbstractServer {
 			}
 			sendToAllClients("new#price#in#flower_" + flowerToUpdate.getFlowerName());
 		}
-		else if (msg.getClass().equals(LoginRegCheck.class)) // login and registration
+		else if (msg.getClass().equals(LoginRegCheck.class))
 		{
 			System.out.println("entered LoginRegCheck");
-			Session session;
+			Session session = App.getSessionFactory().openSession();
+			session.beginTransaction();
 			LoginRegCheck new_user = (LoginRegCheck) msg;
 			System.out.println("new_user name : " + new_user.getUsername());
+			session = App.getSessionFactory().openSession();
+			try {
+				session.beginTransaction();
+				session.save(new_user);
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				session.getTransaction().rollback();
+				e.printStackTrace();
+			} finally {
+				session.close();
+			}// registration
 
-			switch(new_user.getIsLogin()){
-
-				case 0: // registration
-					System.out.println("Trying to Register a new user: " + new_user.getUsername());
-					session = App.getSessionFactory().openSession();
-					session.beginTransaction();
-					List<LoginRegCheck> existingUsers = session.createQuery("FROM LoginRegCheck lr WHERE username = :username", LoginRegCheck.class)
-							.setParameter("username", new_user.getUsername())
-							.getResultList();
-					session.getTransaction().commit();
-					session.close();
-					if(existingUsers.isEmpty()){
-						// we can register.
-						try {
-							session = App.getSessionFactory().openSession();
-							new_user.setId(0); // for insertion
-							session.beginTransaction();
-							session.save(new_user);
-							session.getTransaction().commit();
-							client.sendToClient("#registerSuccess");
-						} catch (Exception e) {
-
-							session.getTransaction().rollback();
-							e.printStackTrace();
-						} finally {
-							session.close();
-						}// registration
-					}
-					else {
-						// user already exists
-						try {
-							client.sendToClient("#registerFailed");
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-					break;
-				case 1: // login
-					System.out.println("Trying to Login a user: " + new_user.getUsername());
-					session = App.getSessionFactory().openSession();
-					session.beginTransaction();
-					List<LoginRegCheck> users = session.createQuery("FROM LoginRegCheck lr WHERE username = :username AND password = :password", LoginRegCheck.class)
-							.setParameter("username", new_user.getUsername())
-							.setParameter("password", new_user.getPassword())
-							.getResultList();
-					session.getTransaction().commit();
-					session.close();
-					if(!users.isEmpty()){
-						try{client.sendToClient("#loginSuccess");}catch(IOException e){e.printStackTrace();} // correct user and password
-					}
-					else{ try{client.sendToClient("#loginFailed");}catch(IOException e){e.printStackTrace();}} // user doesn't exist or password is wrong
-
-					break;
-			}
 		}
 		else if (msg.getClass().equals(UpdateUserEvent.class)){ // USER UPDATE
 			LoginRegCheck userToUpdate = ((UpdateUserEvent) msg).getUpdatedUser();
@@ -669,6 +691,69 @@ public class SimpleServer extends AbstractServer {
 				session.close();
 			}
 
+
+		}
+		else if (msg instanceof update_user_values)
+		{
+			update_user_values update = (update_user_values) msg;
+
+			Session session = App.getSessionFactory().openSession();
+
+			try {
+				session.beginTransaction();
+
+
+				LoginRegCheck user = session.get(LoginRegCheck.class, update.getUser().getId());
+				if (user == null) {
+					System.out.println("User not found in database (ID = " + update.getUser().getId() + ")");
+					session.getTransaction().rollback();
+					return;
+				}
+
+				String column = update.getColumn();
+				String newVal = update.getNew_value();
+				System.out.println("User is " + user.getUsername());
+				System.out.println("column is " + update.getColumn());
+				System.out.println("newVal is " + newVal);
+
+
+
+				switch (column) {
+					case "username":
+						user.setUsername(newVal);
+						break;
+					case "email":
+						user.setEmail(newVal);
+						break;
+					case "store":
+						int new_value = 0;
+						if (update.getNew_value().equals("Haifa"))
+							new_value = 1;
+						else if (update.getNew_value().equals("Krayot"))
+							new_value = 2;
+						else if (update.getNew_value().equals("Nahariyya"))
+							new_value = 3;
+						else if (update.getNew_value().equals("Network"))
+							new_value = 4;
+						user.setStore(new_value);
+				}
+
+
+
+
+
+				session.update(user);
+				session.getTransaction().commit();
+				System.out.println("User successfully updated: " + user.getUsername());
+
+			} catch (Exception e) {
+				if (session.getTransaction() != null) {
+					session.getTransaction().rollback();
+				}
+				e.printStackTrace();
+			} finally {
+				session.close();
+			}
 
 		}
 		else if (msg.getClass().equals(change_sendOrRecieve_messages.class)) {

@@ -1,5 +1,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
+
+
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.change_user_login;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -17,9 +20,13 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
+
+import java.awt.*;
 import java.io.IOException;
 import java.util.List;
+
 
 /**
  * Sample Skeleton for 'registration_screen.fxml' Controller Class
@@ -27,7 +34,6 @@ import java.util.List;
 
 public class RegistrationController {
 
-    public Button logBtn;
     @FXML private Label credit_Card;
     @FXML private PasswordField credit_card_box;
     @FXML private Label id;
@@ -50,18 +56,30 @@ public class RegistrationController {
     @FXML private AnchorPane logAnchPane;
     @FXML
     private Label regPassLbl;
+
+
+
     @FXML
     private Label regPhoneLbl;
+
+
+
     @FXML
     private Label regUserLbl;
+
     @FXML
     private Label regUserLbl1;
+
     @FXML
     private Label regUserLbl11;
+
     @FXML
     private Label selectStoreLbl;
+
+
     @FXML
     private Button switchLoginRegbtn;
+
     @FXML
     private TextField userLogTxtB;
     @FXML
@@ -89,47 +107,34 @@ public class RegistrationController {
     void logToSys(MouseEvent event) throws IOException {
         String user = userLogTxtB.getText();
         String pass = passLogTxtB.getText();
-           if(user.isEmpty() || pass.isEmpty()){
-               Warning warn = new Warning("Please fill all the fields");
-                EventBus.getDefault().post(new WarningEvent(warn));
+        for (LoginRegCheck loginRegCheck : users) {
+
+            if (loginRegCheck.getUsername().equals(user) && loginRegCheck.getPassword().equals(pass)) {
+                System.out.println("");
+                change_user_login wrapper = new change_user_login(loginRegCheck, 1);
+                try {
+                    SimpleClient.getClient().sendToServer(wrapper);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                loginRegCheck.setIsLogin(1);
+                catalogController.set_user(loginRegCheck);
+                catalogController.set_type(loginRegCheck.getStore());
+                con.set_user(loginRegCheck);
+                con.set_guest(false);
+                con.set_type_client(true);
+                con.set_type_local(loginRegCheck.getStore());
+                ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
+
                 return;
-           }
 
-        LoginRegCheck userLogin = new LoginRegCheck(user, pass, "", 1, false, -1);
-        SimpleClient.getClient().sendToServer(userLogin);
-        tempUser = userLogin;
-    }
-
-    @Subscribe
-    public void onSuccessLogin(String msg){
-        if(msg.startsWith("#loginSuccess")){
-            SimpleClient.setCurrentUser(tempUser);
-            if(catalogController != null) {
-                catalogController.set_user(tempUser);
-                catalogController.set_type(store);
             }
-            System.out.println("Login successful for user: " + tempUser.getUsername());
-            Warning warning = new Warning("Login Successful");
-            EventBus.getDefault().post(new WarningEvent(warning));
-            Platform.runLater(() -> {
-                ((Stage) registerWin.getScene().getWindow()).close(); // close the window after successful login
-            });
-        }else if(msg.startsWith("#loginFailed")){
-            SimpleClient.setCurrentUser(null);
-            System.out.println("Login failed for user: " + tempUser.getUsername());
-            Warning warning = new Warning("Incorrect Username or Password");
-            EventBus.getDefault().post(new WarningEvent(warning));
+
         }
     }
-    @Subscribe
-    public void onRegisterFail(String msg) {
-        if (msg.startsWith("#registerFailed")) {
-            SimpleClient.setCurrentUser(null);
-            System.out.println("Registration failed for user: " + tempUser.getUsername());
-            Warning warning = new Warning("Registration Failed: Maybe This Username Already Exists?");
-            EventBus.getDefault().post(new WarningEvent(warning));
-        }
-    }
+
+
+
 
 
     public String checkIfValid(String regUser, String email, String regPass, String confPass, String fullName, String phoneNumber, String account_type, String userId) {
@@ -162,18 +167,18 @@ public class RegistrationController {
         if (!email.contains("@") || !email.contains(".")) {
             return "Invalid email format";
         }
-        /*
+        /*if (is_yearly_subscription) {
             if (userId == null || !userId.matches("\\d{9}")) {
                 return "ID must be exactly 9 digits";
             }
-        */
+        }*/
         return null;
     }
 
 
     @FXML
     void RegToSys(MouseEvent event) throws IOException {
-        if(SimpleClient.getCurrentUser() != null){ Warning warn = new Warning("Can't Register While Being Logged-In."); return;}
+
         String email = regEmailTxtB.getText();
         String regUser = regUserTxtB.getText();
         String fullName = regFullNameTxtB.getText();
@@ -183,15 +188,15 @@ public class RegistrationController {
         String account_type = select_account_type.getValue();
         String userId = regIdTxtB.getText();
 
-//        String check = checkIfValid(regUser, email, regPass, confPass, fullName, phoneNumber, account_type, userId);
-//        if (check != null) {
-//            Warning warning = new Warning(check);
-//            EventBus.getDefault().post(new WarningEvent(warning));
-//            return;
-//        }
+        String check = checkIfValid(regUser, email, regPass, confPass, fullName, phoneNumber, account_type, userId);
+        if (check != null) {
+            Warning warning = new Warning(check);
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
 
-        boolean isConnected = catalogController != null;
-        LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, phoneNumber, fullName, userId, false ,isConnected ); // for now it's it meant to be for registration only.
+        // int isLogin = con != null ? 0 : 1; // need further checking to see if this is necessary
+        LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, phoneNumber, fullName, userId, false); // for now it's it meant to be for registration only.
 
         Runnable sendAndClose = () -> {
             try {
@@ -226,7 +231,6 @@ public class RegistrationController {
     @FXML
     void initialize() throws IOException {
         EventBus.getDefault().register(this);
-        System.out.println("Registration Screen Initialized");
         if(gotFromConnectScene){
             gotFromConnectScene = false;
             logAnchPane.setVisible(false);
@@ -306,7 +310,6 @@ public class RegistrationController {
                 select_store_label.setVisible(true);
                 select_store.setVisible(true);
                 select_store.setValue(null);
-
             }
             case "Network" -> {
                 alert.setTitle("Network Subscription");
@@ -356,6 +359,8 @@ public class RegistrationController {
     @FXML
     void decideLogOrReg(MouseEvent event) // whenever we press on the "Go to Registration/Login" button
     {
+
+
         if (logOrReg % 2 == 1) { // we went from registration(0) to login(1)
             logAnchPane.setVisible(true);
             regAnchPane.setVisible(false);
@@ -366,7 +371,7 @@ public class RegistrationController {
             regAnchPane.setVisible(true);
             switchLoginRegbtn.setText("Go to Login");
         }
-        logOrReg++; // toggle between 0 and 1
+        logOrReg++;// toggle between 0 and 1
     }
 
 
