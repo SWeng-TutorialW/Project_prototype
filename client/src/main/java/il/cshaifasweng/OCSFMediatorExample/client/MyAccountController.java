@@ -22,6 +22,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class MyAccountController {
+
+    @FXML public Label userIdLbl;
+    @FXML public TextField idNumTxtB;
     @FXML TextField userChangeTxtB;
     @FXML TextField emailChangeTxtB;
     @FXML TextField phoneChangeTxtB;
@@ -29,8 +32,8 @@ public class MyAccountController {
     @FXML private Button myOrdersButton, subscribeBtn, changeBtn;
     @FXML private AnchorPane myAccUsers, my_account_data;
     @FXML private PasswordField newPassTxtB, confNewPassTxtB;
-    @FXML private Label subscriptionDateLbl;
-    @FXML private Label subscriptionStartLbl;
+    @FXML private Label subscriptionExpireLbl, subscriptionExpireTitleLbl;
+
 
     private LoginRegCheck current_User;
 
@@ -122,6 +125,8 @@ public class MyAccountController {
     public void loadUserInfo() {
         if (current_User == null) return;
 
+        idNumTxtB.setText(String.valueOf(current_User.getIdNum())); // Assuming getId() returns Long or int
+        idNumTxtB.setEditable(false);
         userChangeTxtB.setText(current_User.getUsername());
         emailChangeTxtB.setText(current_User.getEmail()); // what if the user changes their info?
         phoneChangeTxtB.setText(current_User.getPhoneNum());
@@ -131,12 +136,14 @@ public class MyAccountController {
             default -> "Guest"; // shouldn't happen
         };
         if (current_User.is_yearly_subscription() && current_User.getSubscriptionStartDate() != null) {
-            subscriptionStartLbl.setVisible(true);
-            subscriptionStartLbl.setVisible(true);
-            subscriptionDateLbl.setText(current_User.getSubscriptionStartDate().toString());
+            LocalDate expire = current_User.getSubscriptionStartDate().plusYears(1);
+
+            subscriptionExpireTitleLbl.setVisible(true);
+            subscriptionExpireLbl.setVisible(true);
+            subscriptionExpireTitleLbl.setText(expire.toString());
         } else {
-            subscriptionDateLbl.setVisible(false);
-            subscriptionStartLbl.setVisible(false);
+            subscriptionExpireTitleLbl.setVisible(false);
+            subscriptionExpireLbl.setVisible(false);
         }
         accountTypeEmptyLbl.setText(accountType);
         subscribeBtn.setVisible(!current_User.is_yearly_subscription());
@@ -228,6 +235,7 @@ public class MyAccountController {
                 return;
             }
             current_User.setStore(4);
+            loadUserInfo();  //added
             showAlert(Alert.AlertType.INFORMATION, "Upgraded", null,
                     "Your account has been upgraded to a Network account.\nYou may now proceed to register for the yearly subscription.");
         }

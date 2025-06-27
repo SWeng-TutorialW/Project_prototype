@@ -80,8 +80,8 @@
                         <Label fx:id="accTypeLbl" text="Account Type :" GridPane.rowIndex="4" />
                         <Label fx:id="accountTypeEmptyLbl" text="_" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
-                        <Label fx:id="subscriptionStartLbl" text="Subscription Start Date :" GridPane.rowIndex="5" />
-                        <Label fx:id="subscriptionDateLbl" text=" " GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <Label fx:id="subscriptionExpireLbl" text="Expire Date :" GridPane.rowIndex="5" />
+                        <Label fx:id="subscriptionExpireTitleLbl" text=" " GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
                         <Label fx:id="changePassLbl" text="Change Password" GridPane.rowIndex="6" />
 
