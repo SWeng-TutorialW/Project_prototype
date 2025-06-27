@@ -11,23 +11,54 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
-<ScrollPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="850.0" prefWidth="604.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogController_employee">
+<ScrollPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="850.0" prefWidth="798.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogController_employee">
     <content>
-        <AnchorPane prefHeight="846.0" prefWidth="602.0">
+        <AnchorPane prefHeight="846.0" prefWidth="788.0">
             <children>
-                <Label fx:id="copyrightLBl" alignment="CENTER" layoutX="177.0" layoutY="809.0" prefHeight="28.0" prefWidth="253.0" text="LilachSystem v0.1 © 2025 BestGroup. All rights reserved." AnchorPane.bottomAnchor="9.0" AnchorPane.leftAnchor="177.0" AnchorPane.rightAnchor="176.0">
+                <Label fx:id="copyrightLBl" alignment="CENTER" layoutX="232.0" layoutY="818.0" prefHeight="28.0" prefWidth="253.0" text="LilachSystem v0.1 © 2025 BestGroup. All rights reserved.">
                     <font>
                         <Font name="Segoe UI" size="10.0" />
                     </font>
                 </Label>
-                <HBox fx:id="first_line" layoutX="-1.0" layoutY="156.0" prefHeight="145.0" prefWidth="586.0" spacing="20.0">
+                <Label layoutX="-2.0" layoutY="-3.0" prefHeight="68.0" prefWidth="791.0" style="-fx-background-color: #C8A2C8;" text="LILACH FLOWERS" textFill="#fdfdfd57">
+                    <font>
+                        <Font name="Palatino Linotype" size="24.0" />
+                    </font>
+                </Label>
+                <Button fx:id="my_account" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="421.0" layoutY="-1.0" mnemonicParsing="false" onAction="#gotoEmployeeAcc" prefHeight="41.0" prefWidth="142.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="    My Account" textFill="#fdfdfd">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                </Button>
+                <ImageView fitHeight="36.0" fitWidth="34.0" layoutX="421.0" layoutY="2.0" pickOnBounds="true">
+                    <image>
+                        <Image url="@../../../../images/person_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.png" />
+                    </image>
+                </ImageView>
+                <Button fx:id="cart" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="562.0" layoutY="-1.0" mnemonicParsing="false" prefHeight="41.0" prefWidth="85.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text=" Cart" textFill="#fdfdfd">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                </Button>
+                <ImageView fitHeight="39.0" fitWidth="27.0" layoutX="562.0" pickOnBounds="true">
+                    <image>
+                        <Image url="@../../../../images/cart.png" />
+                    </image>
+                </ImageView>
+                <Button fx:id="contact" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="647.0" layoutY="-1.0" mnemonicParsing="false" onAction="#open_complain_box" prefHeight="41.0" prefWidth="142.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Mail Box" textFill="#fdfdfd">
+                    <font>
+                        <Font size="13.0" />
+                    </font>
+                </Button>
+                <HBox fx:id="first_line" layoutY="137.0" prefHeight="197.0" prefWidth="776.0" spacing="20.0">
                     <children>
-                        <Button fx:id="one_1" mnemonicParsing="false" prefWidth="74.0">
+                        <Button fx:id="one_1" mnemonicParsing="false" onAction="#delete_flower" prefHeight="219.0" prefWidth="182.0">
                             <graphic>
-                                <VBox fx:id="flower_1" prefHeight="155.0" prefWidth="144.0">
+                                <VBox fx:id="flower_1" prefHeight="193.0" prefWidth="166.0">
                                     <children>
-                                        <ImageView fx:id="pic_1" fitHeight="96.0" fitWidth="166.0" pickOnBounds="true" />
+                                        <ImageView fx:id="pic_1" fitHeight="83.0" fitWidth="166.0" pickOnBounds="true" />
                                         <Label fx:id="name_1" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
                                             <font>
                                                 <Font size="18.0" />
@@ -38,7 +69,11 @@
                                                 <Font size="18.0" />
                                             </font>
                                         </Label>
-                                        <TextField fx:id="price_1" alignment="TOP_CENTER" onAction="#commitPrice" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_1_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font></Text>
+                                        <TextField fx:id="price_1" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -47,7 +82,7 @@
                                 </VBox>
                             </graphic>
                         </Button>
-                        <Button fx:id="two_2" mnemonicParsing="false" prefWidth="74.0">
+                        <Button fx:id="two_2" mnemonicParsing="false" onAction="#delete_flower" prefWidth="74.0">
                             <graphic>
                                 <VBox fx:id="flower_2" prefHeight="202.0" prefWidth="162.0">
                                     <children>
@@ -62,7 +97,12 @@
                                                 <Font size="18.0" />
                                             </font>
                                         </Label>
-                                        <TextField fx:id="price_2" alignment="TOP_CENTER" onAction="#commitPrice" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_2_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                                        <TextField fx:id="price_2" alignment="TOP_CENTER" prefHeight="27.0" prefWidth="166.0" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -71,7 +111,7 @@
                                 </VBox>
                             </graphic>
                         </Button>
-                        <Button fx:id="three_3" mnemonicParsing="false" prefWidth="74.0">
+                        <Button fx:id="three_3" mnemonicParsing="false" onAction="#delete_flower" prefWidth="74.0">
                             <graphic>
                                 <VBox fx:id="flower_3" prefHeight="202.0" prefWidth="162.0">
                                     <children>
@@ -86,7 +126,12 @@
                                                 <Font size="18.0" />
                                             </font>
                                         </Label>
-                                        <TextField fx:id="price_3" alignment="TOP_CENTER" onAction="#commitPrice" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_3_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                                        <TextField fx:id="price_3" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -95,11 +140,7 @@
                                 </VBox>
                             </graphic>
                         </Button>
-                    </children>
-                </HBox>
-                <HBox fx:id="second_line" layoutX="2.0" layoutY="386.0" prefHeight="193.0" prefWidth="586.0" spacing="20.0">
-                    <children>
-                        <Button fx:id="four_4" mnemonicParsing="false" prefWidth="74.0">
+                        <Button fx:id="four_4" mnemonicParsing="false" onAction="#delete_flower" prefWidth="74.0">
                             <graphic>
                                 <VBox fx:id="flower_4" prefHeight="202.0" prefWidth="162.0">
                                     <children>
@@ -114,7 +155,12 @@
                                                 <Font size="18.0" />
                                             </font>
                                         </Label>
-                                        <TextField fx:id="price_4" alignment="TOP_CENTER" onAction="#commitPrice" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_4_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                                        <TextField fx:id="price_4" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -123,7 +169,11 @@
                                 </VBox>
                             </graphic>
                         </Button>
-                        <Button fx:id="five_5" mnemonicParsing="false" prefWidth="74.0">
+                    </children>
+                </HBox>
+                <HBox fx:id="second_line" layoutY="373.0" prefHeight="197.0" prefWidth="775.0" spacing="20.0">
+                    <children>
+                        <Button fx:id="five_5" mnemonicParsing="false" onAction="#delete_flower" prefWidth="74.0">
                             <graphic>
                                 <VBox fx:id="flower_5" prefHeight="202.0" prefWidth="162.0">
                                     <children>
@@ -138,7 +188,12 @@
                                                 <Font size="18.0" />
                                             </font>
                                         </Label>
-                                        <TextField fx:id="price_5" alignment="TOP_CENTER" onAction="#commitPrice" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_5_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                                        <TextField fx:id="price_5" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -147,7 +202,7 @@
                                 </VBox>
                             </graphic>
                         </Button>
-                        <Button fx:id="six_6" mnemonicParsing="false" prefWidth="74.0">
+                        <Button fx:id="six_6" mnemonicParsing="false" onAction="#delete_flower" prefWidth="74.0">
                             <graphic>
                                 <VBox fx:id="flower_6" prefHeight="202.0" prefWidth="162.0">
                                     <children>
@@ -162,7 +217,12 @@
                                                 <Font size="18.0" />
                                             </font>
                                         </Label>
-                                        <TextField fx:id="price_6" alignment="TOP_CENTER" onAction="#commitPrice" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_6_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                                        <TextField fx:id="price_6" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -171,21 +231,7 @@
                                 </VBox>
                             </graphic>
                         </Button>
-                    </children>
-                </HBox>
-                <AnchorPane fx:id="for_combo" layoutX="14.0" layoutY="88.0" prefHeight="30.0" prefWidth="150.0">
-                    <children>
-                        <ComboBox fx:id="combo" onAction="#combo_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
-                        <ImageView fx:id="sort_image" fitHeight="25.0" fitWidth="43.0" pickOnBounds="true">
-                            <image>
-                                <Image url="@../../../../images/sort.png" />
-                            </image>
-                        </ImageView>
-                    </children>
-                </AnchorPane>
-                <HBox fx:id="second_line1" layoutX="2.0" layoutY="607.0" prefHeight="193.0" prefWidth="586.0" spacing="20.0">
-                    <children>
-                        <Button fx:id="seven_7" mnemonicParsing="false" prefWidth="74.0">
+                        <Button fx:id="seven_7" mnemonicParsing="false" onAction="#delete_flower" prefWidth="74.0">
                             <graphic>
                                 <VBox fx:id="flower_7" prefHeight="202.0" prefWidth="162.0">
                                     <children>
@@ -200,7 +246,12 @@
                                                 <Font size="18.0" />
                                             </font>
                                         </Label>
-                                        <TextField fx:id="price_7" alignment="TOP_CENTER" onAction="#commitPrice" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_7_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                                        <TextField fx:id="price_7" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -209,7 +260,7 @@
                                 </VBox>
                             </graphic>
                         </Button>
-                        <Button fx:id="eight_8" mnemonicParsing="false" prefWidth="74.0">
+                        <Button fx:id="eight_8" mnemonicParsing="false" onAction="#delete_flower" prefWidth="74.0">
                             <graphic>
                                 <VBox fx:id="flower_8" prefHeight="202.0" prefWidth="162.0">
                                     <children>
@@ -224,7 +275,12 @@
                                                 <Font size="18.0" />
                                             </font>
                                         </Label>
-                                        <TextField fx:id="price_8" alignment="TOP_CENTER" onAction="#commitPrice" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_8_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                                        <TextField fx:id="price_8" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -233,7 +289,21 @@
                                 </VBox>
                             </graphic>
                         </Button>
-                        <Button fx:id="nine_9" mnemonicParsing="false" prefWidth="74.0">
+                    </children>
+                </HBox>
+                <AnchorPane fx:id="for_combo" layoutX="14.0" layoutY="80.0" prefHeight="30.0" prefWidth="150.0">
+                    <children>
+                        <ComboBox fx:id="combo" onAction="#combo_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
+                        <ImageView fx:id="sort_image" fitHeight="25.0" fitWidth="43.0" pickOnBounds="true">
+                            <image>
+                                <Image url="@../../../../images/sort.png" />
+                            </image>
+                        </ImageView>
+                    </children>
+                </AnchorPane>
+                <HBox fx:id="second_line1" layoutX="2.0" layoutY="607.0" prefHeight="197.0" prefWidth="775.0" spacing="20.0">
+                    <children>
+                        <Button fx:id="nine_9" mnemonicParsing="false" onAction="#delete_flower" prefWidth="74.0">
                             <graphic>
                                 <VBox fx:id="flower_9" prefHeight="202.0" prefWidth="162.0">
                                     <children>
@@ -248,7 +318,12 @@
                                                 <Font size="18.0" />
                                             </font>
                                         </Label>
-                                        <TextField fx:id="price_9" alignment="TOP_CENTER" onAction="#commitPrice" style="-fx-text-fill: #c8a2c8;">
+                              <Text fx:id="price_9_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                                        <TextField fx:id="price_9" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
                                             <font>
                                                 <Font size="18.0" />
                                             </font>
@@ -257,47 +332,112 @@
                                 </VBox>
                             </graphic>
                         </Button>
+                  <Button fx:id="ten_10" mnemonicParsing="false" onAction="#delete_flower" prefWidth="74.0">
+                     <graphic>
+                        <VBox fx:id="flower_10" prefHeight="202.0" prefWidth="162.0">
+                           <children>
+                              <ImageView fx:id="pic_10" fitHeight="96.0" fitWidth="166.0" pickOnBounds="true" />
+                              <Label fx:id="name_10" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="type_10" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Text fx:id="price_10_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_10" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </TextField>
+                           </children>
+                        </VBox>
+                     </graphic>
+                  </Button>
+                  <Button fx:id="eleven_11" mnemonicParsing="false" onAction="#delete_flower" prefWidth="74.0">
+                     <graphic>
+                        <VBox fx:id="flower_11" prefHeight="202.0" prefWidth="162.0">
+                           <children>
+                              <ImageView fx:id="pic_11" fitHeight="96.0" fitWidth="166.0" pickOnBounds="true" />
+                              <Label fx:id="name_11" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="type_11" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Text fx:id="price_11_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_11" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </TextField>
+                           </children>
+                        </VBox>
+                     </graphic>
+                  </Button>
+                  <Button fx:id="twelve_12" mnemonicParsing="false" onAction="#delete_flower" prefWidth="74.0">
+                     <graphic>
+                        <VBox fx:id="flower_12" prefHeight="202.0" prefWidth="162.0">
+                           <children>
+                              <ImageView fx:id="pic_12" fitHeight="96.0" fitWidth="166.0" pickOnBounds="true" />
+                              <Label fx:id="name_12" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Label fx:id="type_12" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Label>
+                              <Text fx:id="price_12_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </Text>
+                              <TextField fx:id="price_12" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
+                                 <font>
+                                    <Font size="18.0" />
+                                 </font>
+                              </TextField>
+                           </children>
+                        </VBox>
+                     </graphic>
+                  </Button>
                     </children>
                 </HBox>
-            <Button fx:id="add_flower" layoutX="460.0" layoutY="84.0" mnemonicParsing="false" onAction="#add_flower" prefHeight="25.0" prefWidth="116.0" style="-fx-background-color: #C8A2C8;" text="Add Flower" textFill="#fdfdfd">
+            <Button fx:id="add_flower" layoutX="660.0" layoutY="76.0" mnemonicParsing="false" onAction="#add_flower" prefHeight="25.0" prefWidth="116.0" style="-fx-background-color: #C8A2C8;" text="Add Flower" textFill="#fdfdfd">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <AnchorPane layoutX="-5.0" prefHeight="61.0" prefWidth="610.0" style="-fx-background-color: #FFD1DC;">
-               <children>
-                  <Label fx:id="titleLbl" layoutX="29.0" layoutY="17.0" prefHeight="29.0" prefWidth="164.0" text="Lilach Flowers" textFill="#b20f99" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="29.0" AnchorPane.rightAnchor="407.0">
-                     <font>
-                        <Font name="Segoe UI" size="24.0" />
-                     </font>
-                  </Label>
-                      <Button fx:id="my_account" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="205.0" layoutY="10.0" mnemonicParsing="false" prefHeight="41.0" prefWidth="169.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="    My Account" textFill="#fdfdfd" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="205.0" AnchorPane.rightAnchor="226.0">
-                          <font>
-                              <Font size="18.0" />
-                          </font>
-                      </Button>
-                      <ImageView fitHeight="29.0" fitWidth="30.0" layoutX="217.0" layoutY="17.0" pickOnBounds="true" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="217.0" AnchorPane.rightAnchor="353.0">
-                          <image>
-                              <Image url="@../../../../images/person_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.png" />
-                          </image>
-                      </ImageView>
-                      <Button fx:id="cart" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="374.0" layoutY="10.0" mnemonicParsing="false" prefHeight="41.0" prefWidth="85.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text=" Cart" textFill="#fdfdfd" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="374.0" AnchorPane.rightAnchor="141.0">
-                          <font>
-                              <Font size="18.0" />
-                          </font>
-                      </Button>
-                      <ImageView fitHeight="26.0" fitWidth="25.0" layoutX="380.0" layoutY="18.0" pickOnBounds="true" AnchorPane.bottomAnchor="17.0" AnchorPane.leftAnchor="380.0" AnchorPane.rightAnchor="195.0">
-                          <image>
-                              <Image url="@../../../../images/cart.png" />
-                          </image>
-                      </ImageView>
-                      <Button fx:id="contact" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="459.0" layoutY="10.0" mnemonicParsing="false" onAction="#open_complain_box" prefHeight="41.0" prefWidth="127.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Complain Box" textFill="#fdfdfd" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="459.0" AnchorPane.rightAnchor="14.0">
-                          <font>
-                              <Font size="13.0" />
-                          </font>
-                      </Button>
-               </children>
-            </AnchorPane>
+            <Button fx:id="discount" layoutX="391.0" layoutY="76.0" mnemonicParsing="false" onAction="#discount" prefHeight="39.0" prefWidth="129.0" style="-fx-background-color: #C8A2C8;" text="Set Discount" textFill="#fdfdfd">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
+            <ComboBox fx:id="Stores" layoutX="195.0" layoutY="83.0" onAction="#stores_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
+            <Button fx:id="users_btn" layoutX="692.0" layoutY="40.0" mnemonicParsing="false" onAction="#show_users" prefHeight="25.0" prefWidth="71.0" text="users" />
+            <Button fx:id="end_sale_btn" layoutX="270.0" layoutY="11.0" mnemonicParsing="false" onAction="#end_sale" prefHeight="41.0" prefWidth="116.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="END Sale" textFill="#fdfdfd" visible="false">
+               <font>
+                  <Font size="18.0" />
+               </font>
+            </Button>
             </children>
         </AnchorPane>
     </content>

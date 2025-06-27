@@ -50,7 +50,8 @@ public class PrimaryController {
 	}
 
 	@FXML
-	void initialize() {
+	void initialize()
+	{
 		
 
 	}
@@ -73,7 +74,6 @@ public class PrimaryController {
 			e.printStackTrace();
 			return;
 		}
-		move_to_connect_scene();
 		if (SimpleClient.getClient().isConnected()) {
 			System.out.println("move_to_connect_scene");
 			move_to_connect_scene();
@@ -94,6 +94,7 @@ public class PrimaryController {
 
 			} catch (IOException e) {
 				e.printStackTrace();
+				System.out.println("failed to load connect scene");
 			}
 		});
 	}

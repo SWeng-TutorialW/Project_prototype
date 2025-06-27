@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane fx:id="registerWin" prefHeight="698.0" prefWidth="450.0" style="-fx-background-color: #f8d5ec;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.RegistrationController">
+
+   <children>
+
+      <!-- Registration Panel -->
+      <AnchorPane fx:id="regAnchPane" layoutX="22.0" layoutY="38.0" prefHeight="580.0" prefWidth="407.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-border-color: #e9a4c7; -fx-border-width: 1.5;" visible="false">
+
+         <children>
+            <Label fx:id="regLbl" layoutX="130.0" layoutY="10.0" text="Registration">
+               <font><Font name="Segoe UI Semibold" size="24.0" /></font>
+            </Label>
+
+            <Label fx:id="selectStoreLbl" layoutX="10.0" layoutY="50.0" text="Select type of subscription">
+               <font><Font name="Segoe UI" size="13.0" /></font>
+            </Label>
+
+            <ComboBox fx:id="select_account_type" layoutX="10.0" layoutY="70.0" onAction="#selected_account" prefWidth="150.0" />
+            <Label fx:id="select_store_label" layoutX="220.0" layoutY="50.0" text="Select Store" visible="false">
+               <font><Font name="Segoe UI" size="13.0" /></font>
+            </Label>
+            <ComboBox fx:id="select_store" layoutX="220.0" layoutY="70.0" onAction="#select_store" prefWidth="150.0" visible="false" />
+
+            <!-- Username -->
+            <Label layoutX="10.0" layoutY="110.0" text="Username"><font><Font name="Segoe UI" size="13.0" /></font></Label>
+            <TextField fx:id="regUserTxtB" layoutX="10.0" layoutY="130.0" prefWidth="360.0" />
+
+            <!-- Email -->
+            <Label layoutX="10.0" layoutY="160.0" text="Email"><font><Font name="Segoe UI" size="13.0" /></font></Label>
+            <TextField fx:id="regEmailTxtB" layoutX="10.0" layoutY="180.0" prefWidth="360.0" />
+
+            <!-- Full Name -->
+            <Label layoutX="10.0" layoutY="210.0" text="Full Name"><font><Font name="Segoe UI" size="13.0" /></font></Label>
+            <TextField fx:id="regFullNameTxtB" layoutX="10.0" layoutY="230.0" prefWidth="360.0" />
+
+            <!-- Phone -->
+            <Label layoutX="10.0" layoutY="260.0" text="Phone Number"><font><Font name="Segoe UI" size="13.0" /></font></Label>
+            <TextField fx:id="regPhoneTxtB" layoutX="10.0" layoutY="280.0" prefWidth="360.0" />
+
+            <!-- ID Number -->
+            <Label fx:id="id" layoutX="10.0" layoutY="310.0" text="ID Number"><font><Font name="Segoe UI" size="13.0" /></font></Label>
+            <TextField fx:id="regIdTxtB" layoutX="10.0" layoutY="330.0" prefWidth="360.0" />
+
+            <!-- Password -->
+            <Label layoutX="10.0" layoutY="360.0" text="Password"><font><Font name="Segoe UI" size="13.0" /></font></Label>
+            <PasswordField fx:id="regPassTxtB" layoutX="10.0" layoutY="380.0" prefWidth="360.0" />
+            <TextField fx:id="regPassVisibleTxtB" layoutX="10.0" layoutY="380.0" prefWidth="360.0" visible="false" />
+
+            <!-- Confirm Password -->
+            <Label layoutX="10.0" layoutY="410.0" text="Confirm Password"><font><Font name="Segoe UI" size="13.0" /></font></Label>
+            <PasswordField fx:id="regPassConfTxtB" layoutX="10.0" layoutY="430.0" prefWidth="360.0" />
+            <TextField fx:id="regPassConfVisibleTxtB" layoutX="10.0" layoutY="430.0" prefWidth="360.0" visible="false" />
+
+            <!-- Show Password -->
+            <CheckBox fx:id="regShowPassCB" layoutX="10.0" layoutY="460.0" onAction="#togglePass" text="Show Password">
+               <font><Font name="Segoe UI" size="13.0" /></font>
+            </CheckBox>
+
+            <!-- Error Message -->
+            <Label fx:id="regErrMsgLbl" layoutX="10.0" layoutY="490.0" prefWidth="360.0" style="-fx-text-fill: red;" text="___" visible="false" wrapText="true" />
+
+            <!-- Register Button -->
+            <Button fx:id="regBtn" layoutX="142.0" layoutY="520.0" onMouseClicked="#RegToSys" prefHeight="35.0" prefWidth="123.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white; -fx-background-radius: 8;" text="Register">
+               <font><Font name="Segoe UI" size="13.0" /></font>
+            </Button>
+         </children>
+      </AnchorPane>
+
+      <!-- Login Panel -->
+      <AnchorPane fx:id="logAnchPane" layoutX="-410.0" layoutY="64.0" prefHeight="529.0" prefWidth="395.0" style="-fx-background-color: #ffffff; -fx-background-radius: 12; -fx-border-color: #e9a4c7; -fx-border-width: 1.5;" visible="false">
+         <children>
+            <Label fx:id="loginLbl" layoutX="150.0" layoutY="20.0" text="Login">
+               <font><Font name="Segoe UI Semibold" size="24.0" /></font>
+            </Label>
+
+            <Label layoutX="40.0" layoutY="100.0" text="Username"><font><Font name="Segoe UI" size="13.0" /></font></Label>
+            <TextField fx:id="userLogTxtB" layoutX="40.0" layoutY="120.0" prefWidth="300.0" />
+
+            <Label layoutX="40.0" layoutY="170.0" text="Password"><font><Font name="Segoe UI" size="13.0" /></font></Label>
+            <PasswordField fx:id="passLogTxtB" layoutX="40.0" layoutY="190.0" prefWidth="300.0" />
+
+            <Button fx:id="logBtn" layoutX="135.0" layoutY="250.0" onMouseClicked="#logToSys" prefHeight="35.0" prefWidth="123.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white; -fx-background-radius: 8;" text="Login">
+               <font><Font name="Segoe UI" size="13.0" /></font>
+            </Button>
+         </children>
+      </AnchorPane>
+
+      <!-- Switch Button -->
+      <Button fx:id="switchLoginRegbtn" layoutX="142.0" layoutY="640.0" onMouseClicked="#decideLogOrReg" prefHeight="30.0" prefWidth="165.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white; -fx-background-radius: 8;" text="Go to Registration">
+         <font><Font name="Segoe UI" size="13.0" /></font>
+      </Button>
+   </children>
+</AnchorPane>

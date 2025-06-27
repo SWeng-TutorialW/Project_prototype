@@ -2,14 +2,13 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
-
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 
 @Entity
 @Table(name = "users_tbl")
 public class LoginRegCheck implements Serializable {
-
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,25 +23,84 @@ public class LoginRegCheck implements Serializable {
     @Column(name = "emailAdd")
     private String email;
 
+
+    private LocalDate subscriptionStartDate;
     private int isLogin; // 1 = login, 0 = registration
-    private boolean type; // false = client, true = employee
+    private boolean type;// false = client, true = employee
+    private int store;// 1 for store number 1 ,until 3 ,
+    // if the value is 4 is for all the stores -workes must be between 1-2-3
+    // worker with value 4 is the מנהל רשת
+
+
+    @Column(name = "userIdNum")
+    private String idNum; // only if accType == 2
+
+    @Column(name = "phoneNum")
+    private String phoneNum;
+
+    @Column(name = "fullName")
+    private String fullName;
+
+
+    boolean is_yearly_subscription=false;
+    boolean send_complain=false;
+    boolean receive_answer=false;
 
     public LoginRegCheck() {}
 
-    public LoginRegCheck(String username, String password, String email, int isLogin) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.isLogin = isLogin;
-        this.type = false;
-    }
 
-    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type) {
+    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.isLogin = isLogin;
         this.type = type;
+        this.store = store;
+    }
+    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String phoneNum, String fullName) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.isLogin = isLogin;
+        this.type = type;
+        this.store = store;
+        this.phoneNum = phoneNum;
+        this.fullName = fullName;
+    }
+    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String phoneNum, String fullName, String idNum, boolean is_yearly_subscription) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.isLogin = isLogin;
+        this.type = type;
+        this.store = store;
+        this.phoneNum = phoneNum;
+        this.fullName = fullName;
+        this.idNum = idNum;
+        this.is_yearly_subscription = is_yearly_subscription;
+        if (is_yearly_subscription) {
+            this.subscriptionStartDate = LocalDate.now();
+        }
+    }
+    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store,  boolean is_yearly_subscription) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.isLogin = isLogin;
+        this.type = type;
+        this.store = store;
+        this.phoneNum = phoneNum;
+        this.fullName = fullName;
+        this.idNum = idNum;
+        this.is_yearly_subscription = is_yearly_subscription;
+    }
+
+
+    public Integer getStore() {return store;}
+
+    public String getStoreName() {
+        String[] stores = { "Haifa", "Krayot","Nahariyya","network"};
+        return stores[this.store - 1];
     }
 
     // Getters (optionally add setters)
@@ -52,6 +110,14 @@ public class LoginRegCheck implements Serializable {
     public int getIsLogin() { return isLogin; }
     public boolean isType() { return type; }
 
+    public String getIdNum() { return idNum; }
+    public String getPhoneNum() { return phoneNum; }
+    public String getFullName() { return fullName; }
+    public Integer getId() { return id; }
+
+    public void setPhoneNum(String phoneNum) {
+        this.phoneNum = phoneNum;
+    }
     public void setUsername(String username) {
         this.username = username;
     }
@@ -64,5 +130,52 @@ public class LoginRegCheck implements Serializable {
     public void setId(Integer id) {
         this.id = id;
     }
+    public void setIsLogin(int isLogin) {
+        this.isLogin = isLogin;
+    }
+    public boolean is_yearly_subscription() {
+        return is_yearly_subscription;
+    }
+    public void set_send(boolean send_complain)
+    {
+        this.send_complain=send_complain;
+    }
+    public boolean get_send_complain()
+    {
+        return send_complain;
+    }
+    public void set_receive_answer(boolean receive_answer)
+    {
+        this.receive_answer=receive_answer;
+    }
+    public boolean isReceive_answer()
+    {
+        return receive_answer;
+    }
+    public void set_yearly_subscription(boolean is_yearly_subscription)
+    {
+        this.is_yearly_subscription=is_yearly_subscription;
+    }
+    public void setStore(int store) {
+        this.store = store;
+    }
+
+    public void setIdNum(String idNum) {
+        this.idNum = idNum;
+    }
+
+    public boolean isYearlySubscriptionExpired() {
+        if (!is_yearly_subscription || subscriptionStartDate == null) return false;
+        return ChronoUnit.DAYS.between(subscriptionStartDate, LocalDate.now()) >= 365;
+    }
+
+    public LocalDate getSubscriptionStartDate() {
+        return subscriptionStartDate;
+    }
+
+    public void setSubscriptionStartDate(LocalDate subscriptionStartDate) {
+        this.subscriptionStartDate = subscriptionStartDate;
+    }
+
 }
 

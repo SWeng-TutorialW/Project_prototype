@@ -1,13 +1,14 @@
 package il.cshaifasweng.OCSFMediatorExample.server;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 
 
-import il.cshaifasweng.OCSFMediatorExample.entities.Complain;
-import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
-import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -19,21 +20,30 @@ import org.hibernate.service.ServiceRegistry;
  * Hello world!
  *
  */
-public class App 
+public class App
 {
-	
+
 	private static SimpleServer server;
 
     private static Session session;
     private static SessionFactory sessionFactory = null;
+    private static List<Store> stores;
+
+    public static List<Store> get_stores() {
+        return stores;
+    }
 
     static SessionFactory getSessionFactory() throws HibernateException {
         if (sessionFactory == null) {
             Configuration configuration = new Configuration();
             configuration.setProperty("hibernate.show_sql", "true");
+            configuration.setProperty("hibernate.show_sql", "true");
             configuration.addAnnotatedClass(Flower.class);
             configuration.addAnnotatedClass(LoginRegCheck.class);
             configuration.addAnnotatedClass(Complain.class);
+            configuration.addAnnotatedClass(Order.class);
+            configuration.addAnnotatedClass(CartItem.class);
+            configuration.addAnnotatedClass(Store.class);
             ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                     .applySettings(configuration.getProperties())
                     .build();
@@ -50,6 +60,7 @@ public class App
             SessionFactory sessionFactory = getSessionFactory();
         session = sessionFactory.openSession();
         session.beginTransaction();
+        System.out.println(">>> INSERTING FLOWERS TO DB...");
         Flower flower_1 = new Flower("Romance Royalty",11.99,"Rose");
         session.save(flower_1);
         session.flush();
@@ -68,9 +79,59 @@ public class App
         Flower flower_6 = new Flower("White Snowflake", 6.49, "Lily");
         session.save(flower_6);
         session.flush();
-        LoginRegCheck Asaf = new LoginRegCheck("Asaf","123","asaf@",0,true);
+        Flower flower_7 = new Flower("Golden Breeze", 7.99, "Daffodil");
+        session.save(flower_7);
+        session.flush();
+        Flower flower_8 = new Flower("Blue Whisper", 5.49, "Hyacinth");
+        session.save(flower_8);
+        session.flush();
+        List<Flower> haifaFlowers = new ArrayList<>(Arrays.asList(flower_1, flower_2, flower_3, flower_4, flower_5, flower_6, flower_7));
+        List<Flower> krayotFlowers = new ArrayList<>(Arrays.asList(flower_1, flower_2, flower_3, flower_4, flower_5, flower_6, flower_7, flower_8));
+        List<Flower>nahariyyaFlowers = new ArrayList<>(Arrays.asList(flower_1, flower_2, flower_3, flower_4, flower_5, flower_6));
+        Store lilach_Haifa = new Store("lilach_Haifa", "Abba khoushy", haifaFlowers);
+        Store lilach_Krayot = new Store("lilach_Krayot", "Hasolel Bonneh", krayotFlowers);
+        Store lilach_Nahariyya = new Store("lilach_Nahariyya", "Herzl", nahariyyaFlowers);;
+        session.save(lilach_Haifa);
+        session.flush();
+        session.save(lilach_Krayot);
+        session.flush();
+        session.save(lilach_Nahariyya);
+        session.flush();
+        LoginRegCheck Nissim = new  LoginRegCheck("Nissim","123","Nissim@",0,true,2);
+        session.save(Nissim);
+        session.flush();
+        LoginRegCheck Yarden = new  LoginRegCheck("Yarden","123","Yarden@",0,true,2);
+        session.save(Yarden);
+        session.flush();
+        // Nissim and Yarden  are workes of karayot
+        LoginRegCheck Itay = new  LoginRegCheck("Itay","123","Itay@",0,true,3);
+        session.save(Itay);
+        session.flush();
+        LoginRegCheck Diana = new  LoginRegCheck("Diana","123","Diana@",0,true,3);
+        session.save(Diana);
+        session.flush();
+        // Itay and Diana  are workes of Nahariyya
+        LoginRegCheck Dor = new  LoginRegCheck("Dor","123","Dor@",0,true,1);
+        session.save(Dor);
+        session.flush();
+        LoginRegCheck Asaf = new  LoginRegCheck("Asaf","123","Asaf@",0,true,1);
         session.save(Asaf);
         session.flush();
+        // Asaf and Dor  are workes of Haifa
+        LoginRegCheck tamar = new  LoginRegCheck("tamar","123","Asaf@",0,false,1);
+        session.save(tamar);
+        session.flush();
+
+        LoginRegCheck amit = new  LoginRegCheck("amit","123","amit@",0,false,1);
+        session.save(amit);
+        session.flush();
+
+        LoginRegCheck malci = new  LoginRegCheck("malci","123","Asaf@",0,true,4);
+        session.save( malci);
+        session.flush();
+
+        stores = Arrays.asList(lilach_Haifa, lilach_Krayot, lilach_Nahariyya);
+
         session.getTransaction().commit();// Save everything.
 
 
@@ -82,11 +143,18 @@ public class App
     System.err.println("An error occured, changes have been rolled back.");
             exception.printStackTrace();
 } finally {
-    session.close();
+            if (session != null){
+                session.close();
+            }
+
 }
         server = new SimpleServer(3000);
         server.listen();
-}
+
+        // Start the order status scheduler
+        OrderStatusScheduler scheduler = new OrderStatusScheduler();
+        scheduler.start();
+    }
 
 
     }
