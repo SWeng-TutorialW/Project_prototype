@@ -147,7 +147,9 @@ public class MyAccountController {
     }
     @Subscribe
     public void onSuccessfulUpdate(String str) {
+        System.out.println("onSuccessfulUpdate called with: " + str);
         if(str.startsWith("#userUpdateSuccess")) {
+            System.out.println("#userUpdateSuccess detected, posting SuccessEvent");
             Platform.runLater(() -> {
                 // Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 // alert.setTitle("Update Success");
@@ -158,7 +160,7 @@ public class MyAccountController {
                 org.greenrobot.eventbus.EventBus.getDefault().post(new SuccessEvent(success));
             });
             loadUserInfo();
-    }
+        }
     }
     @Subscribe
     public void getUserDetails(UpdateUserEvent user) {
@@ -186,9 +188,21 @@ public class MyAccountController {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                Platform.runLater(() -> {
+                // Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                // alert.setTitle("Update Success");
+                // alert.setHeaderText("Successfully Updated User Details");
+                // alert.setContentText("Your Details Are Up-To-Date.");
+                // alert.showAndWait();
+                Success success = new Success("Your details are up-to-date.");
+                org.greenrobot.eventbus.EventBus.getDefault().post(new SuccessEvent(success));
+            });
             }
             else{passErrorMsgLbl.setVisible(true);}
     }
+
+
     @FXML
     void onSubscribe(ActionEvent event) {
         if (current_User == null) { // Good, we're making sure the user is indeed logged in
