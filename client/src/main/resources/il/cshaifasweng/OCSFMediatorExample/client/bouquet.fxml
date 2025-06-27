@@ -45,8 +45,8 @@
          </font>
       </Label>
       <ComboBox fx:id="flower_num1" layoutX="301.0" layoutY="265.0" onAction="#calc" prefHeight="25.0" prefWidth="232.0" style="-fx-background-color: #ffffff;" visible="false" />
-      <ComboBox fx:id="flower_num2" layoutX="301.0" layoutY="320.0" onAction="#calc" prefHeight="25.0" prefWidth="232.0" style="-fx-background-color: #ffffff;" visible="false" />
       <ComboBox fx:id="flower_num3" layoutX="301.0" layoutY="369.0" onAction="#calc" prefHeight="25.0" prefWidth="232.0" style="-fx-background-color: #ffffff;" visible="false" />
+      <ComboBox fx:id="flower_num2" layoutX="301.0" layoutY="320.0" onAction="#calc" prefHeight="25.0" prefWidth="232.0" style="-fx-background-color: #ffffff;" visible="false" />
       <ComboBox fx:id="flower_num4" layoutX="301.0" layoutY="420.0" onAction="#calc" prefHeight="25.0" prefWidth="232.0" style="-fx-background-color: #ffffff;" visible="false" />
       <ComboBox fx:id="flower_num5" layoutX="301.0" layoutY="469.0" onAction="#calc" prefHeight="25.0" prefWidth="232.0" style="-fx-background-color: #ffffff;" visible="false" />
       <Label fx:id="price" layoutX="533.0" layoutY="482.0" prefHeight="79.0" prefWidth="207.0" text="price:" textFill="WHITE">

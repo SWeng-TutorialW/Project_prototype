@@ -108,6 +108,9 @@ public class EmailService {
             }
         } else {
             content.append("Delivery Type: Store Pickup\n");
+            if (order.getDeliveryTime() != null) {
+                content.append("Scheduled Pickup: ").append(dateFormat.format(order.getDeliveryTime())).append("\n");
+            }
         }
         content.append("\n");
         
@@ -333,6 +336,26 @@ public class EmailService {
         content.append("Order Date: ").append(dateFormat.format(order.getOrderDate())).append("\n");
         content.append("Cancellation Date: ").append(dateFormat.format(order.getCancellationDate())).append("\n");
         content.append("Status: CANCELLED\n\n");
+        
+        if (order.isRequiresDelivery()) {
+            content.append("Delivery Type: Home Delivery\n");
+            content.append("Delivery Address: ").append(order.getStreetAddress())
+                   .append(", ").append(order.getCity());
+            if (order.getApartment() != null && !order.getApartment().isEmpty()) {
+                content.append(", Apt ").append(order.getApartment());
+            }
+            content.append("\n");
+            if (order.getDeliveryTime() != null) {
+                content.append("Scheduled Delivery: ").append(dateFormat.format(order.getDeliveryTime())).append("\n");
+            }
+        } else {
+            content.append("Delivery Type: Store Pickup\n");
+            if (order.getDeliveryTime() != null) {
+                content.append("Scheduled Pickup: ").append(dateFormat.format(order.getDeliveryTime())).append("\n");
+            }
+        }
+        
+        content.append("\n");
         
         if (order.getCancellationReason() != null && !order.getCancellationReason().isEmpty()) {
             content.append("Cancellation Reason: ").append(order.getCancellationReason()).append("\n\n");

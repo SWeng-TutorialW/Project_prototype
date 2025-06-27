@@ -1,7 +1,9 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 
+import il.cshaifasweng.OCSFMediatorExample.entities.Store;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.change_user_login;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -108,12 +110,6 @@ public class RegistrationController {
                 EventBus.getDefault().post(new WarningEvent(warn));
                 return;
            }
-           int store_index= tempUser.getStore();
-
-        LoginRegCheck userLogin = new LoginRegCheck(user, pass, "", 1, false, store_index);
-        SimpleClient.getClient().sendToServer(userLogin);
-        tempUser = userLogin;
-
 
 
     }
@@ -125,8 +121,6 @@ public class RegistrationController {
             if(catalogController != null) {
                 catalogController.set_user(tempUser);
                 catalogController.set_type(store);
-                System.out.println(" " + tempUser.getStoreName());
-
             }
             System.out.println("Login successful for user: " + tempUser.getUsername());
             Warning warning = new Warning("Login Successful");
@@ -370,7 +364,6 @@ public class RegistrationController {
         regPassConfVisibleTxtB.setVisible(show);
         regPassConfTxtB.setVisible(!show);
     }
-
 
     @FXML
     void decideLogOrReg(MouseEvent event) // whenever we press on the "Go to Registration/Login" button

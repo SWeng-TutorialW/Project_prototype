@@ -265,6 +265,9 @@ public class CatalogController {
         System.out.println("the user is " + user.getUsername());
         System.out.println(" user send: " + user.get_send_complain());
     }
+    public connect_scene_Con getController() {
+        return con;
+    }
     public LoginRegCheck getUser() {
         return user;
     }
@@ -286,7 +289,8 @@ public class CatalogController {
     private ImageView cus_img;
     @FXML
     private Button bouqut_btn;
-
+    private connect_scene_Con con;
+    public void setController(connect_scene_Con controller) { con = controller; }
 
     private int currentIndex = 0;
     private final String[] imagePaths = {
@@ -512,6 +516,14 @@ public class CatalogController {
             set_sorting_type(4);
             return;
         }
+        if(event.get_catalog_type()==-2)
+        {
+
+            add_flower_flag=0;
+            setCatalogSorting(event.get_flowers());
+            set_sorting_type(4);
+            return;
+        }
         if(type!=4)
         {
             System.out.println("send message to server "+type);
@@ -715,6 +727,7 @@ public class CatalogController {
                     Parent root = fxmlLoader.load();
                     RegistrationController regController = fxmlLoader.getController();
                     regController.setCatalogController(this);
+                    regController.setController(con);
                     Stage stage = new Stage();
                     stage.setTitle("Create New Account");
                     stage.setScene(new Scene(root));
@@ -726,6 +739,9 @@ public class CatalogController {
 
         }
         else{       //login user mode
+            if (MyAccountController.isMyAccountOpen()) {
+                MyAccountController.myAccountStage.close();
+            }
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("my_account.fxml"));
                 Parent root = fxmlLoader.load();
@@ -733,6 +749,7 @@ public class CatalogController {
                 myAccountController.setCurrentUser(user);
                 myAccountController.setCatalogController(this);
                 Stage stage = new Stage();
+                MyAccountController.setMyAccountStage(stage);
                 stage.setTitle("My Account");
                 stage.setScene(new Scene(root));
                 stage.show();
@@ -911,6 +928,15 @@ public class CatalogController {
         System.out.println("CatalogController: openCart called");
         System.out.println("CatalogController: Current user is: " + (user != null ? user.getUsername() : "null"));
 
+        if (CartController.isCartOpen()) {
+            Warning warning = new Warning("The cart window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            CartController.setCartStage(CartController.cartStage); // bring to front
+            CartController.cartStage.toFront();
+            CartController.cartStage.requestFocus();
+            return;
+        }
+
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));
             Parent root = loader.load();
@@ -921,6 +947,7 @@ public class CatalogController {
             cartController.setCatalogController(this);
 
             Stage stage = new Stage();
+            CartController.setCartStage(stage);
             stage.setTitle("Shopping Cart");
             stage.setScene(new Scene(root));
             stage.show();
