@@ -2,7 +2,8 @@ package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import javax.persistence.*;
 import java.io.Serializable;
-
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 
 @Entity
@@ -23,6 +24,7 @@ public class LoginRegCheck implements Serializable {
     private String email;
 
 
+    private LocalDate subscriptionStartDate;
     private int isLogin; // 1 = login, 0 = registration
     private boolean type;// false = client, true = employee
     private int store;// 1 for store number 1 ,until 3 ,
@@ -32,9 +34,6 @@ public class LoginRegCheck implements Serializable {
 
     @Column(name = "userIdNum")
     private String idNum; // only if accType == 2
-
-    @Column(name = "creditCard")
-    private String creditCard; // only if accType == 2
 
     @Column(name = "phoneNum")
     private String phoneNum;
@@ -68,7 +67,8 @@ public class LoginRegCheck implements Serializable {
         this.phoneNum = phoneNum;
         this.fullName = fullName;
     }
-    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String phoneNum, String fullName, String idNum, String creditCard, boolean is_yearly_subscription) {
+
+    public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store, String phoneNum, String fullName, String idNum, boolean is_yearly_subscription) {
         this.username = username;
         this.password = password;
         this.email = email;
@@ -78,9 +78,12 @@ public class LoginRegCheck implements Serializable {
         this.phoneNum = phoneNum;
         this.fullName = fullName;
         this.idNum = idNum;
-        this.creditCard = creditCard;
         this.is_yearly_subscription = is_yearly_subscription;
+        if (is_yearly_subscription) {
+            this.subscriptionStartDate = LocalDate.now();
+        }
     }
+
     public LoginRegCheck(String username, String password, String email, int isLogin, boolean type, int store,  boolean is_yearly_subscription) {
         this.username = username;
         this.password = password;
@@ -91,22 +94,9 @@ public class LoginRegCheck implements Serializable {
         this.phoneNum = phoneNum;
         this.fullName = fullName;
         this.idNum = idNum;
-        this.creditCard = creditCard;
         this.is_yearly_subscription = is_yearly_subscription;
     }
 
-    public LoginRegCheck(String regUser, String regPass, String email, int isLogin, boolean b, int store, String phoneNumber, String fullName, String userId, boolean b1) {
-        this.username = regUser;
-        this.password = regPass;
-        this.email = email;
-        this.isLogin = isLogin;
-        this.type = b; // false for client, true for employee
-        this.store = store; // 1-3 for stores, 4 for network manager
-        this.phoneNum = phoneNumber;
-        this.fullName = fullName;
-        this.idNum = userId;
-        this.is_yearly_subscription = b1;
-    }
 
     public Integer getStore() {return store;}
 
@@ -175,5 +165,19 @@ public class LoginRegCheck implements Serializable {
     public void setIdNum(String idNum) {
         this.idNum = idNum;
     }
+
+    public boolean isYearlySubscriptionExpired() {
+        if (!is_yearly_subscription || subscriptionStartDate == null) return false;
+        return ChronoUnit.DAYS.between(subscriptionStartDate, LocalDate.now()) >= 365;
+    }
+
+    public LocalDate getSubscriptionStartDate() {
+        return subscriptionStartDate;
+    }
+
+    public void setSubscriptionStartDate(LocalDate subscriptionStartDate) {
+        this.subscriptionStartDate = subscriptionStartDate;
+    }
+
 }
 
