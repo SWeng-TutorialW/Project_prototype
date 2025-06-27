@@ -11,7 +11,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class OrderStatusScheduler {
-    private static final long CHECK_INTERVAL_MINUTES = 1;
+    private static final long CHECK_INTERVAL_MINUTES = 5;
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public void start() {
@@ -39,6 +39,16 @@ public class OrderStatusScheduler {
                     order.setStatus("PICKED_UP");
                     session.update(order);
                     EmailService.sendOrderStatusUpdateEmail(order, "PICKED_UP");
+                }
+            }
+            // Check for expired yearly subscriptions
+            String userHql = "FROM il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck u WHERE u.is_yearly_subscription = true AND u.subscriptionStartDate IS NOT NULL";
+            List<il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck> users = session.createQuery(userHql, il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck.class).getResultList();
+            for (il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck user : users) {
+                if (user.isYearlySubscriptionExpired()) {
+                    user.set_yearly_subscription(false);
+                    session.update(user);
+                    EmailService.sendSubscriptionExpiredEmail(user);
                 }
             }
             tx.commit();
