@@ -1,6 +1,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+import il.cshaifasweng.OCSFMediatorExample.entities.CartItem;
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
+import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
@@ -11,6 +13,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.util.Duration;
+import javafx.scene.control.Spinner;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -82,13 +85,24 @@ public class bouquet_controller {
     private Label price;
     int flowers_number=-1;
 
-    @FXML
-    void initialize() {
+    @FXML private javafx.scene.control.Spinner<Integer> quantity1;
+    @FXML private javafx.scene.control.Spinner<Integer> quantity2;
+    @FXML private javafx.scene.control.Spinner<Integer> quantity3;
+    @FXML private javafx.scene.control.Spinner<Integer> quantity4;
+    @FXML private javafx.scene.control.Spinner<Integer> quantity5;
 
+    @FXML
+    private void initialize() {
         flower_num.getItems().addAll("2", "3","4","5");
         flowerBoxes = new ComboBox[]{flower_num1, flower_num2, flower_num3, flower_num4, flower_num5};
-
-
+        // Set up spinners for quantity (default 1, min 1, max 20)
+        Spinner[] spinners = new Spinner[]{quantity1, quantity2, quantity3, quantity4, quantity5};
+        for (Spinner<Integer> spinner : spinners) {
+            if (spinner != null) {
+                spinner.setValueFactory(new javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 1));
+                spinner.valueProperty().addListener((obs, oldVal, newVal) -> updateTotalPrice());
+            }
+        }
     }
 
 
@@ -161,6 +175,16 @@ public class bouquet_controller {
 
         }
 
+        // Show/hide spinners for quantity
+        Spinner[] spinners = new Spinner[]{quantity1, quantity2, quantity3, quantity4, quantity5};
+        for (int i = 0; i < 5; i++) {
+            if (i < flowers_number) {
+                spinners[i].setVisible(true);
+            } else {
+                spinners[i].setVisible(false);
+            }
+        }
+        updateTotalPrice();
     }
     boolean[] used = new boolean[5];
     String[] names = new String[5];
@@ -249,35 +273,66 @@ public class bouquet_controller {
         }
         isUpdating = false;
 
-
-        for (int i = 0; i < selectedNum; i++)
-        {
-            String flowerName = boxes[i].getValue();
-
-            if (flowerName == null) {
-                calc_price.setText("");
-                return;
-            }
-
-            Flower flower = flowersList_c.stream()
-                    .filter(f -> f.getFlowerName().equals(flowerName))
-                    .findFirst()
-                    .orElse(null);
-
-            if (flower == null) {
-                calc_price.setText("Flower " + flowerName + " not found.");
-                return;
-            }
-
-            totalPrice += flower.getFlowerPrice() / selectedNum;
-        }
-
-        calc_price.setText(String.format("%.2f", totalPrice));
-
-
+        updateTotalPrice();
     }
 
+    private void updateTotalPrice() {
+        double totalPrice = 0.0;
+        Spinner[] spinners = new Spinner[]{quantity1, quantity2, quantity3, quantity4, quantity5};
+        for (int i = 0; i < flowerBoxes.length; i++) {
+            if (flowerBoxes[i].isVisible() && flowerBoxes[i].getValue() != null && spinners[i].isVisible()) {
+                String flowerName = (String) flowerBoxes[i].getValue();
+                int qty = (Integer) spinners[i].getValue();
+                // Find the flower in flowersList_c
+                for (Flower f : flowersList_c) {
+                    if (f.getFlowerName().equals(flowerName)) {
+                        totalPrice += (f.getFlowerPrice()/20) * qty;
+                        break;
+                    }
+                }
+            }
+        }
+        calc_price.setText(String.format("%.2f", totalPrice));
+    }
 
+    @FXML
+    private void addToCart() {
+        // Collect selected flowers and quantities
+        List<String> selectedFlowers = new ArrayList<>();
+        Spinner[] spinners = new Spinner[]{quantity1, quantity2, quantity3, quantity4, quantity5};
+        for (int i = 0; i < flowerBoxes.length; i++) {
+            if (flowerBoxes[i].isVisible() && flowerBoxes[i].getValue() != null && spinners[i].isVisible()) {
+                int qty = (Integer) spinners[i].getValue();
+                selectedFlowers.add(flowerBoxes[i].getValue() + " x" + qty);
+            }
+        }
+        if (selectedFlowers.isEmpty()) {
+            Warning warning = new Warning("Please select at least two flowers for your bouquet.");
+            org.greenrobot.eventbus.EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+        // Create a custom Flower object
+        String customName = "custom flower: (" + String.join(", ", selectedFlowers) + ")";
+        Flower customFlower = new Flower();
+        customFlower.setFlowerName(customName);
+        customFlower.setFlowerType("Bouquet");
+        double priceValue = 0.0;
+        try {
+            priceValue = Double.parseDouble(calc_price.getText());
+        } catch (Exception e) {
+            // fallback to 0
+        }
+        customFlower.setFlowerPrice(priceValue);
+        // Add to cart
+        String storeName = catalogController != null && catalogController.getUser() != null ? catalogController.getUser().getStoreName() : "Custom";
+        CartItem cartItem = new CartItem(customFlower, 1, storeName);
+        OrderPageController.getCartItems().add(cartItem);
+        // Show confirmation
+        // Warning warning = new Warning("Custom bouquet added to cart successfully!");
+        // org.greenrobot.eventbus.EventBus.getDefault().post(new WarningEvent(warning));
+        Success success = new Success("Custom bouquet added to cart successfully!");
+        org.greenrobot.eventbus.EventBus.getDefault().post(new SuccessEvent(success));
+    }
 
 }
 

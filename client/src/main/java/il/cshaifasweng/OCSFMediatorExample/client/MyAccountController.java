@@ -1,8 +1,6 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
-import il.cshaifasweng.OCSFMediatorExample.entities.UpdateUserEvent;
-import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -19,7 +17,6 @@ import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.security.Key;
-import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -31,12 +28,8 @@ public class MyAccountController {
     @FXML private Button myOrdersButton, subscribeBtn, changeBtn;
     @FXML private AnchorPane myAccUsers, my_account_data;
     @FXML private PasswordField newPassTxtB, confNewPassTxtB;
-    @FXML private Label subscriptionDateLbl;
-    @FXML private Label subscriptionStartLbl;
-    @FXML private TextField idNumTxtB;
-
-
     private LoginRegCheck current_User;
+
     private CatalogController catalogController;
 
     static Stage myAccountStage = null;
@@ -116,7 +109,7 @@ public class MyAccountController {
             stage.setScene(new Scene(root));
             stage.show();
 
-            ((Stage) myOrdersButton.getScene().getWindow()).close();
+            // ((Stage) myOrdersButton.getScene().getWindow()).close(); // <-- Remove this line to keep My Account open
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -128,20 +121,12 @@ public class MyAccountController {
         userChangeTxtB.setText(current_User.getUsername());
         emailChangeTxtB.setText(current_User.getEmail()); // what if the user changes their info?
         phoneChangeTxtB.setText(current_User.getPhoneNum());
-        idNumTxtB.setText(current_User.getIdNum());
         String accountType = switch (current_User.getStore()) {
             case 4 -> current_User.is_yearly_subscription() ? "Yearly Subscription" : "Network";
             case 1, 2, 3 -> "Store - " + current_User.getStoreName();
             default -> "Guest"; // shouldn't happen
         };
-        if (current_User.is_yearly_subscription() && current_User.getSubscriptionStartDate() != null) {
-            subscriptionStartLbl.setVisible(true);
-            subscriptionStartLbl.setVisible(true);
-            subscriptionDateLbl.setText(current_User.getSubscriptionStartDate().toString());
-        } else {
-            subscriptionDateLbl.setVisible(false);
-            subscriptionStartLbl.setVisible(false);
-        }
+
         accountTypeEmptyLbl.setText(accountType);
         subscribeBtn.setVisible(!current_User.is_yearly_subscription());
     }
@@ -164,11 +149,13 @@ public class MyAccountController {
     public void onSuccessfulUpdate(String str) {
         if(str.startsWith("#userUpdateSuccess")) {
             Platform.runLater(() -> {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Update Success");
-                alert.setHeaderText("Successfully Updated User Details");
-                alert.setContentText("Your Details Are Up-To-Date.");
-                alert.showAndWait();
+                // Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                // alert.setTitle("Update Success");
+                // alert.setHeaderText("Successfully Updated User Details");
+                // alert.setContentText("Your Details Are Up-To-Date.");
+                // alert.showAndWait();
+                Success success = new Success("Your details are up-to-date.");
+                org.greenrobot.eventbus.EventBus.getDefault().post(new SuccessEvent(success));
             });
             loadUserInfo();
     }
@@ -187,13 +174,12 @@ public class MyAccountController {
             if(newPassTxtB.getText().equals(confNewPassTxtB.getText())) {
                 passErrorMsgLbl.setVisible(false);
                 UpdateUserEvent updatedUser;
-
                 LoginRegCheck currentUser = current_User;
+
                 currentUser.setUsername(userChangeTxtB.getText());
                 currentUser.setEmail(emailChangeTxtB.getText());
                 currentUser.setPhoneNum(phoneChangeTxtB.getText());
                 currentUser.setPassword(newPassTxtB.getText());
-                currentUser.setIdNum(idNumTxtB.getText());
                 updatedUser = new UpdateUserEvent(currentUser);
                 try {
                     SimpleClient.client.sendToServer(updatedUser);
@@ -252,12 +238,23 @@ public class MyAccountController {
 
             paymentController.setOnPaymentSuccess(() -> {
                 current_User.set_yearly_subscription(true);
-                current_User.setSubscriptionStartDate(LocalDate.now());
-
                 sendUpdateToServer.run();
 
                 // Notify other controllers (e.g., checkout) of the upgrade
                 EventBus.getDefault().post(new UpdateUserEvent(current_User));
+
+                // Add subscription order to user's orders
+                Order subscriptionOrder = new Order(current_User.getUsername(), current_User.getEmail(), current_User);
+                subscriptionOrder.setStatus("CONFIRMED");
+                subscriptionOrder.setTotalAmount(100.0); // Assuming subscription price is 100
+                subscriptionOrder.setDiscountAmount(0.0);
+                subscriptionOrder.setRequiresDelivery(false);
+                Flower subscriptionFlower = new Flower("Yearly Subscription", 100.0, "Subscription");
+                CartItem subscriptionItem = new CartItem(subscriptionFlower, 1, current_User.getStoreName());
+                subscriptionOrder.addItem(subscriptionItem);
+                // Optionally, persist or notify the system about the new order
+                // For now, just add to OrdersHistoryController if possible
+                OrdersHistoryController.addOrderForUser(current_User, subscriptionOrder);
 
                 if (catalogController != null) {
                     catalogController.set_user(current_User);
@@ -270,7 +267,7 @@ public class MyAccountController {
                 Platform.runLater(() -> {
                     loadUserInfo();
                     paymentStage.close();
-                    ((Stage) subscribeBtn.getScene().getWindow()).close();
+                    // ((Stage) subscribeBtn.getScene().getWindow()).close(); // <-- Remove this line to keep My Account open
                 });
             });
 

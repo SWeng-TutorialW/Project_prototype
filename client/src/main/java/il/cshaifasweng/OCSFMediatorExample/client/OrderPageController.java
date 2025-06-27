@@ -121,8 +121,10 @@ public class OrderPageController {
                 cartItems.add(cartItem);
             }
             // Show confirmation
-            Warning warning = new Warning("Item added to cart successfully!");
-            EventBus.getDefault().post(new WarningEvent(warning));
+            // Warning warning = new Warning("Item added to cart successfully!");
+            // EventBus.getDefault().post(new WarningEvent(warning));
+            Success success = new Success("Item added to cart successfully!");
+            EventBus.getDefault().post(new SuccessEvent(success));
             // Notify cart window to refresh
             EventBus.getDefault().post(new CartUpdatedEvent());
         }

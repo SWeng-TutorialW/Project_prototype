@@ -100,6 +100,17 @@ public class CheckoutController {
         }
     }
     
+    private static Stage paymentStageInstance = null;
+    public static boolean isPaymentStageOpen() {
+        return paymentStageInstance != null && paymentStageInstance.isShowing();
+    }
+    public static void setPaymentStageInstance(Stage stage) {
+        paymentStageInstance = stage;
+        if (paymentStageInstance != null) {
+            paymentStageInstance.setOnHidden(e -> paymentStageInstance = null);
+        }
+    }
+    
     public void initialize() {
         // Set up table columns
         nameColumn.setCellValueFactory(cellData -> 
@@ -208,6 +219,8 @@ public class CheckoutController {
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
+        // Ensure discount is shown immediately if user is a yearly subscriber
+        updateTotal();
     }
     
     public void setCartItems(List<CartItem> items) {
@@ -381,6 +394,13 @@ public class CheckoutController {
         order.setDiscountAmount(discount); // set the discount amount
 
         // Open payment page
+        if (isPaymentStageOpen()) {
+            Warning warning = new Warning("The payment window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            paymentStageInstance.toFront();
+            paymentStageInstance.requestFocus();
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/il/cshaifasweng/OCSFMediatorExample/client/payment.fxml"));
             Parent root = loader.load();
@@ -390,6 +410,7 @@ public class CheckoutController {
 
             Scene scene = new Scene(root);
             Stage stage = new Stage();
+            setPaymentStageInstance(stage);
             stage.setTitle("Secure Payment");
             stage.setScene(scene);
             stage.show();
