@@ -249,7 +249,7 @@ public class CatalogController {
     }
     @FXML
     private ComboBox<String> Stores;
-
+    
     private List<Flower> flowersList_c;
     private Label[] nameLabels;
     private Label[] typeLabels;

@@ -213,7 +213,6 @@
                   <Button fx:id="bouqut_btn" layoutX="16.0" layoutY="197.0" mnemonicParsing="false" onAction="#create_bouqut" prefHeight="25.0" prefWidth="97.0" style="-fx-background-color: #fdfdfd;" text="MY BOUQUET" />
                </children>
             </AnchorPane>
-            <ComboBox fx:id="colors" layoutX="529.0" layoutY="83.0" onAction="#colors_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
          </children>
       </AnchorPane>
    </content>

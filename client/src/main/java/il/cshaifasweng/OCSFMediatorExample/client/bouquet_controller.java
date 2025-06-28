@@ -14,6 +14,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.util.Duration;
 import javafx.scene.control.Spinner;
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -316,6 +317,8 @@ public class bouquet_controller {
         Flower customFlower = new Flower();
         customFlower.setFlowerName(customName);
         customFlower.setFlowerType("Bouquet");
+        customFlower.setColor("Rainbow");
+        customFlower.setCategory("Bouquet");
         double priceValue = 0.0;
         try {
             priceValue = Double.parseDouble(calc_price.getText());
@@ -327,6 +330,8 @@ public class bouquet_controller {
         String storeName = catalogController != null && catalogController.getUser() != null ? catalogController.getUser().getStoreName() : "Custom";
         CartItem cartItem = new CartItem(customFlower, 1, storeName);
         OrderPageController.getCartItems().add(cartItem);
+        // Notify cart window to refresh
+        EventBus.getDefault().post(new CartUpdatedEvent());
         // Show confirmation
         // Warning warning = new Warning("Custom bouquet added to cart successfully!");
         // org.greenrobot.eventbus.EventBus.getDefault().post(new WarningEvent(warning));

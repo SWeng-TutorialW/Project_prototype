@@ -263,7 +263,9 @@ public class CartController {
 
     @Subscribe
     public void onCartUpdated(CartUpdatedEvent event) {
-        // Refresh the cart display if needed
+        // Refresh the cart display with the latest items from the shared cart
+        cartItems.clear();
+        cartItems.addAll(OrderPageController.getCartItems());
         updateTotal();
     }
 }
