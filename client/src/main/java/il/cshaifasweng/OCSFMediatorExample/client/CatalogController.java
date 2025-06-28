@@ -732,6 +732,94 @@ public class CatalogController {
             System.out.println("=== SET CATALOG DATA COMPLETED ===");
         });
     }
+    
+    // New method for filtered catalog data
+    public void setFilteredCatalogData(List<Flower> filteredFlowerList) {
+        System.out.println("=== SET FILTERED CATALOG DATA CALLED ===");
+        System.out.println("Filtered flower list size: " + (filteredFlowerList == null ? 0 : filteredFlowerList.size()));
+        
+        Platform.runLater(() -> {
+            if (catalogFlowPane == null) {
+                System.out.println("catalogFlowPane is NULL! Check FXML wiring.");
+                return;
+            }
+            
+            catalogFlowPane.getChildren().clear();
+            if (filteredFlowerList == null || filteredFlowerList.isEmpty()) {
+                System.out.println("No flowers match the current filters.");
+                Label emptyLabel = new Label("No flowers match your current filters.\nTry adjusting your filter criteria.");
+                emptyLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px; -fx-text-alignment: center;");
+                catalogFlowPane.getChildren().add(emptyLabel);
+                return;
+            }
+            
+            for (Flower f : filteredFlowerList) {
+                VBox card = new VBox(5);
+                card.setPrefWidth(160);
+                card.setStyle("-fx-background-color: #fff; -fx-border-color: #c8a2c8; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10;");
+                ImageView imageView = new ImageView();
+                imageView.setFitWidth(140);
+                imageView.setFitHeight(90);
+                setImageFromDatabase(imageView, f.getImage(), f.getFlowerType());
+                Label nameLabel = new Label(f.getFlowerName());
+                nameLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 18px;");
+                Label typeLabel = new Label(f.getFlowerType());
+                typeLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 14px;");
+                
+                // Add color label
+                Label colorLabel = new Label("Color: " + (f.getColor() != null ? f.getColor() : "N/A"));
+                colorLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 12px;");
+                
+                // Add category label
+                Label categoryLabel = new Label("Category: " + (f.getCategory() != null ? f.getCategory() : "N/A"));
+                categoryLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 12px;");
+                
+                TextField priceField = new TextField(String.format("%.2f", f.getFlowerPrice()));
+                priceField.setEditable(false);
+                priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px;");
+                Text priceBeforeSale = new Text();
+                priceBeforeSale.setStyle("-fx-fill: LIGHTPINK; -fx-strikethrough: true; -fx-font-size: 14px;");
+                if (f.isSale()) {
+                    priceBeforeSale.setVisible(true);
+                    int discount_percent = f.getDiscount();
+                    double remainingPercent = 100.0 - discount_percent;
+                    double originalPrice = f.getFlowerPrice() * 100.0 / remainingPercent;
+                    priceBeforeSale.setText(String.format("%.2f", originalPrice));
+                } else {
+                    priceBeforeSale.setVisible(false);
+                }
+                card.getChildren().addAll(imageView, nameLabel, typeLabel, colorLabel, categoryLabel, priceBeforeSale, priceField);
+                card.setOnMouseClicked(e -> openFlowerDetails(f));
+                catalogFlowPane.getChildren().add(card);
+            }
+            System.out.println("Filtered catalog updated with " + catalogFlowPane.getChildren().size() + " cards.");
+            System.out.println("=== SET FILTERED CATALOG DATA COMPLETED ===");
+        });
+    }
+    
+    // Method to open filter window
+    @FXML
+    void openFilterWindow(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_filter.fxml"));
+            Parent root = loader.load();
+            
+            CatalogFilterController filterController = loader.getController();
+            filterController.setCatalogController(this);
+            filterController.setOriginalFlowersList(flowersList_c);
+            
+            Stage filterStage = new Stage();
+            filterStage.setTitle("Filter Catalog");
+            filterStage.setScene(new Scene(root));
+            filterStage.setResizable(false);
+            filterController.setFilterStage(filterStage);
+            
+            filterStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Error opening filter window: " + e.getMessage());
+        }
+    }
     private void openFlowerDetails(Flower flower) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("order_page.fxml"));

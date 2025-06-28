@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="600.0" prefWidth="400.0" style="-fx-background-color: #f8f9fa;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogFilterController">
+   <children>
+      <VBox layoutX="0.0" layoutY="0.0" prefHeight="600.0" prefWidth="400.0" spacing="20.0">
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+         <children>
+            <!-- Header -->
+            <HBox alignment="CENTER" prefHeight="50.0" prefWidth="360.0" style="-fx-background-color: #C8A2C8;">
+               <children>
+                  <Label text="Filter Catalog" textFill="WHITE">
+                     <font>
+                        <Font name="Segoe UI" size="20.0" />
+                     </font>
+                  </Label>
+               </children>
+            </HBox>
+            
+            <!-- Price Range Section -->
+            <VBox spacing="10.0">
+               <Label text="Price Range (₪)" style="-fx-font-weight: bold; -fx-font-size: 16px;">
+                  <font>
+                     <Font name="Segoe UI" size="16.0" />
+                  </font>
+               </Label>
+               
+               <HBox alignment="CENTER" spacing="10.0">
+                  <Label fx:id="minPriceLabel" text="0" />
+                  <Slider fx:id="priceRangeSlider" min="0.0" max="300.0" majorTickUnit="50" minorTickCount="0" showTickLabels="true" showTickMarks="true" prefWidth="200.0" />
+                  <Label fx:id="maxPriceLabel" text="300" />
+               </HBox>
+               
+               <HBox alignment="CENTER" spacing="10.0">
+                  <Label text="Min:" />
+                  <TextField fx:id="minPriceField" prefWidth="80.0" promptText="0" />
+                  <Label text="Max:" />
+                  <TextField fx:id="maxPriceField" prefWidth="80.0" promptText="300" />
+               </HBox>
+            </VBox>
+            
+            <!-- Color Filter Section -->
+            <VBox spacing="10.0">
+               <Label text="Colors" style="-fx-font-weight: bold; -fx-font-size: 16px;">
+                  <font>
+                     <Font name="Segoe UI" size="16.0" />
+                  </font>
+               </Label>
+               
+               <ScrollPane fitToWidth="true" prefHeight="120.0" prefWidth="360.0">
+                  <content>
+                     <VBox fx:id="colorCheckBoxContainer" spacing="5.0">
+                        <CheckBox fx:id="redCheckBox" text="Red" />
+                        <CheckBox fx:id="yellowCheckBox" text="Yellow" />
+                        <CheckBox fx:id="pinkCheckBox" text="Pink" />
+                        <CheckBox fx:id="whiteCheckBox" text="White" />
+                        <CheckBox fx:id="purpleCheckBox" text="Purple" />
+                        <CheckBox fx:id="blueCheckBox" text="Blue" />
+                        <CheckBox fx:id="orangeCheckBox" text="Orange" />
+                        <CheckBox fx:id="greenCheckBox" text="Green" />
+                        <CheckBox fx:id="blackCheckBox" text="Black" />
+                        <CheckBox fx:id="brownCheckBox" text="Brown" />
+                     </VBox>
+                  </content>
+               </ScrollPane>
+            </VBox>
+            
+            <!-- Category Filter Section -->
+            <VBox spacing="10.0">
+               <Label text="Categories" style="-fx-font-weight: bold; -fx-font-size: 16px;">
+                  <font>
+                     <Font name="Segoe UI" size="16.0" />
+                  </font>
+               </Label>
+               
+               <ScrollPane fitToWidth="true" prefHeight="100.0" prefWidth="360.0">
+                  <content>
+                     <VBox fx:id="categoryCheckBoxContainer" spacing="5.0">
+                        <CheckBox fx:id="flowerCheckBox" text="Flower" />
+                        <CheckBox fx:id="bouquetCheckBox" text="Bouquet" />
+                        <CheckBox fx:id="plantCheckBox" text="Plant" />
+                        <CheckBox fx:id="giftCheckBox" text="Gift" />
+                        <CheckBox fx:id="seasonalCheckBox" text="Seasonal" />
+                     </VBox>
+                  </content>
+               </ScrollPane>
+            </VBox>
+            
+            <!-- Sort Options -->
+            <VBox spacing="10.0">
+               <Label text="Sort By" style="-fx-font-weight: bold; -fx-font-size: 16px;">
+                  <font>
+                     <Font name="Segoe UI" size="16.0" />
+                  </font>
+               </Label>
+               
+               <ComboBox fx:id="sortComboBox" prefWidth="200.0" />
+            </VBox>
+            
+            <!-- Action Buttons -->
+            <HBox alignment="CENTER" spacing="20.0">
+               <Button fx:id="applyFilterButton" mnemonicParsing="false" onAction="#applyFilters" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #C8A2C8; -fx-text-fill: white;" text="Apply Filters">
+                  <font>
+                     <Font name="Segoe UI" size="14.0" />
+                  </font>
+               </Button>
+               <Button fx:id="clearFilterButton" mnemonicParsing="false" onAction="#clearFilters" prefHeight="40.0" prefWidth="120.0" style="-fx-background-color: #6c757d; -fx-text-fill: white;" text="Clear All">
+                  <font>
+                     <Font name="Segoe UI" size="14.0" />
+                  </font>
+               </Button>
+            </HBox>
+            
+            <!-- Results Summary -->
+            <VBox spacing="5.0">
+               <Label fx:id="resultsLabel" text="Showing all items" style="-fx-font-style: italic;">
+                  <font>
+                     <Font name="Segoe UI" size="12.0" />
+                  </font>
+               </Label>
+            </VBox>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane> 
