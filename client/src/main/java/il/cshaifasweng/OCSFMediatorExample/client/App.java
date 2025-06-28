@@ -1,5 +1,8 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
+
+import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
+import il.cshaifasweng.OCSFMediatorExample.entities.change_user_login;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -14,6 +17,8 @@ import java.io.IOException;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+
+import javax.xml.catalog.Catalog;
 
 /**
  * JavaFX App
@@ -49,8 +54,6 @@ public class App extends Application {
     public static Scene getScene() {
         return scene;
     }
-    
-    
 
 
     @Override
@@ -58,6 +61,11 @@ public class App extends Application {
 		// TODO Auto-generated method stub
     	EventBus.getDefault().unregister(this);
         SimpleClient.getClient().sendToServer("remove client");
+        if(CatalogController.getUser() != null || CatalogController_employee.getUser() != null)
+        {
+            LoginRegCheck loggedUser = CatalogController.getUser() != null ? CatalogController.getUser() : CatalogController_employee.getUser();
+            SimpleClient.getClient().sendToServer(new change_user_login(loggedUser, 0));
+        }
         SimpleClient.getClient().closeConnection();
 		super.stop();
 	}

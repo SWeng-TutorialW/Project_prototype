@@ -684,7 +684,7 @@ public class SimpleServer extends AbstractServer {
 			}
 
 		}
-		else if (msg.getClass().equals(change_user_login.class)) {
+		else if (msg.getClass().equals(change_user_login.class)) { // changes user logged-in state. 0 is logged-out, 1 is logged-in.
 			change_user_login wrapper = (change_user_login) msg;
 			LoginRegCheck user = wrapper.get_user();
 			int new_state = wrapper.get_the_new_state();
@@ -705,7 +705,7 @@ public class SimpleServer extends AbstractServer {
 
 				if (userInDb != null) {
 					userInDb.setIsLogin(new_state);
-					session.update(userInDb);
+					session.update(userInDb); // Good:)
 				}
 
 				session.getTransaction().commit();
@@ -806,6 +806,16 @@ public class SimpleServer extends AbstractServer {
 						else if (update.getNew_value().equals("Network"))
 							new_value = 4;
 						user.setStore(new_value);
+						break;
+					case "phoneNum":
+						user.setPhoneNum(newVal);
+						break;
+					case "fullName":
+						user.setFullName(newVal);
+						break;
+					case "idNum":
+						user.setIdNum(newVal);
+						break;
 				}
 
 
