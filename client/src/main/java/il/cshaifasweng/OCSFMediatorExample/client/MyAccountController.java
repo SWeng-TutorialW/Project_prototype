@@ -21,6 +21,8 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
+import static javafx.geometry.Pos.CENTER;
+
 public class MyAccountController {
 
     @FXML public Label userIdLbl;
@@ -28,14 +30,15 @@ public class MyAccountController {
     @FXML TextField userChangeTxtB;
     @FXML TextField emailChangeTxtB;
     @FXML TextField phoneChangeTxtB;
-    @FXML private Label accountTypeEmptyLbl, passErrorMsgLbl,  newPassLbl, confNewPassLbl,accTypeLbl, usrnmeLbl, emailLbl, phoneNumLbl, changePassLbl;
+    @FXML TextField fNameTxtB;
+    @FXML private Label accountTypeEmptyLbl, passErrorMsgLbl,  newPassLbl, confNewPassLbl,accTypeLbl, usrnmeLbl, emailLbl, phoneNumLbl, changePassLbl, myAccountLbl, fullNameLbl;
     @FXML private Button myOrdersButton, subscribeBtn, changeBtn,changePassBtn;
     @FXML private AnchorPane myAccUsers, my_account_data;
     @FXML private PasswordField newPassTxtB, confNewPassTxtB;
     @FXML private Label subscriptionExpireLbl, subscriptionExpireTitleLbl;
 
 
-    private LoginRegCheck current_User;
+    private static LoginRegCheck current_User;
 
     private CatalogController catalogController;
 
@@ -91,6 +94,16 @@ public class MyAccountController {
         AnchorPane.setTopAnchor(my_account_data, 58.0);
         AnchorPane.setRightAnchor(my_account_data, 89.0);
         AnchorPane.setLeftAnchor(my_account_data, 89.0);
+
+        if(current_User.isType()) // an employee
+        {
+            myOrdersButton.setDisable(true);
+            subscribeBtn.setDisable(true);
+        }
+        myAccountLbl.setText("My Account - Hello " + current_User.getFullName());
+        myAccountLbl.setAlignment(CENTER);
+
+
     }
 
     @FXML
@@ -131,6 +144,7 @@ public class MyAccountController {
         userChangeTxtB.setText(current_User.getUsername());
         emailChangeTxtB.setText(current_User.getEmail()); // what if the user changes their info?
         phoneChangeTxtB.setText(current_User.getPhoneNum());
+        fNameTxtB.setText(current_User.getFullName());
         String accountType = switch (current_User.getStore()) {
             case 4 -> current_User.is_yearly_subscription() ? "Yearly Subscription" : "Network";
             case 1, 2, 3 -> "Store - " + current_User.getStoreName();
@@ -202,6 +216,7 @@ public class MyAccountController {
         currentUser.setEmail(emailChangeTxtB.getText());
         currentUser.setPhoneNum(phoneChangeTxtB.getText());
         // currentUser.setPassword(newPassTxtB.getText()); Irrelevant, a different function handles password changes
+        currentUser.setFullName(fNameTxtB.getText());
         updatedUser = new UpdateUserEvent(currentUser);
         try {
             SimpleClient.client.sendToServer(updatedUser);

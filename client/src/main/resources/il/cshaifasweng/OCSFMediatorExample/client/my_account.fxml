@@ -78,10 +78,10 @@
                         <Label fx:id="userIdLbl" text="ID Number :" GridPane.rowIndex="3" />
                         <TextField fx:id="idNumTxtB" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
-                        <Label fx:id="accTypeLbl" text="Account Type :" GridPane.rowIndex="4" />
-                        <Label fx:id="accountTypeEmptyLbl" text="_" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Label fx:id="accTypeLbl" text="Account Type :" GridPane.rowIndex="5" />
+                        <Label fx:id="accountTypeEmptyLbl" prefHeight="17.0" prefWidth="78.0" text="_" GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
-                        <Label fx:id="subscriptionExpireLbl" text="Subscription Expiration Date :" GridPane.rowIndex="5" />
+                        <Label fx:id="subscriptionExpireLbl" text="Subscription Expiration Date :" GridPane.rowIndex="6" />
                         <Label fx:id="subscriptionExpireTitleLbl" text=" " GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
                         <Label fx:id="changePassLbl" text="Change Password" GridPane.rowIndex="7">
@@ -96,6 +96,8 @@
                         <PasswordField fx:id="confNewPassTxtB" GridPane.columnIndex="1" GridPane.rowIndex="9" />
 
                         <Label fx:id="passErrorMsgLbl" prefHeight="17.0" prefWidth="210.0" text="Passwords Don't Match Try Again" textAlignment="CENTER" textFill="RED" visible="false" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                  <Label fx:id="fullNameLbl" text="Full Name :" GridPane.rowIndex="4" />
+                  <TextField fx:id="fNameTxtB" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                     </children>
                 </GridPane>
 
