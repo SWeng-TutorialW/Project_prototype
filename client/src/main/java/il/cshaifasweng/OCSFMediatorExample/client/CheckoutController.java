@@ -255,6 +255,8 @@ public class CheckoutController {
             }
             // Optionally, autofill address if you store it in user entity
         }
+        // Update total to show discount immediately if user is a yearly subscriber
+        updateTotal();
     }
     
     private void updateDeliveryFee() {

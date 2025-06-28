@@ -83,17 +83,25 @@
                         <Label fx:id="subscriptionExpireLbl" text="Expire Date :" GridPane.rowIndex="5" />
                         <Label fx:id="subscriptionExpireTitleLbl" text=" " GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
-                        <Label fx:id="changePassLbl" text="Change Password" GridPane.rowIndex="6" />
+                        <!-- Subscription Start Date -->
+                        <Label fx:id="subscriptionStartLbl" text="Subscription Start Date :" GridPane.rowIndex="6">
+                            <font>
+                                <Font name="Segoe UI" size="13.0" />
+                            </font>
+                        </Label>
+                        <Label fx:id="subscriptionDateLbl" text=" " GridPane.columnIndex="1" GridPane.rowIndex="6" />
 
-                        <Label fx:id="newPassLbl" text="New Password" GridPane.rowIndex="7" />
-                        <PasswordField fx:id="newPassTxtB" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                        <Label fx:id="changePassLbl" text="Change Password" GridPane.rowIndex="7" />
 
-                        <Label fx:id="confNewPassLbl" text="Confirm New Password" GridPane.rowIndex="8" />
-                        <PasswordField fx:id="confNewPassTxtB" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                        <Label fx:id="newPassLbl" text="New Password" GridPane.rowIndex="8" />
+                        <PasswordField fx:id="newPassTxtB" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+
+                        <Label fx:id="confNewPassLbl" text="Confirm New Password" GridPane.rowIndex="9" />
+                        <PasswordField fx:id="confNewPassTxtB" GridPane.columnIndex="1" GridPane.rowIndex="9" />
 
                         <Label fx:id="passErrorMsgLbl" text="Passwords Don't Match Try Again"
                                textAlignment="CENTER" textFill="RED" visible="false" wrapText="true"
-                               GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                               GridPane.columnIndex="1" GridPane.rowIndex="10" />
                     </children>
                 </GridPane>
 

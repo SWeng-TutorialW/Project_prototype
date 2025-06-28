@@ -106,24 +106,32 @@
                         </Label>
                         <Label fx:id="subscriptionDateLbl" text=" " GridPane.columnIndex="1" GridPane.rowIndex="5" />
                         
-                        <Label fx:id="changePassLbl" text="Change Password" GridPane.rowIndex="6">
+                        <!-- Subscription Expire Date -->
+                        <Label fx:id="subscriptionExpireLbl" text="Expire Date :" GridPane.rowIndex="6">
+                            <font>
+                                <Font name="Segoe UI" size="13.0" />
+                            </font>
+                        </Label>
+                        <Label fx:id="subscriptionExpireTitleLbl" text=" " GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                        
+                        <Label fx:id="changePassLbl" text="Change Password" GridPane.rowIndex="7">
                             <font>
                                 <Font name="Segoe UI Bold" size="13.0" />
                             </font>
                         </Label>
-                        <Label fx:id="newPassLbl" text="New Password" GridPane.rowIndex="7">
+                        <Label fx:id="newPassLbl" text="New Password" GridPane.rowIndex="8">
                             <font>
                                 <Font name="Segoe UI" size="13.0" />
                             </font>
                         </Label>
-                        <Label fx:id="confNewPassLbl" text="Confirm New Password" GridPane.rowIndex="8">
+                        <Label fx:id="confNewPassLbl" text="Confirm New Password" GridPane.rowIndex="9">
                             <font>
                                 <Font name="Segoe UI" size="13.0" />
                             </font>
                         </Label>
-                        <PasswordField fx:id="newPassTxtB" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                        <PasswordField fx:id="confNewPassTxtB" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-                        <Label fx:id="passErrorMsgLbl" prefHeight="49.0" prefWidth="157.0" text="Passwords Don't Match Try Again" textAlignment="CENTER" textFill="RED" visible="false" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="9">
+                        <PasswordField fx:id="newPassTxtB" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                        <PasswordField fx:id="confNewPassTxtB" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+                        <Label fx:id="passErrorMsgLbl" prefHeight="49.0" prefWidth="157.0" text="Passwords Don't Match Try Again" textAlignment="CENTER" textFill="RED" visible="false" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="10">
                             <font>
                                 <Font name="Segoe UI Bold" size="13.0" />
                             </font>
@@ -133,7 +141,7 @@
                                 <Font name="Segoe UI" size="13.0" />
                             </font>
                         </Label>
-                        <TextField fx:id="phoneChangeTxtB1" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <TextField fx:id="idNumTxtB" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                     </children>
                 </GridPane>
 
