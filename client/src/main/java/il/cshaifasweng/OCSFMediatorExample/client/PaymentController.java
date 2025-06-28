@@ -246,8 +246,8 @@ public class PaymentController {
                 order.setStatus("CONFIRMED");
                 SimpleClient.getClient().sendToServer(order);
 
-                Warning warning = new Warning("Payment successful! Your order has been placed.");
-                EventBus.getDefault().post(new WarningEvent(warning));
+                Success success = new Success("Payment successful! Your order has been placed.");
+                EventBus.getDefault().post(new SuccessEvent(success));
 
                 OrderPageController.clearCart();
                 ((Stage) payButton.getScene().getWindow()).close();

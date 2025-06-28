@@ -57,6 +57,12 @@ public class OrderDetailsController {
     private TableColumn<CartItem, String> itemTypeColumn;
     
     @FXML
+    private TableColumn<CartItem, String> itemColorColumn;
+    
+    @FXML
+    private TableColumn<CartItem, String> itemCategoryColumn;
+    
+    @FXML
     private TableColumn<CartItem, String> itemStoreColumn;
     
     @FXML
@@ -101,6 +107,9 @@ public class OrderDetailsController {
     @FXML
     private Button backButton;
     
+    @FXML
+    private Label discountLabel;
+    
     private Order currentOrder;
     private ObservableList<CartItem> itemsList;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -115,6 +124,16 @@ public class OrderDetailsController {
         
         itemTypeColumn.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getFlower().getFlowerType()));
+        
+        itemColorColumn.setCellValueFactory(cellData -> {
+            String color = cellData.getValue().getFlower().getColor();
+            return new SimpleStringProperty(color != null ? color : "N/A");
+        });
+        
+        itemCategoryColumn.setCellValueFactory(cellData -> {
+            String category = cellData.getValue().getFlower().getCategory();
+            return new SimpleStringProperty(category != null ? category : "N/A");
+        });
         
         itemStoreColumn.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getStore()));
@@ -184,7 +203,13 @@ public class OrderDetailsController {
         }
         double deliveryFee = currentOrder.getDeliveryFee();
         double total = currentOrder.getTotalAmount();
-        
+        double discount = currentOrder.getDiscountAmount();
+        if (discount > 0.0) {
+            discountLabel.setText(String.format("Yearly Subscriber Discount: -₪%.2f", discount));
+            discountLabel.setVisible(true);
+        } else {
+            discountLabel.setVisible(false);
+        }
         subtotalLabel.setText(String.format("₪%.2f", subtotal));
         deliveryFeeLabel.setText(String.format("₪%.2f", deliveryFee));
         totalAmountLabel.setText(String.format("₪%.2f", total));

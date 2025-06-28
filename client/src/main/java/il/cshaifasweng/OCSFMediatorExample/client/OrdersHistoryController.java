@@ -143,8 +143,17 @@ public class OrdersHistoryController {
                     setGraphic(null);
                 } else {
                     Order order = getTableView().getItems().get(getIndex());
-                    // Only show cancel button for orders that can be cancelled
-                    if (canCancelOrder(order)) {
+                    boolean isSubscription = false;
+                    if (order.getItems() != null) {
+                        for (var cartItem : order.getItems()) {
+                            if (cartItem.getFlower() != null && "Yearly Subscription".equals(cartItem.getFlower().getFlowerName())) {
+                                isSubscription = true;
+                                break;
+                            }
+                        }
+                    }
+                    // Only show cancel button for orders that can be cancelled and are not subscription
+                    if (canCancelOrder(order) && !isSubscription) {
                         cancelButton.setVisible(true);
                         cancelButton.setDisable(false);
                         setGraphic(cancelButton);
@@ -447,5 +456,30 @@ public class OrdersHistoryController {
         
         // Also refresh the table
         ordersTable.refresh();
+    }
+    
+    /**
+     * Adds an order for a user. This is a static helper for MyAccountController to add a subscription order.
+     * This implementation is minimal and only works if an OrdersHistoryController instance is open and accessible.
+     * In a real app, this should send the order to the server for persistence.
+     */
+    public static void addOrderForUser(LoginRegCheck user, Order order) {
+        // This is a placeholder. In a real app, you would send the order to the server.
+        try {
+            // Send the order to the server for persistence
+            SimpleClient.getClient().sendToServer(order);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    @org.greenrobot.eventbus.Subscribe
+    public void handleOrderSuccessMessage(String message) {
+        if ("order_success".equals(message)) {
+            // Reload orders if this window is open and user is set
+            if (currentUser != null && ordersTable.getScene() != null && ordersTable.getScene().getWindow().isShowing()) {
+                Platform.runLater(this::loadUserOrders);
+            }
+        }
     }
 } 

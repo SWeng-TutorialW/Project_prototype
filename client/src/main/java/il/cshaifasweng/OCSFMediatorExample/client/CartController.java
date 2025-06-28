@@ -15,6 +15,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,6 +25,8 @@ public class CartController {
     @FXML private TableColumn<CartItem, String> nameColumn;
     @FXML private TableColumn<CartItem, String> storeColumn;
     @FXML private TableColumn<CartItem, String> typeColumn;
+    @FXML private TableColumn<CartItem, String> colorColumn;
+    @FXML private TableColumn<CartItem, String> categoryColumn;
     @FXML private TableColumn<CartItem, Double> priceColumn;
     @FXML private TableColumn<CartItem, Integer> quantityColumn;
     @FXML private TableColumn<CartItem, Double> totalColumn;
@@ -41,19 +44,41 @@ public class CartController {
         this.catalogController = catalogController;
     }
 
+    static Stage cartStage = null;
+
+    public static boolean isCartOpen() {
+        return cartStage != null && cartStage.isShowing();
+    }
+
+    public static void setCartStage(Stage stage) {
+        cartStage = stage;
+        if (cartStage != null) {
+            cartStage.setOnHidden(e -> cartStage = null);
+        }
+    }
+
+    @FXML
     public void initialize() {
         // Set up table columns
         nameColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getFlower().getFlowerName()));
+            new SimpleStringProperty(cellData.getValue().getFlower().getFlowerName()));
         storeColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getStore()));
         typeColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getFlower().getFlowerType()));
+            new SimpleStringProperty(cellData.getValue().getFlower().getFlowerType()));
+        colorColumn.setCellValueFactory(cellData -> {
+            String color = cellData.getValue().getFlower().getColor();
+            return new SimpleStringProperty(color != null ? color : "N/A");
+        });
+        categoryColumn.setCellValueFactory(cellData -> {
+            String category = cellData.getValue().getFlower().getCategory();
+            return new SimpleStringProperty(category != null ? category : "N/A");
+        });
         priceColumn.setCellValueFactory(cellData ->
-                new SimpleDoubleProperty(cellData.getValue().getFlower().getFlowerPrice()).asObject());
+            new SimpleDoubleProperty(cellData.getValue().getFlower().getFlowerPrice()).asObject());
         quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         totalColumn.setCellValueFactory(cellData ->
-                new SimpleDoubleProperty(cellData.getValue().getTotalPrice()).asObject());
+            new SimpleDoubleProperty(cellData.getValue().getTotalPrice()).asObject());
 
         // Add remove button to action column
         actionColumn.setCellFactory(col -> new TableCell<>() {
@@ -80,6 +105,34 @@ public class CartController {
         // Update total when items change
         cartItems.addListener((javafx.collections.ListChangeListener.Change<? extends CartItem> change) -> {
             updateTotal();
+        });
+
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+
+        // Unregister from EventBus when window closes
+        cartTable.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                if (newScene.getWindow() != null) {
+                    newScene.getWindow().setOnHidden(e -> {
+                        if (EventBus.getDefault().isRegistered(this)) {
+                            EventBus.getDefault().unregister(this);
+                        }
+                    });
+                } else {
+                    // Listen for the window property to become non-null
+                    newScene.windowProperty().addListener((obsWin, oldWin, newWin) -> {
+                        if (newWin != null) {
+                            newWin.setOnHidden(e -> {
+                                if (EventBus.getDefault().isRegistered(this)) {
+                                    EventBus.getDefault().unregister(this);
+                                }
+                            });
+                        }
+                    });
+                }
+            }
         });
     }
 
@@ -153,44 +206,37 @@ public class CartController {
             return;
         }
 
-        // Check if current user is available, use SimpleClient as fallback
-     /*   if (currentUser == null) {
-            currentUser = SimpleClient.getCurrentUser();
-            System.out.println("Using SimpleClient current user: " + (currentUser != null ? currentUser.getUsername() : "null"));
+        if (CheckoutController.isCheckoutOpen()) {
+            CheckoutController.checkoutStage.close();
         }
 
-        if (currentUser == null) {
-            System.out.println("Current user is null despite being logged in");
-            Warning warning = new Warning("User session not found. Please log in again.");
-            EventBus.getDefault().post(new WarningEvent(warning));
-            return;
-        }*/
-
-        System.out.println("User is logged in, proceeding to checkout");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("checkout.fxml"));
             Parent root = loader.load();
             CheckoutController checkoutController = loader.getController();
             checkoutController.setCartItems(cartItems);
-            checkoutController.setCurrentUser(currentUser); // Pass the user to checkout
+            checkoutController.setCurrentUser(currentUser);
 
             Stage stage = new Stage();
+            CheckoutController.setCheckoutStage(stage);
             stage.setTitle("Checkout");
             stage.setScene(new Scene(root));
             stage.show();
 
             // Close cart window
-            ((Stage) cartTable.getScene().getWindow()).close();
+            Stage cartStage = (Stage) checkoutButton.getScene().getWindow();
+            cartStage.close();
         } catch (IOException e) {
-            System.err.println("Error loading checkout.fxml: " + e.getMessage());
             e.printStackTrace();
+            Warning warning = new Warning("Error opening checkout");
+            EventBus.getDefault().post(new WarningEvent(warning));
         }
     }
 
     @FXML
     private void continueShopping() {
-        // Close cart window
-        ((Stage) cartTable.getScene().getWindow()).close();
+        Stage stage = (Stage) continueShoppingButton.getScene().getWindow();
+        stage.close();
     }
 
     @FXML
@@ -203,5 +249,21 @@ public class CartController {
             Warning warning = new Warning("Error returning to catalog");
             EventBus.getDefault().post(new WarningEvent(warning));
         }
+    }
+
+    @FXML
+    private void openCartWarningIfOpen() {
+        if (isCartOpen()) {
+            Warning warning = new Warning("The cart window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            cartStage.toFront();
+            cartStage.requestFocus();
+        }
+    }
+
+    @Subscribe
+    public void onCartUpdated(CartUpdatedEvent event) {
+        // Refresh the cart display if needed
+        updateTotal();
     }
 }

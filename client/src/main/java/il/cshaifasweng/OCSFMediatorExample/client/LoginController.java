@@ -366,8 +366,6 @@ public class LoginController {
 
     }
 
-
-
     @FXML
     void register(ActionEvent event)
     {

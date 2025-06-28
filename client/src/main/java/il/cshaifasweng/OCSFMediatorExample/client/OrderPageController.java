@@ -16,6 +16,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Logger;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,9 +25,11 @@ public class OrderPageController {
     private ImageView flowerImage;
     @FXML private Label flowerName;
     @FXML private Label flowerType;
+    @FXML private Label flowerColor;
+    @FXML private Label flowerCategory;
     @FXML private Label flowerPrice;
     @FXML private Label storeName;
-    @FXML private String store;
+    private String store;
     @FXML private Spinner<Integer> quantitySpinner;
     @FXML private Label totalPrice;
     @FXML private Button addToCartButton;
@@ -62,27 +65,98 @@ public class OrderPageController {
         if (selectedFlower != null) {
             flowerName.setText(selectedFlower.getFlowerName());
             flowerType.setText("Flower Type: " + selectedFlower.getFlowerType());
+            flowerColor.setText("Color: " + (selectedFlower.getColor() != null ? selectedFlower.getColor() : "N/A"));
+            flowerCategory.setText("Category: " + (selectedFlower.getCategory() != null ? selectedFlower.getCategory() : "N/A"));
             System.out.println("The store of the flower is: " + this.store);
             storeName.setText("Store: " + this.store);
 
             flowerPrice.setText(String.format("Price: $%.2f", selectedFlower.getFlowerPrice()));
             updateTotalPrice();
             
-            // Set flower image
-            try {
-                String imagePath = "/images/" + selectedFlower.getFlowerType() + ".png";
-                Image image = new Image(getClass().getResourceAsStream(imagePath));
-                flowerImage.setImage(image);
-            } catch (Exception e) {
-                System.err.println("Failed to load image for: " + selectedFlower.getFlowerType());
-                try {
-                    String imagePath = "/images/no_photo.png";
-                    Image image = new Image(getClass().getResourceAsStream(imagePath));
-                    flowerImage.setImage(image);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+            // Set flower image using database path with fallback
+            setFlowerImage();
+        }
+    }
+    
+    private void setFlowerImage() {
+        try {
+            String imagePath = null;
+            
+            // If database has a valid image path, use it
+            if (selectedFlower.getImage() != null && !selectedFlower.getImage().trim().isEmpty()) {
+                imagePath = selectedFlower.getImage();
+            } else {
+                // Fallback to flower type if no image path in database
+                imagePath = "images/" + selectedFlower.getFlowerType() + ".png";
             }
+            
+            // Handle different path formats
+            String finalImagePath;
+            if (imagePath.startsWith("images/")) {
+                // Convert to resource path format
+                finalImagePath = "/" + imagePath;
+            } else if (imagePath.startsWith("/")) {
+                // Already in resource path format
+                finalImagePath = imagePath;
+            } else {
+                // Assume it's a relative path, add images/ prefix
+                finalImagePath = "/images/" + imagePath;
+            }
+            
+            System.out.println("Loading flower image from path: " + imagePath + " -> " + finalImagePath);
+            
+            InputStream inputStream = getClass().getResourceAsStream(finalImagePath);
+            if (inputStream != null) {
+                Image image = new Image(inputStream);
+                flowerImage.setImage(image);
+            } else {
+                // Try fallback to flower type
+                setImageFallback();
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Failed to load image from database path: " + selectedFlower.getImage() + " for flower type: " + selectedFlower.getFlowerType());
+            setImageFallback();
+        }
+    }
+    
+    private void setImageFallback() {
+        try {
+            // First try FlowerImages directory
+            String fallbackPath = "/images/FlowerImages/" + selectedFlower.getFlowerType() + ".png";
+            InputStream inputStream = getClass().getResourceAsStream(fallbackPath);
+            
+            if (inputStream == null) {
+                // If not found in FlowerImages, try main images directory
+                fallbackPath = "/images/" + selectedFlower.getFlowerType() + ".png";
+                inputStream = getClass().getResourceAsStream(fallbackPath);
+            }
+            
+            if (inputStream != null) {
+                System.out.println("Using fallback image: " + fallbackPath);
+                Image image = new Image(inputStream);
+                flowerImage.setImage(image);
+            } else {
+                // Load no_photo image as final fallback
+                setNoPhotoImage();
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to load fallback image for flower type: " + selectedFlower.getFlowerType());
+            setNoPhotoImage();
+        }
+    }
+    
+    private void setNoPhotoImage() {
+        try {
+            String noPhotoPath = "/images/no_photo.png";
+            System.out.println("Loading no_photo image: " + noPhotoPath);
+            InputStream inputStream = getClass().getResourceAsStream(noPhotoPath);
+            if (inputStream != null) {
+                Image image = new Image(inputStream);
+                flowerImage.setImage(image);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to load no_photo image as well");
         }
     }
     
@@ -100,34 +174,35 @@ public class OrderPageController {
             System.out.println("User not logged in");
             Warning warning = new Warning("Please log in to add items to cart");
             EventBus.getDefault().post(new WarningEvent(warning));
-
-          /*  try {
-                 FXMLLoader loader = new FXMLLoader(getClass().getResource("connect_scene.fxml"));
-                Parent root = loader.load();
-
-                Stage stage = new Stage();
-                stage.setTitle("Connect");
-                stage.setScene(new Scene(root));
-                stage.show();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
-
             return; // Exit the method to prevent further execution
         }
 
-        if (!this.store.equals(this.user.getStoreName()) && user.getStore() != 4) {
-            Warning warning = new Warning("You Can Only Order From The Store: " + user.getStoreName());
+        // Prevent adding from another store if not network
+        if (user.getStore() != 4 && !this.store.equals(this.user.getStoreName())) {
+            Warning warning = new Warning("You can only order from your own store: " + user.getStoreName());
             EventBus.getDefault().post(new WarningEvent(warning));
-        } else if (selectedFlower != null) {
-            int quantity = quantitySpinner.getValue();
-            System.out.println("The store of the flower is:" + this.store);
-            CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
-            cartItems.add(cartItem);
+            return;
+        }
 
+        if (selectedFlower != null) {
+            int quantity = quantitySpinner.getValue();
+            boolean found = false;
+            for (CartItem item : cartItems) {
+                if (item.getFlower().getId() == selectedFlower.getId() && item.getStore().equals(this.store)) {
+                    item.setQuantity(item.getQuantity() + quantity);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
+                cartItems.add(cartItem);
+            }
             // Show confirmation
-            Warning warning = new Warning("Item added to cart successfully!");
-            EventBus.getDefault().post(new WarningEvent(warning));
+            Success success = new Success("Item added to cart successfully!");
+            EventBus.getDefault().post(new SuccessEvent(success));
+            // Notify cart window to refresh
+            EventBus.getDefault().post(new CartUpdatedEvent());
         }
 
         // Close current window
@@ -137,13 +212,22 @@ public class OrderPageController {
     
     @FXML
     private void viewCart() {
+        if (CartController.isCartOpen()) {
+            Warning warning = new Warning("The cart window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            CartController.setCartStage(CartController.cartStage); // bring to front
+            CartController.cartStage.toFront();
+            CartController.cartStage.requestFocus();
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("cart.fxml"));
             Parent root = loader.load();
             CartController cartController = loader.getController();
             cartController.setCartItems(cartItems);
-            
+
             Stage stage = new Stage();
+            CartController.setCartStage(stage);
             stage.setTitle("Shopping Cart");
             stage.setScene(new Scene(root));
             stage.show();

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.UsersTableController">
+    <TableView fx:id="usersTable" layoutX="14.0" layoutY="14.0" prefHeight="400.0" prefWidth="600.0">
+        <columns>
+            <TableColumn fx:id="usernameCol" text="Username" />
+            <TableColumn fx:id="phoneCol" text="Phone Number" />
+            <TableColumn fx:id="fullNameCol" text="Full Name" />
+            <TableColumn fx:id="idNumCol" text="ID Number" />
+            <TableColumn fx:id="emailCol" text="Email" />
+            <TableColumn fx:id="storeCol" text="Store" />
+            <TableColumn fx:id="typeCol" text="Type" />
+            <TableColumn fx:id="subscriptionCol" text="yearly subscription" />
+            <TableColumn fx:id="isLoginCol" text="Login Mode" />
+        </columns>
+    </TableView>
+</AnchorPane>
