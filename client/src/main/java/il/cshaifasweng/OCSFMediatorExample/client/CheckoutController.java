@@ -41,6 +41,8 @@ public class CheckoutController {
     @FXML private TableView<CartItem> orderTable;
     @FXML private TableColumn<CartItem, String> nameColumn;
     @FXML private TableColumn<CartItem, String> typeColumn;
+    @FXML private TableColumn<CartItem, String> colorColumn;
+    @FXML private TableColumn<CartItem, String> categoryColumn;
     @FXML private TableColumn<CartItem, Double> priceColumn;
     @FXML private TableColumn<CartItem, Integer> quantityColumn;
     @FXML private TableColumn<CartItem, Double> totalColumn;
@@ -117,6 +119,14 @@ public class CheckoutController {
             new SimpleStringProperty(cellData.getValue().getFlower().getFlowerName()));
         typeColumn.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getFlower().getFlowerType()));
+        colorColumn.setCellValueFactory(cellData -> {
+            String color = cellData.getValue().getFlower().getColor();
+            return new SimpleStringProperty(color != null ? color : "N/A");
+        });
+        categoryColumn.setCellValueFactory(cellData -> {
+            String category = cellData.getValue().getFlower().getCategory();
+            return new SimpleStringProperty(category != null ? category : "N/A");
+        });
         priceColumn.setCellValueFactory(cellData -> 
             new SimpleDoubleProperty(cellData.getValue().getFlower().getFlowerPrice()).asObject());
         quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));

@@ -276,7 +276,7 @@ public class MyAccountController {
                 subscriptionOrder.setTotalAmount(100.0); // Assuming subscription price is 100
                 subscriptionOrder.setDiscountAmount(0.0);
                 subscriptionOrder.setRequiresDelivery(false);
-                Flower subscriptionFlower = new Flower("Yearly Subscription", 100.0, "Subscription");
+                Flower subscriptionFlower = new Flower("Yearly Subscription", 100.0, "Subscription", "images/subscription.png", "Gold", "Subscription");
                 CartItem subscriptionItem = new CartItem(subscriptionFlower, 1, current_User.getStoreName());
                 subscriptionOrder.addItem(subscriptionItem);
                 // Optionally, persist or notify the system about the new order

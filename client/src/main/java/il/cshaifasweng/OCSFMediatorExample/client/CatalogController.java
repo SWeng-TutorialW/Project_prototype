@@ -37,7 +37,9 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import javafx.scene.layout.FlowPane;
 
+import java.util.ArrayList;
 
 public class CatalogController {
 
@@ -303,6 +305,9 @@ public class CatalogController {
     };
 
     @FXML
+    private FlowPane catalogFlowPane;
+
+    @FXML
     void create_bouqut(ActionEvent event)
     {
         Platform.runLater(() -> {
@@ -352,6 +357,37 @@ public class CatalogController {
         combo.getItems().addAll("Price High to LOW", "Price Low to HIGH");
         combo.setValue("Sort");
         Stores.getItems().addAll("Haifa", "Krayot","Nahariyya","network");
+        // Set default store selection
+        if (user != null) {
+            if (user.getStore() == 4 || user.is_yearly_subscription()) {
+                Stores.setValue("network");
+            } else if (user.getStore() == 1) {
+                Stores.setValue("Haifa");
+            } else if (user.getStore() == 2) {
+                Stores.setValue("Krayot");
+            } else if (user.getStore() == 3) {
+                Stores.setValue("Nahariyya");
+            }
+            
+            // Request catalog data for the user's store after setting the selection
+            try {
+                String selectedStore = Stores.getValue();
+                if (selectedStore != null) {
+                    if (selectedStore.equals("network")) {
+                        SimpleClient.getClient().sendToServer("get_all_flowers");
+                    } else {
+                        int storeId = getCurrentStoreId(selectedStore);
+                        if (storeId != -1) {
+                            SimpleClient.getClient().sendToServer("get_catalog_" + storeId);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Stores.setValue("network"); // Guest default
+        }
         combo.setButtonCell(new ListCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -398,87 +434,55 @@ public class CatalogController {
                 e.printStackTrace();
             }
         });
+        combo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            combo_choose(null);
+        });
+        Stores.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            updateCatalogForSelectedStore();
+        });
     }
     public void setCatalogSorting(List<Flower> flowerList) {
-        flowersList_sorting = flowerList;
-
         Platform.runLater(() -> {
-            if (sorting_type == 0 || sorting_type == 4) {
-                Stores.setValue("network");
-            }
-            if (sorting_type == 1) {
-                Stores.setValue("Haifa");
-            }
-            if (sorting_type == 2) {
-                Stores.setValue("Krayot");
-            }
-            if (sorting_type == 3) {
-                Stores.setValue("Nahariyya");
-            }
-
-            clearCatalog();
-            System.out.println("this client is for store: " + type);
-            System.out.println("this client is see the store: " + sorting_type);
-            if(add_flower_flag==1)
-            {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("new flower in catalog");
-                alert.setHeaderText("see our new flower :]");
-                alert.setContentText("see our new flower :]");
-                alert.show();
-            }
-            if(add_flower_flag==-1 )
-            {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("flower deleted from the catalog");
-                alert.setHeaderText("flower deleted from the catalog :[");
-                alert.setContentText("flower deleted from the catalog:[");
-                alert.show();
-            }
-            if(add_flower_flag==2)
-            {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("NEW PRICE FOR"+ flower_name);
-                alert.setHeaderText("NEW PRICE FOR"+ flower_name);
-                alert.setContentText("NEW PRICE FOR"+ flower_name);
-                alert.show();
-            }
-            if(add_flower_flag==3)
-            {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("ALL THE STORE IN DISCOUNTS");
-                alert.setHeaderText("ALL THE STORE IN DISCOUNTS");
-                alert.setContentText("ALL THE STORE IN DISCOUNTS");
-                alert.show();
-            }
-            add_flower_flag=0;
-            System.out.println("Received flowers: " + flowersList_sorting.size());
-            for (Flower f : flowersList_sorting) {
-                System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
-            }
-
-            for (int i = 0; i < flowersList_sorting.size() && i < 12; i++) {
-                Flower f = flowersList_sorting.get(i);
-
-                nameLabels[i].setText(f.getFlowerName());
-
+            flowersList_c = flowerList;
+            catalogFlowPane.getChildren().clear();
+            for (Flower f : flowersList_c) {
+                VBox card = new VBox(5);
+                card.setPrefWidth(160);
+                card.setStyle("-fx-background-color: #fff; -fx-border-color: #c8a2c8; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10;");
+                ImageView imageView = new ImageView();
+                imageView.setFitWidth(140);
+                imageView.setFitHeight(90);
+                setImageFromDatabase(imageView, f.getImage(), f.getFlowerType());
+                Label nameLabel = new Label(f.getFlowerName());
+                nameLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 18px;");
+                Label typeLabel = new Label(f.getFlowerType());
+                typeLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 14px;");
+                
+                // Add color label
+                Label colorLabel = new Label("Color: " + (f.getColor() != null ? f.getColor() : "N/A"));
+                colorLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 12px;");
+                
+                // Add category label
+                Label categoryLabel = new Label("Category: " + (f.getCategory() != null ? f.getCategory() : "N/A"));
+                categoryLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 12px;");
+                
+                TextField priceField = new TextField(String.format("%.2f", f.getFlowerPrice()));
+                priceField.setEditable(false);
+                priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px;");
+                Text priceBeforeSale = new Text();
+                priceBeforeSale.setStyle("-fx-fill: LIGHTPINK; -fx-strikethrough: true; -fx-font-size: 14px;");
                 if (f.isSale()) {
-                    price_Before_sale[i].setVisible(true);
+                    priceBeforeSale.setVisible(true);
                     int discount_percent = f.getDiscount();
                     double remainingPercent = 100.0 - discount_percent;
                     double originalPrice = f.getFlowerPrice() * 100.0 / remainingPercent;
-                    String originalPriceStr = String.format("%.2f", originalPrice);
-                    price_Before_sale[i].setText(originalPriceStr);
+                    priceBeforeSale.setText(String.format("%.2f", originalPrice));
+                } else {
+                    priceBeforeSale.setVisible(false);
                 }
-
-                priceFields[i].setText(String.format("%.2f", f.getFlowerPrice()));
-                typeLabels[i].setText(f.getFlowerType());
-                setImage(imageViews[i], f.getFlowerType());
-
-                if (i == 8) nine_9.setVisible(true);
-                if (i == 9) ten_10.setVisible(true);
-                if (i == 10) eleven_11.setVisible(true);
-                if (i == 11) twelve_12.setVisible(true);
+                card.getChildren().addAll(imageView, nameLabel, typeLabel, colorLabel, categoryLabel, priceBeforeSale, priceField);
+                card.setOnMouseClicked(e -> openFlowerDetails(f));
+                catalogFlowPane.getChildren().add(card);
             }
         });
     }
@@ -499,45 +503,52 @@ public class CatalogController {
     }
     @Subscribe
     public void handleCatalogUpdate(discount_for_1_flower event)throws IOException {
-
-        if(event.get_catalog_type()==1)
-        {
-            flower_name=event.get_flower_name();
-            add_flower_flag=2;
-            setCatalogSorting(event.get_flowers());
-            set_sorting_type(4);
+        System.out.println("=== DISCOUNT EVENT RECEIVED ===");
+        System.out.println("Event catalog type: " + event.get_catalog_type());
+        System.out.println("Current type: " + type);
+        System.out.println("Current store selection: " + Stores.getValue());
+        System.out.println("Flower name: " + event.get_flower_name());
+        
+        // Special handling for network operations (catalog_type = -1)
+        if (event.get_catalog_type() == -1) {
+            System.out.println("*** NETWORK DISCOUNT EVENT PROCESSING ***");
+            System.out.println("Updating UI for all clients with " + event.get_flowers().size() + " flowers");
+            if (event.get_flowers() != null) {
+                setCatalogData(event.get_flowers());
+            }
+            System.out.println("*** NETWORK DISCOUNT EVENT PROCESSED ***");
             return;
         }
-        if(event.get_catalog_type()==2)
-        {
-
-            add_flower_flag=3;
-            setCatalogSorting(event.get_flowers());
-            set_sorting_type(4);
-            return;
+        
+        // Only reload if this event is for our current store selection
+        String selectedStore = Stores.getValue();
+        if (selectedStore != null) {
+            int currentStoreId = getCurrentStoreId(selectedStore);
+            System.out.println("Current store ID: " + currentStoreId);
+            System.out.println("Event catalog type: " + event.get_catalog_type());
+            
+            if (event.get_catalog_type() == currentStoreId) {
+                System.out.println("Discount event matches current store, updating UI");
+                // Update the UI with the new data from the event
+                if (event.get_flowers() != null) {
+                    System.out.println("Updating catalog with " + event.get_flowers().size() + " flowers");
+                    setCatalogData(event.get_flowers());
+                }
+            } else {
+                System.out.println("Discount event does not match current store. Event type: " + event.get_catalog_type() + ", Current store ID: " + currentStoreId);
+            }
+        } else {
+            System.out.println("No store selected, cannot process discount event");
         }
-        if(event.get_catalog_type()==-2)
-        {
-
-            add_flower_flag=0;
-            setCatalogSorting(event.get_flowers());
-            set_sorting_type(4);
-            return;
-        }
-        if(type!=4)
-        {
-            System.out.println("send message to server "+type);
-            SimpleClient.getClient().sendToServer("I#need#to#update#my#store#catalog_"+type);
-            return;
-        }
-        flowersList_c=event.get_flowers();
-
-
     }
+    
     @Subscribe
     public void handleCatalogUpdate(Add_flower_event event)throws IOException {
-
-        System.out.println("enter handle " );
+        System.out.println("=== CATALOG CONTROLLER: ADD FLOWER EVENT RECEIVED ===");
+        System.out.println("Event catalog type: " + event.get_catalog_type());
+        System.out.println("Current type: " + type);
+        System.out.println("Current store selection: " + Stores.getValue());
+        System.out.println("Event flowers count: " + (event.get_flowers() != null ? event.get_flowers().size() : "null"));
 
         if(event.get_flowers()==null)
         {
@@ -550,102 +561,212 @@ public class CatalogController {
                     set_user(event.getUser());
                     return;
                 }
-
             }
             return;
         }
-        if(event.get_catalog_type()==-1)
-        {
-            add_flower_flag=-1;
-            setCatalogSorting(event.get_flowers());
-            set_sorting_type(4);
+        
+        // Special handling for delete events (catalog_type = -1)
+        if (event.get_catalog_type() == -1) {
+            System.out.println("*** NETWORK DELETE EVENT PROCESSING ***");
+            System.out.println("Updating UI for all clients with " + event.get_flowers().size() + " flowers");
+            setCatalogData(event.get_flowers());
+            System.out.println("*** NETWORK DELETE EVENT PROCESSED ***");
             return;
         }
-        add_flower_flag=1;
-        setCatalogSorting(event.get_flowers());
-        set_sorting_type(4);
-        if(type!=4)
-        {
-            System.out.println("send message to server "+type);
-            SimpleClient.getClient().sendToServer("I#need#to#update#my#store#catalog_"+type);
-            return;
+        
+        // Only reload if this event is for our current store selection
+        String selectedStore = Stores.getValue();
+        if (selectedStore != null) {
+            int currentStoreId = getCurrentStoreId(selectedStore);
+            System.out.println("Current store ID: " + currentStoreId);
+            System.out.println("Event catalog type: " + event.get_catalog_type());
+            
+            if (event.get_catalog_type() == currentStoreId) {
+                System.out.println("Add flower event matches current store, updating UI");
+                // Update the UI with the new data from the event
+                setCatalogData(event.get_flowers());
+            } else {
+                System.out.println("Add flower event does not match current store. Event type: " + event.get_catalog_type() + ", Current store ID: " + currentStoreId);
+            }
+        } else {
+            System.out.println("No store selected, cannot process add flower event");
         }
-        flowersList_c=event.get_flowers();
-
-
     }
+    
     @Subscribe
     public void handleCatalogUpdate(update_local_catalog event) {
-        System.out.println("enter ok");
-        if(type== event.get_catalog_type())
-        {
-            System.out.println("the local catalog updated " +event.get_catalog_type());
-            flowersList_c=event.get_flowers();
-            return;
+        System.out.println("=== UPDATE LOCAL CATALOG EVENT ===");
+        System.out.println("Event catalog type: " + event.get_catalog_type());
+        System.out.println("Current selected store: " + Stores.getValue());
+        System.out.println("Current type: " + type);
+        
+        // Check if this update is for the store we're currently viewing
+        String selectedStore = Stores.getValue();
+        if (selectedStore != null) {
+            int currentStoreId = getCurrentStoreId(selectedStore);
+            System.out.println("Current store ID: " + currentStoreId);
+            System.out.println("Event store ID: " + event.get_catalog_type());
+            
+            if (currentStoreId == event.get_catalog_type()) {
+                System.out.println("Update local catalog event matches current store, updating UI");
+                // Update the UI with the new data from the event
+                if (event.get_flowers() != null) {
+                    flowersList_c = event.get_flowers();
+                    setCatalogData(event.get_flowers());
+                }
+            } else {
+                System.out.println("Update local catalog event does not match current store. Event type: " + event.get_catalog_type() + ", Current store ID: " + currentStoreId);
+            }
+        } else {
+            System.out.println("No store selected, cannot process update local catalog event");
+        }
+    }
+    
+    /**
+     * Reloads the catalog with fresh data from the database
+     * This ensures all clients have the most current data after any catalog changes
+     */
+    private void reloadCatalogFromDatabase() {
+        try {
+            String selectedStore = Stores.getValue();
+            if (selectedStore == null) {
+                System.out.println("No store selected, cannot reload catalog");
+                return;
+            }
+            
+            System.out.println("Reloading catalog from database for store: " + selectedStore);
+            
+            // Request fresh data from server based on current store selection
+            if (selectedStore.equals("network")) {
+                // For network view, get all flowers
+                SimpleClient.getClient().sendToServer("get_all_flowers");
+            } else {
+                // For specific store, get store-specific catalog
+                int storeId = getCurrentStoreId(selectedStore);
+                if (storeId > 0) {
+                    SimpleClient.getClient().sendToServer("get_catalog_" + storeId);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reloading catalog from database: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Helper method to get current store ID based on selected store
+     */
+    private int getCurrentStoreId(String selectedStore) {
+        if (selectedStore == null) return -1;
+
+        switch (selectedStore) {
+            case "Haifa": return 1;
+            case "Krayot": return 2;
+            case "Nahariyya": return 3;
+            case "network": return 4;
+            default: return -1;
         }
     }
     public void setCatalogData(List<Flower> flowerList) {
-        if(type==0||type==4)
-        {
-            flowersList_c = flowerList;
-            Stores.setValue("network");
-        }
-        if(type==1)
-        {
-            Stores.setValue("Haifa");
-        }
-        if(type==2)
-        {
-            Stores.setValue("Krayot");
-        }
-        if(type==3)
-        {
-            Stores.setValue("Nahariyya");
-        }
-        System.out.println("this client is for store: " + type);
-        System.out.println("Received flowers: " + flowersList_c.size());
-        for (Flower f : flowersList_c) {
-            System.out.println(f.getFlowerName() + ", " + f.getFlowerPrice());
-        }
-        for (int i = 0; i < flowersList_c.size() && i < 12; i++) {
-            Flower f = flowersList_c.get(i);
-            nameLabels[i].setText(f.getFlowerName());
-            if (f.isSale())
-            {
-                price_Before_sale[i].setVisible(true);
-                int discount_percent = f.getDiscount();
-                double remainingPercent = 100.0 -discount_percent;
-                double originalPrice = f.getFlowerPrice() * 100.0 / remainingPercent;
-                String originalPriceStr = String.format("%.2f", originalPrice);
-                price_Before_sale[i].setText(originalPriceStr);
+        System.out.println("=== SET CATALOG DATA CALLED ===");
+        System.out.println("Flower list size: " + (flowerList == null ? 0 : flowerList.size()));
+        System.out.println("Current store selection: " + Stores.getValue());
+        
+        Platform.runLater(() -> {
+            System.out.println("=== PLATFORM.RUNLATER EXECUTING ===");
+            if (catalogFlowPane == null) {
+                System.out.println("catalogFlowPane is NULL! Check FXML wiring.");
+                return;
             }
-            priceFields[i].setText(String.format("%.2f", f.getFlowerPrice()));
-            typeLabels[i].setText(f.getFlowerType());
-            setImage(imageViews[i], f.getFlowerType());
-            if (i == 8) nine_9.setVisible(true);
-            if (i == 9) ten_10.setVisible(true);
-            if (i == 10) eleven_11.setVisible(true);
-            if (i == 11) twelve_12.setVisible(true);
+            flowersList_c = flowerList;
+            System.out.println("setCatalogData called with " + (flowerList == null ? 0 : flowerList.size()) + " flowers");
+            catalogFlowPane.getChildren().clear();
+            if (flowerList == null || flowerList.isEmpty()) {
+                System.out.println("No flowers to display in catalog.");
+                // Optionally, add a label to the pane to indicate empty catalog
+                Label emptyLabel = new Label("No flowers available for this selection.");
+                emptyLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 18px;");
+                catalogFlowPane.getChildren().add(emptyLabel);
+                return;
+            }
+            for (Flower f : flowersList_c) {
+                VBox card = new VBox(5);
+                card.setPrefWidth(160);
+                card.setStyle("-fx-background-color: #fff; -fx-border-color: #c8a2c8; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10;");
+                ImageView imageView = new ImageView();
+                imageView.setFitWidth(140);
+                imageView.setFitHeight(90);
+                setImageFromDatabase(imageView, f.getImage(), f.getFlowerType());
+                Label nameLabel = new Label(f.getFlowerName());
+                nameLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 18px;");
+                Label typeLabel = new Label(f.getFlowerType());
+                typeLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 14px;");
+                
+                // Add color label
+                Label colorLabel = new Label("Color: " + (f.getColor() != null ? f.getColor() : "N/A"));
+                colorLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 12px;");
+                
+                // Add category label
+                Label categoryLabel = new Label("Category: " + (f.getCategory() != null ? f.getCategory() : "N/A"));
+                categoryLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 12px;");
+                
+                TextField priceField = new TextField(String.format("%.2f", f.getFlowerPrice()));
+                priceField.setEditable(false);
+                priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px;");
+                Text priceBeforeSale = new Text();
+                priceBeforeSale.setStyle("-fx-fill: LIGHTPINK; -fx-strikethrough: true; -fx-font-size: 14px;");
+                if (f.isSale()) {
+                    priceBeforeSale.setVisible(true);
+                    int discount_percent = f.getDiscount();
+                    double remainingPercent = 100.0 - discount_percent;
+                    double originalPrice = f.getFlowerPrice() * 100.0 / remainingPercent;
+                    priceBeforeSale.setText(String.format("%.2f", originalPrice));
+                } else {
+                    priceBeforeSale.setVisible(false);
+                }
+                card.getChildren().addAll(imageView, nameLabel, typeLabel, colorLabel, categoryLabel, priceBeforeSale, priceField);
+                card.setOnMouseClicked(e -> openFlowerDetails(f));
+                catalogFlowPane.getChildren().add(card);
+            }
+            System.out.println("Catalog updated with " + catalogFlowPane.getChildren().size() + " cards.");
+            System.out.println("=== SET CATALOG DATA COMPLETED ===");
+        });
+    }
+    private void openFlowerDetails(Flower flower) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("order_page.fxml"));
+            Parent root = loader.load();
+            OrderPageController controller = loader.getController();
+            if (this.user != null) {
+                controller.setUser(this.user);
+            }
+            // Always pass the display name (Haifa, Krayot, Nahariyya, network)
+            String selectedStore = Stores.getValue();
+            controller.setStore(selectedStore); // Set store first
+            controller.setFlower(flower);       // Then set flower (so updateUI sees the store)
+            Stage stage = new Stage();
+            stage.setTitle("Order Flower");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Warning warning = new Warning("Error opening order page");
+            org.greenrobot.eventbus.EventBus.getDefault().post(new WarningEvent(warning));
         }
     }
     @FXML
     void stores_choose(ActionEvent event) throws IOException
     {
-        System.out.println("enter stores");
+        System.out.println("=== STORE SELECTION CHANGED ===");
         String selected = Stores.getValue();
-        String message = "";
-        if (selected.equals("Haifa")) {
-            message = "Haifa";
-        } else if (selected.equals("Krayot")) {
-            message = "Krayot";
+        if (selected == null) {
+            System.out.println("No store selected");
+            return;
+        }
 
-        }
-        else if (selected.equals("Nahariyya")) {
-            message = "Nahariyya";
-        }
-        else if (selected.equals("network")) {
-            message = "network";
-        }
+        System.out.println("Selected store: " + selected);
+
+        // Clear combo selection and reset sorting
         combo.getSelectionModel().clearSelection();
         combo.setValue("Sort");
         combo.setButtonCell(new ListCell<>() {
@@ -658,63 +779,130 @@ public class CatalogController {
             }
         });
         sort_image.setVisible(true);
-        message = message + "_" + type;
-        System.out.println("message: " + message);
-        SimpleClient.getClient().sendToServer(message);
 
-
+        // Request fresh data from database based on selected store
+        if (selected.equals("network")) {
+            // For network view, get all flowers from Flowers table
+            String message = "get_all_flowers";
+            SimpleClient.getClient().sendToServer(message);
+            System.out.println("Requested all flowers from Flowers table for network view");
+        } else {
+            // Get store ID for the selected store
+            int storeId = getCurrentStoreId(selected);
+            if (storeId != -1) {
+                // Request fresh flower list from database for this store
+                String message = "get_catalog_" + storeId;
+                SimpleClient.getClient().sendToServer(message);
+                System.out.println("Requested fresh catalog for store ID: " + storeId + " (" + selected + ")");
+            } else {
+                System.err.println("Invalid store selection: " + selected);
+            }
+        }
     }
     @FXML
-    public void combo_choose(ActionEvent actionEvent) throws IOException {
-        sort_image.setVisible(false);
-        String selected = combo.getValue();
-        String selected_store = Stores.getValue();
-        int localtype=1;
-
-        if (selected == null) {
+    public void combo_choose(ActionEvent actionEvent) {
+        System.out.println("combo_choose CALLED");
+        String selectedSort = combo.getValue();
+        System.out.println("Selected sort option: " + selectedSort);
+        
+        if (selectedSort == null || selectedSort.equals("Sort")) {
+            System.out.println("No sorting selected, showing original order");
             return;
         }
-        if(selected_store.equals("Haifa"))
-        {
-            localtype=1;
+        
+        if (flowersList_c == null || flowersList_c.isEmpty()) {
+            System.out.println("No flowers to sort");
+            return;
         }
-        if(selected_store.equals("Krayot"))
-        {
-            localtype=2;
+        
+        // Create a copy of the current flower list for sorting
+        List<Flower> sortedFlowers = new ArrayList<>(flowersList_c);
+        
+        // Apply sorting based on selection
+        switch (selectedSort) {
+            case "Price High to LOW":
+                System.out.println("Sorting by price: High to Low");
+                sortedFlowers.sort((f1, f2) -> Double.compare(f2.getFlowerPrice(), f1.getFlowerPrice()));
+                break;
+            case "Price Low to HIGH":
+                System.out.println("Sorting by price: Low to High");
+                sortedFlowers.sort((f1, f2) -> Double.compare(f1.getFlowerPrice(), f2.getFlowerPrice()));
+                break;
+            default:
+                System.out.println("Unknown sort option: " + selectedSort);
+                return;
         }
-        if(selected_store.equals("Nahariyya"))
-        {
-            localtype=3;
-        }
-        if(selected_store.equals("network"))
-        {
-            localtype=4;
-        }
-        System.out.println("localtype = " + localtype);
-        String localtypeStr = String.valueOf(localtype);
+        
+        // Update the display with sorted flowers
+        setCatalogSorting(sortedFlowers);
+        System.out.println("Sorting applied successfully");
+    }
 
+    private List<Store> storesList;
+    public void setStoresList(List<Store> stores) {
+        this.storesList = stores;
+    }
 
-        String message = "";
-        if (selected.equals("Price High to LOW")) {
-            message = "get_flowers_high_to_low_"+localtypeStr+"_"+type;
-        } else if (selected.equals("Price Low to HIGH")) {
-            message = "get_flowers_low_to_high_"+localtypeStr+"_"+type;
+    private void updateCatalogForSelectedStore() {
+        System.out.println("=== UPDATE CATALOG FOR SELECTED STORE ===");
+        String selected_store = Stores.getValue();
+        if (selected_store == null) {
+            System.out.println("No store selected, cannot update catalog");
+            return;
         }
-        System.out.println("message = " + message);
-        SimpleClient.getClient().sendToServer(message);
+
+        System.out.println("Updating catalog for store: " + selected_store);
+
+        // Request fresh data from database based on selected store
+        try {
+            if (selected_store.equals("network")) {
+                // For network view, get all flowers from Flowers table
+                String message = "get_all_flowers";
+                SimpleClient.getClient().sendToServer(message);
+                System.out.println("Requested all flowers from Flowers table for network view");
+            } else {
+                // Get store ID for the selected store
+                int storeId = getCurrentStoreId(selected_store);
+                if (storeId != -1) {
+                    // Request fresh flower list from database for this store
+                    String message = "get_catalog_" + storeId;
+                    SimpleClient.getClient().sendToServer(message);
+                    System.out.println("Requested fresh catalog for store ID: " + storeId + " (" + selected_store + ")");
+                } else {
+                    System.err.println("Invalid store selection: " + selected_store);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error requesting catalog update: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     private void setImage(ImageView imageView, String flowerName) {
         try {
-            String imagePath = "/images/" + flowerName + ".png";
-            Image image = new Image(getClass().getResourceAsStream(imagePath));
-            imageView.setImage(image);
+            // First try FlowerImages directory
+            String imagePath = "/images/FlowerImages/" + flowerName + ".png";
+            InputStream inputStream = getClass().getResourceAsStream(imagePath);
+            
+            if (inputStream == null) {
+                // If not found in FlowerImages, try main images directory
+                imagePath = "/images/" + flowerName + ".png";
+                inputStream = getClass().getResourceAsStream(imagePath);
+            }
+            
+            if (inputStream != null) {
+                Image image = new Image(inputStream);
+                imageView.setImage(image);
+            } else {
+                // Image not found in either location, use no_photo
+                System.err.println("Failed to load image for: " + flowerName + " - image not found in either location");
+                setNoPhotoImage(imageView);
+            }
         } catch (Exception e) {
             System.err.println("Failed to load image for: " + flowerName);
-            String imagePath = "/images/" + "no_photo"+".png";
-            Image image = new Image(getClass().getResourceAsStream(imagePath));
-            imageView.setImage(image);
             e.printStackTrace();
+            // Use no_photo as fallback
+            setNoPhotoImage(imageView);
         }
     }
     @FXML
@@ -955,6 +1143,70 @@ public class CatalogController {
             e.printStackTrace();
             Warning warning = new Warning("Error opening cart");
             EventBus.getDefault().post(new WarningEvent(warning));
+        }
+    }
+
+    private void setImageFromDatabase(ImageView imageView, String databaseImagePath, String flowerType) {
+        try {
+            String imagePath = null;
+            
+            // If database has a valid image path, use it
+            if (databaseImagePath != null && !databaseImagePath.trim().isEmpty()) {
+                imagePath = databaseImagePath;
+            } else {
+                // Fallback to flower type if no image path in database
+                imagePath = "images/" + flowerType + ".png";
+            }
+            
+            // Handle different path formats
+            String finalImagePath;
+            if (imagePath.startsWith("images/")) {
+                // Convert to resource path format
+                finalImagePath = "/" + imagePath;
+            } else if (imagePath.startsWith("/")) {
+                // Already in resource path format
+                finalImagePath = imagePath;
+            } else {
+                // Assume it's a relative path, add images/ prefix
+                finalImagePath = "/images/" + imagePath;
+            }
+            
+            System.out.println("Loading image from database path: " + imagePath + " -> " + finalImagePath);
+            
+            Image image = new Image(getClass().getResourceAsStream(finalImagePath));
+            imageView.setImage(image);
+            
+        } catch (Exception e) {
+            System.err.println("Failed to load image from database path: " + databaseImagePath + " for flower type: " + flowerType);
+            // Try fallback to flower type
+            setImageFallback(imageView, flowerType);
+        }
+    }
+    
+    // Fallback method for loading images by flower type
+    private void setImageFallback(ImageView imageView, String flowerType) {
+        try {
+            String fallbackPath = "/images/" + flowerType + ".png";
+            System.out.println("Trying fallback image: " + fallbackPath);
+            Image image = new Image(getClass().getResourceAsStream(fallbackPath));
+            imageView.setImage(image);
+        } catch (Exception e) {
+            System.err.println("Failed to load fallback image for flower type: " + flowerType);
+            // Load no_photo image as final fallback
+            setNoPhotoImage(imageView);
+        }
+    }
+    
+    // Method to load no_photo image
+    private void setNoPhotoImage(ImageView imageView) {
+        try {
+            String noPhotoPath = "/images/no_photo.png";
+            System.out.println("Loading no_photo image: " + noPhotoPath);
+            Image image = new Image(getClass().getResourceAsStream(noPhotoPath));
+            imageView.setImage(image);
+        } catch (Exception e) {
+            System.err.println("Failed to load no_photo image as well");
+            // Create a placeholder image or leave empty
         }
     }
 }

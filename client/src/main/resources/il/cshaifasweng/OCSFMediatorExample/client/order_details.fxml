@@ -136,12 +136,14 @@
             <Label text="Order Items:" style="-fx-font-weight: bold; -fx-font-size: 16;" />
             <TableView fx:id="itemsTable" prefHeight="250.0" prefWidth="800.0">
                <columns>
-                  <TableColumn fx:id="itemNameColumn" prefWidth="150.0" text="Item Name" />
-                  <TableColumn fx:id="itemTypeColumn" prefWidth="100.0" text="Type" />
-                  <TableColumn fx:id="itemStoreColumn" prefWidth="100.0" text="Store" />
-                  <TableColumn fx:id="itemPriceColumn" prefWidth="80.0" text="Price" />
-                  <TableColumn fx:id="itemQuantityColumn" prefWidth="80.0" text="Quantity" />
-                  <TableColumn fx:id="itemTotalColumn" prefWidth="100.0" text="Total" />
+                  <TableColumn fx:id="itemNameColumn" prefWidth="120.0" text="Item Name" />
+                  <TableColumn fx:id="itemTypeColumn" prefWidth="80.0" text="Type" />
+                  <TableColumn fx:id="itemColorColumn" prefWidth="70.0" text="Color" />
+                  <TableColumn fx:id="itemCategoryColumn" prefWidth="90.0" text="Category" />
+                  <TableColumn fx:id="itemStoreColumn" prefWidth="80.0" text="Store" />
+                  <TableColumn fx:id="itemPriceColumn" prefWidth="70.0" text="Price" />
+                  <TableColumn fx:id="itemQuantityColumn" prefWidth="70.0" text="Quantity" />
+                  <TableColumn fx:id="itemTotalColumn" prefWidth="80.0" text="Total" />
                </columns>
             </TableView>
             

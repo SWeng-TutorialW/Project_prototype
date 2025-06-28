@@ -267,24 +267,43 @@ public class connect_scene_Con  {
                                     root = loader.load();
                                     CatalogController_employee controller = loader.getController();
                                     List<Store> stores=event.getStores();
+                                    
+                                    System.out.println("DEBUG: Stores list size: " + (stores != null ? stores.size() : "NULL"));
+                                    
                                     if(type_local==4)// network
                                     {
                                         System.out.println("this employee is network ");
                                         controller.set_type(type_local);
                                         controller.set_isLogin(true);
                                         controller.set_user(loginRegCheck);
+                                        controller.setStoresList(stores);
                                         controller.setCatalogData(event.getUpdatedItems());
                                         employeeController=controller;
 
                                     }
                                     else
                                     {
+                                        if (stores == null || stores.isEmpty()) {
+                                            System.err.println("ERROR: Stores list is empty or null for employee!");
+                                            Warning warning = new Warning("Database error: No stores available. Please contact administrator.");
+                                            EventBus.getDefault().post(new WarningEvent(warning));
+                                            return;
+                                        }
+                                        
+                                        if (type_local < 1 || type_local > stores.size()) {
+                                            System.err.println("ERROR: Invalid store index: " + type_local + " for stores size: " + stores.size());
+                                            Warning warning = new Warning("Database error: Invalid store assignment. Please contact administrator.");
+                                            EventBus.getDefault().post(new WarningEvent(warning));
+                                            return;
+                                        }
+                                        
                                         Store store=stores.get(type_local-1);
                                         System.out.println("this employee is for store: " + store.getStoreName());
                                         controller.setFlowersList_c(store.getFlowersList());
                                         controller.set_isLogin(true);
                                         controller.set_user(loginRegCheck);
                                         controller.set_type(type_local);
+                                        controller.setStoresList(stores);
                                         controller.setCatalogData(event.getUpdatedItems());
                                         employeeController=controller;
                                     }
@@ -295,12 +314,16 @@ public class connect_scene_Con  {
                                     root = loader.load();
                                     CatalogController controller = loader.getController();
                                     List<Store> stores=event.getStores();
+                                    
+                                    System.out.println("DEBUG: Stores list size: " + (stores != null ? stores.size() : "NULL"));
+                                    
                                     if(type_local==4)// network
                                     {
                                         controller.set_type(type_local);
                                         System.out.println("this client is network ");
                                         controller.set_isLogin(true);
                                         controller.set_user(loginRegCheck);
+                                        controller.setStoresList(stores);
                                         controller.setCatalogData(event.getUpdatedItems());
                                         catalogController=controller;
                                         controller.setController(this);
@@ -308,12 +331,27 @@ public class connect_scene_Con  {
                                     }
                                     else
                                     {
+                                        if (stores == null || stores.isEmpty()) {
+                                            System.err.println("ERROR: Stores list is empty or null for client!");
+                                            Warning warning = new Warning("Database error: No stores available. Please contact administrator.");
+                                            EventBus.getDefault().post(new WarningEvent(warning));
+                                            return;
+                                        }
+                                        
+                                        if (type_local < 1 || type_local > stores.size()) {
+                                            System.err.println("ERROR: Invalid store index: " + type_local + " for stores size: " + stores.size());
+                                            Warning warning = new Warning("Database error: Invalid store assignment. Please contact administrator.");
+                                            EventBus.getDefault().post(new WarningEvent(warning));
+                                            return;
+                                        }
+                                        
                                         Store store=stores.get(type_local-1);
                                         System.out.println("this client is for store: " + store.getStoreName());
                                         controller.setFlowersList_c(store.getFlowersList());
                                         controller.set_type(type_local);
                                         controller.set_isLogin(true);
                                         controller.set_user(loginRegCheck);
+                                        controller.setStoresList(stores);
                                         controller.setCatalogData(event.getUpdatedItems());
                                         catalogController=controller;
                                         controller.setController(this);
