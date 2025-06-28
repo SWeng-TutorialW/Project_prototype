@@ -84,5 +84,4 @@ public class delete_controller  {
         ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
 
     }
-
 }
