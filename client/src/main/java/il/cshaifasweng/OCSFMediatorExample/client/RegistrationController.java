@@ -239,6 +239,7 @@ public class RegistrationController {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
             if (catalogController != null) {
                 catalogController.set_user(new_user);
                 catalogController.set_type(store);
@@ -256,6 +257,7 @@ public class RegistrationController {
                 sendAndClose.run();
             }, sendAndClose, event);
         } else {
+            CatalogController.set_user(new_user); // Set the user in CatalogController
             sendAndClose.run();
             Success success = new Success("Registration Completed!");
             EventBus.getDefault().post(new SuccessEvent(success));
