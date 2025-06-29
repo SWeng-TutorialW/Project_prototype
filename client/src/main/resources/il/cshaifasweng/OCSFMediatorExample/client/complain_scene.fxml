@@ -24,7 +24,7 @@
       <TableView fx:id="ordersTable" layoutX="63.0" layoutY="115.0" prefHeight="161.0" prefWidth="524.0">
         <columns>
           <TableColumn fx:id="orderDateColumn" prefWidth="102.40003204345703" text="Order Date" />
-            <TableColumn fx:id="priceColumn" prefWidth="83.99993896484375" text="Price $" />
+            <TableColumn fx:id="priceColumn" prefWidth="83.99993896484375" text="Price ₪" />
           <TableColumn fx:id="statusColumn" prefWidth="81.60003662109375" text="Order Status" />
             <TableColumn fx:id="deliveryColumn" prefWidth="52.79998779296875" text="Delivery" />
             <TableColumn fx:id="itemsColumn" prefWidth="202.39999389648438" text="Items" />

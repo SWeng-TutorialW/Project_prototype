@@ -1073,7 +1073,7 @@ public class CatalogController_employee {
         SimpleClient.getClient().sendToServer(message);
 
         // Show success message
-        Success success = new Success("Price updated for '" + flower.getFlowerName() + "' to $" + String.format("%.2f", newPrice));
+        Success success = new Success("Price updated for '" + flower.getFlowerName() + "' to ₪" + String.format("%.2f", newPrice));
         EventBus.getDefault().post(new SuccessEvent(success));
     }
 

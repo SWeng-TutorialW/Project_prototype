@@ -183,9 +183,16 @@ public class OrderDetailsController {
                 deliveryTimeLabel.setText("Not specified");
             }
         } else {
-            // Hide address and delivery time sections for pickup
+            // Hide address section for pickup
             addressSection.setVisible(false);
-            deliveryTimeSection.setVisible(false);
+            
+            // Show pickup time section for pickup orders
+            deliveryTimeSection.setVisible(true);
+            if (currentOrder.getDeliveryTime() != null) {
+                deliveryTimeLabel.setText("Pickup Time: " + dateFormat.format(currentOrder.getDeliveryTime()));
+            } else {
+                deliveryTimeLabel.setText("Pickup Time: Not specified");
+            }
         }
         
         // Populate items table

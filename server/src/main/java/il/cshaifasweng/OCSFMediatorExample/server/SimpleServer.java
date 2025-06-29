@@ -584,7 +584,17 @@ public class SimpleServer extends AbstractServer {
 				List<Flower> flowersFromDB = session.createQuery(hql, Flower.class).getResultList();
 
 				for (Flower flower : flowersFromDB) {
-					double originalPrice = flower.getFlowerPrice();
+					// Calculate original price - if flower is already on sale, calculate the original price first
+					double originalPrice;
+					if (flower.isSale()) {
+						double discountedPrice = flower.getFlowerPrice();
+						int currentDiscount = flower.getDiscount();
+						double remainingPercent = 100.0 - currentDiscount;
+						originalPrice = discountedPrice * 100.0 / remainingPercent;
+					} else {
+						originalPrice = flower.getFlowerPrice();
+					}
+					
 					double newPrice = originalPrice * (1 - discountPercent / 100.0);
 
 					System.out.println("  [DB] Flower: " + flower.getFlowerName());
@@ -710,6 +720,7 @@ public class SimpleServer extends AbstractServer {
 				Root<Flower> root = query.from(Flower.class);
 				query.select(root).where(builder.equal(root.get("flowerName"), flower.getFlowerName()));
 				Flower flowerToUpdate = session.createQuery(query).uniqueResult();
+				
 				flowerToUpdate.setFlowerPrice(originalPrice);
 				flowerToUpdate.setSale(false);
 				flowerToUpdate.setDiscount(0);
@@ -754,7 +765,18 @@ public class SimpleServer extends AbstractServer {
 			Root<Flower> root = query.from(Flower.class);
 			query.select(root).where(builder.equal(root.get("flowerName"), flower.getFlowerName()));
 			Flower flowerToUpdate = session.createQuery(query).uniqueResult();
-			double originalPrice = flowerToUpdate.getFlowerPrice();
+			
+			// Calculate original price - if flower is already on sale, calculate the original price first
+			double originalPrice;
+			if (flowerToUpdate.isSale()) {
+				double discountedPrice = flowerToUpdate.getFlowerPrice();
+				int currentDiscount = flowerToUpdate.getDiscount();
+				double remainingPercent = 100.0 - currentDiscount;
+				originalPrice = discountedPrice * 100.0 / remainingPercent;
+			} else {
+				originalPrice = flowerToUpdate.getFlowerPrice();
+			}
+			
 			double newPrice = originalPrice * (1 - discountPercent / 100.0);
 			flowerToUpdate.setFlowerPrice(newPrice);
 			flowerToUpdate.setSale(true);
@@ -762,6 +784,7 @@ public class SimpleServer extends AbstractServer {
 			session.update(flowerToUpdate);
 			session.getTransaction().commit();
 			System.out.println("Updated price for " + flowerToUpdate.getFlowerName() + ": " + newPrice);
+			System.out.println("Original price was: " + originalPrice + ", New discount: " + discountPercent + "%");
 			session.close();
 			for (Store store : App.get_stores()) {
 				for (Flower f : store.getFlowersList()) {
@@ -1162,6 +1185,36 @@ public class SimpleServer extends AbstractServer {
 							session.save(existing);
 						}
 						item.setFlower(existing);
+					}
+					// Handle custom bouquet flowers
+					else if (flower != null && flower.getFlowerName() != null && flower.getFlowerName().startsWith("custom flower:")) {
+						// For custom bouquets, we need to save the flower first
+						if (flower.getId() == 0) {
+							// This is a new custom flower, save it first
+							session.save(flower);
+							session.flush(); // Ensure the ID is generated
+						}
+						// The flower is now managed and can be referenced
+					}
+					// Handle regular flowers - ensure they are managed
+					else if (flower != null && flower.getId() == 0) {
+						// This is a transient flower, try to find it in the database first
+						CriteriaBuilder builder = session.getCriteriaBuilder();
+						CriteriaQuery<Flower> query = builder.createQuery(Flower.class);
+						Root<Flower> root = query.from(Flower.class);
+						query.select(root).where(builder.equal(root.get("flowerName"), flower.getFlowerName()));
+						Flower existing = null;
+						try {
+							existing = session.createQuery(query).setMaxResults(1).uniqueResult();
+						} catch (Exception ignored) {}
+						if (existing != null) {
+							// Use the existing flower from database
+							item.setFlower(existing);
+						} else {
+							// Save the new flower
+							session.save(flower);
+							session.flush();
+						}
 					}
 				}
 
@@ -1733,8 +1786,8 @@ public class SimpleServer extends AbstractServer {
 						true, "Order cancelled successfully", order.getRefundAmount(), refundPolicy, request.getOrderId());
 					client.sendToClient(response);
 					
-					// Notify all clients about the order update
-					sendToAllClients("update_catalog_after_change");
+					// Order cancellation doesn't need to notify all clients about catalog changes
+					// Removed: sendToAllClients("update_catalog_after_change");
 				} else {
 					OrderCancellationResponse response = new OrderCancellationResponse(
 						false, "Failed to cancel order", 0.0, "", request.getOrderId());

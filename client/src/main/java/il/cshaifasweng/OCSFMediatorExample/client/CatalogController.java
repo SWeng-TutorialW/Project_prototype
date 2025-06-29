@@ -319,6 +319,34 @@ public class CatalogController {
     @FXML
     void create_bouqut(ActionEvent event)
     {
+        // Check if user is logged in (not a guest)
+        if (user == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Bouquet Creation Not Available");
+            alert.setHeaderText("Login Required");
+            alert.setContentText("You must be logged in to create bouquets. Please log in to your account.");
+            alert.showAndWait();
+            return;
+        }
+        
+        // Check if user can create bouquet based on their store assignment
+        int userStore = user.getStore();
+        String currentCatalog = Stores.getValue();
+        
+        if (userStore != 4) {
+            // User is assigned to a specific store - can only create bouquet in their own store
+            String userStoreName = getStoreNameByNumber(userStore);
+            if (!userStoreName.equals(currentCatalog)) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Bouquet Creation Not Available");
+                alert.setHeaderText("Store Access Required");
+                alert.setContentText("You can only create bouquets when viewing your assigned store: " + userStoreName + ". Please switch to your store catalog.");
+                alert.showAndWait();
+                return;
+            }
+        }
+        // If userStore == 4 (network), they can always create bouquet
+        
         Platform.runLater(() -> {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("bouquet.fxml"));
@@ -861,6 +889,11 @@ public class CatalogController {
             String selectedStore = Stores.getValue();
             controller.setStore(selectedStore); // Set store first
             controller.setFlower(flower);       // Then set flower (so updateUI sees the store)
+            
+            // Pass the current catalog flowers for validation
+            List<Flower> currentCatalog = flowersList_sorting != null ? flowersList_sorting : flowersList_c;
+            controller.setCurrentCatalogFlowers(currentCatalog);
+            
             Stage stage = new Stage();
             stage.setTitle("Order Flower");
             stage.setScene(new Scene(root));
@@ -1215,7 +1248,10 @@ public class CatalogController {
             orderController.setStore(Stores.getValue());
             orderController.setFlower(targetFlower);
             orderController.setUser(user);
-
+            
+            // Pass the current catalog flowers for validation
+            List<Flower> currentCatalog = flowersList_sorting != null ? flowersList_sorting : flowersList_c;
+            orderController.setCurrentCatalogFlowers(currentCatalog);
 
             Stage stage = new Stage();
             stage.setTitle("Order Details");
@@ -1331,6 +1367,54 @@ public class CatalogController {
         } catch (Exception e) {
             System.err.println("Failed to load no_photo image as well");
             // Create a placeholder image or leave empty
+        }
+    }
+
+    /**
+     * Helper method to get store name by store number
+     */
+    private String getStoreNameByNumber(int storeNumber) {
+        switch (storeNumber) {
+            case 1: return "Haifa";
+            case 2: return "Krayot";
+            case 3: return "Nahariyya";
+            case 4: return "network";
+            default: return "Unknown";
+        }
+    }
+
+    /**
+     * Updates the bouquet button state based on the user's store assignment and current catalog view
+     */
+    private void updateBouquetButtonState(String selectedStore) {
+        if (bouqut_btn != null && user != null) {
+            int userStore = user.getStore();
+            
+            if (userStore == 4) {
+                // Network users can always create bouquets
+                bouqut_btn.setDisable(false);
+                bouqut_btn.setStyle("-fx-background-color: #fdfdfd; -fx-text-fill: #000000;");
+                bouqut_btn.setTooltip(null);
+            } else {
+                // Store-specific users can only create bouquets in their own store
+                String userStoreName = getStoreNameByNumber(userStore);
+                if (userStoreName.equals(selectedStore)) {
+                    // User is viewing their own store - enable button
+                    bouqut_btn.setDisable(false);
+                    bouqut_btn.setStyle("-fx-background-color: #fdfdfd; -fx-text-fill: #000000;");
+                    bouqut_btn.setTooltip(null);
+                } else {
+                    // User is viewing a different store - disable button
+                    bouqut_btn.setDisable(true);
+                    bouqut_btn.setStyle("-fx-background-color: #cccccc; -fx-text-fill: #666666;");
+                    bouqut_btn.setTooltip(new Tooltip("You can only create bouquets in your assigned store: " + userStoreName));
+                }
+            }
+        } else if (bouqut_btn != null) {
+            // No user logged in - disable button
+            bouqut_btn.setDisable(true);
+            bouqut_btn.setStyle("-fx-background-color: #cccccc; -fx-text-fill: #666666;");
+            bouqut_btn.setTooltip(new Tooltip("Please log in to create bouquets"));
         }
     }
 }
