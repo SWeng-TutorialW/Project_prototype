@@ -1056,10 +1056,10 @@ public class CatalogController {
             }
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("my_account.fxml"));
-                Parent root = fxmlLoader.load();
                 MyAccountController myAccountController = fxmlLoader.getController();
                 myAccountController.setCurrentUser(user);
                 myAccountController.setCatalogController(this);
+                Parent root = fxmlLoader.load();
                 Stage stage = new Stage();
                 MyAccountController.setMyAccountStage(stage);
                 stage.setTitle("My Account");

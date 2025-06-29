@@ -521,12 +521,10 @@ public class CatalogController_employee {
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("my_account_employee.fxml"));
-            Parent root = loader.load();
-
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("my_account.fxml"));
             MyAccountController controller = loader.getController();
             controller.setCurrentUser(user);
-
+            Parent root = loader.load();
             Stage stage = new Stage();
             stage.setTitle("Employee Account");
             stage.setScene(new Scene(root));
