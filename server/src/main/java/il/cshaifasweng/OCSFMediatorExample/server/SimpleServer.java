@@ -866,7 +866,7 @@ public class SimpleServer extends AbstractServer {
 						.setParameter("username", userToUpdate.getUsername())
 						.getResultList();
 				session.getTransaction().commit();
-				if(!existingUser.isEmpty() && !(existingUser.get(0).getId() == userToUpdate.getId())) {System.err.println("ERROR: Someone tried to set his username into someone else's, NOT ALLOWED!");
+				if(!existingUser.isEmpty() && existingUser.get(0).getId() != userToUpdate.getId()) {System.err.println("ERROR: Someone tried to set his username into someone else's, NOT ALLOWED!");
 				client.sendToClient(new Warning("#updateFail_UserExists")); session.close(); return;} // user already exists, cannot update
 				session.close();
 				session = App.getSessionFactory().openSession();
