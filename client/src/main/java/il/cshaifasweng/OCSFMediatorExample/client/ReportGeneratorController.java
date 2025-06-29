@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ReportGeneratorController {
 
@@ -80,22 +81,26 @@ public class ReportGeneratorController {
     private Label topProductLbl;
     
     @FXML
+    private Label totalRefundsLbl;
+    
+    @FXML
     private Button exportPdfBtn;
     
     @FXML
     private Button exportCsvBtn;
     
     @FXML
-    private Button emailReportBtn;
-    
-    @FXML
     private Button refreshBtn;
     
     @FXML
-    private Button backBtn;
+    private VBox storeSelectionContainer;
+    
+    @FXML
+    private ComboBox<String> storeComboBox;
     
     // Sample data for demonstration (will be replaced with real data)
     private Map<String, Double> revenueData = new HashMap<>();
+    private Map<String, Double> refundData = new HashMap<>();
     private Map<String, Integer> productData = new HashMap<>();
     private Map<String, Integer> customerData = new HashMap<>();
     private Map<String, Integer> complaintData = new HashMap<>();
@@ -103,8 +108,10 @@ public class ReportGeneratorController {
     
     private int totalOrders = 0;
     private double totalRevenue = 0.0;
+    private double totalRefunds = 0.0;
     private double avgOrderValue = 0.0;
     private String topProduct = "N/A";
+    private int totalComplaints = 0;
     
     private ToggleGroup reportTypeGroup;
 
@@ -112,25 +119,26 @@ public class ReportGeneratorController {
     private List<Order> allOrders = new ArrayList<>();
     private List<LoginRegCheck> allUsers = new ArrayList<>();
     private int pendingOrderRequests = 0;
-
-    //TODO delete this functoin
-    @Subscribe
-    public void handleDummy(Object event) {
-        // No-op, placeholder for EventBus
-    }
+    private boolean isProcessingData = false; // Flag to prevent duplicate processing
 
     @FXML
     void initialize() {
-        if (EventBus.getDefault().isRegistered(this)) {
-            System.out.println("ReportGeneratorController already registered");
-        } else {
-            EventBus.getDefault().register(this);
+        try {
+            if (EventBus.getDefault().isRegistered(this)) {
+                System.out.println("ReportGeneratorController already registered");
+            } else {
+                EventBus.getDefault().register(this);
+            }
+            
+            setupDatePickers();
+            setupReportTypeGroup();
+            setupCharts();
+            setupStoreSelection();
+            updateQuickRangeButton();
+        } catch (Exception e) {
+            System.err.println("[ReportGenerator] Error in initialize: " + e.getMessage());
+            e.printStackTrace();
         }
-        
-        setupDatePickers();
-        setupReportTypeGroup();
-        setupCharts();
-        updateQuickRangeButton();
     }
     
     private void setupDatePickers() {
@@ -184,6 +192,28 @@ public class ReportGeneratorController {
         ChartUtils.setupProductChart(productChart);
     }
     
+    private void setupStoreSelection() {
+        LoginRegCheck currentUser = SimpleClient.getCurrentUser();
+        if (currentUser != null && currentUser.getStore() == 4) {
+            // Admin can select stores
+            storeSelectionContainer.setVisible(true);
+            storeComboBox.getItems().addAll("All Stores", "Haifa (Store 1)", "Krayot (Store 2)", "Nahariyya (Store 3)");
+            storeComboBox.setValue("All Stores");
+            
+            // Add listener to refresh report when store selection changes
+            storeComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+                if (oldValue != null && !oldValue.equals(newValue) && 
+                    startDatePicker.getValue() != null && endDatePicker.getValue() != null) {
+                    System.out.println("[ReportGenerator] Store selection changed from " + oldValue + " to " + newValue);
+                    generateReport(null);
+                }
+            });
+        } else {
+            // Employee can only see their store
+            storeSelectionContainer.setVisible(false);
+        }
+    }
+    
     private void updateQuickRangeButton() {
         LocalDate now = LocalDate.now();
         LocalDate monthStart = now.withDayOfMonth(1);
@@ -201,9 +231,30 @@ public class ReportGeneratorController {
             showAlert("Please select both start and end dates.");
             return;
         }
+        
+        // Check user permissions
+        LoginRegCheck currentUser = SimpleClient.getCurrentUser();
+        if (currentUser == null) {
+            showAlert("User session not found. Please log in again.");
+            return;
+        }
+        
+        // Only allow employees and admins to access reports
+        if (!currentUser.isType()) {
+            showAlert("Access denied. Only employees and administrators can view reports.");
+            return;
+        }
+        
         System.out.println("[ReportGenerator] Generating report: requesting user list...");
         generateReportBtn.setText("Generating...");
         generateReportBtn.setDisable(true);
+        
+        // Reset processing state
+        isProcessingData = false;
+        allOrders.clear();
+        allUsers.clear();
+        pendingOrderRequests = 0;
+        
         // Fetch all users first
         try {
             SimpleClient.getClient().sendToServer("asks_for_users");
@@ -298,9 +349,10 @@ public class ReportGeneratorController {
     
     private void updateSummaryStatistics() {
         totalOrdersLbl.setText(String.valueOf(totalOrders));
-        totalRevenueLbl.setText(String.format("$%.2f", totalRevenue));
+        totalRevenueLbl.setText(String.format("$%.2f", totalRevenue - totalRefunds));
         avgOrderLbl.setText(String.format("$%.2f", avgOrderValue));
         topProductLbl.setText(topProduct);
+        totalRefundsLbl.setText(String.format("$%.2f", totalRefunds));
     }
     
     @FXML
@@ -348,49 +400,43 @@ public class ReportGeneratorController {
     private void exportCSVData(File file) throws IOException {
         try (FileWriter writer = new FileWriter(file)) {
             // Write header
-            writer.write("Date,Revenue,Orders\n");
+            writer.write("Date,Revenue,Refunds,Net Revenue,Orders\n");
             
             // Write revenue data
             List<String> sortedDates = new ArrayList<>(revenueData.keySet());
             sortedDates.sort(Comparator.naturalOrder());
             
             for (String date : sortedDates) {
-                writer.write(String.format("%s,%.2f,%d\n", date, revenueData.get(date), 
-                    (int)(revenueData.get(date) / avgOrderValue)));
+                double revenue = revenueData.get(date);
+                double refunds = refundData.getOrDefault(date, 0.0);
+                double netRevenue = revenue - refunds;
+                writer.write(String.format("%s,%.2f,%.2f,%.2f,%d\n", date, revenue, refunds, netRevenue, 
+                    (int)(revenue / (avgOrderValue + (totalRefunds / totalOrders)))));
             }
             
             // Write summary
             writer.write("\nSummary\n");
             writer.write(String.format("Total Orders,%d\n", totalOrders));
             writer.write(String.format("Total Revenue,%.2f\n", totalRevenue));
+            writer.write(String.format("Total Refunds,%.2f\n", totalRefunds));
+            writer.write(String.format("Net Revenue,%.2f\n", totalRevenue - totalRefunds));
             writer.write(String.format("Average Order Value,%.2f\n", avgOrderValue));
             writer.write(String.format("Top Product,%s\n", topProduct));
+            writer.write(String.format("Total Complaints,%d\n", totalComplaints));
+            
+            // Write complaints data
+            writer.write("\nComplaints by Category\n");
+            writer.write("Category,Count\n");
+            for (Map.Entry<String, Integer> entry : complaintData.entrySet()) {
+                writer.write(String.format("%s,%d\n", entry.getKey(), entry.getValue()));
+            }
         }
-    }
-    
-    @FXML
-    void emailReport(ActionEvent event) {
-        // This would integrate with the existing email service
-        showAlert("Email functionality will be implemented soon!");
     }
     
     @FXML
     void refreshData(ActionEvent event) {
         generateReport(null); // Just re-fetch real data
         showAlert("Data refreshed successfully!");
-    }
-    
-    @FXML
-    void goBack(ActionEvent event) {
-        try {
-            // Go back to employee catalog
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
-            Parent root = loader.load();
-            App.getScene().setRoot(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("Error navigating back: " + e.getMessage());
-        }
     }
     
     private void showAlert(String message) {
@@ -448,70 +494,205 @@ public class ReportGeneratorController {
         RadioButton selected = (RadioButton) reportTypeGroup.getSelectedToggle();
         return selected != null ? selected.getText() : "Orders Summary";
     }
+    
+    // New getter methods for PDF export
+    public String getReportScope() {
+        LoginRegCheck currentUser = SimpleClient.getCurrentUser();
+        if (currentUser == null) return "Unknown";
+        
+        if (currentUser.getStore() == 4) {
+            // Admin - show selected store
+            String selectedStoreText = storeComboBox.getValue();
+            if (selectedStoreText != null && !selectedStoreText.equals("All Stores")) {
+                return selectedStoreText;
+            } else {
+                return "Network-wide (All Stores)";
+            }
+        } else {
+            return "Store " + currentUser.getStore() + " (" + currentUser.getStoreName() + ")";
+        }
+    }
+    
+    public double getTotalRefunds() {
+        return totalRefunds;
+    }
+    
+    public double getNetRevenue() {
+        return totalRevenue - totalRefunds;
+    }
+    
+    public int getTotalComplaints() {
+        return totalComplaints;
+    }
+    
+    public Map<String, Double> getRefundData() {
+        return refundData;
+    }
+    
+    public Map<String, Integer> getComplaintData() {
+        return complaintData;
+    }
 
     // Add EventBus handlers for real data
     @Subscribe
-    public void handleUsersList(List<LoginRegCheck> users) {
-        System.out.println("[ReportGenerator] Received user list of size: " + users.size());
-        allUsers.clear();
-        allUsers.addAll(users);
-        allOrders.clear();
-        pendingOrderRequests = users.size();
-        if (pendingOrderRequests == 0) {
-            System.out.println("[ReportGenerator] No users found, skipping order fetch.");
-            processOrders(allOrders);
-            return;
+    public void handleReportUsersList(List<LoginRegCheck> users) {
+        try {
+            // Prevent duplicate processing
+            if (isProcessingData) {
+                System.out.println("[ReportGenerator] Already processing data, ignoring duplicate user list");
+                return;
+            }
+            
+            // Check if the list actually contains LoginRegCheck objects
+            if (users == null || users.isEmpty()) {
+                System.out.println("[ReportGenerator] Received empty or null user list");
+                return;
+            }
+            
+            // Verify the first element is actually a LoginRegCheck
+            if (!(users.get(0) instanceof LoginRegCheck)) {
+                System.out.println("[ReportGenerator] Received list with wrong type: " + users.get(0).getClass().getName());
+                return;
+            }
+            
+            System.out.println("[ReportGenerator] Received user list of size: " + users.size());
+            isProcessingData = true;
+            allUsers.clear();
+            allUsers.addAll(users);
+            allOrders.clear();
+            
+            // Only fetch orders for customers (not employees)
+            List<LoginRegCheck> customers = users.stream()
+                .filter(user -> !user.isType()) // Only customers (type = false)
+                .collect(Collectors.toList());
+            
+            pendingOrderRequests = customers.size();
+            
+            // Debug: Print user information
+            for (LoginRegCheck user : users) {
+                System.out.println("[ReportGenerator] User: " + user.getUsername() + ", Store: " + user.getStore() + 
+                                 ", Type: " + user.isType() + " (" + (user.isType() ? "Employee" : "Customer") + ")");
+            }
+            
+            System.out.println("[ReportGenerator] Found " + customers.size() + " customers out of " + users.size() + " total users");
+            
+            if (pendingOrderRequests == 0) {
+                System.out.println("[ReportGenerator] No customers found, skipping order fetch.");
+                processOrders(allOrders);
+                return;
+            }
+            
+            for (LoginRegCheck customer : customers) {
+                System.out.println("[ReportGenerator] Requesting orders for customer: " + customer.getUsername());
+                try {
+                    SimpleClient.getClient().sendToServer("getOrdersForUser_" + customer.getUsername());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    pendingOrderRequests--;
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("[ReportGenerator] Error in handleReportUsersList: " + e.getMessage());
+            e.printStackTrace();
+            isProcessingData = false;
         }
-        for (LoginRegCheck user : users) {
-            System.out.println("[ReportGenerator] Requesting orders for user: " + user.getUsername());
-            try {
-                SimpleClient.getClient().sendToServer("getOrdersForUser_" + user.getUsername());
-            } catch (IOException e) {
-                e.printStackTrace();
+    }
+
+    @Subscribe
+    public void handleReportOrdersResponse(List<Order> userOrders) {
+        try {
+            // Check if the list actually contains Order objects
+            if (userOrders == null || userOrders.isEmpty()) {
+                System.out.println("[ReportGenerator] Received empty order list");
                 pendingOrderRequests--;
+                if (pendingOrderRequests == 0) {
+                    System.out.println("[ReportGenerator] All user orders received. Total orders: " + allOrders.size());
+                    processOrders(allOrders);
+                }
+                return;
+            }
+            
+            // Verify the first element is actually an Order
+            if (!(userOrders.get(0) instanceof Order)) {
+                System.out.println("[ReportGenerator] Received list with wrong type: " + userOrders.get(0).getClass().getName());
+                pendingOrderRequests--;
+                if (pendingOrderRequests == 0) {
+                    System.out.println("[ReportGenerator] All user orders received. Total orders: " + allOrders.size());
+                    processOrders(allOrders);
+                }
+                return;
+            }
+            
+            System.out.println("[ReportGenerator] Received " + userOrders.size() + " orders for a user.");
+            allOrders.addAll(userOrders);
+            pendingOrderRequests--;
+            if (pendingOrderRequests == 0) {
+                System.out.println("[ReportGenerator] All user orders received. Total orders: " + allOrders.size());
+                processOrders(allOrders);
+            }
+        } catch (Exception e) {
+            System.err.println("[ReportGenerator] Error in handleReportOrdersResponse: " + e.getMessage());
+            e.printStackTrace();
+            pendingOrderRequests--;
+            if (pendingOrderRequests == 0) {
+                processOrders(allOrders);
             }
         }
     }
 
+    // Fallback handler for empty order lists
     @Subscribe
-    public void handleUserOrdersResponse(Object response) {
-        if (response instanceof List<?>) {
-            List<?> orders = (List<?>) response;
-            if (!orders.isEmpty() && orders.get(0) instanceof Order) {
-                @SuppressWarnings("unchecked")
-                List<Order> userOrders = (List<Order>) orders;
-                System.out.println("[ReportGenerator] Received " + userOrders.size() + " orders for a user.");
-                allOrders.addAll(userOrders);
-            } else {
-                System.out.println("[ReportGenerator] Received empty order list for a user.");
+    public void handleReportEmptyOrderResponse(Object response) {
+        try {
+            if (response instanceof String) {
+                String responseStr = (String) response;
+                if (responseStr.equals("user_not_found") || responseStr.equals("error_retrieving_orders")) {
+                    System.out.println("[ReportGenerator] Received error response for user orders: " + responseStr);
+                    pendingOrderRequests--;
+                    if (pendingOrderRequests == 0) {
+                        System.out.println("[ReportGenerator] All user orders processed. Total orders: " + allOrders.size());
+                        processOrders(allOrders);
+                    }
+                }
             }
-        } else if (response instanceof String) {
-            String responseStr = (String) response;
-            System.out.println("[ReportGenerator] Received order response string: " + responseStr);
-        }
-        pendingOrderRequests--;
-        if (pendingOrderRequests == 0) {
-            System.out.println("[ReportGenerator] All user orders received. Total orders: " + allOrders.size());
-            processOrders(allOrders);
+        } catch (Exception e) {
+            System.err.println("[ReportGenerator] Error in handleReportEmptyOrderResponse: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     @Subscribe
-    public void handleComplaintsResponse(List<Complain> complaints) {
-        System.out.println("[ReportGenerator] Received List<Complain> with size: " + complaints.size());
-        processComplaints(complaints);
+    public void handleReportComplaintsResponse(List<Complain> complaints) {
+        try {
+            // Check if the list actually contains Complain objects
+            if (complaints == null || complaints.isEmpty()) {
+                System.out.println("[ReportGenerator] Received empty complaints list");
+                return;
+            }
+            
+            // Verify the first element is actually a Complain
+            if (!(complaints.get(0) instanceof Complain)) {
+                System.out.println("[ReportGenerator] Received complaints list with wrong type: " + complaints.get(0).getClass().getName());
+                return;
+            }
+            
+            System.out.println("[ReportGenerator] Received List<Complain> with size: " + complaints.size());
+            processComplaints(complaints);
+        } catch (Exception e) {
+            System.err.println("[ReportGenerator] Error in handleReportComplaintsResponse: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     @Subscribe
-    public void handleComplainUpdateEvent(ComplainUpdateEvent event) {
-        System.out.println("[ReportGenerator] Received ComplainUpdateEvent with size: " + (event.getUpdatedItems() != null ? event.getUpdatedItems().size() : 0));
-        processComplaints(event.getUpdatedItems());
-    }
-
-    @Subscribe
-    public void handleAnyEvent(Object event) {
-        System.out.println("[ReportGenerator] Received unknown event: " + event.getClass().getName());
-        // Optionally, print the event or handle fallback
+    public void handleReportComplainUpdateEvent(ComplainUpdateEvent event) {
+        try {
+            System.out.println("[ReportGenerator] Received ComplainUpdateEvent with size: " + (event.getUpdatedItems() != null ? event.getUpdatedItems().size() : 0));
+            processComplaints(event.getUpdatedItems());
+        } catch (Exception e) {
+            System.err.println("[ReportGenerator] Error in handleReportComplainUpdateEvent: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     // Listen for order updates from server
@@ -529,64 +710,229 @@ public class ReportGeneratorController {
     }
 
     private void processOrders(List<Order> orders) {
-        // If there are orders, set the default date range to the earliest and latest order dates
-        if (!orders.isEmpty()) {
-            LocalDate earliest = orders.stream()
-                .map(order -> order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate())
-                .min(LocalDate::compareTo).orElse(startDatePicker.getValue());
-            LocalDate latest = orders.stream()
-                .map(order -> order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate())
-                .max(LocalDate::compareTo).orElse(endDatePicker.getValue());
-            if (startDatePicker.getValue() == null || endDatePicker.getValue() == null ||
-                startDatePicker.getValue().isAfter(latest) || endDatePicker.getValue().isBefore(earliest)) {
-                startDatePicker.setValue(earliest);
-                endDatePicker.setValue(latest);
+        try {
+            System.out.println("[ReportGenerator] Processing " + orders.size() + " orders");
+            
+            // Get current user for role-based filtering
+            LoginRegCheck currentUser = SimpleClient.getCurrentUser();
+            if (currentUser == null) {
+                System.out.println("[ReportGenerator] No current user found");
+                isProcessingData = false;
+                return;
             }
-        }
-        // Filter by date range
-        LocalDate start = startDatePicker.getValue();
-        LocalDate end = endDatePicker.getValue();
-        revenueData.clear();
-        productData.clear();
-        customerData.clear();
-        Set<String> customers = new HashSet<>();
-        totalOrders = 0;
-        totalRevenue = 0.0;
-        for (Order order : orders) {
-            LocalDate orderDate = order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-            if ((orderDate.isEqual(start) || orderDate.isAfter(start)) && (orderDate.isEqual(end) || orderDate.isBefore(end))) {
-                String dateStr = orderDate.toString();
-                revenueData.put(dateStr, revenueData.getOrDefault(dateStr, 0.0) + order.getTotalAmount());
-                totalRevenue += order.getTotalAmount();
-                totalOrders++;
-                for (CartItem item : order.getItems()) {
-                    String productName = item.getFlower().getFlowerName();
-                    productData.put(productName, productData.getOrDefault(productName, 0) + item.getQuantity());
+            
+            // Filter orders based on user role and store selection
+            List<Order> filteredOrders = new ArrayList<>();
+            int selectedStore = -1;
+            
+            if (currentUser.getStore() == 4) {
+                // Admin - check store selection
+                String selectedStoreText = storeComboBox.getValue();
+                if (selectedStoreText != null) {
+                    if (selectedStoreText.contains("Haifa")) selectedStore = 1;
+                    else if (selectedStoreText.contains("Krayot")) selectedStore = 2;
+                    else if (selectedStoreText.contains("Nahariyya")) selectedStore = 3;
+                    // If "All Stores" is selected, selectedStore remains -1
                 }
-                customers.add(order.getCustomerEmail());
+            } else {
+                // Employee - only their store
+                selectedStore = currentUser.getStore();
             }
+            
+            for (Order order : orders) {
+                boolean includeOrder = false;
+                
+                if (selectedStore == -1) {
+                    // Admin viewing all stores
+                    includeOrder = true;
+                } else {
+                    // Filter by store - check if the order's user belongs to the selected store
+                    if (order.getUser() != null) {
+                        includeOrder = (order.getUser().getStore() == selectedStore);
+                        System.out.println("[ReportGenerator] Order " + order.getId() + " user store: " + 
+                                         order.getUser().getStore() + ", selected store: " + selectedStore + 
+                                         ", include: " + includeOrder);
+                    } else {
+                        // If order has no user, include it for now (fallback)
+                        includeOrder = true;
+                        System.out.println("[ReportGenerator] Order " + order.getId() + " has no user, including by default");
+                    }
+                }
+                
+                if (includeOrder) {
+                    filteredOrders.add(order);
+                }
+            }
+            
+            System.out.println("[ReportGenerator] Filtered to " + filteredOrders.size() + " orders for store " + 
+                             (selectedStore == -1 ? "All Stores" : selectedStore));
+            
+            // If there are orders, set the default date range to the earliest and latest order dates
+            if (!filteredOrders.isEmpty()) {
+                LocalDate earliest = filteredOrders.stream()
+                    .map(order -> order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate())
+                    .min(LocalDate::compareTo).orElse(startDatePicker.getValue());
+                LocalDate latest = filteredOrders.stream()
+                    .map(order -> order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate())
+                    .max(LocalDate::compareTo).orElse(endDatePicker.getValue());
+                if (startDatePicker.getValue() == null || endDatePicker.getValue() == null ||
+                    startDatePicker.getValue().isAfter(latest) || endDatePicker.getValue().isBefore(earliest)) {
+                    startDatePicker.setValue(earliest);
+                    endDatePicker.setValue(latest);
+                }
+            }
+            
+            // Filter by date range
+            LocalDate start = startDatePicker.getValue();
+            LocalDate end = endDatePicker.getValue();
+            revenueData.clear();
+            refundData.clear();
+            productData.clear();
+            customerData.clear();
+            Set<String> customers = new HashSet<>();
+            totalOrders = 0;
+            totalRevenue = 0.0;
+            totalRefunds = 0.0;
+            
+            for (Order order : filteredOrders) {
+                LocalDate orderDate = order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+                System.out.println("[ReportGenerator] Processing order " + order.getId() + " with date " + orderDate + 
+                                 " (start: " + start + ", end: " + end + ")");
+                
+                if ((orderDate.isEqual(start) || orderDate.isAfter(start)) && (orderDate.isEqual(end) || orderDate.isBefore(end))) {
+                    String dateStr = orderDate.toString();
+                    double orderAmount = order.getTotalAmount();
+                    double refundAmount = order.getRefundAmount();
+                    
+                    revenueData.put(dateStr, revenueData.getOrDefault(dateStr, 0.0) + orderAmount);
+                    refundData.put(dateStr, refundData.getOrDefault(dateStr, 0.0) + refundAmount);
+                    
+                    totalRevenue += orderAmount;
+                    totalRefunds += refundAmount;
+                    totalOrders++;
+                    
+                    if (order.getItems() != null) {
+                        for (CartItem item : order.getItems()) {
+                            if (item.getFlower() != null) {
+                                String productName = item.getFlower().getFlowerName();
+                                productData.put(productName, productData.getOrDefault(productName, 0) + item.getQuantity());
+                            }
+                        }
+                    }
+                    
+                    if (order.getCustomerEmail() != null) {
+                        customers.add(order.getCustomerEmail());
+                    }
+                }
+            }
+            
+            avgOrderValue = totalOrders > 0 ? (totalRevenue - totalRefunds) / totalOrders : 0.0;
+            topProduct = productData.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse("N/A");
+            customerData.put("Unique Customers", customers.size());
+            
+            System.out.println("[ReportGenerator] Processed data - Orders: " + totalOrders + 
+                             ", Revenue: " + totalRevenue + ", Refunds: " + totalRefunds + 
+                             ", Products: " + productData.size() + ", Customers: " + customers.size());
+            
+            Platform.runLater(() -> {
+                try {
+                    updateChartsForReportType();
+                    updateSummaryStatistics();
+                    generateReportBtn.setText("Generate Report");
+                    generateReportBtn.setDisable(false);
+                    isProcessingData = false; // Reset processing flag
+                } catch (Exception e) {
+                    System.err.println("[ReportGenerator] Error updating UI: " + e.getMessage());
+                    e.printStackTrace();
+                    generateReportBtn.setText("Generate Report");
+                    generateReportBtn.setDisable(false);
+                    isProcessingData = false;
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("[ReportGenerator] Error in processOrders: " + e.getMessage());
+            e.printStackTrace();
+            Platform.runLater(() -> {
+                generateReportBtn.setText("Generate Report");
+                generateReportBtn.setDisable(false);
+                isProcessingData = false;
+            });
         }
-        avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0.0;
-        topProduct = productData.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse("N/A");
-        customerData.put("Unique Customers", customers.size());
-        Platform.runLater(() -> {
-            updateChartsForReportType();
-            updateSummaryStatistics();
-            generateReportBtn.setText("Generate Report");
-            generateReportBtn.setDisable(false);
-        });
     }
 
     private void processComplaints(List<Complain> complaints) {
-        complaintData.clear();
-        for (Complain c : complaints) {
-            String type = categorizeComplaint(c.getComplaint());
-            complaintData.put(type, complaintData.getOrDefault(type, 0) + 1);
+        try {
+            if (complaints == null) {
+                System.out.println("[ReportGenerator] No complaints to process");
+                return;
+            }
+            
+            // Get current user for role-based filtering
+            LoginRegCheck currentUser = SimpleClient.getCurrentUser();
+            if (currentUser == null) {
+                System.out.println("[ReportGenerator] No current user found for complaints processing");
+                return;
+            }
+            
+            // Filter complaints based on user role and store selection
+            List<Complain> filteredComplaints = new ArrayList<>();
+            int selectedStore = -1;
+            
+            if (currentUser.getStore() == 4) {
+                // Admin - check store selection
+                String selectedStoreText = storeComboBox.getValue();
+                if (selectedStoreText != null) {
+                    if (selectedStoreText.contains("Haifa")) selectedStore = 1;
+                    else if (selectedStoreText.contains("Krayot")) selectedStore = 2;
+                    else if (selectedStoreText.contains("Nahariyya")) selectedStore = 3;
+                    // If "All Stores" is selected, selectedStore remains -1
+                }
+            } else {
+                // Employee - only their store
+                selectedStore = currentUser.getStore();
+            }
+            
+            for (Complain complaint : complaints) {
+                boolean includeComplaint = false;
+                
+                if (selectedStore == -1) {
+                    // Admin viewing all stores
+                    includeComplaint = true;
+                } else {
+                    // Filter by store - check if the complaint's client belongs to the selected store
+                    // For now, include all complaints since store information might not be in complaints
+                    // This can be enhanced later when store information is added to complaints
+                    includeComplaint = true;
+                }
+                
+                if (includeComplaint) {
+                    filteredComplaints.add(complaint);
+                }
+            }
+            
+            complaintData.clear();
+            totalComplaints = filteredComplaints.size();
+            
+            for (Complain c : filteredComplaints) {
+                String type = categorizeComplaint(c.getComplaint());
+                complaintData.put(type, complaintData.getOrDefault(type, 0) + 1);
+            }
+            
+            System.out.println("[ReportGenerator] Processed " + filteredComplaints.size() + " complaints into " + complaintData.size() + " categories");
+            
+            Platform.runLater(() -> {
+                try {
+                    updateChartsForReportType();
+                    updateSummaryStatistics();
+                } catch (Exception e) {
+                    System.err.println("[ReportGenerator] Error updating UI for complaints: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            });
+        } catch (Exception e) {
+            System.err.println("[ReportGenerator] Error in processComplaints: " + e.getMessage());
+            e.printStackTrace();
         }
-        Platform.runLater(() -> {
-            updateChartsForReportType();
-            updateSummaryStatistics();
-        });
     }
 
     private String categorizeComplaint(String complaintText) {
@@ -598,5 +944,13 @@ public class ReportGeneratorController {
         if (lower.contains("wrong")) return "Wrong Items";
         if (lower.contains("service")) return "Customer Service";
         return "Other";
+    }
+    
+    // Method to properly clean up EventBus registration
+    public void cleanup() {
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+            System.out.println("[ReportGenerator] Unregistered from EventBus");
+        }
     }
 } 

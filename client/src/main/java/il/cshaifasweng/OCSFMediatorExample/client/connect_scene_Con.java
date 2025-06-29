@@ -292,7 +292,7 @@ public class connect_scene_Con  {
                                         employeeController=controller;
                                     }
                                     
-                                    // Add this line to update the mailbox icon after everything is set up
+                                    // Initialize mailbox icon after everything is set up
                                     Platform.runLater(() -> {
                                         controller.updateMailboxIcon();
                                     });
@@ -327,7 +327,7 @@ public class connect_scene_Con  {
 
                                     }
                                     
-                                    // Add this line to update the mailbox icon after everything is set up
+                                    // Initialize mailbox icon after everything is set up
                                     Platform.runLater(() -> {
                                         controller.updateMailboxIcon();
                                     });

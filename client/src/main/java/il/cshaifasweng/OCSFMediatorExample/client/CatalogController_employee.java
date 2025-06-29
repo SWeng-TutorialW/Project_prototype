@@ -1207,16 +1207,7 @@ public class CatalogController_employee {
             // Update the user object with new data from server
             this.user = event.getUser();
             
-            // Check if this is a new message notification
-            if (user.isReceive_answer()) {
-                // Show warning notification for new message
-                Platform.runLater(() -> {
-                    Warning warning = new Warning("You have a new message from the admin!");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                });
-            }
-            
-            // Update the mailbox icon
+            // Update the mailbox icon (no warning notification)
             Platform.runLater(() -> {
                 updateMailboxIcon();
             });

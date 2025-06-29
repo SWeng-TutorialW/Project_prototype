@@ -47,7 +47,7 @@
                         <Image url="@../../../../images/cart.png" />
                     </image>
                 </ImageView>
-                <Button fx:id="contact" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="647.0" layoutY="-1.0" mnemonicParsing="false" onAction="#open_complain_box" prefHeight="41.0" prefWidth="142.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Mail Box" textFill="#fdfdfd">
+                <Button fx:id="contact" alignment="TOP_CENTER" contentDisplay="RIGHT" layoutX="647.0" layoutY="-1.0" mnemonicParsing="false" onAction="#open_complain_box" prefHeight="41.0" prefWidth="142.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Mail Box" textFill="#fdfdfd">
                     <font>
                         <Font size="13.0" />
                     </font>

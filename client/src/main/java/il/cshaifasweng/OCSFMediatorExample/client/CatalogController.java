@@ -267,7 +267,6 @@ public class CatalogController {
         System.out.println("set_user updated");
         System.out.println("user send?"+user.get_send_complain());
         System.out.println("user recieve?"+user.isReceive_answer());
-        // Don't call updateMailboxIcon here - it will be called after FXML injection
     }
     public connect_scene_Con getController() {
         return con;
@@ -952,7 +951,6 @@ public class CatalogController {
 
     public void updateMailboxIcon() {
         System.out.println("updateMailboxIcon called");
-        System.out.println("mailbox_icon is null: " + (mailbox_icon == null));
         
         // Check if mailbox_icon is null (FXML injection not complete yet)
         if (mailbox_icon == null) {
@@ -960,7 +958,7 @@ public class CatalogController {
             return;
         }
         
-        if (user != null && user.isReceive_answer()) {
+        if (user.isReceive_answer()) {
             System.out.println("Setting mailbox icon visible for user: " + user.getUsername());
             mailbox_icon.setVisible(true);
         } else {
@@ -977,16 +975,7 @@ public class CatalogController {
             // Update the user object with new data from server
             this.user = event.getUser();
             
-            // Check if this is a new message notification
-            if (user.isReceive_answer()) {
-                // Show warning notification for new message
-                Platform.runLater(() -> {
-                    Warning warning = new Warning("You have a new message from the admin!");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                });
-            }
-            
-            // Update the mailbox icon
+            // Update the mailbox icon (no warning notification)
             Platform.runLater(() -> {
                 updateMailboxIcon();
             });
