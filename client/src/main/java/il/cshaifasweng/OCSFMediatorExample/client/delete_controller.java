@@ -43,7 +43,7 @@ public class delete_controller  {
         if (selectedFlower != null) {
             flowerName.setText(selectedFlower.getFlowerName());
             flowerType.setText(selectedFlower.getFlowerType());
-            flowerPrice.setText(String.format("Price: $%.2f", selectedFlower.getFlowerPrice()));
+            flowerPrice.setText(String.format("Price: ₪%.2f", selectedFlower.getFlowerPrice()));
 
             // Set flower image
             try {
@@ -84,5 +84,4 @@ public class delete_controller  {
         ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
 
     }
-
 }

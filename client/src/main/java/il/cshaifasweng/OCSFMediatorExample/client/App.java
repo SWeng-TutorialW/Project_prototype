@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -72,6 +73,31 @@ public class App extends Application {
         	alert.show();
     	});
     	
+    }
+
+    @Subscribe
+    public void onSuccessEvent(SuccessEvent event) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(AlertType.NONE,
+                    String.format("%s\nTimestamp: %s\n",
+                            event.getSuccess().getMessage(),
+                            event.getSuccess().getTime().toString())
+            );
+            alert.setTitle("Success");
+            alert.setHeaderText("Success");
+
+            // Set custom green checkmark icon
+            javafx.scene.image.ImageView checkIcon = new javafx.scene.image.ImageView(
+                getClass().getResource("/images/green_check.png").toExternalForm()
+            );
+            checkIcon.setFitHeight(48);
+            checkIcon.setFitWidth(48);
+            alert.setGraphic(checkIcon);
+
+            alert.getButtonTypes().setAll(ButtonType.OK);
+
+            alert.show();
+        });
     }
 
 	public static void main(String[] args) {

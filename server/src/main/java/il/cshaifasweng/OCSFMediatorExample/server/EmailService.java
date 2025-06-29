@@ -108,6 +108,9 @@ public class EmailService {
             }
         } else {
             content.append("Delivery Type: Store Pickup\n");
+            if (order.getDeliveryTime() != null) {
+                content.append("Scheduled Pickup: ").append(dateFormat.format(order.getDeliveryTime())).append("\n");
+            }
         }
         content.append("\n");
         
@@ -334,6 +337,26 @@ public class EmailService {
         content.append("Cancellation Date: ").append(dateFormat.format(order.getCancellationDate())).append("\n");
         content.append("Status: CANCELLED\n\n");
         
+        if (order.isRequiresDelivery()) {
+            content.append("Delivery Type: Home Delivery\n");
+            content.append("Delivery Address: ").append(order.getStreetAddress())
+                   .append(", ").append(order.getCity());
+            if (order.getApartment() != null && !order.getApartment().isEmpty()) {
+                content.append(", Apt ").append(order.getApartment());
+            }
+            content.append("\n");
+            if (order.getDeliveryTime() != null) {
+                content.append("Scheduled Delivery: ").append(dateFormat.format(order.getDeliveryTime())).append("\n");
+            }
+        } else {
+            content.append("Delivery Type: Store Pickup\n");
+            if (order.getDeliveryTime() != null) {
+                content.append("Scheduled Pickup: ").append(dateFormat.format(order.getDeliveryTime())).append("\n");
+            }
+        }
+        
+        content.append("\n");
+        
         if (order.getCancellationReason() != null && !order.getCancellationReason().isEmpty()) {
             content.append("Cancellation Reason: ").append(order.getCancellationReason()).append("\n\n");
         }
@@ -363,5 +386,46 @@ public class EmailService {
         content.append(emailConfig.getProperty("store.name", "Flower Store")).append(" Team");
         
         return content.toString();
+    }
+    
+    public static void sendSubscriptionExpiredEmail(il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck user) {
+        try {
+            Properties props = new Properties();
+            props.put("mail.smtp.auth", emailConfig.getProperty("email.smtp.auth", "true"));
+            props.put("mail.smtp.starttls.enable", emailConfig.getProperty("email.smtp.starttls.enable", "true"));
+            props.put("mail.smtp.host", emailConfig.getProperty("email.smtp.host", "smtp.gmail.com"));
+            props.put("mail.smtp.port", emailConfig.getProperty("email.smtp.port", "587"));
+
+            Session session = Session.getInstance(props, new Authenticator() {
+                @Override
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(
+                        emailConfig.getProperty("email.from.address"),
+                        emailConfig.getProperty("email.from.password")
+                    );
+                }
+            });
+
+            Message message = new MimeMessage(session);
+            message.setFrom(new InternetAddress(emailConfig.getProperty("email.from.address")));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(user.getEmail()));
+            message.setSubject("Your Yearly Subscription Has Expired - " + emailConfig.getProperty("store.name", "Flower Store"));
+
+            StringBuilder content = new StringBuilder();
+            content.append("Dear ").append(user.getFullName() != null ? user.getFullName() : user.getUsername()).append(",\n\n");
+            content.append("We wanted to let you know that your yearly subscription has expired.\n");
+            content.append("To continue enjoying your exclusive discounts and benefits, please renew your subscription.\n\n");
+            content.append("If you have any questions or need assistance, feel free to contact us.\n\n");
+            content.append("Thank you for being a valued customer!\n\n");
+            content.append("Best regards,\n");
+            content.append(emailConfig.getProperty("store.name", "Flower Store")).append(" Team");
+
+            message.setText(content.toString());
+            Transport.send(message);
+            System.out.println("Subscription expiration email sent to: " + user.getEmail());
+        } catch (MessagingException e) {
+            System.err.println("Failed to send subscription expiration email: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 } 
