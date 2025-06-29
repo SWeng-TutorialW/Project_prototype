@@ -273,15 +273,15 @@ public class CatalogController {
     public static LoginRegCheck getUser() {
         return user;
     }
-    public void  set_type(int value)
+    public void set_type(int value)
     {
         type=value;
     }
-    public void  set_sorting_type(int value)
+    public void set_sorting_type(int value)
     {
         sorting_type=value;
     }
-    public  void setFlowersList_c(List<Flower> flowerList)
+    public void setFlowersList_c(List<Flower> flowerList)
     {
         flowersList_c = flowerList;
     }
@@ -1021,9 +1021,8 @@ public class CatalogController {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("my_account.fxml"));
                 Parent root = fxmlLoader.load();
-                MyAccountController myAccountController = fxmlLoader.getController();
-                myAccountController.setCurrentUser(user);
-                myAccountController.setCatalogController(this);
+                MyAccountController.setCurrentUser(user);
+                MyAccountController.setCatalogController(this);
                 Stage stage = new Stage();
                 MyAccountController.setMyAccountStage(stage);
                 stage.setTitle("My Account");

@@ -107,8 +107,7 @@ public class SimpleClient extends AbstractClient {
 
 		}
 		else if(msg.getClass().equals(UpdateUserEvent.class)){ // Update user event has been received
-			EventBus.getDefault().post(msg);
-			EventBus.getDefault().post("#userUpdateSuccess");
+			EventBus.getDefault().post(new UpdateUserEvent(((UpdateUserEvent) msg).getUpdatedUser(),"#userUpdateSuccess"));
 		}
 		else if(msg.getClass().equals(GetUserDetails.class)){
 			EventBus.getDefault().post(msg); // This will send the user details to the UI

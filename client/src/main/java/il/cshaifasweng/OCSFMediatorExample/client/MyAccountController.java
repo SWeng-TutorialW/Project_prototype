@@ -142,13 +142,19 @@ public class MyAccountController {
         {
             myOrdersButton.setDisable(true);
             subscribeBtn.setDisable(true);
+            myOrdersButton.setVisible(false);
+            subscribeBtn.setVisible(false);
         }
-        myAccountLbl.setText("My Account - Hello " + current_User.getFullName());
-        myAccountLbl.setAlignment(CENTER);
+
+        centerHelloAccountLbl();
 
 
     }
-
+    void centerHelloAccountLbl() {
+        myAccountLbl.setText("My Account - Hello " + current_User.getFullName());
+        myAccountLbl.setAlignment(CENTER);
+        myAccountLbl.setLayoutX(myAccUsers.getWidth() / 2 - myAccountLbl.getWidth() / 2);
+    }
     @FXML
     private void handleMyOrdersButton() {
         if (current_User == null) {
@@ -223,9 +229,9 @@ public class MyAccountController {
     }
 
     @Subscribe
-    public void onSuccessfulUpdate(String str) {
-        System.out.println("onSuccessfulUpdate called with: " + str);
-        if(str.startsWith("#userUpdateSuccess")) {
+    public void onSuccessfulUpdate(UpdateUserEvent event) {
+        System.out.println("onSuccessfulUpdate called with: " + event.getMsg());
+        if(event.getMsg().startsWith("#userUpdateSuccess")) {
             System.out.println("#userUpdateSuccess detected, posting SuccessEvent");
             Platform.runLater(() -> {
                 // Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -234,19 +240,19 @@ public class MyAccountController {
                 // alert.setContentText("Your Details Are Up-To-Date.");
                 // alert.showAndWait();
                 Success success = new Success("Your details are up-to-date.");
-                org.greenrobot.eventbus.EventBus.getDefault().post(new SuccessEvent(success));
+                EventBus.getDefault().post(new SuccessEvent(success));
             });
             loadUserInfo();
         }
     }
 
-    @Subscribe
+    /*@Subscribe
     public void getUserDetails(UpdateUserEvent user) {
         if(Objects.equals(user.getUpdatedUser().getId(), current_User.getId())) { // just to make sure we are updating the correct user
             catalogController.set_user(current_User);
             loadUserInfo();
         }
-    }
+    } IRRELEVANT */
 
     @FXML
     void sendUserUpdate(ActionEvent event) {
@@ -254,12 +260,11 @@ public class MyAccountController {
         passErrorMsgLbl.setVisible(false);
         UpdateUserEvent updatedUser;
         LoginRegCheck currentUser = current_User;
-
         currentUser.setUsername(userChangeTxtB.getText());
         currentUser.setEmail(emailChangeTxtB.getText());
         currentUser.setPhoneNum(phoneChangeTxtB.getText());
-        // currentUser.setPassword(newPassTxtB.getText()); Irrelevant, a different function handles password changes
         currentUser.setFullName(fNameTxtB.getText());
+        // currentUser.setPassword(newPassTxtB.getText()); Irrelevant, a different function handles password changes
         updatedUser = new UpdateUserEvent(currentUser);
         try {
             SimpleClient.client.sendToServer(updatedUser);

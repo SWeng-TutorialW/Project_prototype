@@ -512,7 +512,7 @@ public class CatalogController_employee {
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("my_account_employee.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("my_account.fxml"));
             Parent root = loader.load();
 
             MyAccountController controller = loader.getController();

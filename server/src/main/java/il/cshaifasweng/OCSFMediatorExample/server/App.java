@@ -21,15 +21,15 @@ import org.hibernate.service.ServiceRegistry;
  * Hello world!
  *
  */
-public class App
-{
+public class App {
 
-	private static SimpleServer server;
+    private static SimpleServer server;
 
     private static Session session;
     private static SessionFactory sessionFactory = null;
     private static List<Store> stores;
-    private static Configuration configuration;
+    private static Configuration configuration = new Configuration();
+
     public static List<Store> get_stores() {
         if (stores == null || stores.isEmpty()) {
             System.out.println("WARNING: Stores list is null or empty, attempting to reload...");
@@ -37,34 +37,40 @@ public class App
         }
         return stores != null ? stores : new ArrayList<>();
     }
-    
+
     public static void refreshStores() {
         loadStoresFromDatabase();
     }
 
     static SessionFactory getSessionFactory() throws HibernateException {
-
+        if (sessionFactory == null) {
+            ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                    .applySettings(configuration.getProperties())
+                    .build();
+            sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+        }
+        return sessionFactory;
     }
-    
-    public static void loadStoresFromDatabase() {
+
+    public static void loadStoresFromDatabase() throws HibernateException {
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
-            
+
             System.out.println(">>> LOADING STORES FROM DATABASE...");
-            
+
             CriteriaBuilder builder = session.getCriteriaBuilder();
             CriteriaQuery<Store> query = builder.createQuery(Store.class);
             query.from(Store.class);
-            
+
             stores = session.createQuery(query).getResultList();
-            
+
             System.out.println(">>> LOADED STORES FROM DATABASE:");
             System.out.println("Total stores found: " + stores.size());
-            
+
             if (stores.isEmpty()) {
                 System.out.println("WARNING: No stores found in database!");
                 System.out.println("Checking if stores table exists and has data...");
-                
+
                 // Try a simple query to see if the table exists
                 try {
                     String hql = "FROM Store";
@@ -73,7 +79,7 @@ public class App
                 } catch (Exception e) {
                     System.err.println("Error with HQL query: " + e.getMessage());
                 }
-                
+
                 // Check if flowers exist
                 try {
                     String hql = "FROM Flower";
@@ -90,7 +96,7 @@ public class App
                     }
                 }
             }
-            
+
             session.getTransaction().commit();
         } catch (Exception e) {
             System.err.println("Error loading stores from database: " + e.getMessage());
@@ -102,10 +108,10 @@ public class App
         System.out.println(">>> TESTING DATABASE CONNECTION...");
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
-            
+
             // Test basic connection
             System.out.println("Database connection successful");
-            
+
             // Test if tables exist
             try {
                 String hql = "FROM Store";
@@ -114,7 +120,7 @@ public class App
             } catch (Exception e) {
                 System.err.println("Stores table error: " + e.getMessage());
             }
-            
+
             try {
                 String hql = "FROM Flower";
                 List<Flower> flowers = session.createQuery(hql, Flower.class).getResultList();
@@ -122,7 +128,7 @@ public class App
             } catch (Exception e) {
                 System.err.println("Flowers table error: " + e.getMessage());
             }
-            
+
             session.getTransaction().commit();
         } catch (Exception e) {
             System.err.println("Database connection test failed: " + e.getMessage());
@@ -134,77 +140,84 @@ public class App
         System.out.println(">>> VERIFYING STORE-FLOWER RELATIONSHIPS...");
         try (Session session = getSessionFactory().openSession()) {
             session.beginTransaction();
-            
+
             // Load all stores
             String hql = "FROM Store";
             List<Store> allStores = session.createQuery(hql, Store.class).getResultList();
-            
+
             System.out.println("Found " + allStores.size() + " stores in database");
-            
+
             for (Store store : allStores) {
                 System.out.println("Store: " + store.getStoreName() + " (ID: " + store.getId() + ")");
                 System.out.println("  Flowers count: " + store.getFlowersList().size());
-                
+
                 for (Flower flower : store.getFlowersList()) {
                     System.out.println("    - " + flower.getFlowerName() + " (ID: " + flower.getId() + ")");
                 }
             }
-            
+
             session.getTransaction().commit();
         } catch (Exception e) {
             System.err.println("Error verifying store-flower relationships: " + e.getMessage());
             e.printStackTrace();
         }
     }
-    public static void main( String[] args ) throws IOException
-    {
-        System.out.println("Starting OCSFMediatorExample server...");
-        while(true) { // Don't be scared, this is just to retry connection if it fails :)
-        System.out.println("Enter Database Password:");
-        Scanner scn = new Scanner(System.in);
-        String dbPassword = scn.nextLine();
 
+    public static void main(String[] args) throws IOException {
+
+        configuration.setProperty("hibernate.show_sql", "true");
+        configuration.addAnnotatedClass(Flower.class);
+        configuration.addAnnotatedClass(LoginRegCheck.class);
+        configuration.addAnnotatedClass(Complain.class);
+        configuration.addAnnotatedClass(Order.class);
+        configuration.addAnnotatedClass(CartItem.class);
+        configuration.addAnnotatedClass(Store.class);
+        System.out.println("Starting OCSFMediatorExample server...");
+        Scanner scn = new Scanner(System.in);
+        while (true) {
+            System.out.println("Enter Database Password:");
+            String dbPassword = scn.nextLine();
+            configuration.setProperty("hibernate.connection.password", dbPassword);
 
             try {
+                // Force create session factory to test connection
+                if (sessionFactory != null) {
+                    sessionFactory.close();
+                    sessionFactory = null;
+                }
 
-                configuration = new Configuration().configure();
-                SessionFactory sesFactory = (() -> {
-                    if (sessionFactory == null) {
-                        configuration.setProperty("hibernate.connection.password", dbPassword);
-                        configuration.setProperty("hibernate.show_sql", "true");
-                        configuration.addAnnotatedClass(Flower.class);
-                        configuration.addAnnotatedClass(LoginRegCheck.class);
-                        configuration.addAnnotatedClass(Complain.class);
-                        configuration.addAnnotatedClass(Order.class);
-                        configuration.addAnnotatedClass(CartItem.class);
-                        configuration.addAnnotatedClass(Store.class);
-                        ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-                                .applySettings(configuration.getProperties())
-                                .build();
-                        sessionFactory = configuration.buildSessionFactory(serviceRegistry);
-                        return sessionFactory;
-                    }
-                    return sessionFactory;
-                });
+                ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
+                        .applySettings(configuration.getProperties())
+                        .build();
+                sessionFactory = configuration.buildSessionFactory(serviceRegistry);
 
-                // Test database connection first
+                // Test database connection
                 testDatabaseConnection();
 
                 // Check if database needs initialization
                 if (!DatabaseInitializer.isDatabaseInitialized(sessionFactory)) {
-                    // Initialize database with all data
                     DatabaseInitializer.initializeDatabase(sessionFactory);
                 } else {
-                    // Database already has data, just load stores
                     loadStoresFromDatabase();
                 }
                 break;
             } catch (Exception exception) {
                 System.err.println("An error occurred during database setup. Could not connect, Try Again...\n");
                 exception.printStackTrace();
-            }
-        }
 
+                //handle failed session factory
+                if (sessionFactory != null) {
+                    try {
+                        sessionFactory.close();
+                    } catch (Exception e) {
+                        // Ignore errors
+                    }
+                    sessionFactory = null;
+                }
+            }
+
+
+        }
         server = new SimpleServer(3000);
         server.listen();
 
