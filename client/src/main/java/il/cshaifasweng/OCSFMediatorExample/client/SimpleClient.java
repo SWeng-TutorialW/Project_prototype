@@ -40,7 +40,32 @@ public class SimpleClient extends AbstractClient {
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
 		else if (msg instanceof List<?>) { // send users to reg scene
-			EventBus.getDefault().post(msg);
+			List<?> list = (List<?>) msg;
+			if (!list.isEmpty()) {
+				Object firstElement = list.get(0);
+				if (firstElement instanceof LoginRegCheck) {
+					// This is a list of users
+					@SuppressWarnings("unchecked")
+					List<LoginRegCheck> users = (List<LoginRegCheck>) list;
+					EventBus.getDefault().post(users);
+				} else if (firstElement instanceof Order) {
+					// This is a list of orders
+					@SuppressWarnings("unchecked")
+					List<Order> orders = (List<Order>) list;
+					EventBus.getDefault().post(orders);
+				} else if (firstElement instanceof Complain) {
+					// This is a list of complaints
+					@SuppressWarnings("unchecked")
+					List<Complain> complaints = (List<Complain>) list;
+					EventBus.getDefault().post(complaints);
+				} else {
+					// Unknown list type, post as generic list
+					EventBus.getDefault().post(list);
+				}
+			} else {
+				// Empty list, post as is
+				EventBus.getDefault().post(list);
+			}
 		}
 		else if(msg.getClass().equals(ComplainUpdateEvent.class)){
 			EventBus.getDefault().post(msg); // post the catalog update to UI

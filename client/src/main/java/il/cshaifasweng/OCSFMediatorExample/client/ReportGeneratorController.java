@@ -113,12 +113,6 @@ public class ReportGeneratorController {
     private List<LoginRegCheck> allUsers = new ArrayList<>();
     private int pendingOrderRequests = 0;
 
-    //TODO delete this functoin
-    @Subscribe
-    public void handleDummy(Object event) {
-        // No-op, placeholder for EventBus
-    }
-
     @FXML
     void initialize() {
         if (EventBus.getDefault().isRegistered(this)) {
@@ -449,19 +443,62 @@ public class ReportGeneratorController {
         return selected != null ? selected.getText() : "Orders Summary";
     }
 
-    // Add EventBus handlers for real data
+    // Single EventBus handler for all data types to prevent conflicts
     @Subscribe
-    public void handleUsersList(List<LoginRegCheck> users) {
-        System.out.println("[ReportGenerator] Received user list of size: " + users.size());
+    public void handleAllEvents(Object event) {
+        try {
+            if (event instanceof List<?>) {
+                List<?> list = (List<?>) event;
+                if (list.isEmpty()) {
+                    System.out.println("[ReportGenerator] Received empty list");
+                    return;
+                }
+                
+                Object firstElement = list.get(0);
+                
+                if (firstElement instanceof LoginRegCheck) {
+                    @SuppressWarnings("unchecked")
+                    List<LoginRegCheck> users = (List<LoginRegCheck>) list;
+                    handleUsersList(users);
+                } else if (firstElement instanceof Order) {
+                    @SuppressWarnings("unchecked")
+                    List<Order> orders = (List<Order>) list;
+                    handleOrdersList(orders);
+                } else if (firstElement instanceof Complain) {
+                    @SuppressWarnings("unchecked")
+                    List<Complain> complaints = (List<Complain>) list;
+                    handleComplaintsList(complaints);
+                } else {
+                    System.out.println("[ReportGenerator] Received unknown list type: " + firstElement.getClass().getName());
+                }
+            } else if (event instanceof ComplainUpdateEvent) {
+                ComplainUpdateEvent complainEvent = (ComplainUpdateEvent) event;
+                System.out.println("[ReportGenerator] Received ComplainUpdateEvent with size: " + 
+                                 (complainEvent.getUpdatedItems() != null ? complainEvent.getUpdatedItems().size() : 0));
+                handleComplaintsList(complainEvent.getUpdatedItems());
+            } else {
+                System.out.println("[ReportGenerator] Received unknown event: " + event.getClass().getName());
+            }
+        } catch (Exception e) {
+            System.err.println("[ReportGenerator] Error in handleAllEvents: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // Internal methods for processing different data types
+    private void handleUsersList(List<LoginRegCheck> users) {
+        System.out.println("[ReportGenerator] Processing user list of size: " + users.size());
         allUsers.clear();
         allUsers.addAll(users);
         allOrders.clear();
         pendingOrderRequests = users.size();
+        
         if (pendingOrderRequests == 0) {
             System.out.println("[ReportGenerator] No users found, skipping order fetch.");
             processOrders(allOrders);
             return;
         }
+        
         for (LoginRegCheck user : users) {
             System.out.println("[ReportGenerator] Requesting orders for user: " + user.getUsername());
             try {
@@ -473,60 +510,24 @@ public class ReportGeneratorController {
         }
     }
 
-    @Subscribe
-    public void handleUserOrdersResponse(Object response) {
-        if (response instanceof List<?>) {
-            List<?> orders = (List<?>) response;
-            if (!orders.isEmpty() && orders.get(0) instanceof Order) {
-                @SuppressWarnings("unchecked")
-                List<Order> userOrders = (List<Order>) orders;
-                System.out.println("[ReportGenerator] Received " + userOrders.size() + " orders for a user.");
-                allOrders.addAll(userOrders);
-            } else {
-                System.out.println("[ReportGenerator] Received empty order list for a user.");
-            }
-        } else if (response instanceof String) {
-            String responseStr = (String) response;
-            System.out.println("[ReportGenerator] Received order response string: " + responseStr);
-        }
+    private void handleOrdersList(List<Order> orders) {
+        System.out.println("[ReportGenerator] Processing orders list of size: " + orders.size());
+        allOrders.addAll(orders);
         pendingOrderRequests--;
+        
         if (pendingOrderRequests == 0) {
             System.out.println("[ReportGenerator] All user orders received. Total orders: " + allOrders.size());
             processOrders(allOrders);
         }
     }
 
-    @Subscribe
-    public void handleComplaintsResponse(List<Complain> complaints) {
-        System.out.println("[ReportGenerator] Received List<Complain> with size: " + complaints.size());
+    private void handleComplaintsList(List<Complain> complaints) {
+        System.out.println("[ReportGenerator] Processing complaints list of size: " + (complaints != null ? complaints.size() : 0));
         processComplaints(complaints);
     }
 
-    @Subscribe
-    public void handleComplainUpdateEvent(ComplainUpdateEvent event) {
-        System.out.println("[ReportGenerator] Received ComplainUpdateEvent with size: " + (event.getUpdatedItems() != null ? event.getUpdatedItems().size() : 0));
-        processComplaints(event.getUpdatedItems());
-    }
-
-    @Subscribe
-    public void handleAnyEvent(Object event) {
-        System.out.println("[ReportGenerator] Received unknown event: " + event.getClass().getName());
-        // Optionally, print the event or handle fallback
-    }
-
-    // Listen for order updates from server
-    @Subscribe
-    public void handleOrderUpdate(String message) {
-        if ("update_catalog_after_change".equals(message)) {
-            System.out.println("[ReportGenerator] Received order update notification, refreshing data...");
-            // Automatically refresh data when new orders are created
-            Platform.runLater(() -> {
-                if (startDatePicker.getValue() != null && endDatePicker.getValue() != null) {
-                    generateReport(null);
-                }
-            });
-        }
-    }
+    // Remove all other EventBus handlers to prevent conflicts
+    // @Subscribe methods removed to prevent multiple handlers for the same data
 
     private void processOrders(List<Order> orders) {
         // If there are orders, set the default date range to the earliest and latest order dates
@@ -578,10 +579,17 @@ public class ReportGeneratorController {
     }
 
     private void processComplaints(List<Complain> complaints) {
+        if (complaints == null) {
+            System.out.println("[ReportGenerator] No complaints to process");
+            return;
+        }
+        
         complaintData.clear();
         for (Complain c : complaints) {
-            String type = categorizeComplaint(c.getComplaint());
-            complaintData.put(type, complaintData.getOrDefault(type, 0) + 1);
+            if (c != null && c.getComplaint() != null) {
+                String type = categorizeComplaint(c.getComplaint());
+                complaintData.put(type, complaintData.getOrDefault(type, 0) + 1);
+            }
         }
         Platform.runLater(() -> {
             updateChartsForReportType();
@@ -598,5 +606,19 @@ public class ReportGeneratorController {
         if (lower.contains("wrong")) return "Wrong Items";
         if (lower.contains("service")) return "Customer Service";
         return "Other";
+    }
+
+    // Listen for order updates from server
+    @Subscribe
+    public void handleOrderUpdate(String message) {
+        if ("update_catalog_after_change".equals(message)) {
+            System.out.println("[ReportGenerator] Received order update notification, refreshing data...");
+            // Automatically refresh data when new orders are created
+            Platform.runLater(() -> {
+                if (startDatePicker.getValue() != null && endDatePicker.getValue() != null) {
+                    generateReport(null);
+                }
+            });
+        }
     }
 } 
