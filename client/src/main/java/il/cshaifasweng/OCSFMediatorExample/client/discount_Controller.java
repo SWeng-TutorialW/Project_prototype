@@ -172,18 +172,42 @@ public class discount_Controller implements Initializable {
         updatePriceDisplay();
     }
 
-    // Image loading method copied from CatalogController_employee
+    // Image loading method to properly handle database image paths
     private void setImageFromDatabase(ImageView imageView, String databaseImagePath, String flowerType) {
-        if (databaseImagePath != null && !databaseImagePath.trim().isEmpty()) {
-            // Try to load from the database path first
-            setImage(imageView, databaseImagePath);
-            if (imageView.getImage() != null) {
-                return; // Successfully loaded from database path
+        try {
+            String imagePath = null;
+
+            // If database has a valid image path, use it
+            if (databaseImagePath != null && !databaseImagePath.trim().isEmpty()) {
+                imagePath = databaseImagePath;
+            } else {
+                // Fallback to flower type if no image path in database
+                imagePath = "images/FlowerImages/" + flowerType + ".png";
             }
+
+            // Handle different path formats
+            String finalImagePath;
+            if (imagePath.startsWith("images/")) {
+                // Convert to resource path format
+                finalImagePath = "/" + imagePath;
+            } else if (imagePath.startsWith("/")) {
+                // Already in resource path format
+                finalImagePath = imagePath;
+            } else {
+                // Assume it's a relative path, add images/ prefix
+                finalImagePath = "/images/" + imagePath;
+            }
+
+            System.out.println("Loading image from database path: " + imagePath + " -> " + finalImagePath);
+
+            Image image = new Image(getClass().getResourceAsStream(finalImagePath));
+            imageView.setImage(image);
+
+        } catch (Exception e) {
+            System.err.println("Failed to load image from database path: " + databaseImagePath + " for flower type: " + flowerType);
+            // Try fallback to flower type
+            setImageFallback(imageView, flowerType);
         }
-        
-        // Fallback to flower type-based image loading
-        setImageFallback(imageView, flowerType);
     }
 
     private void setImageFallback(ImageView imageView, String flowerType) {
@@ -305,11 +329,8 @@ public class discount_Controller implements Initializable {
     }
 
     private void showSuccess(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Success");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        Success success = new Success("Discount set Successfully!");
+        EventBus.getDefault().post(new SuccessEvent(success));
     }
 
     public void setCatalogController(CatalogController_employee controller) {

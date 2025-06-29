@@ -150,7 +150,7 @@ public class CartController {
         double total = cartItems.stream()
                 .mapToDouble(CartItem::getTotalPrice)
                 .sum();
-        cartTotal.setText(String.format("Total: $%.2f", total));
+        cartTotal.setText(String.format("Total: ₪%.2f", total));
     }
 
     private void removeItem(CartItem item) {

@@ -21,7 +21,7 @@
          <Font name="Palatino Linotype" size="16.0" />
       </font>
    </Button>
-   <TextField fx:id="moneyTf" layoutX="156.0" layoutY="322.0" prefHeight="26.0" prefWidth="87.0" promptText="Amount in $" />
+   <TextField fx:id="moneyTf" layoutX="156.0" layoutY="322.0" prefHeight="26.0" prefWidth="87.0" promptText="Amount in ₪" />
    <CheckBox fx:id="refundCheckBox" layoutX="144.0" layoutY="283.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="111.0" text="Refund Client">
       <font>
          <Font name="Palatino Linotype" size="13.0" />

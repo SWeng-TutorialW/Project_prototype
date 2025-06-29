@@ -109,12 +109,12 @@ public class ReplyComplainController {
                 double orderPrice = extractOrderPrice(originalComplain.getComplaint());
     
                 if (orderPrice > 0 && refundValue > orderPrice) {
-                    Warning warning = new Warning("Cannot refund more than order price ($" + String.format("%.2f", orderPrice) + ")");
+                    Warning warning = new Warning("Cannot refund more than order price (₪" + String.format("%.2f", orderPrice) + ")");
                     EventBus.getDefault().post(new WarningEvent(warning));
                     return;
                 }
     
-                replyText = replyText.concat("\nWe have refunded your account with ").concat(refundAmount).concat(" $");
+                replyText = replyText.concat("\nWe have refunded your account with ").concat(refundAmount).concat(" ₪");
                 newComplain.setRefundAmount(refundValue);
             }
     
@@ -138,8 +138,8 @@ public class ReplyComplainController {
         private double extractOrderPrice(String complaintText) {
             if (complaintText == null) return 0.0;
             
-            // Look for "Price: $123.45" pattern
-            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("Price: \\$([\\d.]+)");
+            // Look for "Price: ₪123.45" pattern
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("Price: ₪([\\d.]+)");
             java.util.regex.Matcher matcher = pattern.matcher(complaintText);
             
             if (matcher.find()) {

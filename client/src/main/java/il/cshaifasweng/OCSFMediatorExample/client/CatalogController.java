@@ -40,6 +40,8 @@ import org.greenrobot.eventbus.Subscribe;
 import javafx.scene.layout.FlowPane;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CatalogController {
 
@@ -180,8 +182,6 @@ public class CatalogController {
     @FXML
     private Button  Mail_box;
     @FXML
-    private ImageView sort_image;
-    @FXML
     private Button three_3;
     @FXML
     private AnchorPane buttonsAncPane;
@@ -241,7 +241,8 @@ public class CatalogController {
     private AnchorPane custom;
     @FXML
     private Label cus_label;
-
+    @FXML
+    private ButtonBar btnPane;
 
     boolean is_login=false;
     public void set_isLogin(boolean is_login) {
@@ -307,9 +308,44 @@ public class CatalogController {
     @FXML
     private FlowPane catalogFlowPane;
 
+    // Filter state tracking
+    private double currentMinPrice = 0.0;
+    private double currentMaxPrice = 300.0;
+    private Set<String> currentSelectedColors = new HashSet<>();
+    private Set<String> currentSelectedCategories = new HashSet<>();
+    private String currentSortOption = "Name (A-Z)";
+
     @FXML
     void create_bouqut(ActionEvent event)
     {
+        // Check if user is logged in (not a guest)
+        if (user == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Bouquet Creation Not Available");
+            alert.setHeaderText("Login Required");
+            alert.setContentText("You must be logged in to create bouquets. Please log in to your account.");
+            alert.showAndWait();
+            return;
+        }
+
+        // Check if user can create bouquet based on their store assignment
+        int userStore = user.getStore();
+        String currentCatalog = Stores.getValue();
+
+        if (userStore != 4) {
+            // User is assigned to a specific store - can only create bouquet in their own store
+            String userStoreName = getStoreNameByNumber(userStore);
+            if (!userStoreName.equals(currentCatalog)) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Bouquet Creation Not Available");
+                alert.setHeaderText("Store Access Required");
+                alert.setContentText("You can only create bouquets when viewing your assigned store: " + userStoreName + ". Please switch to your store catalog.");
+                alert.showAndWait();
+                return;
+            }
+        }
+        // If userStore == 4 (network), they can always create bouquet
+
         Platform.runLater(() -> {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("bouquet.fxml"));
@@ -345,17 +381,14 @@ public class CatalogController {
             currentIndex = random.nextInt(imagePaths.length);
             String fullPath = imagePaths[currentIndex];
 
-
             String filename = fullPath.substring(fullPath.lastIndexOf("/") + 1);
             String flowerName = filename.substring(0, filename.lastIndexOf("."));
-
 
             setImage(cus_img, flowerName);
         }));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
-        combo.getItems().addAll("Price High to LOW", "Price Low to HIGH");
-        combo.setValue("Sort");
+
         Stores.getItems().addAll("Haifa", "Krayot","Nahariyya","network");
         // Set default store selection
         if (user != null) {
@@ -388,24 +421,7 @@ public class CatalogController {
         } else {
             Stores.setValue("network"); // Guest default
         }
-        combo.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item);
-                setAlignment(Pos.CENTER);
-                setTextFill(Color.web("#FFFAFA"));
-            }
-        });
-        combo.setCellFactory(listView -> new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item);
-                setAlignment(Pos.CENTER);
-                setTextFill(Color.web("#C8A2C8"));
-            }
-        });
+
         nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12 };
         typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12 };
         priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
@@ -434,9 +450,7 @@ public class CatalogController {
                 e.printStackTrace();
             }
         });
-        combo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            combo_choose(null);
-        });
+
         Stores.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             updateCatalogForSelectedStore();
         });
@@ -520,6 +534,41 @@ public class CatalogController {
             return;
         }
         
+        // For discount events (catalog_type = 4), update immediately for all clients
+        if (event.get_catalog_type() == 4) {
+            System.out.println("*** DISCOUNT EVENT PROCESSING - IMMEDIATE UPDATE ***");
+            System.out.println("Updating catalog with " + event.get_flowers().size() + " flowers");
+
+            // Store current store selection
+            String currentStore = Stores.getValue();
+
+            // Request fresh data for the current store to ensure we have the latest information
+            if (currentStore != null) {
+                try {
+                    if (currentStore.equals("network")) {
+                        // For network view, use the data from the event
+                        if (event.get_flowers() != null) {
+                            setCatalogData(event.get_flowers());
+                        }
+                    } else {
+                        // For specific store, request fresh data from server
+                        int currentStoreId = getCurrentStoreId(currentStore);
+                        if (currentStoreId != -1) {
+                            String message = "get_catalog_" + currentStoreId;
+                            SimpleClient.getClient().sendToServer(message);
+                            System.out.println("Requested fresh catalog for store ID: " + currentStoreId + " (" + currentStore + ") after discount event");
+                        }
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error requesting fresh catalog data after discount event: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
+            System.out.println("*** DISCOUNT EVENT PROCESSED - IMMEDIATE UPDATE ***");
+            return;
+        }
+
         // Only reload if this event is for our current store selection
         String selectedStore = Stores.getValue();
         if (selectedStore != null) {
@@ -569,7 +618,33 @@ public class CatalogController {
         if (event.get_catalog_type() == -1) {
             System.out.println("*** NETWORK DELETE EVENT PROCESSING ***");
             System.out.println("Updating UI for all clients with " + event.get_flowers().size() + " flowers");
-            setCatalogData(event.get_flowers());
+
+            // Store current store selection
+            String currentStore = Stores.getValue();
+
+            // Request fresh data for the current store to ensure we have the latest information
+            if (currentStore != null) {
+                try {
+                    if (currentStore.equals("network")) {
+                        // For network view, use the data from the event
+                        if (event.get_flowers() != null) {
+                            setCatalogData(event.get_flowers());
+                        }
+                    } else {
+                        // For specific store, request fresh data from server
+                        int currentStoreId = getCurrentStoreId(currentStore);
+                        if (currentStoreId != -1) {
+                            String message = "get_catalog_" + currentStoreId;
+                            SimpleClient.getClient().sendToServer(message);
+                            System.out.println("Requested fresh catalog for store ID: " + currentStoreId + " (" + currentStore + ") after delete event");
+                        }
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error requesting fresh catalog data after delete event: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
             System.out.println("*** NETWORK DELETE EVENT PROCESSED ***");
             return;
         }
@@ -584,7 +659,10 @@ public class CatalogController {
             if (event.get_catalog_type() == currentStoreId) {
                 System.out.println("Add flower event matches current store, updating UI");
                 // Update the UI with the new data from the event
-                setCatalogData(event.get_flowers());
+                if (event.get_flowers() != null) {
+                    System.out.println("Updating catalog with " + event.get_flowers().size() + " flowers");
+                    setCatalogData(event.get_flowers());
+                }
             } else {
                 System.out.println("Add flower event does not match current store. Event type: " + event.get_catalog_type() + ", Current store ID: " + currentStoreId);
             }
@@ -797,6 +875,17 @@ public class CatalogController {
         });
     }
     
+    /**
+     * Updates the current filter state from the filter controller
+     */
+    public void updateCurrentFilterState(double minPrice, double maxPrice, Set<String> colors, Set<String> categories, String sortOption) {
+        this.currentMinPrice = minPrice;
+        this.currentMaxPrice = maxPrice;
+        this.currentSelectedColors = new HashSet<>(colors);
+        this.currentSelectedCategories = new HashSet<>(categories);
+        this.currentSortOption = sortOption;
+    }
+
     // Method to open filter window
     @FXML
     void openFilterWindow(ActionEvent event) {
@@ -808,6 +897,15 @@ public class CatalogController {
             filterController.setCatalogController(this);
             filterController.setOriginalFlowersList(flowersList_c);
             
+            // Pass current filter state to restore UI
+            filterController.setCurrentFilterState(
+                currentMinPrice,
+                currentMaxPrice,
+                currentSelectedColors,
+                currentSelectedCategories,
+                currentSortOption
+            );
+
             Stage filterStage = new Stage();
             filterStage.setTitle("Filter Catalog");
             filterStage.setScene(new Scene(root));
@@ -832,6 +930,11 @@ public class CatalogController {
             String selectedStore = Stores.getValue();
             controller.setStore(selectedStore); // Set store first
             controller.setFlower(flower);       // Then set flower (so updateUI sees the store)
+
+            // Pass the current catalog flowers for validation
+            List<Flower> currentCatalog = flowersList_sorting != null ? flowersList_sorting : flowersList_c;
+            controller.setCurrentCatalogFlowers(currentCatalog);
+
             Stage stage = new Stage();
             stage.setTitle("Order Flower");
             stage.setScene(new Scene(root));
@@ -855,18 +958,14 @@ public class CatalogController {
         System.out.println("Selected store: " + selected);
 
         // Clear combo selection and reset sorting
-        combo.getSelectionModel().clearSelection();
-        combo.setValue("Sort");
-        combo.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item);
-                setAlignment(Pos.CENTER);
-                setTextFill(Color.web("#FFFAFA"));
-            }
-        });
-        sort_image.setVisible(true);
+
+
+        // Clear current filter state
+        currentMinPrice = 0.0;
+        currentMaxPrice = 300.0;
+        currentSelectedColors.clear();
+        currentSelectedCategories.clear();
+        currentSortOption = "Name (A-Z)";
 
         // Request fresh data from database based on selected store
         if (selected.equals("network")) {
@@ -887,6 +986,8 @@ public class CatalogController {
             }
         }
     }
+
+    //mark
     @FXML
     public void combo_choose(ActionEvent actionEvent) {
         System.out.println("combo_choose CALLED");
@@ -1180,6 +1281,9 @@ public class CatalogController {
             orderController.setFlower(targetFlower);
             orderController.setUser(user);
 
+            // Pass the current catalog flowers for validation
+            List<Flower> currentCatalog = flowersList_sorting != null ? flowersList_sorting : flowersList_c;
+            orderController.setCurrentCatalogFlowers(currentCatalog);
 
             Stage stage = new Stage();
             stage.setTitle("Order Details");
@@ -1295,6 +1399,54 @@ public class CatalogController {
         } catch (Exception e) {
             System.err.println("Failed to load no_photo image as well");
             // Create a placeholder image or leave empty
+        }
+    }
+
+    /**
+     * Helper method to get store name by store number
+     */
+    private String getStoreNameByNumber(int storeNumber) {
+        switch (storeNumber) {
+            case 1: return "Haifa";
+            case 2: return "Krayot";
+            case 3: return "Nahariyya";
+            case 4: return "network";
+            default: return "Unknown";
+        }
+    }
+
+    /**
+     * Updates the bouquet button state based on the user's store assignment and current catalog view
+     */
+    private void updateBouquetButtonState(String selectedStore) {
+        if (bouqut_btn != null && user != null) {
+            int userStore = user.getStore();
+
+            if (userStore == 4) {
+                // Network users can always create bouquets
+                bouqut_btn.setDisable(false);
+                bouqut_btn.setStyle("-fx-background-color: #fdfdfd; -fx-text-fill: #000000;");
+                bouqut_btn.setTooltip(null);
+            } else {
+                // Store-specific users can only create bouquets in their own store
+                String userStoreName = getStoreNameByNumber(userStore);
+                if (userStoreName.equals(selectedStore)) {
+                    // User is viewing their own store - enable button
+                    bouqut_btn.setDisable(false);
+                    bouqut_btn.setStyle("-fx-background-color: #fdfdfd; -fx-text-fill: #000000;");
+                    bouqut_btn.setTooltip(null);
+                } else {
+                    // User is viewing a different store - disable button
+                    bouqut_btn.setDisable(true);
+                    bouqut_btn.setStyle("-fx-background-color: #cccccc; -fx-text-fill: #666666;");
+                    bouqut_btn.setTooltip(new Tooltip("You can only create bouquets in your assigned store: " + userStoreName));
+                }
+            }
+        } else if (bouqut_btn != null) {
+            // No user logged in - disable button
+            bouqut_btn.setDisable(true);
+            bouqut_btn.setStyle("-fx-background-color: #cccccc; -fx-text-fill: #666666;");
+            bouqut_btn.setTooltip(new Tooltip("Please log in to create bouquets"));
         }
     }
 }

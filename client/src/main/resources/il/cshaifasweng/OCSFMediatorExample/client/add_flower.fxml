@@ -9,8 +9,8 @@
 
 <VBox alignment="CENTER" spacing="20.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.AddFlower_Controller">
    <children>
-      <Label text="Add Flower" style="-fx-font-size: 24; -fx-font-weight: bold;" />
-      
+      <Label text="Add Item" style="-fx-font-size: 24; -fx-font-weight: bold;" />
+
       <!-- Network Mode Form -->
       <VBox spacing="10" fx:id="networkFormSection">
          <GridPane hgap="10" vgap="10">
@@ -27,40 +27,40 @@
                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-               <Label text="Flower Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-               <TextField fx:id="flowerNameField" promptText="Enter flower name" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-               
-               <Label text="Flower Type:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-               <TextField fx:id="flowerTypeField" promptText="Enter flower type" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-               
+               <Label text="Item Name:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+               <TextField fx:id="flowerNameField" promptText="Enter item name" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+               <Label text="Item Type:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+               <TextField fx:id="flowerTypeField" promptText="Enter item type" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
                <Label text="Color:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-               <TextField fx:id="colorField" promptText="Enter color" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-               
+               <ComboBox fx:id="colorComboBox" promptText="Select color" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
                <Label text="Category:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
                <ComboBox fx:id="categoryComboBox" promptText="Select category" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-               
+
                <Label text="Price:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
                <TextField fx:id="priceField" promptText="Enter price" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-               
+
                <Label text="Image Path:" GridPane.columnIndex="0" GridPane.rowIndex="5" />
                <TextField fx:id="imagePathField" promptText="Enter image path (optional)" GridPane.columnIndex="1" GridPane.rowIndex="5" />
             </children>
          </GridPane>
       </VBox>
-      
+
       <!-- Store Mode Section -->
       <VBox spacing="15" fx:id="storeModeSection" visible="false">
-         <Label text="Select Flower to Add to Your Store" style="-fx-font-size: 16; -fx-font-weight: bold;" />
-         
-         <ComboBox fx:id="existingFlowersComboBox" promptText="Choose a flower..." prefWidth="300" />
-         
+         <Label text="Select Item to Add to Your Store" style="-fx-font-size: 16; -fx-font-weight: bold;" />
+
+         <ComboBox fx:id="existingFlowersComboBox" promptText="Choose a item..." prefWidth="300" />
+
          <!-- Flower Details Display -->
          <VBox fx:id="flowerDetailsSection" spacing="10" style="-fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 15;">
-            <Label text="Flower Details" style="-fx-font-size: 14; -fx-font-weight: bold;" />
-            
+            <Label text="Item Details" style="-fx-font-size: 14; -fx-font-weight: bold;" />
+
             <HBox spacing="20" alignment="CENTER_LEFT">
                <ImageView fx:id="flowerImageView" fitHeight="100" fitWidth="100" preserveRatio="true" />
-               
+
                <VBox spacing="5">
                   <Label fx:id="flowerNameLabel" text="Name: " />
                   <Label fx:id="flowerTypeLabel" text="Type: " />
@@ -71,14 +71,14 @@
             </HBox>
          </VBox>
       </VBox>
-      
+
       <!-- Buttons -->
       <HBox spacing="20" alignment="CENTER">
-         <Button fx:id="addButton" text="Add Flower" onAction="#addFlower" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;" />
+         <Button fx:id="addButton" text="Add Item" onAction="#addFlower" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;" />
          <Button fx:id="cancelButton" text="Cancel" onAction="#cancel" style="-fx-background-color: #f44336; -fx-text-fill: white;" />
       </HBox>
    </children>
    <padding>
       <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
    </padding>
-</VBox> 
+</VBox>

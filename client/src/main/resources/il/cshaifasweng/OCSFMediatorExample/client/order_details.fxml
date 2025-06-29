@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.geometry.Insets?>
 
-<AnchorPane fx:controller="il.cshaifasweng.OCSFMediatorExample.client.OrderDetailsController" fx:id="orderDetailsPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="900.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="orderDetailsPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="900.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.OrderDetailsController">
    <children>
-      <Label fx:id="titleLabel" alignment="CENTER" layoutX="350.0" layoutY="20.0" prefHeight="30.0" prefWidth="200.0" text="Order Details" textAlignment="CENTER">
+      <Label fx:id="titleLabel" alignment="CENTER" layoutX="350.0" layoutY="14.0" prefHeight="30.0" prefWidth="200.0" text="Order Details" textAlignment="CENTER">
          <font>
             <Font name="Dubai Medium" size="24.0" />
          </font>
@@ -19,21 +23,21 @@
             <!-- Order Header Info -->
             <HBox spacing="20.0">
                <children>
-                  <VBox spacing="5.0" prefWidth="200.0">
+                  <VBox prefWidth="200.0" spacing="5.0">
                      <children>
-                        <Label text="Order ID:" style="-fx-font-weight: bold;" />
+                        <Label style="-fx-font-weight: bold;" text="Order ID:" />
                         <Label fx:id="orderIdLabel" text="Order ID" />
                      </children>
                   </VBox>
-                  <VBox spacing="5.0" prefWidth="200.0">
+                  <VBox prefWidth="200.0" spacing="5.0">
                      <children>
-                        <Label text="Order Date:" style="-fx-font-weight: bold;" />
+                        <Label style="-fx-font-weight: bold;" text="Order Date:" />
                         <Label fx:id="orderDateLabel" text="Order Date" />
                      </children>
                   </VBox>
-                  <VBox spacing="5.0" prefWidth="200.0">
+                  <VBox prefWidth="200.0" spacing="5.0">
                      <children>
-                        <Label text="Status:" style="-fx-font-weight: bold;" />
+                        <Label style="-fx-font-weight: bold;" text="Status:" />
                         <Label fx:id="statusLabel" text="Status" />
                      </children>
                   </VBox>
@@ -43,21 +47,21 @@
             <!-- Customer Information -->
             <HBox spacing="20.0">
                <children>
-                  <VBox spacing="5.0" prefWidth="200.0">
+                  <VBox prefWidth="200.0" spacing="5.0">
                      <children>
-                        <Label text="Customer Name:" style="-fx-font-weight: bold;" />
+                        <Label style="-fx-font-weight: bold;" text="Customer Name:" />
                         <Label fx:id="customerNameLabel" text="Customer Name" />
                      </children>
                   </VBox>
-                  <VBox spacing="5.0" prefWidth="200.0">
+                  <VBox prefWidth="200.0" spacing="5.0">
                      <children>
-                        <Label text="Customer Email:" style="-fx-font-weight: bold;" />
+                        <Label style="-fx-font-weight: bold;" text="Customer Email:" />
                         <Label fx:id="customerEmailLabel" text="Customer Email" />
                      </children>
                   </VBox>
-                  <VBox spacing="5.0" prefWidth="200.0">
+                  <VBox prefWidth="200.0" spacing="5.0">
                      <children>
-                        <Label text="Delivery Type:" style="-fx-font-weight: bold;" />
+                        <Label style="-fx-font-weight: bold;" text="Delivery Type:" />
                         <Label fx:id="deliveryTypeLabel" text="Delivery Type" />
                      </children>
                   </VBox>
@@ -67,7 +71,7 @@
             <!-- Address Information (if delivery) -->
             <VBox fx:id="addressSection" spacing="5.0" visible="false">
                <children>
-                  <Label text="Delivery Address:" style="-fx-font-weight: bold;" />
+                  <Label style="-fx-font-weight: bold;" text="Delivery Address:" />
                   <Label fx:id="addressLabel" text="Address" />
                </children>
             </VBox>
@@ -75,7 +79,7 @@
             <!-- Delivery Time (if delivery) -->
             <VBox fx:id="deliveryTimeSection" spacing="5.0" visible="false">
                <children>
-                  <Label text="Delivery Time:" style="-fx-font-weight: bold;" />
+                  <Label style="-fx-font-weight: bold;" text="Delivery Time:" />
                   <Label fx:id="deliveryTimeLabel" text="Delivery Time" />
                </children>
             </VBox>
@@ -83,24 +87,24 @@
             <!-- Cancellation Information (if cancelled) -->
             <VBox fx:id="cancellationSection" spacing="5.0" visible="false">
                <children>
-                  <Label text="Cancellation Information:" style="-fx-font-weight: bold; -fx-font-size: 16;" />
+                  <Label style="-fx-font-weight: bold; -fx-font-size: 16;" text="Cancellation Information:" />
                   <HBox spacing="20.0">
                      <children>
-                        <VBox spacing="5.0" prefWidth="200.0">
+                        <VBox prefWidth="200.0" spacing="5.0">
                            <children>
-                              <Label text="Cancellation Date:" style="-fx-font-weight: bold;" />
+                              <Label style="-fx-font-weight: bold;" text="Cancellation Date:" />
                               <Label fx:id="cancellationDateLabel" text="Cancellation Date" />
                            </children>
                         </VBox>
-                        <VBox spacing="5.0" prefWidth="200.0">
+                        <VBox prefWidth="200.0" spacing="5.0">
                            <children>
-                              <Label text="Refund Amount:" style="-fx-font-weight: bold;" />
+                              <Label style="-fx-font-weight: bold;" text="Refund Amount:" />
                               <Label fx:id="refundAmountLabel" text="Refund Amount" />
                            </children>
                         </VBox>
-                        <VBox spacing="5.0" prefWidth="300.0">
+                        <VBox prefWidth="300.0" spacing="5.0">
                            <children>
-                              <Label text="Cancellation Reason:" style="-fx-font-weight: bold;" />
+                              <Label style="-fx-font-weight: bold;" text="Cancellation Reason:" />
                               <Label fx:id="cancellationReasonLabel" text="Cancellation Reason" />
                            </children>
                         </VBox>
@@ -112,18 +116,18 @@
             <!-- Greeting Card Information (if included) -->
             <VBox fx:id="greetingCardSection" spacing="5.0" visible="false">
                <children>
-                  <Label text="Greeting Card Information:" style="-fx-font-weight: bold; -fx-font-size: 16;" />
+                  <Label style="-fx-font-weight: bold; -fx-font-size: 16;" text="Greeting Card Information:" />
                   <HBox spacing="20.0">
                      <children>
-                        <VBox spacing="5.0" prefWidth="200.0">
+                        <VBox prefWidth="200.0" spacing="5.0">
                            <children>
-                              <Label text="Card Background:" style="-fx-font-weight: bold;" />
+                              <Label style="-fx-font-weight: bold;" text="Card Background:" />
                               <Label fx:id="greetingCardBackgroundLabel" text="Card Background" />
                            </children>
                         </VBox>
-                        <VBox spacing="5.0" prefWidth="500.0">
+                        <VBox prefWidth="500.0" spacing="5.0">
                            <children>
-                              <Label text="Greeting Message:" style="-fx-font-weight: bold;" />
+                              <Label style="-fx-font-weight: bold;" text="Greeting Message:" />
                               <Label fx:id="greetingCardMessageLabel" text="Greeting Message" wrapText="true" />
                            </children>
                         </VBox>
@@ -133,7 +137,7 @@
             </VBox>
             
             <!-- Items Table -->
-            <Label text="Order Items:" style="-fx-font-weight: bold; -fx-font-size: 16;" />
+            <Label style="-fx-font-weight: bold; -fx-font-size: 16;" text="Order Items:" />
             <TableView fx:id="itemsTable" prefHeight="250.0" prefWidth="800.0">
                <columns>
                   <TableColumn fx:id="itemNameColumn" prefWidth="120.0" text="Item Name" />
@@ -148,21 +152,21 @@
             </TableView>
             
             <!-- Order Summary -->
-            <HBox spacing="20.0" alignment="CENTER_RIGHT">
+            <HBox alignment="CENTER_RIGHT" spacing="20.0">
                <children>
-                  <VBox spacing="5.0" alignment="CENTER_RIGHT">
+                  <VBox alignment="CENTER_RIGHT" spacing="5.0">
                      <children>
-                        <Label text="Subtotal:" style="-fx-font-weight: bold;" />
-                        <Label text="Delivery Fee:" style="-fx-font-weight: bold;" />
-                        <Label text="Total Amount:" style="-fx-font-weight: bold; -fx-font-size: 16;" />
+                        <Label style="-fx-font-weight: bold;" text="Subtotal:" />
+                        <Label style="-fx-font-weight: bold;" text="Delivery Fee:" />
+                        <Label style="-fx-font-weight: bold; -fx-font-size: 16;" text="Total Amount:" />
                      </children>
                   </VBox>
-                  <VBox spacing="5.0" alignment="CENTER_RIGHT">
+                  <VBox alignment="CENTER_RIGHT" spacing="5.0">
                      <children>
                         <Label fx:id="subtotalLabel" text="₪0.00" />
                         <Label fx:id="deliveryFeeLabel" text="₪0.00" />
-                        <Label fx:id="discountLabel" text="" visible="false" style="-fx-text-fill: #388e3c; -fx-font-size: 16; -fx-font-weight: bold;" />
-                        <Label fx:id="totalAmountLabel" text="₪0.00" style="-fx-font-size: 16;" />
+                        <Label fx:id="discountLabel" style="-fx-text-fill: #388e3c; -fx-font-size: 16; -fx-font-weight: bold;" text="" visible="false" />
+                        <Label fx:id="totalAmountLabel" style="-fx-font-size: 16;" text="₪0.00" />
                      </children>
                   </VBox>
                </children>
@@ -170,6 +174,6 @@
          </children>
       </VBox>
       
-      <Button fx:id="backButton" layoutX="400.0" layoutY="750.0" prefHeight="30.0" prefWidth="100.0" text="Back" onAction="#handleBackButton" />
+      <Button fx:id="backButton" layoutX="400.0" layoutY="750.0" onAction="#handleBackButton" prefHeight="30.0" prefWidth="100.0" text="Back" />
    </children>
-</AnchorPane> 
+</AnchorPane>

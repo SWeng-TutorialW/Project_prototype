@@ -144,6 +144,7 @@ public class MyAccountController {
             subscribeBtn.setDisable(true);
             myOrdersButton.setVisible(false);
             subscribeBtn.setVisible(false);
+            subscriptionExpireLbl.setVisible(false);
         }
 
         centerHelloAccountLbl();

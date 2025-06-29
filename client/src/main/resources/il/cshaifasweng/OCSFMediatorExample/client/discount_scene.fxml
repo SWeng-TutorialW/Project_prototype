@@ -1,15 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
 <AnchorPane prefHeight="700.0" prefWidth="900.0" style="-fx-background-color: #C8A2C8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.discount_Controller">
    <children>
-      <Text fill="WHITE" fontSmoothingType="LCD" layoutX="250.0" layoutY="50.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Set Flower Discount" wrappingWidth="400.0">
+      <Text fill="WHITE" fontSmoothingType="LCD" layoutX="250.0" layoutY="50.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Set Flower Discount" textAlignment="CENTER" wrappingWidth="400.0">
          <font>
             <Font name="Segoe UI Light" size="36.0" />
          </font>
@@ -22,7 +28,7 @@
          
          <!-- Flower Selection Section -->
          <VBox spacing="10.0" style="-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 10; -fx-padding: 15;">
-            <Label text="Select Flower:" style="-fx-font-weight: bold; -fx-font-size: 18; -fx-text-fill: #4B275F;">
+            <Label style="-fx-font-weight: bold; -fx-font-size: 18; -fx-text-fill: #4B275F;" text="Select Flower:">
                <font>
                   <Font size="18.0" />
                </font>
@@ -32,43 +38,43 @@
          
          <!-- Flower Details Section -->
          <VBox fx:id="flowerDetailsSection" spacing="15.0" style="-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 10; -fx-padding: 20;">
-            <HBox spacing="20.0" alignment="CENTER_LEFT">
+            <HBox alignment="CENTER_LEFT" spacing="20.0">
                <ImageView fx:id="selectedFlowerImageView" fitHeight="120.0" fitWidth="120.0" preserveRatio="true" style="-fx-border-color: #c8a2c8; -fx-border-radius: 5;" />
                <VBox spacing="8.0">
-                  <Label fx:id="selectedFlowerNameLabel" text="Flower Name" style="-fx-font-weight: bold; -fx-font-size: 20; -fx-text-fill: #4B275F;" />
-                  <Label fx:id="selectedFlowerTypeLabel" text="Flower Type" style="-fx-font-size: 16; -fx-text-fill: #4B275F;" />
-                  <Label fx:id="currentDiscountLabel" text="Current Discount: 0%" visible="false" style="-fx-text-fill: #388e3c; -fx-font-weight: bold;" />
+                  <Label fx:id="selectedFlowerNameLabel" style="-fx-font-weight: bold; -fx-font-size: 20; -fx-text-fill: #4B275F;" text="Flower Name" />
+                  <Label fx:id="selectedFlowerTypeLabel" style="-fx-font-size: 16; -fx-text-fill: #4B275F;" text="Flower Type" />
+                  <Label fx:id="currentDiscountLabel" style="-fx-text-fill: #388e3c; -fx-font-weight: bold;" text="Current Discount: 0%" visible="false" />
                </VBox>
             </HBox>
             
             <Separator />
             
             <VBox spacing="10.0">
-               <Label fx:id="selectedFlowerOriginalPriceLabel" text="Original Price: ₪0.00" style="-fx-font-size: 16; -fx-text-fill: #4B275F;" />
-               <Label fx:id="selectedFlowerPriceLabel" text="New Price: ₪0.00" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #388e3c;" />
+               <Label fx:id="selectedFlowerOriginalPriceLabel" style="-fx-font-size: 16; -fx-text-fill: #4B275F;" text="Original Price: ₪0.00" />
+               <Label fx:id="selectedFlowerPriceLabel" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #388e3c;" text="New Price: ₪0.00" />
             </VBox>
          </VBox>
          
          <!-- Discount Slider Section -->
          <VBox spacing="15.0" style="-fx-background-color: rgba(255,255,255,0.9); -fx-background-radius: 10; -fx-padding: 20;">
-            <Label text="Set Discount Percentage:" style="-fx-font-weight: bold; -fx-font-size: 18; -fx-text-fill: #4B275F;">
+            <Label style="-fx-font-weight: bold; -fx-font-size: 18; -fx-text-fill: #4B275F;" text="Set Discount Percentage:">
                <font>
                   <Font size="18.0" />
                </font>
             </Label>
             
             <HBox alignment="CENTER" spacing="20.0">
-               <Label text="0%" style="-fx-font-size: 16; -fx-text-fill: #4B275F;" />
+               <Label style="-fx-font-size: 16; -fx-text-fill: #4B275F;" text="0%" />
                <Slider fx:id="discountSlider" prefWidth="300.0" />
-               <Label text="100%" style="-fx-font-size: 16; -fx-text-fill: #4B275F;" />
+               <Label style="-fx-font-size: 16; -fx-text-fill: #4B275F;" text="100%" />
             </HBox>
             
-            <Label fx:id="discountPercentageLabel" text="0%" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #388e3c;" alignment="CENTER" />
+            <Label fx:id="discountPercentageLabel" alignment="CENTER" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #388e3c;" text="0%" />
          </VBox>
          
          <!-- Buttons Section -->
          <HBox alignment="CENTER" spacing="20.0">
-            <Button fx:id="applyDiscountButton" mnemonicParsing="false" onAction="#applyDiscount" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #388e3c; -fx-text-fill: white; -fx-font-weight: bold;" text="Apply Discount" disable="true">
+            <Button fx:id="applyDiscountButton" disable="true" mnemonicParsing="false" onAction="#applyDiscount" prefHeight="40.0" prefWidth="150.0" style="-fx-background-color: #388e3c; -fx-text-fill: white; -fx-font-weight: bold;" text="Apply Discount">
                <font>
                   <Font size="16.0" />
                </font>

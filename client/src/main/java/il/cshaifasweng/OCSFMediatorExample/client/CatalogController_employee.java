@@ -7,6 +7,9 @@ import java.io.IOException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.ArrayList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -438,6 +441,13 @@ public class CatalogController_employee {
     int add_flower_flag=0;
     String flower_name="";
 
+    // Filter state tracking
+    private double currentMinPrice = 0.0;
+    private double currentMaxPrice = 300.0;
+    private Set<String> currentSelectedColors = new HashSet<>();
+    private Set<String> currentSelectedCategories = new HashSet<>();
+    private String currentSortOption = "Name (A-Z)";
+
     @FXML
     void initialize() {
         if (!EventBus.getDefault().isRegistered(this)) {
@@ -447,28 +457,9 @@ public class CatalogController_employee {
             System.out.println("CatalogController_employee already registered");
         }
         System.out.println("CatalogController employee initialized");
-        combo.getItems().addAll("Price High to LOW", "Price Low to HIGH");
-        combo.setValue("Sort");
-        Stores.getItems().addAll("Haifa", "Krayot","Nahariyya","network");
-        combo.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item);
-                setAlignment(Pos.CENTER);
-                setTextFill(Color.web("#FFFAFA"));
-            }
-        });
 
-        combo.setCellFactory(listView -> new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item);
-                setAlignment(Pos.CENTER);
-                setTextFill(Color.web("#C8A2C8"));
-            }
-        });
+        Stores.getItems().addAll("Haifa", "Krayot","Nahariyya","network");
+
         nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12 };
         typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12 };
         priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
@@ -720,7 +711,33 @@ public class CatalogController_employee {
         if (event.get_catalog_type() == -1) {
             System.out.println("*** NETWORK DELETE EVENT PROCESSING (EMPLOYEE) ***");
             System.out.println("Updating UI for all clients with " + event.get_flowers().size() + " flowers");
-            setCatalogData(event.get_flowers());
+
+            // Store current store selection
+            String currentStore = Stores.getValue();
+
+            // Request fresh data for the current store to ensure we have the latest information
+            if (currentStore != null) {
+                try {
+                    if (currentStore.equals("network")) {
+                        // For network view, use the data from the event
+                        if (event.get_flowers() != null) {
+                            setCatalogData(event.get_flowers());
+                        }
+                    } else {
+                        // For specific store, request fresh data from server
+                        int currentStoreId = getCurrentStoreId(currentStore);
+                        if (currentStoreId != -1) {
+                            String message = "get_catalog_" + currentStoreId;
+                            SimpleClient.getClient().sendToServer(message);
+                            System.out.println("Requested fresh catalog for store ID: " + currentStoreId + " (" + currentStore + ") after delete event");
+                        }
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error requesting fresh catalog data after delete event: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
             System.out.println("*** NETWORK DELETE EVENT PROCESSED (EMPLOYEE) ***");
             return;
         }
@@ -763,7 +780,42 @@ public class CatalogController_employee {
             System.out.println("*** NETWORK DISCOUNT EVENT PROCESSED ***");
             return;
         }
-        
+
+        // For discount events (catalog_type = 4), update immediately for all clients
+        if (event.get_catalog_type() == 4) {
+            System.out.println("*** DISCOUNT EVENT PROCESSING - IMMEDIATE UPDATE ***");
+            System.out.println("Updating catalog with " + event.get_flowers().size() + " flowers");
+
+            // Store current store selection
+            String currentStore = Stores.getValue();
+
+            // Request fresh data for the current store to ensure we have the latest information
+            if (currentStore != null) {
+                try {
+                    if (currentStore.equals("network")) {
+                        // For network view, use the data from the event
+                        if (event.get_flowers() != null) {
+                            setCatalogData(event.get_flowers());
+                        }
+                    } else {
+                        // For specific store, request fresh data from server
+                        int currentStoreId = getCurrentStoreId(currentStore);
+                        if (currentStoreId != -1) {
+                            String message = "get_catalog_" + currentStoreId;
+                            SimpleClient.getClient().sendToServer(message);
+                            System.out.println("Requested fresh catalog for store ID: " + currentStoreId + " (" + currentStore + ") after discount event");
+                        }
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error requesting fresh catalog data after discount event: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+
+            System.out.println("*** DISCOUNT EVENT PROCESSED - IMMEDIATE UPDATE ***");
+            return;
+        }
+
         // Only reload if this event is for our current store selection
         String selectedStore = Stores.getValue();
         if (selectedStore != null) {
@@ -1203,6 +1255,17 @@ public class CatalogController_employee {
 
         System.out.println("Selected store: " + selected);
 
+
+
+
+        // Clear current filter state
+        currentMinPrice = 0.0;
+        currentMaxPrice = 300.0;
+        currentSelectedColors.clear();
+        currentSelectedCategories.clear();
+        currentSortOption = "Name (A-Z)";
+
+        // Request fresh data from database based on selected store
         if (selected.equals("network")) {
             // For network view, get all flowers from Flowers table
             String message = "get_all_flowers";
@@ -1722,6 +1785,15 @@ public class CatalogController_employee {
             filterController.setCatalogController(this);
             filterController.setOriginalFlowersList(flowersList_c);
             
+            // Pass current filter state to restore UI
+            filterController.setCurrentFilterState(
+                currentMinPrice,
+                currentMaxPrice,
+                currentSelectedColors,
+                currentSelectedCategories,
+                currentSortOption
+            );
+
             Stage filterStage = new Stage();
             filterStage.setTitle("Filter Catalog");
             filterStage.setScene(new Scene(root));
@@ -1733,6 +1805,17 @@ public class CatalogController_employee {
             e.printStackTrace();
             System.err.println("Error opening filter window: " + e.getMessage());
         }
+    }
+
+    /**
+     * Updates the current filter state from the filter controller
+     */
+    public void updateCurrentFilterState(double minPrice, double maxPrice, Set<String> colors, Set<String> categories, String sortOption) {
+        this.currentMinPrice = minPrice;
+        this.currentMaxPrice = maxPrice;
+        this.currentSelectedColors = new HashSet<>(colors);
+        this.currentSelectedCategories = new HashSet<>(categories);
+        this.currentSortOption = sortOption;
     }
 }
 

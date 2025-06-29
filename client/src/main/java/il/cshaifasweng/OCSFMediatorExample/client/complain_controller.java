@@ -190,7 +190,7 @@ public class complain_controller implements Initializable {
         if (currentUser != null) {
             complain.setClient(currentUser.getUsername());
         }
-        String complaintWithOrder = "Order #" + selectedOrder.getId() + " - Price: $" + String.format("%.2f", selectedOrder.getTotalAmount()) + " - " + client_complaint;
+        String complaintWithOrder = "Order #" + selectedOrder.getId() + " - Price: ₪" + String.format("%.2f", selectedOrder.getTotalAmount()) + " - " + client_complaint;
         complain.setComplaint(complaintWithOrder);
 
         if (catalogController != null) {
