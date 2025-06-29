@@ -60,11 +60,6 @@ public class App extends Application {
 		// TODO Auto-generated method stub
     	EventBus.getDefault().unregister(this);
         SimpleClient.getClient().sendToServer("remove client");
-        if(CatalogController.getUser() != null || CatalogController_employee.getUser() != null)
-        {
-            LoginRegCheck loggedUser = CatalogController.getUser() != null ? CatalogController.getUser() : CatalogController_employee.getUser();
-            SimpleClient.getClient().sendToServer(new change_user_login(loggedUser, 0));
-        }
         SimpleClient.getClient().closeConnection();
 		super.stop();
 	}

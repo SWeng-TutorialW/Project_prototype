@@ -635,7 +635,6 @@ public class SimpleServer extends AbstractServer {
 					break;
 			}
 		}
-
 		else if (msg.getClass().equals(UpdateUserEvent.class)){ // USER UPDATE
 			LoginRegCheck userToUpdate = ((UpdateUserEvent) msg).getUpdatedUser();
 			Session session = null;
@@ -661,7 +660,7 @@ public class SimpleServer extends AbstractServer {
                 session.getTransaction().rollback(); e.printStackTrace(); System.err.println("ERROR: Could not send update confirmation to client or update failed.\n");
             } finally {session.close();}
 		}
-		else if(msg.getClass().equals(GetUserDetails.class)) {
+		/*else if(msg.getClass().equals(GetUserDetails.class)) {
 			Session session = null;
 			LoginRegCheck user = ((GetUserDetails) msg).getUser();
 			try {
@@ -683,7 +682,7 @@ public class SimpleServer extends AbstractServer {
 				e.printStackTrace();
 			}
 
-		}
+		}*/
 		else if (msg.getClass().equals(change_user_login.class)) { // changes user logged-in state. 0 is logged-out, 1 is logged-in.
 			change_user_login wrapper = (change_user_login) msg;
 			LoginRegCheck user = wrapper.get_user();

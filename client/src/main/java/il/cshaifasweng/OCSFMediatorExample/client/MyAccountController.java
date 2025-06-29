@@ -25,22 +25,65 @@ import static javafx.geometry.Pos.CENTER;
 
 public class MyAccountController {
 
-    @FXML public Label userIdLbl;
-    @FXML public TextField idNumTxtB;
-    @FXML TextField userChangeTxtB;
-    @FXML TextField emailChangeTxtB;
-    @FXML TextField phoneChangeTxtB;
-    @FXML TextField fNameTxtB;
-    @FXML private Label accountTypeEmptyLbl, passErrorMsgLbl,  newPassLbl, confNewPassLbl,accTypeLbl, usrnmeLbl, emailLbl, phoneNumLbl, changePassLbl, myAccountLbl, fullNameLbl;
-    @FXML private Button myOrdersButton, subscribeBtn, changeBtn,changePassBtn;
-    @FXML private AnchorPane myAccUsers, my_account_data;
-    @FXML private PasswordField newPassTxtB, confNewPassTxtB;
-    @FXML private Label subscriptionExpireLbl, subscriptionExpireTitleLbl;
+    @FXML
+    private Button ChangeBtn;
+    @FXML
+    private Label accTypeLbl;
+    @FXML
+    private Label accountTypeEmptyLbl;
+    @FXML
+    private Button changePassBtn;
+    @FXML
+    private Label changePassLbl;
+    @FXML
+    private Label confNewPassLbl;
+    @FXML
+    private PasswordField confNewPassTxtB;
+    @FXML
+    private TextField emailChangeTxtB;
+    @FXML
+    private Label emailLbl;
+    @FXML
+    private TextField fNameTxtB;
+    @FXML
+    private Label fullNameLbl;
+    @FXML
+    private TextField idNumTxtB;
+    @FXML
+    private AnchorPane myAccUsers;
+    @FXML
+    private Label myAccountLbl;
+    @FXML
+    private Button myOrdersButton;
+    @FXML
+    private AnchorPane my_account_data;
+    @FXML
+    private Label newPassLbl;
+    @FXML
+    private PasswordField newPassTxtB;
+    @FXML
+    private Label passErrorMsgLbl;
+    @FXML
+    private TextField phoneChangeTxtB;
+    @FXML
+    private Label phoneNumLbl;
+    @FXML
+    private Button subscribeBtn;
+    @FXML
+    private Label subscriptionExpireLbl;
+    @FXML
+    private Label subscriptionExpireTitleLbl;
+    @FXML
+    private TextField userChangeTxtB;
+    @FXML
+    private Label userIdLbl;
+    @FXML
+    private Label usrnmeLbl;
 
 
     private static LoginRegCheck current_User;
 
-    private CatalogController catalogController;
+    private static CatalogController catalogController;
 
     static Stage myAccountStage = null;
     public static boolean isMyAccountOpen() {
@@ -76,13 +119,13 @@ public class MyAccountController {
         }
     }
 
-    public void setCatalogController(CatalogController catalogController) {
-        this.catalogController = catalogController;
+    public static void setCatalogController(CatalogController catalogCtrl) {
+        catalogController = catalogCtrl;
     }
 
-    public void setCurrentUser(LoginRegCheck user) {
-        this.current_User = user;
-        loadUserInfo();
+    public static void setCurrentUser(LoginRegCheck user) {
+        current_User = user;
+
     }
 
     @FXML

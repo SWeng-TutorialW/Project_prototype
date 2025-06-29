@@ -328,7 +328,7 @@ public class CatalogController_employee {
     private Text[] price_Before_sale;
     private int type=0 ; //, 1 for store 1 ,2 for store 2 ,3 for store 3 ,
     // 4 for the network
-    private static int sorting_type=-1 ; //, 1 for store 1 ,2 for store 2 ,3 for store 3 ,
+    private int sorting_type=-1 ; //, 1 for store 1 ,2 for store 2 ,3 for store 3 ,
     // 4 for the network ,-1 mean not sorted anything
     private List<Flower> flowersList_sorting;
     public void  set_type(int value)
@@ -341,19 +341,19 @@ public class CatalogController_employee {
             discount.setOnAction(this::request);
         }
     }
-    private static LoginRegCheck user;
-    public static void set_user(LoginRegCheck usr) {
-        user = usr;
+    private LoginRegCheck user;
+    public void set_user(LoginRegCheck user) {
+        this.user = user;
         System.out.println("set_user updated");
         System.out.println("user send?"+user.get_send_complain());
         System.out.println("user recieve?"+user.isReceive_answer());
-        sorting_type= usr.getStore();
+        sorting_type= user.getStore();
     }
     boolean is_login=false;
     public void set_isLogin(boolean is_login) {
         this.is_login = is_login;
     }
-    public static LoginRegCheck getUser() {
+    public LoginRegCheck getUser() {
         return user;
     }
     private ComplainController_employee complainController;

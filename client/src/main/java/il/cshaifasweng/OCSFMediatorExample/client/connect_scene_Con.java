@@ -224,6 +224,7 @@ public class connect_scene_Con  {
                             {
                                 Warning warning = new Warning("this user already in the system");
                                 EventBus.getDefault().post(new WarningEvent(warning));
+                                CatalogController.set_user(null);
                                 return;
                             }
                             user = loginRegCheck;
@@ -248,8 +249,8 @@ public class connect_scene_Con  {
                             System.out.println("the user is mnoy to store "+type_local);
                             SimpleClient.isGuest = false; // Yarden added this
 
-
                         }
+
                         change_user_login wrapper = new change_user_login(user,1);
                         try {
                             SimpleClient.getClient().sendToServer(wrapper);
@@ -275,7 +276,6 @@ public class connect_scene_Con  {
                                         controller.set_user(loginRegCheck);
                                         controller.setCatalogData(event.getUpdatedItems());
                                         employeeController=controller;
-
                                     }
                                     else
                                     {
