@@ -146,7 +146,6 @@ public class MyAccountController {
             subscribeBtn.setVisible(false);
             subscriptionExpireLbl.setVisible(false);
         }
-
         centerHelloAccountLbl();
 
 
