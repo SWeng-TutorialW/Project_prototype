@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #C8A2C8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.delete_controller">
+    <children>
+        <Label alignment="TOP_CENTER" layoutX="2.0" layoutY="14.0" prefHeight="96.0" prefWidth="800.0" text="Flower Details" textAlignment="CENTER" textFill="WHITE">
+            <font>
+                <Font name="Segoe UI Light" size="48.0" />
+            </font>
+        </Label>
+      <Button fx:id="deleteButton" layoutX="290.0" layoutY="378.0" mnemonicParsing="false" onAction="#Delete" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #9B6B9E;" text="Delete Flower" textFill="WHITE">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Button>
+      <HBox alignment="CENTER_LEFT" layoutX="166.0" layoutY="159.0" spacing="20.0">
+         <children>
+            <ImageView fx:id="flowerImage" fitHeight="200.0" fitWidth="200.0" preserveRatio="true" />
+            <VBox spacing="10.0">
+               <children>
+                  <Label fx:id="flowerName" text="Flower Name" textFill="WHITE">
+                     <font>
+                        <Font size="24.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="flowerType" text="Flower Type" textFill="WHITE">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="flowerPrice" text="Price: ₪0.00" textFill="WHITE">
+                     <font>
+                        <Font size="18.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+    </children>
+</AnchorPane>

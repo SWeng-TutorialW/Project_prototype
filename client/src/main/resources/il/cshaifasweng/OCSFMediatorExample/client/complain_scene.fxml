@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="720.0" prefWidth="650.0" style="-fx-background-color: #C8A2C8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.complain_controller">
+   <children>
+      <Label fx:id="head" layoutX="179.0" layoutY="14.0" prefHeight="46.0" prefWidth="291.0" text="Tell Us What Went Wrong" textFill="#ffffffb3">
+         <font>
+            <Font name="Palatino Linotype" size="24.0" />
+         </font>
+      </Label>
+      <TextField fx:id="text_box" alignment="TOP_LEFT" layoutX="63.0" layoutY="382.0" prefHeight="232.0" prefWidth="524.0">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </TextField>
+      <Button fx:id="send" layoutX="256.0" layoutY="648.0" mnemonicParsing="false" onAction="#send_complain" prefHeight="25.0" prefWidth="138.0" style="-fx-background-color: #D8BFD8;" text="Submit Complaint" textFill="WHITE" />
+      <TableView fx:id="ordersTable" layoutX="63.0" layoutY="115.0" prefHeight="161.0" prefWidth="524.0">
+        <columns>
+          <TableColumn fx:id="orderDateColumn" prefWidth="102.40003204345703" text="Order Date" />
+            <TableColumn fx:id="priceColumn" prefWidth="83.99993896484375" text="Price ₪" />
+          <TableColumn fx:id="statusColumn" prefWidth="81.60003662109375" text="Order Status" />
+            <TableColumn fx:id="deliveryColumn" prefWidth="52.79998779296875" text="Delivery" />
+            <TableColumn fx:id="itemsColumn" prefWidth="202.39999389648438" text="Items" />
+        </columns>
+      </TableView>
+      <Label layoutX="63.0" layoutY="74.0" text="Please choose relevant order" textFill="#ffffffb2">
+         <font>
+            <Font name="Palatino Linotype" size="20.0" />
+         </font>
+      </Label>
+      <Label layoutX="63.0" layoutY="343.0" text="Add here more information " textFill="#ffffffb3">
+         <font>
+            <Font name="Palatino Linotype" size="20.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>

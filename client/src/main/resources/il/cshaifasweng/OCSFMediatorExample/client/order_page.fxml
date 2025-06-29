@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #C8A2C8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.OrderPageController">
+    <children>
+        <Label alignment="TOP_CENTER" layoutX="2.0" layoutY="14.0" prefHeight="96.0" prefWidth="800.0" text="Order Details" textAlignment="CENTER" textFill="WHITE">
+            <font>
+                <Font name="Segoe UI Light" size="48.0" />
+            </font>
+        </Label>
+
+        <VBox alignment="CENTER" layoutX="50.0" layoutY="150.0" prefHeight="400.0" prefWidth="700.0" spacing="20.0">
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+            </padding>
+
+            <HBox alignment="CENTER_LEFT" spacing="20.0">
+                <ImageView fx:id="flowerImage" fitHeight="200.0" fitWidth="200.0" preserveRatio="true" />
+                <VBox spacing="10.0">
+                    <Label fx:id="flowerName" text="Flower Name" textFill="WHITE">
+                        <font>
+                            <Font size="24.0" />
+                        </font>
+                    </Label>
+                    <Label fx:id="storeName" text="Store Name" textFill="WHITE">
+                        <font>
+                            <Font size="18.0" />
+                        </font>
+                    </Label>
+                    <Label fx:id="flowerType" text="Flower Type" textFill="WHITE">
+                        <font>
+                            <Font size="18.0" />
+                        </font>
+                    </Label>
+                    <Label fx:id="flowerColor" text="Color" textFill="WHITE">
+                        <font>
+                            <Font size="18.0" />
+                        </font>
+                    </Label>
+                    <Label fx:id="flowerCategory" text="Category" textFill="WHITE">
+                        <font>
+                            <Font size="18.0" />
+                        </font>
+                    </Label>
+                    <Label fx:id="flowerPrice" text="Price: ₪0.00" textFill="WHITE">
+                        <font>
+                            <Font size="18.0" />
+                        </font>
+                    </Label>
+                </VBox>
+            </HBox>
+
+            <HBox alignment="CENTER_LEFT" spacing="20.0">
+                <Label text="Quantity:" textFill="WHITE">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                </Label>
+                <Spinner fx:id="quantitySpinner" initialValue="1" max="99" min="1" prefWidth="100.0" />
+            </HBox>
+
+            <Label fx:id="totalPrice" text="Total: ₪0.00" textFill="WHITE">
+                <font>
+                    <Font size="24.0" />
+                </font>
+            </Label>
+
+            <HBox alignment="CENTER" spacing="20.0">
+                <Button fx:id="addToCartButton" mnemonicParsing="false" onAction="#addToCart" prefHeight="40.0" prefWidth="200.0" style="-fx-background-color: #9B6B9E;" text="Add to Cart" textFill="WHITE">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                </Button>
+            </HBox>
+        </VBox>
+    </children>
+</AnchorPane>
