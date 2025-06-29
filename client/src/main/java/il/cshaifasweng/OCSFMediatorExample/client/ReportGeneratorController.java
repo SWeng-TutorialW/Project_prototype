@@ -107,7 +107,18 @@ public class ReportGeneratorController {
     private String topProduct = "N/A";
     
     private ToggleGroup reportTypeGroup;
-    
+
+    // Track order fetching state
+    private List<Order> allOrders = new ArrayList<>();
+    private List<LoginRegCheck> allUsers = new ArrayList<>();
+    private int pendingOrderRequests = 0;
+
+    //TODO delete this functoin
+    @Subscribe
+    public void handleDummy(Object event) {
+        // No-op, placeholder for EventBus
+    }
+
     @FXML
     void initialize() {
         if (EventBus.getDefault().isRegistered(this)) {
@@ -119,7 +130,6 @@ public class ReportGeneratorController {
         setupDatePickers();
         setupReportTypeGroup();
         setupCharts();
-        loadSampleData();
         updateQuickRangeButton();
     }
     
@@ -174,27 +184,6 @@ public class ReportGeneratorController {
         ChartUtils.setupProductChart(productChart);
     }
     
-    private void loadSampleData() {
-        // Generate sample data using ChartUtils
-        LocalDate startDate = startDatePicker.getValue() != null ? startDatePicker.getValue() : LocalDate.now().withDayOfMonth(1);
-        LocalDate endDate = endDatePicker.getValue() != null ? endDatePicker.getValue() : LocalDate.now();
-        
-        revenueData = ChartUtils.generateSampleRevenueData(startDate, endDate);
-        productData = ChartUtils.generateSampleProductData();
-        customerData = ChartUtils.generateCustomerData();
-        complaintData = ChartUtils.generateComplaintData();
-        branchData = ChartUtils.generateBranchData();
-        
-        // Calculate summary statistics
-        totalOrders = 45;
-        totalRevenue = revenueData.values().stream().mapToDouble(Double::doubleValue).sum();
-        avgOrderValue = totalRevenue / totalOrders;
-        topProduct = productData.entrySet().stream()
-                .max(Map.Entry.comparingByValue())
-                .map(Map.Entry::getKey)
-                .orElse("N/A");
-    }
-    
     private void updateQuickRangeButton() {
         LocalDate now = LocalDate.now();
         LocalDate monthStart = now.withDayOfMonth(1);
@@ -212,30 +201,19 @@ public class ReportGeneratorController {
             showAlert("Please select both start and end dates.");
             return;
         }
-        
-        // Show loading indicator
+        System.out.println("[ReportGenerator] Generating report: requesting user list...");
         generateReportBtn.setText("Generating...");
         generateReportBtn.setDisable(true);
-        
-        // Simulate data loading (replace with actual data fetching)
-        Platform.runLater(() -> {
-            try {
-                Thread.sleep(1000); // Simulate processing time
-                
-                // Reload data with new date range
-                loadSampleData();
-                updateChartsForReportType();
-                updateSummaryStatistics();
-                
-                generateReportBtn.setText("Generate Report");
-                generateReportBtn.setDisable(false);
-                
-                showAlert("Report generated successfully!");
-                
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
+        // Fetch all users first
+        try {
+            SimpleClient.getClient().sendToServer("asks_for_users");
+            SimpleClient.getClient().sendToServer("getComplaints");
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error fetching data: " + e.getMessage());
+            generateReportBtn.setText("Generate Report");
+            generateReportBtn.setDisable(false);
+        }
     }
     
     @FXML
@@ -398,9 +376,7 @@ public class ReportGeneratorController {
     
     @FXML
     void refreshData(ActionEvent event) {
-        loadSampleData();
-        updateChartsForReportType();
-        updateSummaryStatistics();
+        generateReport(null); // Just re-fetch real data
         showAlert("Data refreshed successfully!");
     }
     
@@ -471,5 +447,156 @@ public class ReportGeneratorController {
     public String getSelectedReportType() {
         RadioButton selected = (RadioButton) reportTypeGroup.getSelectedToggle();
         return selected != null ? selected.getText() : "Orders Summary";
+    }
+
+    // Add EventBus handlers for real data
+    @Subscribe
+    public void handleUsersList(List<LoginRegCheck> users) {
+        System.out.println("[ReportGenerator] Received user list of size: " + users.size());
+        allUsers.clear();
+        allUsers.addAll(users);
+        allOrders.clear();
+        pendingOrderRequests = users.size();
+        if (pendingOrderRequests == 0) {
+            System.out.println("[ReportGenerator] No users found, skipping order fetch.");
+            processOrders(allOrders);
+            return;
+        }
+        for (LoginRegCheck user : users) {
+            System.out.println("[ReportGenerator] Requesting orders for user: " + user.getUsername());
+            try {
+                SimpleClient.getClient().sendToServer("getOrdersForUser_" + user.getUsername());
+            } catch (IOException e) {
+                e.printStackTrace();
+                pendingOrderRequests--;
+            }
+        }
+    }
+
+    @Subscribe
+    public void handleUserOrdersResponse(Object response) {
+        if (response instanceof List<?>) {
+            List<?> orders = (List<?>) response;
+            if (!orders.isEmpty() && orders.get(0) instanceof Order) {
+                @SuppressWarnings("unchecked")
+                List<Order> userOrders = (List<Order>) orders;
+                System.out.println("[ReportGenerator] Received " + userOrders.size() + " orders for a user.");
+                allOrders.addAll(userOrders);
+            } else {
+                System.out.println("[ReportGenerator] Received empty order list for a user.");
+            }
+        } else if (response instanceof String) {
+            String responseStr = (String) response;
+            System.out.println("[ReportGenerator] Received order response string: " + responseStr);
+        }
+        pendingOrderRequests--;
+        if (pendingOrderRequests == 0) {
+            System.out.println("[ReportGenerator] All user orders received. Total orders: " + allOrders.size());
+            processOrders(allOrders);
+        }
+    }
+
+    @Subscribe
+    public void handleComplaintsResponse(List<Complain> complaints) {
+        System.out.println("[ReportGenerator] Received List<Complain> with size: " + complaints.size());
+        processComplaints(complaints);
+    }
+
+    @Subscribe
+    public void handleComplainUpdateEvent(ComplainUpdateEvent event) {
+        System.out.println("[ReportGenerator] Received ComplainUpdateEvent with size: " + (event.getUpdatedItems() != null ? event.getUpdatedItems().size() : 0));
+        processComplaints(event.getUpdatedItems());
+    }
+
+    @Subscribe
+    public void handleAnyEvent(Object event) {
+        System.out.println("[ReportGenerator] Received unknown event: " + event.getClass().getName());
+        // Optionally, print the event or handle fallback
+    }
+
+    // Listen for order updates from server
+    @Subscribe
+    public void handleOrderUpdate(String message) {
+        if ("update_catalog_after_change".equals(message)) {
+            System.out.println("[ReportGenerator] Received order update notification, refreshing data...");
+            // Automatically refresh data when new orders are created
+            Platform.runLater(() -> {
+                if (startDatePicker.getValue() != null && endDatePicker.getValue() != null) {
+                    generateReport(null);
+                }
+            });
+        }
+    }
+
+    private void processOrders(List<Order> orders) {
+        // If there are orders, set the default date range to the earliest and latest order dates
+        if (!orders.isEmpty()) {
+            LocalDate earliest = orders.stream()
+                .map(order -> order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate())
+                .min(LocalDate::compareTo).orElse(startDatePicker.getValue());
+            LocalDate latest = orders.stream()
+                .map(order -> order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate())
+                .max(LocalDate::compareTo).orElse(endDatePicker.getValue());
+            if (startDatePicker.getValue() == null || endDatePicker.getValue() == null ||
+                startDatePicker.getValue().isAfter(latest) || endDatePicker.getValue().isBefore(earliest)) {
+                startDatePicker.setValue(earliest);
+                endDatePicker.setValue(latest);
+            }
+        }
+        // Filter by date range
+        LocalDate start = startDatePicker.getValue();
+        LocalDate end = endDatePicker.getValue();
+        revenueData.clear();
+        productData.clear();
+        customerData.clear();
+        Set<String> customers = new HashSet<>();
+        totalOrders = 0;
+        totalRevenue = 0.0;
+        for (Order order : orders) {
+            LocalDate orderDate = order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+            if ((orderDate.isEqual(start) || orderDate.isAfter(start)) && (orderDate.isEqual(end) || orderDate.isBefore(end))) {
+                String dateStr = orderDate.toString();
+                revenueData.put(dateStr, revenueData.getOrDefault(dateStr, 0.0) + order.getTotalAmount());
+                totalRevenue += order.getTotalAmount();
+                totalOrders++;
+                for (CartItem item : order.getItems()) {
+                    String productName = item.getFlower().getFlowerName();
+                    productData.put(productName, productData.getOrDefault(productName, 0) + item.getQuantity());
+                }
+                customers.add(order.getCustomerEmail());
+            }
+        }
+        avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0.0;
+        topProduct = productData.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse("N/A");
+        customerData.put("Unique Customers", customers.size());
+        Platform.runLater(() -> {
+            updateChartsForReportType();
+            updateSummaryStatistics();
+            generateReportBtn.setText("Generate Report");
+            generateReportBtn.setDisable(false);
+        });
+    }
+
+    private void processComplaints(List<Complain> complaints) {
+        complaintData.clear();
+        for (Complain c : complaints) {
+            String type = categorizeComplaint(c.getComplaint());
+            complaintData.put(type, complaintData.getOrDefault(type, 0) + 1);
+        }
+        Platform.runLater(() -> {
+            updateChartsForReportType();
+            updateSummaryStatistics();
+        });
+    }
+
+    private String categorizeComplaint(String complaintText) {
+        if (complaintText == null) return "Other";
+        String lower = complaintText.toLowerCase();
+        if (lower.contains("delivery")) return "Delivery Issues";
+        if (lower.contains("refund")) return "Refunds";
+        if (lower.contains("quality")) return "Quality Issues";
+        if (lower.contains("wrong")) return "Wrong Items";
+        if (lower.contains("service")) return "Customer Service";
+        return "Other";
     }
 } 

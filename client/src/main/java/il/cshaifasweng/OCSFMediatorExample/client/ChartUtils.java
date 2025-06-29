@@ -43,42 +43,6 @@ public class ChartUtils {
         chart.setStyle("-fx-background-color: white; -fx-border-color: #C8A2C8; -fx-border-width: 1;");
     }
     
-    public static Map<String, Double> generateSampleRevenueData(LocalDate startDate, LocalDate endDate) {
-        Map<String, Double> revenueData = new HashMap<>();
-        LocalDate currentDate = startDate;
-        
-        while (!currentDate.isAfter(endDate)) {
-            String dateStr = currentDate.format(DateTimeFormatter.ofPattern("MM/dd"));
-            
-            // Generate realistic revenue data with some variation
-            double baseRevenue = 1500.0;
-            double variation = Math.sin(currentDate.getDayOfYear() * 0.1) * 500; // Seasonal variation
-            double randomFactor = (Math.random() - 0.5) * 300; // Random variation
-            double revenue = Math.max(500, baseRevenue + variation + randomFactor); // Minimum $500
-            
-            revenueData.put(dateStr, revenue);
-            currentDate = currentDate.plusDays(1);
-        }
-        
-        return revenueData;
-    }
-    
-    public static Map<String, Integer> generateSampleProductData() {
-        Map<String, Integer> productData = new HashMap<>();
-        
-        // Sample flower products with realistic sales numbers
-        productData.put("Roses", 150 + (int)(Math.random() * 50));
-        productData.put("Tulips", 120 + (int)(Math.random() * 40));
-        productData.put("Lilies", 90 + (int)(Math.random() * 30));
-        productData.put("Orchids", 80 + (int)(Math.random() * 25));
-        productData.put("Sunflowers", 60 + (int)(Math.random() * 20));
-        productData.put("Daffodils", 70 + (int)(Math.random() * 25));
-        productData.put("Hyacinths", 50 + (int)(Math.random() * 20));
-        productData.put("Carnations", 100 + (int)(Math.random() * 30));
-        
-        return productData;
-    }
-    
     public static void updateRevenueChart(LineChart<String, Number> chart, Map<String, Double> revenueData) {
         chart.getData().clear();
         
@@ -109,20 +73,31 @@ public class ChartUtils {
     
     public static void updateProductChart(PieChart chart, Map<String, Integer> productData) {
         chart.getData().clear();
-        
+
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
-        
-        int colorIndex = 0;
+
         for (Map.Entry<String, Integer> entry : productData.entrySet()) {
             PieChart.Data data = new PieChart.Data(entry.getKey(), entry.getValue());
             pieChartData.add(data);
-            
-            // Apply custom colors
-            data.getNode().setStyle("-fx-pie-color: " + toHexString(CHART_COLORS[colorIndex % CHART_COLORS.length]) + ";");
+        }
+
+        chart.setData(pieChartData);
+
+        // Now apply custom colors after nodes are created
+        int colorIndex = 0;
+        for (PieChart.Data data : chart.getData()) {
+            final int idx = colorIndex;
+            data.nodeProperty().addListener((obs, oldNode, newNode) -> {
+                if (newNode != null) {
+                    newNode.setStyle("-fx-pie-color: " + toHexString(CHART_COLORS[idx % CHART_COLORS.length]) + ";");
+                }
+            });
+            // If node already exists (sometimes it does), style it immediately
+            if (data.getNode() != null) {
+                data.getNode().setStyle("-fx-pie-color: " + toHexString(CHART_COLORS[colorIndex % CHART_COLORS.length]) + ";");
+            }
             colorIndex++;
         }
-        
-        chart.setData(pieChartData);
     }
     
     public static Map<String, Integer> generateCustomerData() {
