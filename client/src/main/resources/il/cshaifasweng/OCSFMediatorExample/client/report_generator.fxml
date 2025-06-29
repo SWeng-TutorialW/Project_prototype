@@ -29,15 +29,6 @@
                </opaqueInsets>
             </Label>
             
-            <!-- Back Button -->
-            <Button fx:id="backBtn" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="1050.0" layoutY="1.0" 
-                    mnemonicParsing="false" onAction="#goBack" prefHeight="41.0" prefWidth="142.0" 
-                    style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="← Back" textFill="#fdfdfd">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Button>
-            
             <!-- Date Range Section -->
             <VBox layoutX="20.0" layoutY="80.0" prefHeight="120.0" prefWidth="1160.0" 
                   style="-fx-background-color: #f8f9fa; -fx-border-color: #C8A2C8; -fx-border-width: 2; -fx-border-radius: 10;">
@@ -61,6 +52,13 @@
                               <Label text="End Date:" style="-fx-font-weight: bold; -fx-text-fill: #C8A2C8;" />
                               <DatePicker fx:id="endDatePicker" promptText="Select end date" 
                                          style="-fx-font-size: 14;" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="5" fx:id="storeSelectionContainer" visible="false">
+                           <children>
+                              <Label text="Store:" style="-fx-font-weight: bold; -fx-text-fill: #C8A2C8;" />
+                              <ComboBox fx:id="storeComboBox" promptText="Select store" 
+                                       style="-fx-font-size: 14;" />
                            </children>
                         </VBox>
                         <Button fx:id="generateReportBtn" mnemonicParsing="false" onAction="#generateReport" 
@@ -98,14 +96,10 @@
                      <children>
                         <RadioButton fx:id="ordersReport" mnemonicParsing="false" selected="true" 
                                      style="-fx-font-size: 14; -fx-text-fill: #C8A2C8;" text="📦 Orders Summary" />
-                        <RadioButton fx:id="revenueReport" mnemonicParsing="false" 
-                                     style="-fx-font-size: 14; -fx-text-fill: #C8A2C8;" text="💰 Revenue Analysis" />
-                        <RadioButton fx:id="productsReport" mnemonicParsing="false" 
-                                     style="-fx-font-size: 14; -fx-text-fill: #C8A2C8;" text="🌹 Popular Products" />
                         <RadioButton fx:id="customersReport" mnemonicParsing="false" 
                                      style="-fx-font-size: 14; -fx-text-fill: #C8A2C8;" text="👥 Customer Analysis" />
                         <RadioButton fx:id="complaintsReport" mnemonicParsing="false" 
-                                     style="-fx-font-size: 14; -fx-text-fill: #C8A2C8;" text="⚠️ Complaints and Refunds" />
+                                     style="-fx-font-size: 14; -fx-text-fill: #C8A2C8;" text="Complaints and Refunds" />
                      </children>
                      <padding>
                         <Insets bottom="15" />
@@ -190,25 +184,31 @@
                      <children>
                         <VBox alignment="CENTER" spacing="5">
                            <children>
-                              <Label text="Total Orders" style="-fx-font-size: 12; -fx-text-fill: #666;" />
+                              <Label fx:id="totalOrdersLabel" text="Total Orders" style="-fx-font-size: 12; -fx-text-fill: #666;" />
                               <Label fx:id="totalOrdersLbl" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #C8A2C8;" />
                            </children>
                         </VBox>
                         <VBox alignment="CENTER" spacing="5">
                            <children>
-                              <Label text="Total Revenue" style="-fx-font-size: 12; -fx-text-fill: #666;" />
+                              <Label fx:id="totalRevenueLabel" text="Total Revenue" style="-fx-font-size: 12; -fx-text-fill: #666;" />
                               <Label fx:id="totalRevenueLbl" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #28a745;" />
                            </children>
                         </VBox>
                         <VBox alignment="CENTER" spacing="5">
                            <children>
-                              <Label text="Average Order Value" style="-fx-font-size: 12; -fx-text-fill: #666;" />
+                              <Label text="Total Refunds" style="-fx-font-size: 12; -fx-text-fill: #666;" />
+                              <Label fx:id="totalRefundsLbl" text="'$' 0.00" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #dc3545;" />
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="5">
+                           <children>
+                              <Label fx:id="avgOrderLabel" text="Average Order Value" style="-fx-font-size: 12; -fx-text-fill: #666;" />
                               <Label fx:id="avgOrderLbl" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #ffc107;" />
                            </children>
                         </VBox>
                         <VBox alignment="CENTER" spacing="5">
                            <children>
-                              <Label text="Top Product" style="-fx-font-size: 12; -fx-text-fill: #666;" />
+                              <Label fx:id="topProductLabel" text="Top Product" style="-fx-font-size: 12; -fx-text-fill: #666;" />
                               <Label fx:id="topProductLbl" text="N/A" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #dc3545;" />
                            </children>
                         </VBox>
@@ -225,7 +225,7 @@
                <children>
                   <Button fx:id="exportPdfBtn" mnemonicParsing="false" onAction="#exportToPDF" 
                           prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: #dc3545; -fx-text-fill: white;" 
-                          text="📄 Export PDF">
+                          text="📄 Export Report">
                      <font>
                         <Font size="16.0" />
                      </font>
@@ -233,13 +233,6 @@
                   <Button fx:id="exportCsvBtn" mnemonicParsing="false" onAction="#exportToCSV" 
                           prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: #17a2b8; -fx-text-fill: white;" 
                           text="📊 Export CSV">
-                     <font>
-                        <Font size="16.0" />
-                     </font>
-                  </Button>
-                  <Button fx:id="emailReportBtn" mnemonicParsing="false" onAction="#emailReport" 
-                          prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: #6f42c1; -fx-text-fill: white;" 
-                          text="📧 Email Report">
                      <font>
                         <Font size="16.0" />
                      </font>

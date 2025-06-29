@@ -2,6 +2,8 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import java.io.IOException;
 
@@ -128,25 +130,6 @@ public class CatalogController_employee {
     @FXML
     private Label name_9;
 
-    @FXML
-    private Button nine_9;
-
-    @FXML
-    private Button one_1;
-    @FXML
-    private Button eleven_11;
-    @FXML
-    private VBox flower_10;
-
-    @FXML
-    private VBox flower_11;
-
-    @FXML
-    private VBox flower_12;
-    @FXML
-    private Button ten_10;
-    @FXML
-    private Button twelve_12;
     @FXML
     private Label name_10;
 
@@ -356,6 +339,17 @@ public class CatalogController_employee {
             discount.setText("Send request to the admin");
             discount.setPrefWidth(240);
             discount.setOnAction(this::request);
+            // Show request button for regular employees
+            if (request_btn != null) {
+                request_btn.setVisible(true);
+                request_btn.setManaged(true);
+            }
+        } else {
+            // Hide request button for admin users
+            if (request_btn != null) {
+                request_btn.setVisible(false);
+                request_btn.setManaged(false);
+            }
         }
     }
     private LoginRegCheck user;
@@ -367,6 +361,13 @@ public class CatalogController_employee {
 
         // Set default store filter based on user's store
         setDefaultStoreFilter();
+        
+        // Update mailbox icon when user is updated
+        Platform.runLater(this::updateMailboxIcon);
+    }
+
+    public LoginRegCheck getUser() {
+        return user;
     }
 
     private void setDefaultStoreFilter() {
@@ -424,9 +425,6 @@ public class CatalogController_employee {
     public void set_isLogin(boolean is_login) {
         this.is_login = is_login;
     }
-    public LoginRegCheck getUser() {
-        return user;
-    }
     private ComplainController_employee complainController;
     public void setCatalogController(ComplainController_employee controller) {
         this.complainController = controller;
@@ -451,51 +449,62 @@ public class CatalogController_employee {
 
     @FXML
     void initialize() {
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-            System.out.println("CatalogController_employee registered");
-        } else {
-            System.out.println("CatalogController_employee already registered");
-        }
-        System.out.println("CatalogController employee initialized");
-
-        Stores.getItems().addAll("Haifa", "Krayot","Nahariyya","network");
-
-        nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12 };
-        typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12 };
-        priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
-        imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12 };
-        price_Before_sale = new Text[] { price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale };
-        Stage stage = App.getStage();
-        stage.setOnCloseRequest(event1 -> {
+        EventBus.getDefault().register(this);
+        
+        // Initialize mailbox icon after FXML injection is complete
+        Platform.runLater(this::updateMailboxIcon);
+        
+        // Refresh user state from server
+        refreshUserState();
+        
+        // Set up store selection
+        Stores.getItems().addAll("Haifa", "Krayot", "Nahariyya", "network");
+        Stores.setValue("network"); // Default to network view
+        
+        // Initialize arrays for flower display
+        nameLabels = new Label[]{name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12};
+        typeLabels = new Label[]{type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12};
+        priceFields = new TextField[]{price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12};
+        imageViews = new ImageView[]{pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12};
+        price_Before_sale = new Text[]{price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale};
+        
+        // Set up cart button
+        cart.setOnAction(e -> {
             try {
-                if (user != null) {
-                    user.setIsLogin(0);
-                    change_user_login tt = new change_user_login(user,0);
-                    System.out.println("the user is " + user.getUsername()+"logged out");
-                    SimpleClient.getClient().sendToServer(tt);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                open_complain_box(e);
+            } catch (IOException ex) {
+                ex.printStackTrace();
             }
         });
-
-        // Add this at the end of initialize method
-        // Use Platform.runLater to ensure FXML injection is complete
-        Platform.runLater(() -> {
-            updateMailboxIcon();
-        });
+        
+        // Hide request button for admin users (type 4)
+        if (user != null && user.getStore() == 4) {
+            request_btn.setVisible(false);
+        }
     }
 
     public void updateMailboxIcon() {
+        System.out.println("[CatalogController_employee] updateMailboxIcon called");
+        System.out.println("[CatalogController_employee] mailbox_icon is null: " + (mailbox_icon == null));
+        System.out.println("[CatalogController_employee] user is null: " + (user == null));
+        
         // Check if mailbox_icon is null (FXML injection not complete yet)
         if (mailbox_icon == null) {
+            System.out.println("[CatalogController_employee] mailbox_icon is null, returning");
             return;
         }
 
-        if (user != null && user.isReceive_answer()) {
-            mailbox_icon.setVisible(true);
+        if (user != null) {
+            System.out.println("[CatalogController_employee] User: " + user.getUsername() + ", isReceive_answer: " + user.isReceive_answer());
+            if (user.isReceive_answer()) {
+                System.out.println("[CatalogController_employee] Setting mailbox icon visible for user: " + user.getUsername());
+                mailbox_icon.setVisible(true);
+            } else {
+                System.out.println("[CatalogController_employee] Setting mailbox icon invisible for user: " + user.getUsername());
+                mailbox_icon.setVisible(false);
+            }
         } else {
+            System.out.println("[CatalogController_employee] User is null, setting mailbox icon invisible");
             mailbox_icon.setVisible(false);
         }
     }
@@ -701,14 +710,11 @@ public class CatalogController_employee {
         if(event.get_flowers()==null)
         {
             System.out.println("the user is " + user.getUsername());
-            if(type!=4)
+            System.out.println("the user that came from the event " +event.getUser().getUsername());
+            if(user.getUsername().equals(event.getUser().getUsername()))
             {
-                System.out.println("the user that came from the event " +event.getUser().getUsername());
-                if(user.getUsername().equals(event.getUser().getUsername()))
-                {
-                    set_user(event.getUser());
-                    return;
-                }
+                set_user(event.getUser());
+                return;
             }
             return;
         }
@@ -1339,12 +1345,20 @@ public class CatalogController_employee {
             Parent root = fxmlLoader.load();
 
             ReportGeneratorController controller = fxmlLoader.getController();
+            // Pass the current user to prevent session loss
+            controller.setCurrentUser(user);
 
             Stage stage = new Stage();
             stage.setTitle("Report Generator");
             stage.setScene(new Scene(root));
             stage.setWidth(1200);
             stage.setHeight(900);
+            
+            // Set up cleanup when window is closed
+            stage.setOnCloseRequest(e -> {
+                controller.cleanup();
+            });
+            
             stage.show();
 
         } catch (IOException e) {
@@ -1824,32 +1838,101 @@ public class CatalogController_employee {
         this.currentSortOption = sortOption;
     }
     @Subscribe
-    public void handleUserUpdate(Add_flower_event event) {
-        if (event.getUser() != null && user != null &&
-            event.getUser().getUsername().equals(user.getUsername())) {
-
-            // Update the user object with new data from server
-            this.user = event.getUser();
-
-            // Check if this is a new message notification
-            if (user.isReceive_answer()) {
-                // Show warning notification for new message
-                Platform.runLater(() -> {
-                    Warning warning = new Warning("You have a new message from the admin!");
-                    EventBus.getDefault().post(new WarningEvent(warning));
-                });
-            }
-
-            // Update the mailbox icon
-            Platform.runLater(() -> {
-                updateMailboxIcon();
-            });
+    public void handleUserUpdate(UpdateUserEvent event) {
+        System.out.println("[CatalogController_employee] Received user update event");
+        if (event.getUpdatedUser() != null && event.getUpdatedUser().getUsername().equals(user.getUsername())) {
+            // Update the local user object
+            this.user = event.getUpdatedUser();
+            // Update mailbox icon
+            Platform.runLater(this::updateMailboxIcon);
         }
     }
 
     // Add this method to be called after FXML injection is complete
     public void initializeMailboxIcon() {
         updateMailboxIcon();
+    }
+
+    // Add flag to prevent infinite loops
+    private boolean isRefreshingUserState = false;
+    
+    // Add method to refresh user state from server
+    private void refreshUserState() {
+        if (user != null && !isRefreshingUserState) {
+            try {
+                isRefreshingUserState = true;
+                System.out.println("[CatalogController_employee] Refreshing user state for: " + user.getUsername());
+                SimpleClient.getClient().sendToServer("getUserDetails_" + user.getUsername());
+                
+                // Don't send getComplaints here to avoid infinite loop
+                // The complaint update event already contains the updated complaints
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                // Reset flag after a short delay to allow the response to be processed
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(1000); // Wait 1 second
+                        isRefreshingUserState = false;
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }).start();
+            }
+        }
+    }
+
+    // Add EventBus handler for GetUserDetails response
+    @Subscribe
+    public void handleGetUserDetails(GetUserDetails userDetails) {
+        System.out.println("[CatalogController_employee] Received GetUserDetails response");
+        if (userDetails.getUser() != null && userDetails.getUser().getUsername().equals(user.getUsername())) {
+            // Update the local user object with fresh data from server
+            this.user = userDetails.getUser();
+            // Update mailbox icon
+            Platform.runLater(this::updateMailboxIcon);
+            System.out.println("[CatalogController_employee] Updated user state from server: " + user.getUsername() + ", isReceive_answer: " + user.isReceive_answer());
+        }
+    }
+
+    // Add EventBus handler for complaint updates to refresh mailbox icon
+    @Subscribe
+    public void handleComplaintUpdate(ComplainUpdateEvent event) {
+        System.out.println("[CatalogController_employee] Received complaint update event");
+        // Only refresh user state if we're not already refreshing and if the user might have new messages
+        if (!isRefreshingUserState && user != null) {
+            // Check if this user has any unread messages in the complaints
+            List<Complain> complaints = event.getUpdatedItems();
+            if (complaints != null) {
+                boolean hasUnreadMessages = complaints.stream()
+                    .anyMatch(c -> c.getClient().equals(user.getUsername()) && c.getComplaint().startsWith("answer to"));
+                
+                if (hasUnreadMessages && !user.isReceive_answer()) {
+                    // User has unread messages but flag is not set, refresh user state
+                    Platform.runLater(this::refreshUserState);
+                } else if (!hasUnreadMessages && user.isReceive_answer()) {
+                    // User has no unread messages but flag is set, refresh user state
+                    Platform.runLater(this::refreshUserState);
+                }
+            }
+        }
+    }
+
+     // TODO check can cause infinite loop
+    @Subscribe
+    public void handleComplaintsList(List<Complain> complaints) {
+        System.out.println("[CatalogController_employee] Received complaints list with " + (complaints != null ? complaints.size() : 0) + " complaints");
+        if (user != null && complaints != null) {
+            boolean hasUnreadMessages = complaints.stream()
+                .anyMatch(c -> c.getClient().equals(user.getUsername()) && c.getComplaint().startsWith("answer to"));
+            
+            // Update user's receive_answer flag based on actual complaints
+            if (hasUnreadMessages != user.isReceive_answer()) {
+                user.set_receive_answer(hasUnreadMessages);
+                Platform.runLater(this::updateMailboxIcon);
+                System.out.println("[CatalogController_employee] Updated mailbox icon based on complaints: " + hasUnreadMessages);
+            }
+        }
     }
 
 }

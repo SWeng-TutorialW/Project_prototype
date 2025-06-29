@@ -24,7 +24,7 @@ public class ChartUtils {
     
     public static void setupRevenueChart(LineChart<String, Number> chart, CategoryAxis xAxis, NumberAxis yAxis) {
         chart.setTitle("Revenue Trend");
-        chart.setLegendVisible(true);
+        chart.setLegendVisible(false);
         chart.setAnimated(true);
         
         xAxis.setLabel("Date");
@@ -36,7 +36,7 @@ public class ChartUtils {
     
     public static void setupProductChart(PieChart chart) {
         chart.setTitle("Product Distribution");
-        chart.setLegendVisible(true);
+        chart.setLegendVisible(false);
         chart.setAnimated(true);
         
         // Style the chart

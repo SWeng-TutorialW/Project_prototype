@@ -57,27 +57,21 @@ public class SimpleClient extends AbstractClient {
 			if (!list.isEmpty()) {
 				Object firstElement = list.get(0);
 				if (firstElement instanceof LoginRegCheck) {
-					// This is a list of users
-					@SuppressWarnings("unchecked")
-					List<LoginRegCheck> users = (List<LoginRegCheck>) list;
-					EventBus.getDefault().post(users);
-				} else if (firstElement instanceof Order) {
-					// This is a list of orders
-					@SuppressWarnings("unchecked")
-					List<Order> orders = (List<Order>) list;
-					EventBus.getDefault().post(orders);
+					// This is a list of users - post it for registration/login scenes
+					EventBus.getDefault().post(msg);
 				} else if (firstElement instanceof Complain) {
-					// This is a list of complaints
-					@SuppressWarnings("unchecked")
-					List<Complain> complaints = (List<Complain>) list;
-					EventBus.getDefault().post(complaints);
+					// This is a list of complaints - post it for complaint handlers
+					EventBus.getDefault().post(msg);
+				} else if (firstElement instanceof Order) {
+					// This is a list of orders - post it for order handlers
+					EventBus.getDefault().post(msg);
 				} else {
-					// Unknown list type, post as generic list
-					EventBus.getDefault().post(list);
+					// Unknown list type - log it but don't post to avoid errors
+					System.out.println("Unknown list type received: " + firstElement.getClass().getName());
 				}
 			} else {
-				// Empty list, post as is
-				EventBus.getDefault().post(list);
+				// Empty list - post it (could be empty orders, complaints, etc.)
+				EventBus.getDefault().post(msg);
 			}
 		}
 		else if(msg.getClass().equals(ComplainUpdateEvent.class)){
@@ -171,6 +165,9 @@ public class SimpleClient extends AbstractClient {
 		}
 		else if(msgString.equals("order_success")) {
 			EventBus.getDefault().post("order_success");
+		}
+		else if(msgString.equals("update_mailbox_icon")) {
+			EventBus.getDefault().post("update_mailbox_icon");
 		}
 		// Handle flower addition responses
 		else if(msgString.startsWith("Flower '") && msgString.contains("' added to store successfully")) {

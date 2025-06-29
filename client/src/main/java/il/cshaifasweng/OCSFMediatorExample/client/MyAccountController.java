@@ -56,6 +56,8 @@ public class MyAccountController {
     @FXML
     private Button myOrdersButton;
     @FXML
+    private Button myComplaintsButton;
+    @FXML
     private AnchorPane my_account_data;
     @FXML
     private Label newPassLbl;
@@ -141,6 +143,7 @@ public class MyAccountController {
         if(current_User.isType()) // an employee
         {
             myOrdersButton.setDisable(true);
+            myComplaintsButton.setDisable(true);
             subscribeBtn.setDisable(true);
         }
         myAccountLbl.setText("My Account - Hello " + current_User.getFullName());
@@ -174,6 +177,28 @@ public class MyAccountController {
             stage.show();
 
             // ((Stage) myOrdersButton.getScene().getWindow()).close(); // <-- Remove this line to keep My Account open
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleMyComplaintsButton() {
+        if (current_User == null) {
+            System.out.println("No user logged in");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("my_complaints.fxml"));
+            Parent root = loader.load();
+            MyComplaintsController controller = loader.getController();
+            controller.setCurrentUser(current_User);
+
+            Stage stage = new Stage();
+            stage.setTitle("My Complaints");
+            stage.setScene(new Scene(root));
+            stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -28,18 +28,22 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                     <children>
                         <Button fx:id="myOrdersButton" onAction="#handleMyOrdersButton" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white;" text="My Orders" textAlignment="CENTER">
                             <font><Font name="Segoe UI" size="14.0" /></font>
                         </Button>
-                        <Button fx:id="subscribeBtn" onAction="#onSubscribe" prefHeight="31.0" prefWidth="120.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white;" text="Subscribe" textAlignment="CENTER" GridPane.rowIndex="1">
+                        <Button fx:id="myComplaintsButton" onAction="#handleMyComplaintsButton" prefHeight="30.0" prefWidth="120.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white;" text="My Complaints" textAlignment="CENTER" GridPane.rowIndex="1">
+                            <font><Font name="Segoe UI" size="14.0" /></font>
+                        </Button>
+                        <Button fx:id="subscribeBtn" onAction="#onSubscribe" prefHeight="31.0" prefWidth="120.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white;" text="Subscribe" textAlignment="CENTER" GridPane.rowIndex="2">
                             <font><Font name="Segoe UI" size="13.0" /></font>
                         </Button>
-                        <Button fx:id="ChangeBtn" onAction="#sendUserUpdate" prefHeight="43.0" prefWidth="120.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white;" text="Confirm Changes" textAlignment="CENTER" GridPane.rowIndex="5">
+                        <Button fx:id="ChangeBtn" onAction="#sendUserUpdate" prefHeight="43.0" prefWidth="120.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white;" text="Confirm Changes" textAlignment="CENTER" GridPane.rowIndex="6">
                             <font><Font name="Segoe UI" size="13.0" /></font>
                         </Button>
-                  <Button fx:id="changePassBtn" onAction="#onChangePassword" prefHeight="43.0" prefWidth="120.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white;" text="Set New Password" textAlignment="CENTER" wrapText="true" GridPane.rowIndex="6">
+                  <Button fx:id="changePassBtn" onAction="#onChangePassword" prefHeight="43.0" prefWidth="120.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white;" text="Set New Password" textAlignment="CENTER" wrapText="true" GridPane.rowIndex="7">
                      <font>
                         <Font name="Segoe UI" size="13.0" />
                      </font>
