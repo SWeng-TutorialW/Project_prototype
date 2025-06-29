@@ -52,26 +52,20 @@
                   <Image url="@../../../../images/cart.png" />
                </image>
             </ImageView>
-            <FlowPane fx:id="catalogFlowPane" layoutX="20.0" layoutY="120.0" prefWidth="800.0" prefHeight="700.0" hgap="20.0" vgap="20.0">
+            <FlowPane fx:id="catalogFlowPane" hgap="20.0" layoutX="20.0" layoutY="120.0" prefHeight="700.0" prefWidth="800.0" vgap="20.0">
                <padding>
-                  <Insets top="20" right="20" bottom="20" left="20" />
+                  <Insets bottom="20" left="20" right="20" top="20" />
                </padding>
             </FlowPane>
             <AnchorPane fx:id="for_combo" layoutX="14.0" layoutY="80.0" prefHeight="30.0" prefWidth="150.0">
                <children>
-                  <ComboBox fx:id="combo" onAction="#combo_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
-                  <ImageView fx:id="sort_image" fitHeight="25.0" fitWidth="43.0" pickOnBounds="true">
-                     <image>
-                        <Image url="@../../../../images/sort.png" />
-                     </image>
-                  </ImageView>
+                  <Button fx:id="filterButton" layoutX="20.0" layoutY="4.0" mnemonicParsing="false" onAction="#openFilterWindow" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #C8A2C8; -fx-text-fill: white;" text="Filter">
+                     <font>
+                        <Font name="Segoe UI" size="12.0" />
+                     </font>
+                  </Button>
                </children>
             </AnchorPane>
-            <Button fx:id="filterButton" layoutX="180.0" layoutY="80.0" mnemonicParsing="false" onAction="#openFilterWindow" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #C8A2C8; -fx-text-fill: white;" text="Filter">
-               <font>
-                  <Font name="Segoe UI" size="12.0" />
-               </font>
-            </Button>
             <HBox fx:id="second_line1" layoutY="589.0" prefHeight="197.0" prefWidth="775.0" spacing="15.0">
                <children>
                   <Button fx:id="nine_9" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0" visible="false">
@@ -192,7 +186,7 @@
                   </Button>
                </children>
             </HBox>
-            <ComboBox fx:id="Stores" layoutX="319.0" layoutY="83.0" onAction="#stores_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
+            <ComboBox fx:id="Stores" layoutX="145.0" layoutY="84.0" onAction="#stores_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
             <AnchorPane fx:id="costu" layoutX="773.0" layoutY="-3.0" prefHeight="838.0" prefWidth="200.0" style="-fx-background-color: #C8A2C8;">
                <children>
                   <Label fx:id="cus_label" layoutX="4.0" layoutY="165.0" text="Create your own bouquet" textFill="#fdfdfd">

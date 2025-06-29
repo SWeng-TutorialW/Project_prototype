@@ -124,7 +124,7 @@ public class AddFlower_Controller {
             networkFormSection.setVisible(true);
             storeModeSection.setVisible(false);
 
-            addButton.setText("Add New Flower");
+            addButton.setText("Add New Item");
 
             // Update validation for network mode
             addButton.disableProperty().unbind();
@@ -293,7 +293,7 @@ public class AddFlower_Controller {
             sendFlowerToServer(newFlower);
 
             // Show success message
-            showSuccessMessage("Flower added successfully to database!");
+            showSuccessMessage("Item added successfully to database!");
 
             // Close the window
             closeWindow();
@@ -308,7 +308,7 @@ public class AddFlower_Controller {
     private void addExistingFlowerToStore() {
         Flower selectedFlower = existingFlowersComboBox.getValue();
         if (selectedFlower == null) {
-            showErrorMessage("Please select a flower to add to your store.");
+            showErrorMessage("Please select a item to add to your store.");
             return;
         }
         try {
@@ -326,7 +326,7 @@ public class AddFlower_Controller {
             // Don't close the window immediately - wait for server response
             // The window will be closed when we receive the success response
         } catch (IOException e) {
-            showErrorMessage("Error adding flower to store: " + e.getMessage());
+            showErrorMessage("Error adding item to store: " + e.getMessage());
         }
     }
 
@@ -350,12 +350,12 @@ public class AddFlower_Controller {
                     System.out.println("AddFlower_Controller: Error in UI update: " + e.getMessage());
                 }
             });
-        } else if (response.startsWith("Flower is already in this store")) {
+        } else if (response.startsWith("Item is already in this store")) {
             System.out.println("AddFlower_Controller: Flower already in store error");
-            Platform.runLater(() -> showErrorMessage("This flower is already in the selected store."));
+            Platform.runLater(() -> showErrorMessage("This item is already in the selected store."));
         } else if (response.startsWith("Flower or store not found")) {
             System.out.println("AddFlower_Controller: Flower or store not found error");
-            Platform.runLater(() -> showErrorMessage("Flower or store not found. Please try again."));
+            Platform.runLater(() -> showErrorMessage("Item or store not found. Please try again."));
         } else if (response.startsWith("Error adding flower to store:")) {
             System.out.println("AddFlower_Controller: General error");
             Platform.runLater(() -> showErrorMessage(response));
@@ -378,19 +378,19 @@ public class AddFlower_Controller {
                 catalogController.setPendingStoreName(selectedStore);
             }
         } catch (IOException e) {
-            showErrorMessage("Error refreshing flower list: " + e.getMessage());
+            showErrorMessage("Error refreshing item list: " + e.getMessage());
         }
     }
 
     private boolean validateNewFlowerInputs() {
         // Check required fields
         if (flowerNameField.getText().trim().isEmpty()) {
-            showErrorMessage("Flower name is required.");
+            showErrorMessage("Item name is required.");
             return false;
         }
 
         if (flowerTypeField.getText().trim().isEmpty()) {
-            showErrorMessage("Flower type is required.");
+            showErrorMessage("Item type is required.");
             return false;
         }
 
@@ -430,7 +430,7 @@ public class AddFlower_Controller {
         SimpleClient.getClient().sendToServer(message);
         SimpleClient.getClient().sendToServer(flower);
 
-        System.out.println("Sent flower to server for database addition: " + flower.getFlowerName());
+        System.out.println("Sent item to server for database addition: " + flower.getFlowerName());
     }
 
     private void showSuccessMessage(String message) {

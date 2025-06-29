@@ -373,13 +373,28 @@ public class connect_scene_Con  {
                         return;
                     }
                 }
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Login Error");
-            alert.setHeaderText("Login Failed");
-            alert.setContentText("Your Username or Password are incorrect");
-            alert.showAndWait();
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Login Failed");
+                alert.setHeaderText("Invalid Credentials");
+                alert.setContentText("Username or password is incorrect. Please check your credentials and try again.");
+                alert.showAndWait();
+            });
 
     }
 
+    @Subscribe
+    public void handleLoginResponse(String response) {
+        if (response.equals("#loginFailed")) {
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Login Failed");
+                alert.setHeaderText("Invalid Credentials");
+                alert.setContentText("Username or password is incorrect. Please check your credentials and try again.");
+                alert.showAndWait();
+            });
+        }
     }
+
+}
 

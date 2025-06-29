@@ -182,8 +182,6 @@ public class CatalogController {
     @FXML
     private Button  Mail_box;
     @FXML
-    private ImageView sort_image;
-    @FXML
     private Button three_3;
     @FXML
     private AnchorPane buttonsAncPane;
@@ -391,8 +389,8 @@ public class CatalogController {
         }));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
-        combo.getItems().addAll("Price High to LOW", "Price Low to HIGH");
-        combo.setValue("Sort");
+
+
         Stores.getItems().addAll("Haifa", "Krayot","Nahariyya","network");
         // Set default store selection
         if (user != null) {
@@ -425,24 +423,7 @@ public class CatalogController {
         } else {
             Stores.setValue("network"); // Guest default
         }
-        combo.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item);
-                setAlignment(Pos.CENTER);
-                setTextFill(Color.web("#FFFAFA"));
-            }
-        });
-        combo.setCellFactory(listView -> new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item);
-                setAlignment(Pos.CENTER);
-                setTextFill(Color.web("#C8A2C8"));
-            }
-        });
+
         nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12 };
         typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12 };
         priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
@@ -471,9 +452,7 @@ public class CatalogController {
                 e.printStackTrace();
             }
         });
-        combo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            combo_choose(null);
-        });
+
         Stores.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             updateCatalogForSelectedStore();
         });
@@ -557,6 +536,41 @@ public class CatalogController {
             return;
         }
         
+        // For discount events (catalog_type = 4), update immediately for all clients
+        if (event.get_catalog_type() == 4) {
+            System.out.println("*** DISCOUNT EVENT PROCESSING - IMMEDIATE UPDATE ***");
+            System.out.println("Updating catalog with " + event.get_flowers().size() + " flowers");
+            
+            // Store current store selection
+            String currentStore = Stores.getValue();
+            
+            // Request fresh data for the current store to ensure we have the latest information
+            if (currentStore != null) {
+                try {
+                    if (currentStore.equals("network")) {
+                        // For network view, use the data from the event
+                        if (event.get_flowers() != null) {
+                            setCatalogData(event.get_flowers());
+                        }
+                    } else {
+                        // For specific store, request fresh data from server
+                        int currentStoreId = getCurrentStoreId(currentStore);
+                        if (currentStoreId != -1) {
+                            String message = "get_catalog_" + currentStoreId;
+                            SimpleClient.getClient().sendToServer(message);
+                            System.out.println("Requested fresh catalog for store ID: " + currentStoreId + " (" + currentStore + ") after discount event");
+                        }
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error requesting fresh catalog data after discount event: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+            
+            System.out.println("*** DISCOUNT EVENT PROCESSED - IMMEDIATE UPDATE ***");
+            return;
+        }
+        
         // Only reload if this event is for our current store selection
         String selectedStore = Stores.getValue();
         if (selectedStore != null) {
@@ -606,7 +620,33 @@ public class CatalogController {
         if (event.get_catalog_type() == -1) {
             System.out.println("*** NETWORK DELETE EVENT PROCESSING ***");
             System.out.println("Updating UI for all clients with " + event.get_flowers().size() + " flowers");
-            setCatalogData(event.get_flowers());
+            
+            // Store current store selection
+            String currentStore = Stores.getValue();
+            
+            // Request fresh data for the current store to ensure we have the latest information
+            if (currentStore != null) {
+                try {
+                    if (currentStore.equals("network")) {
+                        // For network view, use the data from the event
+                        if (event.get_flowers() != null) {
+                            setCatalogData(event.get_flowers());
+                        }
+                    } else {
+                        // For specific store, request fresh data from server
+                        int currentStoreId = getCurrentStoreId(currentStore);
+                        if (currentStoreId != -1) {
+                            String message = "get_catalog_" + currentStoreId;
+                            SimpleClient.getClient().sendToServer(message);
+                            System.out.println("Requested fresh catalog for store ID: " + currentStoreId + " (" + currentStore + ") after delete event");
+                        }
+                    }
+                } catch (IOException e) {
+                    System.err.println("Error requesting fresh catalog data after delete event: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+            
             System.out.println("*** NETWORK DELETE EVENT PROCESSED ***");
             return;
         }
@@ -621,7 +661,10 @@ public class CatalogController {
             if (event.get_catalog_type() == currentStoreId) {
                 System.out.println("Add flower event matches current store, updating UI");
                 // Update the UI with the new data from the event
-                setCatalogData(event.get_flowers());
+                if (event.get_flowers() != null) {
+                    System.out.println("Updating catalog with " + event.get_flowers().size() + " flowers");
+                    setCatalogData(event.get_flowers());
+                }
             } else {
                 System.out.println("Add flower event does not match current store. Event type: " + event.get_catalog_type() + ", Current store ID: " + currentStoreId);
             }
@@ -917,18 +960,7 @@ public class CatalogController {
         System.out.println("Selected store: " + selected);
 
         // Clear combo selection and reset sorting
-        combo.getSelectionModel().clearSelection();
-        combo.setValue("Sort");
-        combo.setButtonCell(new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item);
-                setAlignment(Pos.CENTER);
-                setTextFill(Color.web("#FFFAFA"));
-            }
-        });
-        sort_image.setVisible(true);
+
 
         // Clear current filter state
         currentMinPrice = 0.0;
@@ -956,6 +988,8 @@ public class CatalogController {
             }
         }
     }
+
+    //mark
     @FXML
     public void combo_choose(ActionEvent actionEvent) {
         System.out.println("combo_choose CALLED");
