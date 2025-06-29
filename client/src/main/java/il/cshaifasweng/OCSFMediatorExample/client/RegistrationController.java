@@ -114,6 +114,8 @@ public class RegistrationController {
                 con.set_guest(false);
                 con.set_type_client(true);
                 con.set_type_local(loginRegCheck.getStore());
+                Success success = new Success("Log-In Successfully!");
+                EventBus.getDefault().post(new SuccessEvent(success));
                 ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
 
 
@@ -130,44 +132,81 @@ public class RegistrationController {
             }
 
         }
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Login Error");
+        alert.setHeaderText("Login Failed");
+        alert.setContentText("Your Username or Password are incorrect");
+        alert.showAndWait();
+
     }
 
 
     public String checkIfValid(String regUser, String email, String regPass, String confPass, String fullName, String phoneNumber, String account_type, String userId) {
+        // Check if all required fields are filled
         if (isTextFieldEmpty(regPassTxtB) || isTextFieldEmpty(regEmailTxtB) || isTextFieldEmpty(regUserTxtB) || isTextFieldEmpty(regPassConfTxtB) || isTextFieldEmpty(regFullNameTxtB) || isTextFieldEmpty(regPhoneTxtB)) {
             return "Please fill in all the fields";
         }
+        
+        // Check if passwords match
         if (!regPass.equals(confPass)) {
             return "Passwords do not match";
         }
+        
+        // Check account type selection
         if (isComboBoxEmpty(select_account_type)) {
             return "Please select an account type";
         }
+        
+        // Check store selection for Store account type
         if ("Store".equals(account_type) && isComboBoxEmpty(select_store)) {
             return "You need to select a store";
         }
-        for (LoginRegCheck user : users) {
-            if (user.getUsername().equals(regUser)) {
-                return "Username already exists";
+        
+        // Check if username already exists
+        if (users != null) {
+            for (LoginRegCheck user : users) {
+                if (user.getUsername().equals(regUser)) {
+                    return "Username already exists";
+                }
             }
         }
+        
+        // Check store selection for non-yearly subscription
         if (!is_yearly_subscription && store == -1) {
             return "You need to select a store";
         }
-        if (regUser.length() < 4|| regPass.length() < 4 || fullName.length() < 4) {
-            return "Username, password and full name must be at least 4 characters long";
+        
+        // Check minimum length requirements
+        if (regUser.length() < 3 || regPass.length() < 3 || fullName.length() < 3) {
+            return "Username, password and full name must be at least 3 characters long";
         }
-        if (!phoneNumber.matches("\\d{10}")) {
-            return "Phone number must be exactly 10 digits";
+        
+        // Enhanced password validation (above 3 length)
+        if (regPass.length() < 3) {
+            return "Password must be at least 3 characters long";
         }
-        if (!email.contains("@") || !email.contains(".")) {
-            return "Invalid email format";
+        
+        // Enhanced phone number validation (Israeli format)
+        if (!isValidIsraeliPhone(phoneNumber)) {
+            return "Phone number must be in format: 05XXXXXXXX";
         }
+        
+        // Enhanced email validation
+        if (!isValidEmail(email)) {
+            return "Please enter a valid email address";
+        }
+        
+        // Enhanced ID validation for yearly subscription
         if (is_yearly_subscription) {
-            if (userId == null || !userId.matches("\\d{9}")) {
-                return "ID must be exactly 9 digits";
+            if (userId == null || userId.trim().isEmpty()) {
+                return "ID is required for yearly subscription";
+            }
+            if (!isValidIsraeliId(userId)) {
+                return "Please enter a valid 9-digit Israeli ID number";
             }
         }
+        
         return null;
     }
 
@@ -185,14 +224,14 @@ public class RegistrationController {
         String account_type = select_account_type.getValue();
         String userId = regIdTxtB.getText();
 
-//        String check = checkIfValid(regUser, email, regPass, confPass, fullName, phoneNumber, account_type, userId);
-//        if (check != null) {
-//            Warning warning = new Warning(check);
-//            EventBus.getDefault().post(new WarningEvent(warning));
-//            return;
-//        }
+        String check = checkIfValid(regUser, email, regPass, confPass, fullName, phoneNumber, account_type, userId);
+        if (check != null) {
+            Warning warning = new Warning(check);
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
 
-        LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, phoneNumber, fullName, userId, false); // for now it's it meant to be for registration only.
+        LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, phoneNumber, fullName, userId, false); // for now it's it meant to be for registration only.
 
         Runnable sendAndClose = () -> {
             try {
@@ -218,10 +257,8 @@ public class RegistrationController {
             }, sendAndClose, event);
         } else {
             sendAndClose.run();
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Registration Completed!");
-            alert.setHeaderText("Registration Completed!");
-            alert.showAndWait();
+            Success success = new Success("Registration Completed!");
+            EventBus.getDefault().post(new SuccessEvent(success));
         }
     }
 
@@ -267,10 +304,8 @@ public class RegistrationController {
             controller.setOnPaymentSuccess(() -> {
                 onSuccess.run();
                 paymentStage.close();
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Registration Completed!");
-                alert.setHeaderText("Your yearly subscription has been successfully activated.");
-                alert.showAndWait();
+                Success success = new Success("Registration Completed!\nYour yearly subscription has been successfully activated.");
+                EventBus.getDefault().post(new SuccessEvent(success));
             });
 
             controller.setOnPaymentCancel(() -> {
@@ -383,6 +418,52 @@ public class RegistrationController {
 
     private boolean isComboBoxEmpty(ComboBox<String> cb) {
         return cb.getValue() == null || cb.getValue().trim().isEmpty();
+    }
+
+    private boolean isValidIsraeliId(String id) {
+        if (id == null || id.length() != 9) {
+            return false;
+        }
+        
+        // Check if all characters are digits
+        if (!id.matches("^[0-9]{9}$")) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+
+    private boolean isValidIsraeliPhone(String phone) {
+        return phone.matches("^05[0-9]{8}$");
+    }
+
+
+    private boolean isValidEmail(String email) {
+        return email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+    
+
+    private boolean isValidPassword(String password) {
+        return password != null && password.length() >= 3;
+    }
+    
+
+    private boolean isValidUsername(String username) {
+        return username != null && username.length() >= 3 && username.matches("^[a-zA-Z0-9_]+$");
+    }
+
+    private boolean isUsernameAvailable(String username) {
+        if (users == null || username == null || username.trim().isEmpty()) {
+            return false;
+        }
+        
+        for (LoginRegCheck user : users) {
+            if (user.getUsername().equals(username.trim())) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 

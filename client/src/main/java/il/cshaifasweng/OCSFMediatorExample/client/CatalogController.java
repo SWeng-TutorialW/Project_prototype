@@ -40,6 +40,8 @@ import org.greenrobot.eventbus.Subscribe;
 import javafx.scene.layout.FlowPane;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CatalogController {
 
@@ -306,6 +308,13 @@ public class CatalogController {
 
     @FXML
     private FlowPane catalogFlowPane;
+
+    // Filter state tracking
+    private double currentMinPrice = 0.0;
+    private double currentMaxPrice = 300.0;
+    private Set<String> currentSelectedColors = new HashSet<>();
+    private Set<String> currentSelectedCategories = new HashSet<>();
+    private String currentSortOption = "Name (A-Z)";
 
     @FXML
     void create_bouqut(ActionEvent event)
@@ -797,6 +806,17 @@ public class CatalogController {
         });
     }
     
+    /**
+     * Updates the current filter state from the filter controller
+     */
+    public void updateCurrentFilterState(double minPrice, double maxPrice, Set<String> colors, Set<String> categories, String sortOption) {
+        this.currentMinPrice = minPrice;
+        this.currentMaxPrice = maxPrice;
+        this.currentSelectedColors = new HashSet<>(colors);
+        this.currentSelectedCategories = new HashSet<>(categories);
+        this.currentSortOption = sortOption;
+    }
+    
     // Method to open filter window
     @FXML
     void openFilterWindow(ActionEvent event) {
@@ -807,6 +827,15 @@ public class CatalogController {
             CatalogFilterController filterController = loader.getController();
             filterController.setCatalogController(this);
             filterController.setOriginalFlowersList(flowersList_c);
+            
+            // Pass current filter state to restore UI
+            filterController.setCurrentFilterState(
+                currentMinPrice, 
+                currentMaxPrice, 
+                currentSelectedColors, 
+                currentSelectedCategories, 
+                currentSortOption
+            );
             
             Stage filterStage = new Stage();
             filterStage.setTitle("Filter Catalog");
@@ -867,6 +896,13 @@ public class CatalogController {
             }
         });
         sort_image.setVisible(true);
+
+        // Clear current filter state
+        currentMinPrice = 0.0;
+        currentMaxPrice = 300.0;
+        currentSelectedColors.clear();
+        currentSelectedCategories.clear();
+        currentSortOption = "Name (A-Z)";
 
         // Request fresh data from database based on selected store
         if (selected.equals("network")) {

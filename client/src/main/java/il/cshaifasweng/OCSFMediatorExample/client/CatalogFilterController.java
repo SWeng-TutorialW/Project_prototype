@@ -35,10 +35,10 @@ public class CatalogFilterController {
     
     // Category checkboxes
     @FXML private CheckBox flowerCheckBox;
-    @FXML private CheckBox bouquetCheckBox;
-    @FXML private CheckBox plantCheckBox;
-    @FXML private CheckBox giftCheckBox;
-    @FXML private CheckBox seasonalCheckBox;
+    @FXML private CheckBox premiumFlowerCheckBox;
+    @FXML private CheckBox flowersWreathCheckBox;
+    @FXML private CheckBox flowerCrownsCheckBox;
+    @FXML private CheckBox vaseCheckBox;
     
     @FXML private ComboBox<String> sortComboBox;
     @FXML private Button applyFilterButton;
@@ -131,16 +131,10 @@ public class CatalogFilterController {
                                     purpleCheckBox, blueCheckBox, orangeCheckBox, greenCheckBox, 
                                     blackCheckBox, brownCheckBox};
         
-        CheckBox[] categoryCheckBoxes = {flowerCheckBox, bouquetCheckBox, plantCheckBox, 
-                                       giftCheckBox, seasonalCheckBox};
+        CheckBox[] categoryCheckBoxes = {flowerCheckBox, premiumFlowerCheckBox, flowersWreathCheckBox, 
+                                       flowerCrownsCheckBox, vaseCheckBox};
         
-        for (CheckBox cb : colorCheckBoxes) {
-            cb.selectedProperty().addListener((obs, oldVal, newVal) -> updateResultsLabel());
-        }
-        
-        for (CheckBox cb : categoryCheckBoxes) {
-            cb.selectedProperty().addListener((obs, oldVal, newVal) -> updateResultsLabel());
-        }
+
     }
     
     public void setCatalogController(Object controller) {
@@ -153,7 +147,43 @@ public class CatalogFilterController {
     
     public void setOriginalFlowersList(List<Flower> flowers) {
         this.originalFlowersList = new ArrayList<>(flowers);
-        updateResultsLabel();
+        restoreCurrentFilterState();
+    }
+    
+    /**
+     * Restores the current filter state to the UI checkboxes and fields
+     */
+    private void restoreCurrentFilterState() {
+        // Restore price range
+        minPriceField.setText(String.format("%.0f", minPrice));
+        maxPriceField.setText(String.format("%.0f", maxPrice));
+        priceRangeSlider.setValue(maxPrice);
+        minPriceLabel.setText(String.format("%.0f", minPrice));
+        maxPriceLabel.setText(String.format("%.0f", maxPrice));
+        
+        // Restore color checkboxes
+        redCheckBox.setSelected(selectedColors.contains("Red"));
+        yellowCheckBox.setSelected(selectedColors.contains("Yellow"));
+        pinkCheckBox.setSelected(selectedColors.contains("Pink"));
+        whiteCheckBox.setSelected(selectedColors.contains("White"));
+        purpleCheckBox.setSelected(selectedColors.contains("Purple"));
+        blueCheckBox.setSelected(selectedColors.contains("Blue"));
+        orangeCheckBox.setSelected(selectedColors.contains("Orange"));
+        greenCheckBox.setSelected(selectedColors.contains("Green"));
+        blackCheckBox.setSelected(selectedColors.contains("Black"));
+        brownCheckBox.setSelected(selectedColors.contains("Brown"));
+        
+        // Restore category checkboxes
+        flowerCheckBox.setSelected(selectedCategories.contains("Flower"));
+        premiumFlowerCheckBox.setSelected(selectedCategories.contains("Premium Flowers"));
+        flowersWreathCheckBox.setSelected(selectedCategories.contains("Flowers Wreath"));
+        flowerCrownsCheckBox.setSelected(selectedCategories.contains("Flower Crowns"));
+        vaseCheckBox.setSelected(selectedCategories.contains("Vase"));
+        
+        // Restore sort option
+        if (sortOption != null && !sortOption.isEmpty()) {
+            sortComboBox.setValue(sortOption);
+        }
     }
     
     @FXML
@@ -166,15 +196,20 @@ public class CatalogFilterController {
         List<Flower> filteredList = filterFlowers();
         List<Flower> sortedList = sortFlowers(filteredList);
         
-        // Apply filtered data to the appropriate controller
+        // Update the catalog controller's filter state
         if (catalogController instanceof CatalogController) {
+            ((CatalogController) catalogController).updateCurrentFilterState(
+                minPrice, maxPrice, selectedColors, selectedCategories, sortOption
+            );
             ((CatalogController) catalogController).setFilteredCatalogData(sortedList);
         } else if (catalogController instanceof CatalogController_employee) {
+            ((CatalogController_employee) catalogController).updateCurrentFilterState(
+                minPrice, maxPrice, selectedColors, selectedCategories, sortOption
+            );
             ((CatalogController_employee) catalogController).setFilteredCatalogData(sortedList);
         }
         
-        updateResultsLabel();
-        
+
         // Close the filter window
         if (filterStage != null) {
             filterStage.close();
@@ -196,10 +231,10 @@ public class CatalogFilterController {
         brownCheckBox.setSelected(false);
         
         flowerCheckBox.setSelected(false);
-        bouquetCheckBox.setSelected(false);
-        plantCheckBox.setSelected(false);
-        giftCheckBox.setSelected(false);
-        seasonalCheckBox.setSelected(false);
+        premiumFlowerCheckBox.setSelected(false);
+        flowersWreathCheckBox.setSelected(false);
+        flowerCrownsCheckBox.setSelected(false);
+        vaseCheckBox.setSelected(false);
         
         // Reset price range
         priceRangeSlider.setMin(0);
@@ -211,14 +246,26 @@ public class CatalogFilterController {
         // Reset sort
         sortComboBox.setValue("Name (A-Z)");
         
-        // Show all flowers
+        // Reset filter state
+        minPrice = 0.0;
+        maxPrice = 300.0;
+        selectedColors.clear();
+        selectedCategories.clear();
+        sortOption = "Name (A-Z)";
+        
+        // Update the catalog controller's filter state
         if (catalogController instanceof CatalogController) {
+            ((CatalogController) catalogController).updateCurrentFilterState(
+                minPrice, maxPrice, selectedColors, selectedCategories, sortOption
+            );
             ((CatalogController) catalogController).setCatalogData(originalFlowersList);
         } else if (catalogController instanceof CatalogController_employee) {
+            ((CatalogController_employee) catalogController).updateCurrentFilterState(
+                minPrice, maxPrice, selectedColors, selectedCategories, sortOption
+            );
             ((CatalogController_employee) catalogController).setCatalogData(originalFlowersList);
         }
-        
-        updateResultsLabel();
+
     }
     
     private List<Flower> filterFlowers() {
@@ -238,10 +285,10 @@ public class CatalogFilterController {
         // Collect selected categories
         selectedCategories.clear();
         if (flowerCheckBox.isSelected()) selectedCategories.add("Flower");
-        if (bouquetCheckBox.isSelected()) selectedCategories.add("Bouquet");
-        if (plantCheckBox.isSelected()) selectedCategories.add("Plant");
-        if (giftCheckBox.isSelected()) selectedCategories.add("Gift");
-        if (seasonalCheckBox.isSelected()) selectedCategories.add("Seasonal");
+        if (premiumFlowerCheckBox.isSelected()) selectedCategories.add("Premium Flowers");
+        if (flowersWreathCheckBox.isSelected()) selectedCategories.add("Flowers Wreath");
+        if (flowerCrownsCheckBox.isSelected()) selectedCategories.add("Flower Crowns");
+        if (vaseCheckBox.isSelected()) selectedCategories.add("Vase");
         
         // Get sort option
         sortOption = sortComboBox.getValue();
@@ -311,22 +358,8 @@ public class CatalogFilterController {
         }
         return flowers;
     }
-    
-    private void updateResultsLabel() {
-        if (originalFlowersList == null) {
-            resultsLabel.setText("No flowers available");
-            return;
-        }
-        
-        // Apply current filters to get count
-        long filteredCount = originalFlowersList.stream()
-            .filter(this::matchesPriceFilter)
-            .filter(this::matchesColorFilter)
-            .filter(this::matchesCategoryFilter)
-            .count();
-        
-        resultsLabel.setText(String.format("Showing %d of %d items", filteredCount, originalFlowersList.size()));
-    }
+
+
     
     private void showAlert(String title, String message) {
         Platform.runLater(() -> {
@@ -341,5 +374,21 @@ public class CatalogFilterController {
     public boolean hasActiveFilters() {
         return minPrice > 0.0 || maxPrice < 300.0 ||
                !selectedColors.isEmpty() || !selectedCategories.isEmpty();
+    }
+    
+    /**
+     * Sets the current filter state from external source
+     */
+    public void setCurrentFilterState(double minPrice, double maxPrice, Set<String> colors, Set<String> categories, String sortOption) {
+        this.minPrice = minPrice;
+        this.maxPrice = maxPrice;
+        this.selectedColors = new HashSet<>(colors);
+        this.selectedCategories = new HashSet<>(categories);
+        this.sortOption = sortOption;
+        
+        // Update UI if originalFlowersList is already set
+        if (originalFlowersList != null) {
+            restoreCurrentFilterState();
+        }
     }
 } 

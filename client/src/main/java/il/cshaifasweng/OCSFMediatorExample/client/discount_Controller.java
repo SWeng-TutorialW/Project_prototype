@@ -305,11 +305,8 @@ public class discount_Controller implements Initializable {
     }
 
     private void showSuccess(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Success");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        Success success = new Success("Discount set Successfully!");
+        EventBus.getDefault().post(new SuccessEvent(success));
     }
 
     public void setCatalogController(CatalogController_employee controller) {

@@ -7,6 +7,8 @@ import java.io.IOException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -437,6 +439,13 @@ public class CatalogController_employee {
     }
     int add_flower_flag=0;
     String flower_name="";
+
+    // Filter state tracking
+    private double currentMinPrice = 0.0;
+    private double currentMaxPrice = 300.0;
+    private Set<String> currentSelectedColors = new HashSet<>();
+    private Set<String> currentSelectedCategories = new HashSet<>();
+    private String currentSortOption = "Name (A-Z)";
 
     @FXML
     void initialize() {
@@ -1197,7 +1206,7 @@ public class CatalogController_employee {
     @FXML
     void stores_choose(ActionEvent event) throws IOException
     {
-        System.out.println("=== STORE SELECTION CHANGED ===");
+        System.out.println("=== EMPLOYEE STORE SELECTION CHANGED ===");
         String selected = Stores.getValue();
         if (selected == null) {
             System.out.println("No store selected");
@@ -1206,6 +1215,28 @@ public class CatalogController_employee {
 
         System.out.println("Selected store: " + selected);
 
+        // Clear combo selection and reset sorting
+        combo.getSelectionModel().clearSelection();
+        combo.setValue("Sort");
+        combo.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item);
+                setAlignment(Pos.CENTER);
+                setTextFill(Color.web("#FFFAFA"));
+            }
+        });
+        sort_image.setVisible(true);
+
+        // Clear current filter state
+        currentMinPrice = 0.0;
+        currentMaxPrice = 300.0;
+        currentSelectedColors.clear();
+        currentSelectedCategories.clear();
+        currentSortOption = "Name (A-Z)";
+
+        // Request fresh data from database based on selected store
         if (selected.equals("network")) {
             // For network view, get all flowers from Flowers table
             String message = "get_all_flowers";
@@ -1725,6 +1756,15 @@ public class CatalogController_employee {
             filterController.setCatalogController(this);
             filterController.setOriginalFlowersList(flowersList_c);
             
+            // Pass current filter state to restore UI
+            filterController.setCurrentFilterState(
+                currentMinPrice, 
+                currentMaxPrice, 
+                currentSelectedColors, 
+                currentSelectedCategories, 
+                currentSortOption
+            );
+            
             Stage filterStage = new Stage();
             filterStage.setTitle("Filter Catalog");
             filterStage.setScene(new Scene(root));
@@ -1736,6 +1776,17 @@ public class CatalogController_employee {
             e.printStackTrace();
             System.err.println("Error opening filter window: " + e.getMessage());
         }
+    }
+    
+    /**
+     * Updates the current filter state from the filter controller
+     */
+    public void updateCurrentFilterState(double minPrice, double maxPrice, Set<String> colors, Set<String> categories, String sortOption) {
+        this.currentMinPrice = minPrice;
+        this.currentMaxPrice = maxPrice;
+        this.currentSelectedColors = new HashSet<>(colors);
+        this.currentSelectedCategories = new HashSet<>(categories);
+        this.currentSortOption = sortOption;
     }
 }
 
