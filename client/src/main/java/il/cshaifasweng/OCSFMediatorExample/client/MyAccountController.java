@@ -154,6 +154,7 @@ public class MyAccountController {
         myAccountLbl.setText("My Account - Hello " + current_User.getFullName());
         myAccountLbl.setAlignment(CENTER);
         myAccountLbl.setLayoutX(myAccUsers.getWidth() / 2 - myAccountLbl.getWidth() / 2);
+
     }
     @FXML
     private void handleMyOrdersButton() {
@@ -222,7 +223,7 @@ public class MyAccountController {
                     alert.setHeaderText("Username Already Exists");
                     alert.setContentText("The username you entered is already taken. Please choose a different username.");
                     alert.showAndWait();
-                    userChangeTxtB.setText(current_User.getUsername());
+                    loadUserInfo();
                 });
         }
 
@@ -234,6 +235,7 @@ public class MyAccountController {
         if(event.getMsg().startsWith("#userUpdateSuccess")) {
             System.out.println("#userUpdateSuccess detected, posting SuccessEvent");
             Platform.runLater(() -> {
+                current_User = event.getUpdatedUser();
                 // Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 // alert.setTitle("Update Success");
                 // alert.setHeaderText("Successfully Updated User Details");
@@ -266,26 +268,31 @@ public class MyAccountController {
         currentUser.setFullName(fNameTxtB.getText());
         // currentUser.setPassword(newPassTxtB.getText()); Irrelevant, a different function handles password changes
         updatedUser = new UpdateUserEvent(currentUser);
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Confirm Update");
+        confirmation.setHeaderText("Are you sure you want to update your details?");
+
+        ButtonType yes = new ButtonType("Yes");
+        ButtonType no = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+        confirmation.getButtonTypes().setAll(yes, no);
+        Optional<ButtonType> result = confirmation.showAndWait();
+        if (result.isPresent() && result.get() == no) {
+            // User chose not to update, return early
+            return;
+        }
         try {
             SimpleClient.client.sendToServer(updatedUser);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        Platform.runLater(() -> {
-            // Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            // alert.setTitle("Update Success");
-            // alert.setHeaderText("Successfully Updated User Details");
-            // alert.setContentText("Your Details Are Up-To-Date.");
-            // alert.showAndWait();
-            Success success = new Success("Your details are up-to-date.");
-            EventBus.getDefault().post(new SuccessEvent(success));
-        });
+
     }
 
 
     @FXML
     void onChangePassword(ActionEvent event) {
+
         if (newPassTxtB.getText().isEmpty() || confNewPassTxtB.getText().isEmpty()) {
             passErrorMsgLbl.setVisible(true);
             passErrorMsgLbl.setText("Please fill in both password fields.");
@@ -302,7 +309,18 @@ public class MyAccountController {
             passErrorMsgLbl.setText("New password cannot be the same as the current password.");
             return;
         }
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Confirm Password Change");
+        confirmation.setHeaderText("Are you sure you want to update your Password?");
 
+        ButtonType yes = new ButtonType("Yes");
+        ButtonType no = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+        confirmation.getButtonTypes().setAll(yes, no);
+        Optional<ButtonType> result = confirmation.showAndWait();
+        if (result.isPresent() && result.get() == no) {
+            // User chose not to update, return early
+            return;
+        }
         current_User.setPassword(newPassTxtB.getText());
         Platform.runLater(() -> {
             Success success = new Success("Your New Password Has Been Changed Successfully.");
