@@ -1,0 +1,326 @@
+package il.cshaifasweng.OCSFMediatorExample.server;
+
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * Database Initializer - Handles all database initialization including flowers, stores, and users
+ */
+public class DatabaseInitializer {
+    
+    /**
+     * Initialize the database with all required data
+     * @param sessionFactory The Hibernate session factory
+     */
+    public static void initializeDatabase(SessionFactory sessionFactory) {
+        Session session = null;
+        try {
+            session = sessionFactory.openSession();
+            session.beginTransaction();
+            
+            System.out.println(">>> STARTING DATABASE INITIALIZATION...");
+            
+            // Initialize flowers
+            List<Flower> flowers = initializeFlowers(session);
+            
+            // Initialize stores with flowers
+            initializeStores(session, flowers);
+            
+            // Initialize users
+            initializeUsers(session);
+            
+            // Load stores from database to ensure they have the proper flower relationships
+            App.loadStoresFromDatabase();
+            
+            // Verify the relationships are working correctly
+            verifyStoreFlowerRelationships(session);
+            
+            session.getTransaction().commit();
+            System.out.println(">>> DATABASE INITIALIZATION COMPLETED SUCCESSFULLY!");
+            
+        } catch (Exception exception) {
+            if (session != null) {
+                session.getTransaction().rollback();
+            }
+            System.err.println("An error occurred during database initialization, changes have been rolled back.");
+            exception.printStackTrace();
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+    
+    /**
+     * Initialize all flowers in the database
+     * @param session The Hibernate session
+     * @return List of created flowers
+     */
+    private static List<Flower> initializeFlowers(Session session) {
+        System.out.println(">>> INSERTING FLOWERS TO DB...");
+        
+        List<Flower> flowers = new ArrayList<>();
+        
+        // Create all flowers
+        Flower flower_1 = new Flower("Romance Royalty", 25.99, "Rose", "images/FlowerImages/Rose.png", "Red", "Flower");
+        session.save(flower_1);
+        session.flush();
+        flowers.add(flower_1);
+        
+        Flower flower_2 = new Flower("Sunny Smiler", 15.99, "Sunflower", "images/FlowerImages/Sunflower.png", "Yellow", "Flower");
+        session.save(flower_2);
+        session.flush();
+        flowers.add(flower_2);
+        
+        Flower flower_3 = new Flower("Spring's Prince", 16.99, "Tulip", "images/FlowerImages/Tulip.png", "Pink", "Flower");
+        session.save(flower_3);
+        session.flush();
+        flowers.add(flower_3);
+        
+        Flower flower_4 = new Flower("Purple Cloud", 30.99, "Jacarande", "images/FlowerImages/Jacarande.png", "Purple", "Flower");
+        session.save(flower_4);
+        session.flush();
+        flowers.add(flower_4);
+        
+        Flower flower_5 = new Flower("Exotic Queen", 49.99, "Orchid", "images/FlowerImages/Orchid.png", "White", "Flower");
+        session.save(flower_5);
+        session.flush();
+        flowers.add(flower_5);
+        
+        Flower flower_6 = new Flower("White Snowflake", 22.99, "Lily", "images/FlowerImages/Lily.png", "White", "Flower");
+        session.save(flower_6);
+        session.flush();
+        flowers.add(flower_6);
+        
+        Flower flower_7 = new Flower("Golden Breeze", 29.99, "Daffodil", "images/FlowerImages/Daffodil.png", "Yellow", "Flower");
+        session.save(flower_7);
+        session.flush();
+        flowers.add(flower_7);
+        
+        Flower flower_8 = new Flower("Blue Whisper", 16.99, "Hyacinth", "images/FlowerImages/Hyacinth.png", "Blue", "Flower");
+        session.save(flower_8);
+        session.flush();
+        flowers.add(flower_8);
+
+        // Premium flower
+        Flower pf1 = new Flower("Royal Orchid", 199.99, "Orchid", "images/FlowerImages/Royal_Orchid.png", "Red", "Premium flower");
+        session.save(pf1); session.flush(); flowers.add(pf1);
+        Flower pf2 = new Flower("Golden Rose", 159.99, "Rose", "images/FlowerImages/Golden_Rose.png", "Yellow", "Premium flower");
+        session.save(pf2); session.flush(); flowers.add(pf2);
+        Flower pf3 = new Flower("Diamond Lily", 179.99, "Lily", "images/FlowerImages/Diamond_Lilly.png", "Purple", "Premium flower");
+        session.save(pf3); session.flush(); flowers.add(pf3);
+        Flower pf4 = new Flower("Emerald Tulip", 189.99, "Tulip", "images/FlowerImages/Emerald_Tulip.png", "White", "Premium flower");
+        session.save(pf4); session.flush(); flowers.add(pf4);
+        Flower pf5 = new Flower("Sapphire Iris", 259.99, "Iris", "images/FlowerImages/Sapphire_Iris.png", "Blue", "Premium flower");
+        session.save(pf5); session.flush(); flowers.add(pf5);
+
+        // Flowers Wreath
+        Flower fw1 = new Flower("Spring Wreath", 19.99, "Wreath", "images/FlowerImages/wreath1.png", "Mixed", "Flowers Wreath");
+        session.save(fw1); session.flush(); flowers.add(fw1);
+        Flower fw2 = new Flower("Summer Wreath", 21.99, "Wreath", "images/FlowerImages/wreath2.png", "Yellow", "Flowers Wreath");
+        session.save(fw2); session.flush(); flowers.add(fw2);
+        Flower fw3 = new Flower("Autumn Wreath", 22.99, "Wreath", "images/FlowerImages/wreath3.png", "Orange", "Flowers Wreath");
+        session.save(fw3); session.flush(); flowers.add(fw3);
+        Flower fw4 = new Flower("Winter Wreath", 20.99, "Wreath", "images/FlowerImages/wreath4.png", "White", "Flowers Wreath");
+        session.save(fw4); session.flush(); flowers.add(fw4);
+        Flower fw5 = new Flower("Romantic Wreath", 23.99, "Wreath", "images/FlowerImages/wreath5.png", "Red", "Flowers Wreath");
+        session.save(fw5); session.flush(); flowers.add(fw5);
+
+        // Vase
+        Flower v1 = new Flower("Classic Vase", 15.99, "Vase", "images/FlowerImages/vase1.png", "White", "Vase");
+        session.save(v1); session.flush(); flowers.add(v1);
+        Flower v2 = new Flower("Modern Vase", 18.99, "Vase", "images/FlowerImages/vase2.png", "Black", "Vase");
+        session.save(v2); session.flush(); flowers.add(v2);
+        Flower v3 = new Flower("Glass Vase", 17.99, "Vase", "images/FlowerImages/vase3.png", "Transparent", "Vase");
+        session.save(v3); session.flush(); flowers.add(v3);
+        Flower v4 = new Flower("Ceramic Vase", 16.99, "Vase", "images/FlowerImages/vase4.png", "Blue", "Vase");
+        session.save(v4); session.flush(); flowers.add(v4);
+        Flower v5 = new Flower("Rustic Vase", 14.99, "Vase", "images/FlowerImages/vase5.png", "Brown", "Vase");
+        session.save(v5); session.flush(); flowers.add(v5);
+
+        // Flower Crowns
+        Flower fc1 = new Flower("Princess Crown", 24.99, "Crown", "images/FlowerImages/crown1.png", "Pink", "Flower Crowns");
+        session.save(fc1); session.flush(); flowers.add(fc1);
+        Flower fc2 = new Flower("Boho Crown", 22.99, "Crown", "images/FlowerImages/crown2.png", "Yellow", "Flower Crowns");
+        session.save(fc2); session.flush(); flowers.add(fc2);
+        Flower fc3 = new Flower("Festival Crown", 23.99, "Crown", "images/FlowerImages/crown3.png", "Mixed", "Flower Crowns");
+        session.save(fc3); session.flush(); flowers.add(fc3);
+        Flower fc4 = new Flower("Romantic Crown", 25.99, "Crown", "images/FlowerImages/crown4.png", "Red", "Flower Crowns");
+        session.save(fc4); session.flush(); flowers.add(fc4);
+        Flower fc5 = new Flower("Nature Crown", 21.99, "Crown", "images/FlowerImages/crown5.png", "Green", "Flower Crowns");
+        session.save(fc5); session.flush(); flowers.add(fc5);
+        
+        System.out.println(">>> CREATED " + flowers.size() + " FLOWERS");
+        return flowers;
+    }
+    
+    /**
+     * Initialize all stores with their flower relationships
+     * @param session The Hibernate session
+     * @param flowers List of all flowers
+     */
+    private static void initializeStores(Session session, List<Flower> flowers) {
+        System.out.println(">>> CREATING STORES WITH FLOWERS...");
+        
+        // Define flower lists for each store
+        List<Flower> haifaFlowers = new ArrayList<>(Arrays.asList(
+            flowers.get(0), // Rose
+            flowers.get(1), // Sunflower
+            flowers.get(2), // Tulip
+            flowers.get(3), // Jacarande
+            flowers.get(4), // Orchid
+            flowers.get(5), // Lily
+            flowers.get(6)  // Daffodil
+        ));
+        
+        List<Flower> krayotFlowers = new ArrayList<>(Arrays.asList(
+            flowers.get(0), // Rose
+            flowers.get(1), // Sunflower
+            flowers.get(2), // Tulip
+            flowers.get(3), // Jacarande
+            flowers.get(4), // Orchid
+            flowers.get(5), // Lily
+            flowers.get(6), // Daffodil
+            flowers.get(7)  // Hyacinth
+        ));
+        
+        List<Flower> nahariyyaFlowers = new ArrayList<>(Arrays.asList(
+            flowers.get(0), // Rose
+            flowers.get(1), // Sunflower
+            flowers.get(2), // Tulip
+            flowers.get(3), // Jacarande
+            flowers.get(4), // Orchid
+            flowers.get(5)  // Lily
+        ));
+        
+        // Create stores
+        Store lilach_Haifa = new Store("lilach_Haifa", "Abba khoushy", haifaFlowers);
+        session.save(lilach_Haifa);
+        session.flush();
+        
+        Store lilach_Krayot = new Store("lilach_Krayot", "Hasolel Bonneh", krayotFlowers);
+        session.save(lilach_Krayot);
+        session.flush();
+        
+        Store lilach_Nahariyya = new Store("lilach_Nahariyya", "Herzl", nahariyyaFlowers);
+        session.save(lilach_Nahariyya);
+        session.flush();
+        
+        System.out.println(">>> CREATED 3 STORES");
+    }
+    
+    /**
+     * Initialize all users in the database
+     * @param session The Hibernate session
+     */
+    private static void initializeUsers(Session session) {
+        System.out.println(">>> CREATING USERS...");
+        
+        // Haifa Store Workers
+        LoginRegCheck Dor = new LoginRegCheck("Dor", "123", "Dor@", 0, true, 1);
+        session.save(Dor);
+        session.flush();
+        
+        LoginRegCheck Asaf = new LoginRegCheck("Asaf", "123", "Asaf@", 0, true, 1);
+        session.save(Asaf);
+        session.flush();
+        
+        // Krayot Store Workers
+        LoginRegCheck Nissim = new LoginRegCheck("Nissim", "123", "Nissim@", 0, true, 2);
+        session.save(Nissim);
+        session.flush();
+        
+        LoginRegCheck Yarden = new LoginRegCheck("Yarden", "123", "Yarden@", 0, true, 2);
+        session.save(Yarden);
+        session.flush();
+        
+        // Nahariyya Store Workers
+        LoginRegCheck Itay = new LoginRegCheck("Itay", "123", "Itay@", 0, true, 3);
+        session.save(Itay);
+        session.flush();
+        
+        LoginRegCheck Diana = new LoginRegCheck("Diana", "123", "Diana@", 0, true, 3);
+        session.save(Diana);
+        session.flush();
+        
+        // Regular Customers
+        LoginRegCheck tamar = new LoginRegCheck("tamar", "123", "tamar@", 0, false, 1);
+        session.save(tamar);
+        session.flush();
+        
+        LoginRegCheck amit = new LoginRegCheck("amit", "123", "amit@", 0, false, 1);
+        session.save(amit);
+        session.flush();
+        
+        // Network Admin
+        LoginRegCheck malci = new LoginRegCheck("malci", "123", "malci@", 0, true, 4);
+        session.save(malci);
+        session.flush();
+        
+        System.out.println(">>> CREATED 9 USERS");
+    }
+    
+    /**
+     * Verify store-flower relationships are working correctly
+     * @param session The Hibernate session
+     */
+    private static void verifyStoreFlowerRelationships(Session session) {
+        System.out.println(">>> VERIFYING STORE-FLOWER RELATIONSHIPS...");
+        
+        // Load all stores
+        String hql = "FROM Store";
+        List<Store> allStores = session.createQuery(hql, Store.class).getResultList();
+        
+        System.out.println("Found " + allStores.size() + " stores in database");
+        
+        for (Store store : allStores) {
+            System.out.println("Store: " + store.getStoreName() + " (ID: " + store.getId() + ")");
+            System.out.println("  Flowers count: " + store.getFlowersList().size());
+            
+            for (Flower flower : store.getFlowersList()) {
+                System.out.println("    - " + flower.getFlowerName() + " (ID: " + flower.getId() + ")");
+            }
+        }
+    }
+    
+    /**
+     * Check if database is already initialized
+     * @param sessionFactory The Hibernate session factory
+     * @return true if database has data, false otherwise
+     */
+    public static boolean isDatabaseInitialized(SessionFactory sessionFactory) {
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            
+            // Check if stores exist
+            String hql = "FROM Store";
+            List<Store> stores = session.createQuery(hql, Store.class).getResultList();
+            
+            // Check if flowers exist
+            String flowerHql = "FROM Flower";
+            List<Flower> flowers = session.createQuery(flowerHql, Flower.class).getResultList();
+            
+            // Check if users exist
+            String userHql = "FROM LoginRegCheck";
+            List<LoginRegCheck> users = session.createQuery(userHql, LoginRegCheck.class).getResultList();
+            
+            session.getTransaction().commit();
+            
+            boolean hasData = !stores.isEmpty() && !flowers.isEmpty() && !users.isEmpty();
+            System.out.println("Database initialization check: " + 
+                "Stores=" + stores.size() + ", Flowers=" + flowers.size() + ", Users=" + users.size() + 
+                " -> " + (hasData ? "ALREADY INITIALIZED" : "NEEDS INITIALIZATION"));
+            
+            return hasData;
+            
+        } catch (Exception e) {
+            System.err.println("Error checking database initialization: " + e.getMessage());
+            return false;
+        }
+    }
+} 

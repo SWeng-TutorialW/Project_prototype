@@ -1,8 +1,5 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
-
-import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
-import il.cshaifasweng.OCSFMediatorExample.entities.change_user_login;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -17,8 +14,6 @@ import java.io.IOException;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
-
-import javax.xml.catalog.Catalog;
 
 /**
  * JavaFX App
@@ -54,6 +49,9 @@ public class App extends Application {
     public static Scene getScene() {
         return scene;
     }
+    
+    
+
 
     @Override
 	public void stop() throws Exception {

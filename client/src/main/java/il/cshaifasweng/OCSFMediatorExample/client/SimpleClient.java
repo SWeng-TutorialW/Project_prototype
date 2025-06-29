@@ -7,6 +7,7 @@ import org.greenrobot.eventbus.EventBus;
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class SimpleClient extends AbstractClient {
 	
@@ -25,6 +26,10 @@ public class SimpleClient extends AbstractClient {
 
 	@Override
 	protected void handleMessageFromServer(Object msg) {
+		System.out.println("=== SIMPLE CLIENT: MESSAGE RECEIVED ===");
+		System.out.println("Message type: " + msg.getClass().getSimpleName());
+		System.out.println("Message content: " + msg.toString());
+		
 		String msgString = msg.toString();
 		if (msg.getClass().equals(Warning.class)) {
 			EventBus.getDefault().post(new WarningEvent((Warning) msg));
@@ -37,7 +42,15 @@ public class SimpleClient extends AbstractClient {
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
 		else if(msg.getClass().equals(Add_flower_event.class)){
+			System.out.println("=== SIMPLE CLIENT: ADD FLOWER EVENT RECEIVED ===");
+			Add_flower_event event = (Add_flower_event) msg;
+			System.out.println("Event catalog type: " + event.get_catalog_type());
+			System.out.println("Event flowers count: " + (event.get_flowers() != null ? event.get_flowers().size() : "null"));
+			if (event.get_catalog_type() == -1) {
+				System.out.println("*** NETWORK DELETE EVENT DETECTED ***");
+			}
 			EventBus.getDefault().post(msg); // post the catalog update to UI
+			System.out.println("Event posted to EventBus");
 		}
 		else if (msg instanceof List<?>) { // send users to reg scene
 			EventBus.getDefault().post(msg);
@@ -134,7 +147,21 @@ public class SimpleClient extends AbstractClient {
 		else if(msgString.equals("order_success")) {
 			EventBus.getDefault().post("order_success");
 		}
-
+		// Handle flower addition responses
+		else if(msgString.startsWith("Flower '") && msgString.contains("' added to store successfully")) {
+			EventBus.getDefault().post(msgString);
+		}
+		else if(msgString.startsWith("Flower is already in this store")) {
+			EventBus.getDefault().post(msgString);
+		}
+		else if(msgString.startsWith("Flower or store not found")) {
+			EventBus.getDefault().post(msgString);
+		}
+		else if(msgString.startsWith("Error adding flower to store:")) {
+			EventBus.getDefault().post(msgString);
+		}
+		
+		System.out.println("=== END SIMPLE CLIENT: MESSAGE PROCESSED ===");
 	}
 
 	public static SimpleClient getClient() {

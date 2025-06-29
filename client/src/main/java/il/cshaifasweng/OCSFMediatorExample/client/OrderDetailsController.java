@@ -57,6 +57,12 @@ public class OrderDetailsController {
     private TableColumn<CartItem, String> itemTypeColumn;
     
     @FXML
+    private TableColumn<CartItem, String> itemColorColumn;
+    
+    @FXML
+    private TableColumn<CartItem, String> itemCategoryColumn;
+    
+    @FXML
     private TableColumn<CartItem, String> itemStoreColumn;
     
     @FXML
@@ -118,6 +124,16 @@ public class OrderDetailsController {
         
         itemTypeColumn.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getFlower().getFlowerType()));
+        
+        itemColorColumn.setCellValueFactory(cellData -> {
+            String color = cellData.getValue().getFlower().getColor();
+            return new SimpleStringProperty(color != null ? color : "N/A");
+        });
+        
+        itemCategoryColumn.setCellValueFactory(cellData -> {
+            String category = cellData.getValue().getFlower().getCategory();
+            return new SimpleStringProperty(category != null ? category : "N/A");
+        });
         
         itemStoreColumn.setCellValueFactory(cellData -> 
             new SimpleStringProperty(cellData.getValue().getStore()));

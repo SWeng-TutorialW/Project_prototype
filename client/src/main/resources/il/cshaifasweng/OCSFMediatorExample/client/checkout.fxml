@@ -205,11 +205,13 @@
                     <TableView fx:id="orderTable" prefHeight="200.0" VBox.vgrow="NEVER"
                                style="-fx-background-color: #fff; -fx-border-color: #B79DD9;">
                         <columns>
-                            <TableColumn fx:id="nameColumn" prefWidth="200.0" text="Flower Name" />
-                            <TableColumn fx:id="typeColumn" prefWidth="150.0" text="Type" />
-                            <TableColumn fx:id="priceColumn" prefWidth="100.0" text="Price" />
-                            <TableColumn fx:id="quantityColumn" prefWidth="100.0" text="Quantity" />
-                            <TableColumn fx:id="totalColumn" prefWidth="100.0" text="Total" />
+                            <TableColumn fx:id="nameColumn" prefWidth="150.0" text="Flower Name" />
+                            <TableColumn fx:id="typeColumn" prefWidth="100.0" text="Type" />
+                            <TableColumn fx:id="colorColumn" prefWidth="80.0" text="Color" />
+                            <TableColumn fx:id="categoryColumn" prefWidth="100.0" text="Category" />
+                            <TableColumn fx:id="priceColumn" prefWidth="80.0" text="Price" />
+                            <TableColumn fx:id="quantityColumn" prefWidth="80.0" text="Quantity" />
+                            <TableColumn fx:id="totalColumn" prefWidth="80.0" text="Total" />
                         </columns>
                     </TableView>
 

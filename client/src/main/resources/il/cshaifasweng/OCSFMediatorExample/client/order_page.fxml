@@ -41,6 +41,16 @@
                             <Font size="18.0" />
                         </font>
                     </Label>
+                    <Label fx:id="flowerColor" text="Color" textFill="WHITE">
+                        <font>
+                            <Font size="18.0" />
+                        </font>
+                    </Label>
+                    <Label fx:id="flowerCategory" text="Category" textFill="WHITE">
+                        <font>
+                            <Font size="18.0" />
+                        </font>
+                    </Label>
                     <Label fx:id="flowerPrice" text="Price: $0.00" textFill="WHITE">
                         <font>
                             <Font size="18.0" />
