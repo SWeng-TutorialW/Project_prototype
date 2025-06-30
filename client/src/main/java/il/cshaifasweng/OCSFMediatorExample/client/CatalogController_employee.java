@@ -358,25 +358,27 @@ public class CatalogController_employee {
 
         if (type != 4) {
             discount.setDisable(true); // Disable the discount button for non-network users
-            discount.setStyle("-fx-opacity: 0.5;");
+            discount.setStyle("-fx-background-color: #EBD9EB; -fx-text-fill: #A58BA5; -fx-border-color: #D1BBD1;");
+
         }
         if(this.user.getEmployeetype() != 1) {
             users_btn.setDisable(true); // Disable the discount button for non-network users
-            users_btn.setStyle("-fx-opacity: 0.5;");
+            users_btn.setStyle("-fx-background-color: #EBD9EB; -fx-text-fill: #A58BA5; -fx-border-color: #D1BBD1;");
+
         }
         if(this.user.getEmployeetype() != 0) {
             reportsBtn.setDisable(true); // Disable the discount button for non-network users
-            reportsBtn.setStyle("-fx-opacity: 0.5;");
+            reportsBtn.setStyle("-fx-background-color: #EBD9EB; -fx-text-fill: #A58BA5; -fx-border-color: #D1BBD1;");
 
             discount.setDisable(true);
-            discount.setStyle("-fx-opacity: 0.5;");
+            discount.setStyle("-fx-background-color: #EBD9EB; -fx-text-fill: #A58BA5; -fx-border-color: #D1BBD1;");
         }
          if (this.user.getEmployeetype() == 0 || this.user.getEmployeetype() == 3){
              add_flower.setDisable(false);
          }
          else{
              add_flower.setDisable(true);
-             add_flower.setStyle("-fx-opacity: 0.5;");
+             add_flower.setStyle("-fx-background-color: #EBD9EB; -fx-text-fill: #A58BA5; -fx-border-color: #D1BBD1;");
          }
 
 
