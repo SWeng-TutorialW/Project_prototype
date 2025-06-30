@@ -262,6 +262,8 @@ public class MyAccountController {
                 idNumTxtB.setDisable(false);
                 idNumTxtB.setEditable(true);
         }
+
+        idNumTxtB.setEditable(false);
     }
 
     @Subscribe
