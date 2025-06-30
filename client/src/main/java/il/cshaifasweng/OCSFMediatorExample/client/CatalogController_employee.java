@@ -487,7 +487,6 @@ public class CatalogController_employee {
         }
         System.out.println("CatalogController employee initialized");
 
-        Platform.runLater(this::updateMailboxIcon);
 
         // Refresh user state from server
         refreshUserState();
