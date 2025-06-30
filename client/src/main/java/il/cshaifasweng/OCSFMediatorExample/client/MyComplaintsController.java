@@ -44,6 +44,7 @@ public class MyComplaintsController {
     private Label statusLabel;
 
     private LoginRegCheck currentUser;
+
     private ObservableList<ComplaintRow> complaintsData = FXCollections.observableArrayList();
 
     @FXML
