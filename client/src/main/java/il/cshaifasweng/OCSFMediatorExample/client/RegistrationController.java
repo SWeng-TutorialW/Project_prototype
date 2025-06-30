@@ -100,6 +100,15 @@ public class RegistrationController {
         for (LoginRegCheck loginRegCheck : users) {
 
             if (loginRegCheck.getUsername().equals(user) && loginRegCheck.getPassword().equals(pass)) {
+                // Check if user is already logged in
+                if (loginRegCheck.getIsLogin() == 1) {
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Login Error");
+                    alert.setHeaderText("Already Logged In");
+                    alert.setContentText("This user is already logged in elsewhere. Please log out from other devices first.");
+                    alert.showAndWait();
+                    return;
+                }
                 System.out.println("");
                 change_user_login wrapper = new change_user_login(loginRegCheck, 1);
                 try {
@@ -108,6 +117,7 @@ public class RegistrationController {
                     e.printStackTrace();
                 }
                 loginRegCheck.setIsLogin(1);
+                SimpleClient.isGuest = false;
                 catalogController.set_user(loginRegCheck);
                 catalogController.set_type(loginRegCheck.getStore());
                 con.set_user(loginRegCheck);
@@ -257,6 +267,7 @@ public class RegistrationController {
                 sendAndClose.run();
             }, sendAndClose, event);
         } else {
+            SimpleClient.isGuest = false;
             CatalogController.set_user(new_user); // Set the user in CatalogController
             sendAndClose.run();
             Success success = new Success("Registration Completed!");

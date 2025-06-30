@@ -210,7 +210,7 @@ public class OrderPageController {
 
     @FXML
     private void addToCart() {
-        if (user == null || user.getIsLogin() == 0) {
+        if (user == null || user.getIsLogin() == 0 || SimpleClient.isGuest) {
             System.out.println("User not logged in");
             Warning warning = new Warning("Please log in to add items to cart");
             EventBus.getDefault().post(new WarningEvent(warning));
