@@ -9,6 +9,7 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -31,273 +32,43 @@
                   <Insets />
                </opaqueInsets>
             </Label>
-            <Button fx:id="accountLbl" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="483.0" layoutY="1.0" mnemonicParsing="false" onMouseClicked="#gotoAcc" prefHeight="41.0" prefWidth="142.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="    My Account" textFill="#fdfdfd">
+            <Button fx:id="accountLbl" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="461.0" layoutY="-3.0" mnemonicParsing="false" onMouseClicked="#gotoAcc" prefHeight="45.0" prefWidth="144.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="    My Account" textFill="#fdfdfd">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <ImageView fitHeight="36.0" fitWidth="34.0" layoutX="483.0" layoutY="4.0" pickOnBounds="true">
+            <ImageView fitHeight="36.0" fitWidth="34.0" layoutX="461.0" layoutY="4.0" pickOnBounds="true">
                <image>
                   <Image url="@../../../../images/person_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.png" />
                </image>
             </ImageView>
-            <Button fx:id="cart" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="625.0" layoutY="1.0" mnemonicParsing="false" onAction="#openCart" prefHeight="41.0" prefWidth="85.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text=" Cart" textFill="#fdfdfd">
+            <Button fx:id="cart" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="605.0" layoutY="-2.0" mnemonicParsing="false" onAction="#openCart" prefHeight="44.0" prefWidth="105.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text=" Cart" textFill="#fdfdfd">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <ImageView fitHeight="39.0" fitWidth="27.0" layoutX="625.0" layoutY="2.0" pickOnBounds="true">
+            <ImageView fitHeight="39.0" fitWidth="27.0" layoutX="605.0" layoutY="3.0" pickOnBounds="true">
                <image>
                   <Image url="@../../../../images/cart.png" />
                </image>
             </ImageView>
-            <HBox fx:id="first_line" layoutY="126.0" prefHeight="221.0" prefWidth="776.0" spacing="15.0">
-               <children>
-                  <Button fx:id="one_1" mnemonicParsing="false" onAction="#open_flower" prefHeight="219.0" prefWidth="182.0">
-                     <graphic>
-                        <VBox fx:id="flower_1" prefHeight="193.0" prefWidth="166.0">
-                           <children>
-                              <ImageView fx:id="pic_1" fitHeight="83.0" fitWidth="166.0" pickOnBounds="true" />
-                              <Label fx:id="name_1" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Label fx:id="type_1" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Text fx:id="price_1_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font></Text>
-                              <TextField fx:id="price_1" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </TextField>
-                           </children>
-                        </VBox>
-                     </graphic>
-                  </Button>
-                  <Button fx:id="two_2" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
-                     <graphic>
-                        <VBox fx:id="flower_2" prefHeight="202.0" prefWidth="162.0">
-                           <children>
-                              <ImageView fx:id="pic_2" fitHeight="96.0" fitWidth="166.0" pickOnBounds="true" />
-                              <Label fx:id="name_2" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Label fx:id="type_2" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Text fx:id="price_2_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Text>
-                              <TextField fx:id="price_2" alignment="TOP_CENTER" prefHeight="27.0" prefWidth="166.0" style="-fx-text-fill: #c8a2c8;">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </TextField>
-                           </children>
-                        </VBox>
-                     </graphic>
-                  </Button>
-                  <Button fx:id="three_3" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
-                     <graphic>
-                        <VBox fx:id="flower_3" prefHeight="202.0" prefWidth="162.0">
-                           <children>
-                              <ImageView fx:id="pic_3" fitHeight="96.0" fitWidth="166.0" pickOnBounds="true" />
-                              <Label fx:id="name_3" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Label fx:id="type_3" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Text fx:id="price_3_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Text>
-                              <TextField fx:id="price_3" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </TextField>
-                           </children>
-                        </VBox>
-                     </graphic>
-                  </Button>
-                  <Button fx:id="four_4" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
-                     <graphic>
-                        <VBox fx:id="flower_4" prefHeight="202.0" prefWidth="162.0">
-                           <children>
-                              <ImageView fx:id="pic_4" fitHeight="96.0" fitWidth="166.0" pickOnBounds="true" />
-                              <Label fx:id="name_4" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Label fx:id="type_4" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Text fx:id="price_4_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Text>
-                              <TextField fx:id="price_4" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </TextField>
-                           </children>
-                        </VBox>
-                     </graphic>
-                  </Button>
-               </children>
-            </HBox>
-            <HBox fx:id="second_line" layoutY="356.0" prefHeight="197.0" prefWidth="775.0" spacing="15.0">
-               <children>
-                  <Button fx:id="five_5" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
-                     <graphic>
-                        <VBox fx:id="flower_5" prefHeight="202.0" prefWidth="162.0">
-                           <children>
-                              <ImageView fx:id="pic_5" fitHeight="96.0" fitWidth="166.0" pickOnBounds="true" />
-                              <Label fx:id="name_5" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Label fx:id="type_5" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Text fx:id="price_5_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Text>
-                              <TextField fx:id="price_5" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </TextField>
-                           </children>
-                        </VBox>
-                     </graphic>
-                  </Button>
-                  <Button fx:id="six_6" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
-                     <graphic>
-                        <VBox fx:id="flower_6" prefHeight="202.0" prefWidth="162.0">
-                           <children>
-                              <ImageView fx:id="pic_6" fitHeight="96.0" fitWidth="166.0" pickOnBounds="true" />
-                              <Label fx:id="name_6" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Label fx:id="type_6" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Text fx:id="price_6_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Text>
-                              <TextField fx:id="price_6" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </TextField>
-                           </children>
-                        </VBox>
-                     </graphic>
-                  </Button>
-                  <Button fx:id="seven_7" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
-                     <graphic>
-                        <VBox fx:id="flower_7" prefHeight="202.0" prefWidth="162.0">
-                           <children>
-                              <ImageView fx:id="pic_7" fitHeight="96.0" fitWidth="166.0" pickOnBounds="true" />
-                              <Label fx:id="name_7" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Label fx:id="type_7" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Text fx:id="price_7_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Text>
-                              <TextField fx:id="price_7" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </TextField>
-                           </children>
-                        </VBox>
-                     </graphic>
-                  </Button>
-                  <Button fx:id="eight_8" mnemonicParsing="false" onAction="#open_flower" prefWidth="74.0">
-                     <graphic>
-                        <VBox fx:id="flower_8" prefHeight="202.0" prefWidth="162.0">
-                           <children>
-                              <ImageView fx:id="pic_8" fitHeight="96.0" fitWidth="166.0" pickOnBounds="true" />
-                              <Label fx:id="name_8" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Label fx:id="type_8" alignment="TOP_CENTER" prefHeight="32.0" prefWidth="186.0" textFill="#c8a2c8">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Label>
-                              <Text fx:id="price_8_before_sale" fill="LIGHTPINK" fontSmoothingType="LCD" strikethrough="true" strokeType="OUTSIDE" strokeWidth="0.0" text="2" visible="false" wrappingWidth="49.13671875">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </Text>
-                              <TextField fx:id="price_8" alignment="TOP_CENTER" style="-fx-text-fill: #c8a2c8;">
-                                 <font>
-                                    <Font size="18.0" />
-                                 </font>
-                              </TextField>
-                           </children>
-                        </VBox>
-                     </graphic>
-                  </Button>
-               </children>
-            </HBox>
+            <Button fx:id="reportsBtn" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="280.0" layoutY="1.0" mnemonicParsing="false" onAction="#openReports" prefHeight="41.0" prefWidth="142.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="📊 Reports" textFill="#fdfdfd">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Button>
+            <FlowPane fx:id="catalogFlowPane" hgap="20.0" layoutX="20.0" layoutY="120.0" prefHeight="700.0" prefWidth="800.0" vgap="20.0">
+               <padding>
+                  <Insets bottom="20" left="20" right="20" top="20" />
+               </padding>
+            </FlowPane>
             <AnchorPane fx:id="for_combo" layoutX="14.0" layoutY="80.0" prefHeight="30.0" prefWidth="150.0">
                <children>
-                  <ComboBox fx:id="combo" onAction="#combo_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
-                  <ImageView fx:id="sort_image" fitHeight="25.0" fitWidth="43.0" pickOnBounds="true">
-                     <image>
-                        <Image url="@../../../../images/sort.png" />
-                     </image>
-                  </ImageView>
+                  <Button fx:id="filterButton" layoutX="20.0" layoutY="4.0" mnemonicParsing="false" onAction="#openFilterWindow" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #C8A2C8; -fx-text-fill: white;" text="Filter">
+                     <font>
+                        <Font name="Segoe UI" size="12.0" />
+                     </font>
+                  </Button>
                </children>
             </AnchorPane>
             <HBox fx:id="second_line1" layoutY="589.0" prefHeight="197.0" prefWidth="775.0" spacing="15.0">
@@ -420,19 +191,26 @@
                   </Button>
                </children>
             </HBox>
-            <ComboBox fx:id="Stores" layoutX="319.0" layoutY="83.0" onAction="#stores_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
+            <ComboBox fx:id="Stores" layoutX="145.0" layoutY="84.0" onAction="#stores_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
             <AnchorPane fx:id="costu" layoutX="773.0" layoutY="-3.0" prefHeight="838.0" prefWidth="200.0" style="-fx-background-color: #C8A2C8;">
                <children>
                   <Label fx:id="cus_label" layoutX="4.0" layoutY="165.0" text="Create your own bouquet" textFill="#fdfdfd">
                      <font>
                         <Font size="16.0" />
                      </font></Label>
-                  <Button fx:id="Mail_box" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="52.0" layoutY="7.0" mnemonicParsing="false" onAction="#open_mail" prefHeight="41.0" prefWidth="111.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Mail_box" textFill="#fdfdfd">
+                  <Button fx:id="Mail_box" alignment="CENTER" contentDisplay="RIGHT" layoutX="52.0" mnemonicParsing="false" onAction="#open_mail" prefHeight="46.0" prefWidth="147.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Mail Box" textFill="#fdfdfd">
                      <font>
                         <Font size="18.0" />
                      </font>
+                     <graphic>
+                        <ImageView fx:id="mailbox_icon" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" visible="false">
+                           <image>
+                              <Image url="@../../../../images/active.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
                   </Button>
-                  <Button fx:id="contact" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="-63.0" layoutY="7.0" mnemonicParsing="false" onAction="#complaint" prefHeight="41.0" prefWidth="127.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="  Contact Us" textFill="#fdfdfd">
+                  <Button fx:id="contact" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="-63.0" layoutY="1.0" mnemonicParsing="false" onAction="#complaint" prefHeight="45.0" prefWidth="127.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="  Contact Us" textFill="#fdfdfd">
                      <font>
                         <Font size="18.0" />
                      </font>
@@ -446,7 +224,6 @@
                   <Button fx:id="bouqut_btn" layoutX="16.0" layoutY="197.0" mnemonicParsing="false" onAction="#create_bouqut" prefHeight="25.0" prefWidth="97.0" style="-fx-background-color: #fdfdfd;" text="MY BOUQUET" />
                </children>
             </AnchorPane>
-            <ComboBox fx:id="colors" layoutX="529.0" layoutY="83.0" onAction="#colors_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
          </children>
       </AnchorPane>
    </content>

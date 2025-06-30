@@ -16,6 +16,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import javafx.application.Platform;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,6 +26,8 @@ public class CartController {
     @FXML private TableColumn<CartItem, String> nameColumn;
     @FXML private TableColumn<CartItem, String> storeColumn;
     @FXML private TableColumn<CartItem, String> typeColumn;
+    @FXML private TableColumn<CartItem, String> colorColumn;
+    @FXML private TableColumn<CartItem, String> categoryColumn;
     @FXML private TableColumn<CartItem, Double> priceColumn;
     @FXML private TableColumn<CartItem, Integer> quantityColumn;
     @FXML private TableColumn<CartItem, Double> totalColumn;
@@ -64,6 +67,14 @@ public class CartController {
                 new SimpleStringProperty(cellData.getValue().getStore()));
         typeColumn.setCellValueFactory(cellData ->
             new SimpleStringProperty(cellData.getValue().getFlower().getFlowerType()));
+        colorColumn.setCellValueFactory(cellData -> {
+            String color = cellData.getValue().getFlower().getColor();
+            return new SimpleStringProperty(color != null ? color : "N/A");
+        });
+        categoryColumn.setCellValueFactory(cellData -> {
+            String category = cellData.getValue().getFlower().getCategory();
+            return new SimpleStringProperty(category != null ? category : "N/A");
+        });
         priceColumn.setCellValueFactory(cellData ->
             new SimpleDoubleProperty(cellData.getValue().getFlower().getFlowerPrice()).asObject());
         quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
@@ -104,11 +115,24 @@ public class CartController {
         // Unregister from EventBus when window closes
         cartTable.sceneProperty().addListener((obs, oldScene, newScene) -> {
             if (newScene != null) {
-                newScene.getWindow().setOnHidden(e -> {
-                    if (EventBus.getDefault().isRegistered(this)) {
-                        EventBus.getDefault().unregister(this);
-                    }
-                });
+                if (newScene.getWindow() != null) {
+                    newScene.getWindow().setOnHidden(e -> {
+                        if (EventBus.getDefault().isRegistered(this)) {
+                            EventBus.getDefault().unregister(this);
+                        }
+                    });
+                } else {
+                    // Listen for the window property to become non-null
+                    newScene.windowProperty().addListener((obsWin, oldWin, newWin) -> {
+                        if (newWin != null) {
+                            newWin.setOnHidden(e -> {
+                                if (EventBus.getDefault().isRegistered(this)) {
+                                    EventBus.getDefault().unregister(this);
+                                }
+                            });
+                        }
+                    });
+                }
             }
         });
     }
@@ -127,7 +151,7 @@ public class CartController {
         double total = cartItems.stream()
                 .mapToDouble(CartItem::getTotalPrice)
                 .sum();
-        cartTotal.setText(String.format("Total: $%.2f", total));
+        cartTotal.setText(String.format("Total: ₪%.2f", total));
     }
 
     private void removeItem(CartItem item) {
@@ -185,16 +209,14 @@ public class CartController {
 
         if (CheckoutController.isCheckoutOpen()) {
             CheckoutController.checkoutStage.close();
-            // Do not return; continue to open a new window
         }
 
-        System.out.println("User is logged in, proceeding to checkout");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("checkout.fxml"));
             Parent root = loader.load();
             CheckoutController checkoutController = loader.getController();
             checkoutController.setCartItems(cartItems);
-            checkoutController.setCurrentUser(currentUser); // Pass the user to checkout
+            checkoutController.setCurrentUser(currentUser);
 
             Stage stage = new Stage();
             CheckoutController.setCheckoutStage(stage);
@@ -203,17 +225,19 @@ public class CartController {
             stage.show();
 
             // Close cart window
-            ((Stage) cartTable.getScene().getWindow()).close();
+            Stage cartStage = (Stage) checkoutButton.getScene().getWindow();
+            cartStage.close();
         } catch (IOException e) {
-            System.err.println("Error loading checkout.fxml: " + e.getMessage());
             e.printStackTrace();
+            Warning warning = new Warning("Error opening checkout");
+            EventBus.getDefault().post(new WarningEvent(warning));
         }
     }
 
     @FXML
     private void continueShopping() {
-        // Close cart window
-        ((Stage) cartTable.getScene().getWindow()).close();
+        Stage stage = (Stage) continueShoppingButton.getScene().getWindow();
+        stage.close();
     }
 
     @FXML
@@ -230,19 +254,20 @@ public class CartController {
 
     @FXML
     private void openCartWarningIfOpen() {
-        if (CartController.isCartOpen()) {
+        if (isCartOpen()) {
             Warning warning = new Warning("The cart window is already open.");
             EventBus.getDefault().post(new WarningEvent(warning));
-            CartController.setCartStage(CartController.cartStage); // bring to front
-            CartController.cartStage.toFront();
-            CartController.cartStage.requestFocus();
-            return;
+            cartStage.toFront();
+            cartStage.requestFocus();
         }
-        // ... existing open cart logic ...
     }
 
     @Subscribe
     public void onCartUpdated(CartUpdatedEvent event) {
-        setCartItems(OrderPageController.getCartItems());
+        Platform.runLater(() -> {
+            // Refresh the cart display with the latest items from the shared cart
+            cartItems.setAll(OrderPageController.getCartItems());
+            // No need to call updateTotal() here, the listener on cartItems will do it.
+        });
     }
 }

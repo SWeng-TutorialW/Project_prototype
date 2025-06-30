@@ -126,8 +126,9 @@ public class complain_controller implements Initializable {
 
     private void showNoOrders() {
         ordersTable.setVisible(false);
-        Warning warning = new Warning("You don't have any orders yet. Please place an order before submitting a complaint.");
-        EventBus.getDefault().post(new WarningEvent(warning));
+        // Remove the warning - complaints should be allowed without orders
+        // Warning warning = new Warning("You don't have any orders yet. Please place an order before submitting a complaint.");
+        // EventBus.getDefault().post(new WarningEvent(warning));
     }
 
     @Subscribe
@@ -179,19 +180,21 @@ public class complain_controller implements Initializable {
             return;
         }
 
-        if (selectedOrder == null) {
-            Warning warning = new Warning("Please click on an order from the table before submitting your complaint.");
-            EventBus.getDefault().post(new WarningEvent(warning));
-            return;
-        }
-
-        // Create complaint with selected order ID and price
+        // Create complaint - can be with or without order
         Complain complain = new Complain(client_complaint);
         if (currentUser != null) {
             complain.setClient(currentUser.getUsername());
         }
-        String complaintWithOrder = "Order #" + selectedOrder.getId() + " - Price: $" + String.format("%.2f", selectedOrder.getTotalAmount()) + " - " + client_complaint;
-        complain.setComplaint(complaintWithOrder);
+        
+        // If an order is selected, include order information
+        if (selectedOrder != null) {
+            String complaintWithOrder = "Order #" + selectedOrder.getId() + " - Price: ₪" + String.format("%.2f", selectedOrder.getTotalAmount()) + " - " + client_complaint;
+            complain.setComplaint(complaintWithOrder);
+            complain.setOrder(selectedOrder); // Set the order reference
+        } else {
+            // General complaint without order
+            complain.setComplaint(client_complaint);
+        }
 
         if (catalogController != null) {
             catalogController.receiveNewComplain(complain);

@@ -12,11 +12,9 @@
             <Font name="Dubai Medium" size="24.0" />
          </font>
       </Label>
-      
-      <!-- Order Information Section -->
+
       <VBox layoutX="50.0" layoutY="70.0" prefWidth="800.0" spacing="10.0">
          <children>
-            <!-- Order Header Info -->
             <HBox spacing="20.0">
                <children>
                   <VBox spacing="5.0" prefWidth="200.0">
@@ -39,8 +37,7 @@
                   </VBox>
                </children>
             </HBox>
-            
-            <!-- Customer Information -->
+
             <HBox spacing="20.0">
                <children>
                   <VBox spacing="5.0" prefWidth="200.0">
@@ -63,24 +60,21 @@
                   </VBox>
                </children>
             </HBox>
-            
-            <!-- Address Information (if delivery) -->
+
             <VBox fx:id="addressSection" spacing="5.0" visible="false">
                <children>
                   <Label text="Delivery Address:" style="-fx-font-weight: bold;" />
                   <Label fx:id="addressLabel" text="Address" />
                </children>
             </VBox>
-            
-            <!-- Delivery Time (if delivery) -->
+
             <VBox fx:id="deliveryTimeSection" spacing="5.0" visible="false">
                <children>
                   <Label text="Delivery Time:" style="-fx-font-weight: bold;" />
                   <Label fx:id="deliveryTimeLabel" text="Delivery Time" />
                </children>
             </VBox>
-            
-            <!-- Cancellation Information (if cancelled) -->
+
             <VBox fx:id="cancellationSection" spacing="5.0" visible="false">
                <children>
                   <Label text="Cancellation Information:" style="-fx-font-weight: bold; -fx-font-size: 16;" />
@@ -108,8 +102,7 @@
                   </HBox>
                </children>
             </VBox>
-            
-            <!-- Greeting Card Information (if included) -->
+
             <VBox fx:id="greetingCardSection" spacing="5.0" visible="false">
                <children>
                   <Label text="Greeting Card Information:" style="-fx-font-weight: bold; -fx-font-size: 16;" />
@@ -131,43 +124,47 @@
                   </HBox>
                </children>
             </VBox>
-            
-            <!-- Items Table -->
+
             <Label text="Order Items:" style="-fx-font-weight: bold; -fx-font-size: 16;" />
             <TableView fx:id="itemsTable" prefHeight="250.0" prefWidth="800.0">
                <columns>
-                  <TableColumn fx:id="itemNameColumn" prefWidth="150.0" text="Item Name" />
-                  <TableColumn fx:id="itemTypeColumn" prefWidth="100.0" text="Type" />
-                  <TableColumn fx:id="itemStoreColumn" prefWidth="100.0" text="Store" />
-                  <TableColumn fx:id="itemPriceColumn" prefWidth="80.0" text="Price" />
-                  <TableColumn fx:id="itemQuantityColumn" prefWidth="80.0" text="Quantity" />
-                  <TableColumn fx:id="itemTotalColumn" prefWidth="100.0" text="Total" />
+                  <TableColumn fx:id="itemNameColumn" prefWidth="120.0" text="Item Name" />
+                  <TableColumn fx:id="itemTypeColumn" prefWidth="80.0" text="Type" />
+                  <TableColumn fx:id="itemColorColumn" prefWidth="70.0" text="Color" />
+                  <TableColumn fx:id="itemCategoryColumn" prefWidth="90.0" text="Category" />
+                  <TableColumn fx:id="itemStoreColumn" prefWidth="80.0" text="Store" />
+                  <TableColumn fx:id="itemPriceColumn" prefWidth="70.0" text="Price" />
+                  <TableColumn fx:id="itemQuantityColumn" prefWidth="70.0" text="Quantity" />
+                  <TableColumn fx:id="itemTotalColumn" prefWidth="80.0" text="Total" />
                </columns>
             </TableView>
-            
-            <!-- Order Summary -->
-            <HBox spacing="20.0" alignment="CENTER_RIGHT">
+
+            <VBox spacing="10.0" alignment="CENTER_RIGHT">
                <children>
-                  <VBox spacing="5.0" alignment="CENTER_RIGHT">
+                  <HBox spacing="10.0" alignment="CENTER_RIGHT">
                      <children>
-                        <Label text="Subtotal:" style="-fx-font-weight: bold;" />
-                        <Label text="Delivery Fee:" style="-fx-font-weight: bold;" />
-                        <Label text="Total Amount:" style="-fx-font-weight: bold; -fx-font-size: 16;" />
+                        <VBox spacing="5.0" alignment="CENTER_RIGHT" prefWidth="150">
+                           <children>
+                              <Label text="Subtotal:" style="-fx-font-weight: bold;" />
+                              <Label text="Delivery Fee:" style="-fx-font-weight: bold;" />
+                              <Label text="Total Amount:" style="-fx-font-weight: bold; -fx-font-size: 16;" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="5.0" alignment="CENTER_RIGHT" prefWidth="100">
+                           <children>
+                              <Label fx:id="subtotalLabel" text="₪0.00" />
+                              <Label fx:id="deliveryFeeLabel" text="₪0.00" />
+                              <Label fx:id="totalAmountLabel" text="₪0.00" style="-fx-font-size: 16;" />
+                           </children>
+                        </VBox>
                      </children>
-                  </VBox>
-                  <VBox spacing="5.0" alignment="CENTER_RIGHT">
-                     <children>
-                        <Label fx:id="subtotalLabel" text="₪0.00" />
-                        <Label fx:id="deliveryFeeLabel" text="₪0.00" />
-                        <Label fx:id="discountLabel" text="" visible="false" style="-fx-text-fill: #388e3c; -fx-font-size: 16; -fx-font-weight: bold;" />
-                        <Label fx:id="totalAmountLabel" text="₪0.00" style="-fx-font-size: 16;" />
-                     </children>
-                  </VBox>
+                  </HBox>
+                  <Label fx:id="discountLabel" text="" visible="false" style="-fx-text-fill: #388e3c; -fx-font-size: 16; -fx-font-weight: bold;" />
                </children>
-            </HBox>
+            </VBox>
          </children>
       </VBox>
-      
+
       <Button fx:id="backButton" layoutX="400.0" layoutY="750.0" prefHeight="30.0" prefWidth="100.0" text="Back" onAction="#handleBackButton" />
    </children>
-</AnchorPane> 
+</AnchorPane>

@@ -7,6 +7,7 @@ import org.greenrobot.eventbus.EventBus;
 import il.cshaifasweng.OCSFMediatorExample.client.ocsf.AbstractClient;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class SimpleClient extends AbstractClient {
 	
@@ -25,6 +26,10 @@ public class SimpleClient extends AbstractClient {
 
 	@Override
 	protected void handleMessageFromServer(Object msg) {
+		System.out.println("=== SIMPLE CLIENT: MESSAGE RECEIVED ===");
+		System.out.println("Message type: " + msg.getClass().getSimpleName());
+		System.out.println("Message content: " + msg.toString());
+		
 		String msgString = msg.toString();
 		if (msg.getClass().equals(Warning.class)) {
 			EventBus.getDefault().post(new WarningEvent((Warning) msg));
@@ -37,10 +42,37 @@ public class SimpleClient extends AbstractClient {
 			EventBus.getDefault().post(msg); // post the catalog update to UI
 		}
 		else if(msg.getClass().equals(Add_flower_event.class)){
+			System.out.println("=== SIMPLE CLIENT: ADD FLOWER EVENT RECEIVED ===");
+			Add_flower_event event = (Add_flower_event) msg;
+			System.out.println("Event catalog type: " + event.get_catalog_type());
+			System.out.println("Event flowers count: " + (event.get_flowers() != null ? event.get_flowers().size() : "null"));
+			if (event.get_catalog_type() == -1) {
+				System.out.println("*** NETWORK DELETE EVENT DETECTED ***");
+			}
 			EventBus.getDefault().post(msg); // post the catalog update to UI
+			System.out.println("Event posted to EventBus");
 		}
 		else if (msg instanceof List<?>) { // send users to reg scene
-			EventBus.getDefault().post(msg);
+			List<?> list = (List<?>) msg;
+			if (!list.isEmpty()) {
+				Object firstElement = list.get(0);
+				if (firstElement instanceof LoginRegCheck) {
+					// This is a list of users - post it for registration/login scenes
+					EventBus.getDefault().post(msg);
+				} else if (firstElement instanceof Complain) {
+					// This is a list of complaints - post it for complaint handlers
+					EventBus.getDefault().post(msg);
+				} else if (firstElement instanceof Order) {
+					// This is a list of orders - post it for order handlers
+					EventBus.getDefault().post(msg);
+				} else {
+					// Unknown list type - log it but don't post to avoid errors
+					System.out.println("Unknown list type received: " + firstElement.getClass().getName());
+				}
+			} else {
+				// Empty list - post it (could be empty orders, complaints, etc.)
+				EventBus.getDefault().post(msg);
+			}
 		}
 		else if(msg.getClass().equals(ComplainUpdateEvent.class)){
 			EventBus.getDefault().post(msg); // post the catalog update to UI
@@ -134,7 +166,24 @@ public class SimpleClient extends AbstractClient {
 		else if(msgString.equals("order_success")) {
 			EventBus.getDefault().post("order_success");
 		}
-
+		else if(msgString.equals("update_mailbox_icon")) {
+			EventBus.getDefault().post("update_mailbox_icon");
+		}
+		// Handle flower addition responses
+		else if(msgString.startsWith("Flower '") && msgString.contains("' added to store successfully")) {
+			EventBus.getDefault().post(msgString);
+		}
+		else if(msgString.startsWith("Flower is already in this store")) {
+			EventBus.getDefault().post(msgString);
+		}
+		else if(msgString.startsWith("Flower or store not found")) {
+			EventBus.getDefault().post(msgString);
+		}
+		else if(msgString.startsWith("Error adding flower to store:")) {
+			EventBus.getDefault().post(msgString);
+		}
+		
+		System.out.println("=== END SIMPLE CLIENT: MESSAGE PROCESSED ===");
 	}
 
 	public static SimpleClient getClient() {

@@ -21,23 +21,71 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
+import static javafx.geometry.Pos.CENTER;
+
 public class MyAccountController {
 
-    @FXML public Label userIdLbl;
-    @FXML public TextField idNumTxtB;
-    @FXML TextField userChangeTxtB;
-    @FXML TextField emailChangeTxtB;
-    @FXML TextField phoneChangeTxtB;
-    @FXML private Label accountTypeEmptyLbl, passErrorMsgLbl,  newPassLbl, confNewPassLbl,accTypeLbl, usrnmeLbl, emailLbl, phoneNumLbl, changePassLbl;
-    @FXML private Button myOrdersButton, subscribeBtn, changeBtn;
-    @FXML private AnchorPane myAccUsers, my_account_data;
-    @FXML private PasswordField newPassTxtB, confNewPassTxtB;
-    @FXML private Label subscriptionExpireLbl, subscriptionExpireTitleLbl;
+    @FXML
+    private Button ChangeBtn;
+    @FXML
+    private Label accTypeLbl;
+    @FXML
+    private Label accountTypeEmptyLbl;
+    @FXML
+    private Button changePassBtn;
+    @FXML
+    private Label changePassLbl;
+    @FXML
+    private Label confNewPassLbl;
+    @FXML
+    private PasswordField confNewPassTxtB;
+    @FXML
+    private TextField emailChangeTxtB;
+    @FXML
+    private Label emailLbl;
+    @FXML
+    private TextField fNameTxtB;
+    @FXML
+    private Label fullNameLbl;
+    @FXML
+    private TextField idNumTxtB;
+    @FXML
+    private AnchorPane myAccUsers;
+    @FXML
+    private Label myAccountLbl;
+    @FXML
+    private Button myOrdersButton;
+    @FXML
+    private Button myComplaintsButton;
+    @FXML
+    private AnchorPane my_account_data;
+    @FXML
+    private Label newPassLbl;
+    @FXML
+    private PasswordField newPassTxtB;
+    @FXML
+    private Label passErrorMsgLbl;
+    @FXML
+    private TextField phoneChangeTxtB;
+    @FXML
+    private Label phoneNumLbl;
+    @FXML
+    private Button subscribeBtn;
+    @FXML
+    private Label subscriptionExpireLbl;
+    @FXML
+    private Label subscriptionExpireTitleLbl;
+    @FXML
+    private TextField userChangeTxtB;
+    @FXML
+    private Label userIdLbl;
+    @FXML
+    private Label usrnmeLbl;
 
 
-    private LoginRegCheck current_User;
+    private static LoginRegCheck current_User;
 
-    private CatalogController catalogController;
+    private static CatalogController catalogController;
 
     static Stage myAccountStage = null;
     public static boolean isMyAccountOpen() {
@@ -54,6 +102,7 @@ public class MyAccountController {
     public static boolean isPaymentStageOpen() {
         return paymentStageInstance != null && paymentStageInstance.isShowing();
     }
+
     public static void setPaymentStageInstance(Stage stage) {
         paymentStageInstance = stage;
         if (paymentStageInstance != null) {
@@ -72,13 +121,13 @@ public class MyAccountController {
         }
     }
 
-    public void setCatalogController(CatalogController catalogController) {
-        this.catalogController = catalogController;
+    public static void setCatalogController(CatalogController catalogCtrl) {
+        catalogController = catalogCtrl;
     }
 
-    public void setCurrentUser(LoginRegCheck user) {
-        this.current_User = user;
-        loadUserInfo();
+    public static void setCurrentUser(LoginRegCheck user) {
+        current_User = user;
+
     }
 
     @FXML
@@ -90,6 +139,17 @@ public class MyAccountController {
         AnchorPane.setTopAnchor(my_account_data, 58.0);
         AnchorPane.setRightAnchor(my_account_data, 89.0);
         AnchorPane.setLeftAnchor(my_account_data, 89.0);
+
+        if(current_User.isType()) // an employee
+        {
+            myOrdersButton.setDisable(true);
+            myComplaintsButton.setDisable(true);
+            subscribeBtn.setDisable(true);
+        }
+        myAccountLbl.setText("My Account - Hello " + current_User.getFullName());
+        myAccountLbl.setAlignment(CENTER);
+
+
     }
 
     @FXML
@@ -122,6 +182,28 @@ public class MyAccountController {
         }
     }
 
+    @FXML
+    private void handleMyComplaintsButton() {
+        if (current_User == null) {
+            System.out.println("No user logged in");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("my_complaints.fxml"));
+            Parent root = loader.load();
+            MyComplaintsController controller = loader.getController();
+            controller.setCurrentUser(current_User);
+
+            Stage stage = new Stage();
+            stage.setTitle("My Complaints");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void loadUserInfo() {
         if (current_User == null) return;
 
@@ -130,6 +212,7 @@ public class MyAccountController {
         userChangeTxtB.setText(current_User.getUsername());
         emailChangeTxtB.setText(current_User.getEmail()); // what if the user changes their info?
         phoneChangeTxtB.setText(current_User.getPhoneNum());
+        fNameTxtB.setText(current_User.getFullName());
         String accountType = switch (current_User.getStore()) {
             case 4 -> current_User.is_yearly_subscription() ? "Yearly Subscription" : "Network";
             case 1, 2, 3 -> "Store - " + current_User.getStoreName();
@@ -163,6 +246,7 @@ public class MyAccountController {
         }
 
     }
+
     @Subscribe
     public void onSuccessfulUpdate(String str) {
         System.out.println("onSuccessfulUpdate called with: " + str);
@@ -180,44 +264,75 @@ public class MyAccountController {
             loadUserInfo();
         }
     }
+
     @Subscribe
     public void getUserDetails(UpdateUserEvent user) {
         if(Objects.equals(user.getUpdatedUser().getId(), current_User.getId())) { // just to make sure we are updating the correct user
             catalogController.set_user(current_User);
             loadUserInfo();
         }
-
     }
+
     @FXML
-    void sendUserUpdate(ActionEvent event){
+    void sendUserUpdate(ActionEvent event) {
 
-            if(newPassTxtB.getText().equals(confNewPassTxtB.getText())) {
-                passErrorMsgLbl.setVisible(false);
-                UpdateUserEvent updatedUser;
-                LoginRegCheck currentUser = current_User;
+        passErrorMsgLbl.setVisible(false);
+        UpdateUserEvent updatedUser;
+        LoginRegCheck currentUser = current_User;
 
-                currentUser.setUsername(userChangeTxtB.getText());
-                currentUser.setEmail(emailChangeTxtB.getText());
-                currentUser.setPhoneNum(phoneChangeTxtB.getText());
-                currentUser.setPassword(newPassTxtB.getText());
-                updatedUser = new UpdateUserEvent(currentUser);
-                try {
-                    SimpleClient.client.sendToServer(updatedUser);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+        currentUser.setUsername(userChangeTxtB.getText());
+        currentUser.setEmail(emailChangeTxtB.getText());
+        currentUser.setPhoneNum(phoneChangeTxtB.getText());
+        // currentUser.setPassword(newPassTxtB.getText()); Irrelevant, a different function handles password changes
+        currentUser.setFullName(fNameTxtB.getText());
+        updatedUser = new UpdateUserEvent(currentUser);
+        try {
+            SimpleClient.client.sendToServer(updatedUser);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-                Platform.runLater(() -> {
-                // Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                // alert.setTitle("Update Success");
-                // alert.setHeaderText("Successfully Updated User Details");
-                // alert.setContentText("Your Details Are Up-To-Date.");
-                // alert.showAndWait();
-                Success success = new Success("Your details are up-to-date.");
-                org.greenrobot.eventbus.EventBus.getDefault().post(new SuccessEvent(success));
-            });
-            }
-            else{passErrorMsgLbl.setVisible(true);}
+        Platform.runLater(() -> {
+            // Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            // alert.setTitle("Update Success");
+            // alert.setHeaderText("Successfully Updated User Details");
+            // alert.setContentText("Your Details Are Up-To-Date.");
+            // alert.showAndWait();
+            Success success = new Success("Your details are up-to-date.");
+            EventBus.getDefault().post(new SuccessEvent(success));
+        });
+    }
+
+
+    @FXML
+    void onChangePassword(ActionEvent event) {
+        if (newPassTxtB.getText().isEmpty() || confNewPassTxtB.getText().isEmpty()) {
+            passErrorMsgLbl.setVisible(true);
+            passErrorMsgLbl.setText("Please fill in both password fields.");
+            return;
+        }
+
+        if (!newPassTxtB.getText().equals(confNewPassTxtB.getText())) {
+            passErrorMsgLbl.setVisible(true);
+            passErrorMsgLbl.setText("Passwords do not match.");
+            return;
+        }
+        if((newPassTxtB.equals(confNewPassTxtB)) && (newPassTxtB.getText().trim().equals(current_User.getPassword()))) {
+            passErrorMsgLbl.setVisible(true);
+            passErrorMsgLbl.setText("New password cannot be the same as the current password.");
+            return;
+        }
+
+        current_User.setPassword(newPassTxtB.getText());
+        Platform.runLater(() -> {
+            Success success = new Success("Your New Password Has Been Changed Successfully.");
+            EventBus.getDefault().post(new SuccessEvent(success));
+        });
+        try {
+            SimpleClient.getClient().sendToServer(new UpdateUserEvent(current_User));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -268,7 +383,7 @@ public class MyAccountController {
                     e.printStackTrace();
                 }
             };
-
+            int storeType = current_User.getStore();
             paymentController.setOnPaymentSuccess(() -> {
                 current_User.set_yearly_subscription(true);
                 current_User.setSubscriptionStartDate(LocalDate.now());
@@ -295,7 +410,7 @@ public class MyAccountController {
                     catalogController.set_user(current_User);
                     catalogController.set_type(4);
                 }
-
+                current_User.setStore(4); // Ensure the user is set to Network store type
                 showAlert(Alert.AlertType.INFORMATION, "Subscription Completed!", null,
                         "Your account was successfully upgraded to a Yearly Subscription.");
 
@@ -311,6 +426,8 @@ public class MyAccountController {
                 showAlert(Alert.AlertType.WARNING, "Payment Cancelled",
                         "Your payment was not completed.",
                         "You remain on your current account type.");
+
+                current_User.setStore(storeType);
                 loadUserInfo();
             });
 
