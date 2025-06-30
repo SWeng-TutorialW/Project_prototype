@@ -476,12 +476,26 @@ public class CatalogController_employee {
 
     @FXML
     void initialize() {
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-            System.out.println("CatalogController_employee registered");
-        } else {
-            System.out.println("CatalogController_employee already registered");
+        EventBus.getDefault().register(this);
+        
+        // Initialize mailbox icon after FXML injection is complete
+        Platform.runLater(this::updateMailboxIcon);
+        
+        // Set up periodic check for new messages (every 30 seconds)
+        if (user != null) {
+            java.util.Timer timer = new java.util.Timer();
+            timer.scheduleAtFixedRate(new java.util.TimerTask() {
+                @Override
+                public void run() {
+                    Platform.runLater(() -> {
+                        if (user != null) {
+                            updateMailboxIcon();
+                        }
+                    });
+                }
+            }, 30000, 30000); // Check every 30 seconds
         }
+
         System.out.println("CatalogController employee initialized");
 
         Platform.runLater(this::updateMailboxIcon);
@@ -541,13 +555,14 @@ public class CatalogController_employee {
         }
 
         if (user != null) {
-            System.out.println("[CatalogController_employee] User: " + user.getUsername() + ", isReceive_answer: " + user.isReceive_answer());
-            if (user.isReceive_answer()) {
-                System.out.println("[CatalogController_employee] Setting mailbox icon visible for user: " + user.getUsername());
-                mailbox_icon.setVisible(true);
-            } else {
-                System.out.println("[CatalogController_employee] Setting mailbox icon invisible for user: " + user.getUsername());
-                mailbox_icon.setVisible(false);
+            // Query complaints to check for unread responses
+            try {
+                SimpleClient.getClient().sendToServer("getComplaints");
+                // The actual visibility will be set in handleComplaintsList method
+                System.out.println("[CatalogController_employee] Requested complaints to check for unread messages");
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("[CatalogController_employee] Error requesting complaints for mailbox icon update");
             }
         } else {
             System.out.println("[CatalogController_employee] User is null, setting mailbox icon invisible");
@@ -1422,6 +1437,14 @@ public class CatalogController_employee {
                 // For now, we'll show the mailbox and let the complaint handler determine if there are messages
                 SimpleClient.getClient().sendToServer("I#want#to#see#my#answer_"+user.getUsername());
                 System.out.println("I#want#to#see#my#answer_"+user.getUsername());
+                
+                // Mark messages as read by hiding the notification icon
+                Platform.runLater(() -> {
+                    if (mailbox_icon != null) {
+                        mailbox_icon.setVisible(false);
+                        System.out.println("[CatalogController_employee] Marked messages as read - hiding notification icon");
+                    }
+                });
             } catch (IOException e) {
                 e.printStackTrace();
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -1990,22 +2013,9 @@ public class CatalogController_employee {
     @Subscribe
     public void handleComplaintUpdate(ComplainUpdateEvent event) {
         System.out.println("[CatalogController_employee] Received complaint update event");
-        // Only refresh user state if we're not already refreshing and if the user might have new messages
-        if (!isRefreshingUserState && user != null) {
-            // Check if this user has any unread messages in the complaints
-            List<Complain> complaints = event.getUpdatedItems();
-            if (complaints != null) {
-                boolean hasUnreadMessages = complaints.stream()
-                    .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
-
-                if (hasUnreadMessages && !user.isReceive_answer()) {
-                    // User has unread messages but flag is not set, refresh user state
-                    Platform.runLater(this::refreshUserState);
-                } else if (!hasUnreadMessages && user.isReceive_answer()) {
-                    // User has no unread messages but flag is set, refresh user state
-                    Platform.runLater(this::refreshUserState);
-                }
-            }
+        // Refresh mailbox icon when complaints are updated
+        if (user != null) {
+            Platform.runLater(this::updateMailboxIcon);
         }
     }
 
@@ -2017,12 +2027,13 @@ public class CatalogController_employee {
             boolean hasUnreadMessages = complaints.stream()
                 .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
 
-            // Update user's receive_answer flag based on actual complaints
-            if (hasUnreadMessages != user.isReceive_answer()) {
-                user.set_receive_answer(hasUnreadMessages);
-                Platform.runLater(this::updateMailboxIcon);
-                System.out.println("[CatalogController_employee] Updated mailbox icon based on complaints: " + hasUnreadMessages);
-            }
+            // Update mailbox icon visibility based on actual complaints
+            Platform.runLater(() -> {
+                if (mailbox_icon != null) {
+                    mailbox_icon.setVisible(hasUnreadMessages);
+                    System.out.println("[CatalogController_employee] Updated mailbox icon visibility: " + hasUnreadMessages);
+                }
+            });
         }
     }
 

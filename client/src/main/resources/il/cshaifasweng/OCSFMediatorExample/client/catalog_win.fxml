@@ -212,6 +212,13 @@
                      <font>
                         <Font size="18.0" />
                      </font>
+                     <graphic>
+                        <ImageView fx:id="mailbox_icon" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" visible="false">
+                           <image>
+                              <Image url="@../../../../images/active.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
                   </Button>
                   <Button fx:id="cart" alignment="CENTER" contentDisplay="RIGHT" mnemonicParsing="false" onAction="#openCart" prefHeight="85.0" prefWidth="85.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Cart" textFill="#fdfdfd">
                      <font>
