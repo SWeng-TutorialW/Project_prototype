@@ -121,8 +121,8 @@ public class MyComplaintsController {
             
             // Check if this is a response (starts with "answer to <username>")
             String response = "";
-            if (complaintText.startsWith("answer to ")) {
-                response = complaintText.substring(("answer to "+currentUser.getUsername()).length()).trim();
+            if (complaintText.startsWith("answer to")) {
+                response = complaintText.substring(("answer to"+currentUser.getUsername()).length()).trim();
                 complaintText = "Response received";
             }
             
