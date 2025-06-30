@@ -1,6 +1,7 @@
 package il.cshaifasweng.OCSFMediatorExample.entities;
 
 import javax.persistence.*;
+import java.io.Console;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -23,9 +24,21 @@ public class LoginRegCheck implements Serializable {
     @Column(name = "emailAdd")
     private String email;
 
+    @Column(name = "Employeetype")
+    private int Employeetype = 0;
+
 
     private LocalDate subscriptionStartDate;
     private int isLogin; // 1 = login, 0 = registration
+
+    public int getEmployeetype() {
+        return Employeetype;
+    }
+
+    public void setEmployeetype(int employeetype) {
+        Employeetype = employeetype;
+    }
+
     private boolean type;// false = client, true = employee
     private int store;// 1 for store number 1 ,until 3 ,
     // if the value is 4 is for all the stores -workes must be between 1-2-3

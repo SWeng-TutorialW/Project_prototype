@@ -16,6 +16,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import javafx.application.Platform;
 
 import java.io.IOException;
 import java.util.List;
@@ -263,9 +264,10 @@ public class CartController {
 
     @Subscribe
     public void onCartUpdated(CartUpdatedEvent event) {
-        // Refresh the cart display with the latest items from the shared cart
-        cartItems.clear();
-        cartItems.addAll(OrderPageController.getCartItems());
-        updateTotal();
+        Platform.runLater(() -> {
+            // Refresh the cart display with the latest items from the shared cart
+            cartItems.setAll(OrderPageController.getCartItems());
+            // No need to call updateTotal() here, the listener on cartItems will do it.
+        });
     }
 }

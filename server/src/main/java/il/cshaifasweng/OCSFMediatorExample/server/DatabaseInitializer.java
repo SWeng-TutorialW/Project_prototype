@@ -289,7 +289,19 @@ public class DatabaseInitializer {
         LoginRegCheck nahariyyaWorker = new LoginRegCheck("Nahariyya", "123", "nahariyya.worker@lilach.com", 0, true, 3, "054-7778889", "Nahariyya Rosenberg", "777888999", false);
         session.save(nahariyyaWorker);
         session.flush();
-        
+
+        // System Administrator
+        LoginRegCheck System = new LoginRegCheck("System", "123", "haifa.System@lilach.com", 0, true, 4, "050-1112223", "System Cohen", "111222333", false);
+        System.setEmployeetype(1);
+        session.save(System);
+        session.flush();
+
+        // Customer service employee
+        LoginRegCheck service = new LoginRegCheck("service", "123", "haifa.service@lilach.com", 0, true, 4, "050-1112223", "service Cohen", "111222333", false);
+        service.setEmployeetype(2);
+        session.save(service);
+        session.flush();
+
         // Additional Client Users
         LoginRegCheck itayMalich = new LoginRegCheck("Itay", "123", "itay.malich2@gmail.com", 0, false, 4, "050-1234567", "Itay Malich", "123456789", false);
         session.save(itayMalich);
@@ -310,8 +322,7 @@ public class DatabaseInitializer {
         LoginRegCheck dorG2005 = new LoginRegCheck("Dor", "12345", "dorg2005@gmail.com", 0, false, 1, "058-4445556", "Dor Gilad", "321654987", false);
         session.save(dorG2005);
         session.flush();
-        
-        System.out.println(">>> CREATED 14 USERS");
+
     }
     
     /**

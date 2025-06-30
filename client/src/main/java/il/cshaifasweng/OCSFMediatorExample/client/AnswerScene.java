@@ -10,7 +10,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class AnswerScene {
 
 
     @FXML
-    private TextField answer_box;
+    private TextArea answer_box;
 
     @FXML
     private Button btn;

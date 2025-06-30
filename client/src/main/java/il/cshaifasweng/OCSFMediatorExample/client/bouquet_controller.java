@@ -80,7 +80,7 @@ public class bouquet_controller {
     @FXML
     private Label name_labl;
     @FXML
-    private TextField calc_price;
+    private Label calc_price;
     private ComboBox<String>[] flowerBoxes;
 
     @FXML
