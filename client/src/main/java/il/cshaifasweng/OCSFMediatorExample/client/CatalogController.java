@@ -40,7 +40,8 @@ import java.util.Random;
 import java.util.Set;
 
 public class CatalogController {
-
+    @FXML
+    private TextField calc_price;
     @FXML
     private Button cart;
     @FXML
@@ -420,11 +421,16 @@ public class CatalogController {
         
         // Refresh user state from server
         refreshUserState();
-        
+
         // Set up store selection
-        Stores.getItems().addAll("Haifa", "Krayot", "Nahariyya", "network");
-        Stores.setValue("network"); // Default to network view
-        
+       Stores.getItems().addAll("Haifa", "Krayot", "Nahariyya", "network");
+        /* if(user != null) {
+            Stores.setValue(user.getStoreName());
+        }
+        else {
+            Stores.setValue("network");
+        }*/
+        Stores.setValue("network");// Default to network view
         // Initialize arrays for flower display
         nameLabels = new Label[]{name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12};
         typeLabels = new Label[]{type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12};
@@ -440,9 +446,9 @@ public class CatalogController {
                 ex.printStackTrace();
             }
         });
-        
+
         // Hide reports button for non-employee users
-        if (user == null || !user.isType()) {
+        if ((user == null || !user.isType()) && reportsBtn != null) {
             reportsBtn.setVisible(false);
         }
     }
@@ -482,7 +488,7 @@ public class CatalogController {
             List<Complain> complaints = event.getUpdatedItems();
             if (complaints != null) {
                 boolean hasUnreadMessages = complaints.stream()
-                    .anyMatch(c -> c.getClient().equals(user.getUsername()) && c.getComplaint().startsWith("answer to"));
+                    .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
                 
                 if (hasUnreadMessages && !user.isReceive_answer()) {
                     // User has unread messages but flag is not set, refresh user state
@@ -501,7 +507,7 @@ public class CatalogController {
         System.out.println("[CatalogController] Received complaints list with " + (complaints != null ? complaints.size() : 0) + " complaints");
         if (user != null && complaints != null) {
             boolean hasUnreadMessages = complaints.stream()
-                .anyMatch(c -> c.getClient().equals(user.getUsername()) && c.getComplaint().startsWith("answer to"));
+                .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
             
             // Update user's receive_answer flag based on actual complaints
             if (hasUnreadMessages != user.isReceive_answer()) {

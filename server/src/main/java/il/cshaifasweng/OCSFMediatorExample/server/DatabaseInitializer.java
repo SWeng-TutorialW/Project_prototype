@@ -276,24 +276,40 @@ public class DatabaseInitializer {
         LoginRegCheck malci = new LoginRegCheck("malci", "123", "malci@", 0, true, 4);
         session.save(malci);
         session.flush();
-        
-        // Store Workers
-        LoginRegCheck haifaWorker = new LoginRegCheck("Haifa", "123", "haifa.worker@lilach.com", 0, true, 1, "050-1112223", "Haifa Cohen", "111222333", false);
-        session.save(haifaWorker);
+
+        // System Administrator
+        LoginRegCheck System = new LoginRegCheck("System", "123", "haifa.System@lilach.com", 0, true, 4, "050-1112223", "System Cohen", "111222333", false);
+        System.setEmployeetype(1);
+        session.save(System);
         session.flush();
-        
-        LoginRegCheck krayotWorker = new LoginRegCheck("Krayot", "123", "krayot.worker@lilach.com", 0, true, 2, "052-4445556", "Krayot Levy", "444555666", false);
-        session.save(krayotWorker);
-        session.flush();
-        
-        LoginRegCheck nahariyyaWorker = new LoginRegCheck("Nahariyya", "123", "nahariyya.worker@lilach.com", 0, true, 3, "054-7778889", "Nahariyya Rosenberg", "777888999", false);
-        session.save(nahariyyaWorker);
+
+        // Customer service employee
+        LoginRegCheck service = new LoginRegCheck("service", "123", "haifa.service@lilach.com", 0, true, 4, "050-1112223", "service Cohen", "111222333", false);
+        service.setEmployeetype(2);
+        session.save(service);
         session.flush();
         
         // Additional Client Users
         LoginRegCheck itayMalich = new LoginRegCheck("Itay", "123", "itay.malich2@gmail.com", 0, false, 4, "050-1234567", "Itay Malich", "123456789", false);
         session.save(itayMalich);
         session.flush();
+
+        //add workers of stores
+        LoginRegCheck HaifaWorker = new LoginRegCheck("HaifaWorker", "123", "haifa.HaifaWorker@gmail.com", 0, true, 1, "050-1234567", "HaifaWorker", "123456789", false);
+        session.save(HaifaWorker);
+        HaifaWorker.setEmployeetype(3);
+        session.flush();
+
+        LoginRegCheck nahariyyaWorker = new LoginRegCheck("nahariyyaWorker", "123", "haifa.nahariyyaWorker@gmail.com", 0, true, 3, "050-1234567", "nahariyyaWorker", "123456789", false);
+        session.save(nahariyyaWorker);
+        nahariyyaWorker.setEmployeetype(3);
+        session.flush();
+
+        LoginRegCheck KrayotWorker = new LoginRegCheck("KrayotWorker", "123", "haifa.KrayotWorker@gmail.com", 0, true, 2, "050-1234567", "KrayotWorker", "123456789", false);
+        session.save(KrayotWorker);
+        KrayotWorker.setEmployeetype(3);
+        session.flush();
+
         
         LoginRegCheck asafYaakov = new LoginRegCheck("Asaf", "123", "Asafyaakov555@gmail.com", 0, false, 2, "052-9876543", "Asaf Yaakov", "987654321", false);
         session.save(asafYaakov);
@@ -311,7 +327,6 @@ public class DatabaseInitializer {
         session.save(dorG2005);
         session.flush();
         
-        System.out.println(">>> CREATED 14 USERS");
     }
     
     /**

@@ -1275,7 +1275,7 @@ public class SimpleServer extends AbstractServer {
 				client.sendToClient("order_success");
 
 				// Notify all clients about the new order
-				sendToAllClients("update_catalog_after_change");
+				//sendToAllClients("update_catalog_after_change");
 
 				// Call EmailService after successful order save
 				EmailService.sendOrderConfirmationEmail(order);
@@ -1735,8 +1735,7 @@ public class SimpleServer extends AbstractServer {
 				CriteriaQuery<Complain> query = builder.createQuery(Complain.class);
 				Root<Complain> root = query.from(Complain.class);
 
-				// Search for complaints where the client field equals "answer to" + username
-				query.select(root).where(builder.equal(root.get("client"), toSearch));
+				query.select(root).where(builder.equal(root.get("clientName"), toSearch));
 
 				List<Complain> matchingComplaints = session.createQuery(query).getResultList();
 

@@ -102,9 +102,10 @@ public class MyComplaintsController {
             return;
         }
 
-        // Filter complaints for current user
+        // Filter complaints for current user and answers to them
         List<Complain> userComplaints = event.getUpdatedItems().stream()
-            .filter(c -> c != null && currentUser.getUsername().equals(c.getClient()))
+            .filter(c -> c != null && (currentUser.getUsername().equals(c.getClient()) ||
+                (c.getComplaint() != null && c.getComplaint().startsWith("answer to" + currentUser.getUsername())))) //TODO: maybe add a space
             .collect(Collectors.toList());
 
         // Create complaint rows
@@ -118,10 +119,10 @@ public class MyComplaintsController {
             
             String complaintText = complaint.getComplaint() != null ? complaint.getComplaint() : "";
             
-            // Check if this is a response (starts with "answer to")
+            // Check if this is a response (starts with "answer to <username>")
             String response = "";
             if (complaintText.startsWith("answer to")) {
-                response = complaintText.substring("answer to".length()).trim();
+                response = complaintText.substring(("answer to"+currentUser.getUsername()).length()).trim();
                 complaintText = "Response received";
             }
             

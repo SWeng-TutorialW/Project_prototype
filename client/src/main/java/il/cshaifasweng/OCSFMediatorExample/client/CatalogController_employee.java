@@ -47,8 +47,6 @@ public class CatalogController_employee {
     @FXML
     private Button cart;
 
-
-
     @FXML
     private ComboBox<String> Stores;
 
@@ -130,6 +128,25 @@ public class CatalogController_employee {
     @FXML
     private Label name_9;
 
+    @FXML
+    private Button nine_9;
+
+    @FXML
+    private Button one_1;
+    @FXML
+    private Button eleven_11;
+    @FXML
+    private VBox flower_10;
+
+    @FXML
+    private VBox flower_11;
+
+    @FXML
+    private VBox flower_12;
+    @FXML
+    private Button ten_10;
+    @FXML
+    private Button twelve_12;
     @FXML
     private Label name_10;
 
@@ -315,7 +332,7 @@ public class CatalogController_employee {
     private Button end_sale_btn;
 
     @FXML
-    private Button request_btn;
+    private Button reportsBtn;
 
     @FXML
     private ImageView mailbox_icon;
@@ -334,23 +351,6 @@ public class CatalogController_employee {
     public void  set_type(int value)
     {
         type=value;
-        if(type!=4)
-        {
-            discount.setText("Send request to the admin");
-            discount.setPrefWidth(240);
-            discount.setOnAction(this::request);
-            // Show request button for regular employees
-            if (request_btn != null) {
-                request_btn.setVisible(true);
-                request_btn.setManaged(true);
-            }
-        } else {
-            // Hide request button for admin users
-            if (request_btn != null) {
-                request_btn.setVisible(false);
-                request_btn.setManaged(false);
-            }
-        }
     }
     private LoginRegCheck user;
     public void set_user(LoginRegCheck user) {
@@ -359,9 +359,30 @@ public class CatalogController_employee {
         System.out.println("user send?"+user.get_send_complain());
         System.out.println("user recieve?"+user.isReceive_answer());
 
+        if (type != 4) {
+            discount.setDisable(true); // Disable the discount button for non-network users
+            discount.setStyle("-fx-opacity: 0.5;");
+        }
+        if(this.user.getEmployeetype() != 1) {
+            users_btn.setDisable(true); // Disable the discount button for non-network users
+            users_btn.setStyle("-fx-opacity: 0.5;");
+        }
+        if(this.user.getEmployeetype() != 0) {
+            reportsBtn.setDisable(true); // Disable the discount button for non-network users
+            reportsBtn.setStyle("-fx-opacity: 0.5;");
+
+            add_flower.setDisable(true);
+            add_flower.setStyle("-fx-opacity: 0.5;");
+
+            discount.setDisable(true);
+            discount.setStyle("-fx-opacity: 0.5;");
+
+        }
+
+
         // Set default store filter based on user's store
         setDefaultStoreFilter();
-        
+
         // Update mailbox icon when user is updated
         Platform.runLater(this::updateMailboxIcon);
     }
@@ -369,13 +390,13 @@ public class CatalogController_employee {
     public LoginRegCheck getUser() {
         return user;
     }
-
+    
     private void setDefaultStoreFilter() {
         if (user == null) return;
-
+        
         int userStore = user.getStore();
         final String defaultStore;
-
+        
         // Map user's store number to store name
         switch (userStore) {
             case 1:
@@ -394,13 +415,13 @@ public class CatalogController_employee {
                 defaultStore = "Haifa"; // Default fallback
                 break;
         }
-
+        
         // Set the default store in the ComboBox
         if (Stores != null && defaultStore != null) {
             Platform.runLater(() -> {
                 Stores.setValue(defaultStore);
                 System.out.println("Default store filter set to: " + defaultStore + " for user store: " + userStore);
-
+                
                 // Trigger the store selection to load the appropriate catalog
                 try {
                     if (defaultStore.equals("network")) {
@@ -425,6 +446,7 @@ public class CatalogController_employee {
     public void set_isLogin(boolean is_login) {
         this.is_login = is_login;
     }
+
     private ComplainController_employee complainController;
     public void setCatalogController(ComplainController_employee controller) {
         this.complainController = controller;
@@ -449,26 +471,40 @@ public class CatalogController_employee {
 
     @FXML
     void initialize() {
-        EventBus.getDefault().register(this);
-        
-        // Initialize mailbox icon after FXML injection is complete
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+            System.out.println("CatalogController_employee registered");
+        } else {
+            System.out.println("CatalogController_employee already registered");
+        }
+        System.out.println("CatalogController employee initialized");
+
         Platform.runLater(this::updateMailboxIcon);
-        
+
         // Refresh user state from server
         refreshUserState();
-        
-        // Set up store selection
-        Stores.getItems().addAll("Haifa", "Krayot", "Nahariyya", "network");
-        Stores.setValue("network"); // Default to network view
-        
-        // Initialize arrays for flower display
-        nameLabels = new Label[]{name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12};
-        typeLabels = new Label[]{type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12};
-        priceFields = new TextField[]{price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12};
-        imageViews = new ImageView[]{pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12};
-        price_Before_sale = new Text[]{price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale};
-        
-        // Set up cart button
+
+        Stores.getItems().addAll("Haifa", "Krayot","Nahariyya","network");
+
+        nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12 };
+        typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12 };
+        priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
+        imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12 };
+        price_Before_sale = new Text[] { price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale };
+        Stage stage = App.getStage();
+        stage.setOnCloseRequest(event1 -> {
+            try {
+                if (user != null) {
+                    user.setIsLogin(0);
+                    change_user_login tt = new change_user_login(user,0);
+                    System.out.println("the user is " + user.getUsername()+"logged out");
+                    SimpleClient.getClient().sendToServer(tt);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
         cart.setOnAction(e -> {
             try {
                 open_complain_box(e);
@@ -477,17 +513,26 @@ public class CatalogController_employee {
             }
         });
         
-        // Hide request button for admin users (type 4)
-        if (user != null && user.getStore() == 4) {
-            request_btn.setVisible(false);
-        }
+        // Add event listener for combo box selection changes
+      /*  combo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            try {
+                combo_choose(null);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });*/
+        
+        // Add event listener for store selection changes
+       /* Stores.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            updateCatalogForSelectedStore();
+        });*/
     }
 
     public void updateMailboxIcon() {
         System.out.println("[CatalogController_employee] updateMailboxIcon called");
         System.out.println("[CatalogController_employee] mailbox_icon is null: " + (mailbox_icon == null));
         System.out.println("[CatalogController_employee] user is null: " + (user == null));
-        
+
         // Check if mailbox_icon is null (FXML injection not complete yet)
         if (mailbox_icon == null) {
             System.out.println("[CatalogController_employee] mailbox_icon is null, returning");
@@ -540,12 +585,12 @@ public class CatalogController_employee {
             System.out.println("=== EMPLOYEE SET CATALOG SORTING CALLED ===");
             System.out.println("Flower list size: " + (flowerList == null ? 0 : flowerList.size()));
             System.out.println("Current store selection: " + Stores.getValue());
-
+            
             if (catalogFlowPane == null) {
                 System.out.println("catalogFlowPane is NULL! Check FXML wiring.");
                 return;
             }
-
+            
             flowersList_c = flowerList;
             System.out.println("setCatalogSorting called with " + (flowerList == null ? 0 : flowerList.size()) + " flowers");
             catalogFlowPane.getChildren().clear();
@@ -687,12 +732,20 @@ public class CatalogController_employee {
     void show_users(ActionEvent event)
     {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("users_table.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("User Management");
-            stage.setScene(new Scene(root));
-            stage.show();
+            if(this.user.getEmployeetype() == 1) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("users_table.fxml"));
+                Parent root = loader.load();
+                Stage stage = new Stage();
+                stage.setTitle("User Management");
+                stage.setScene(new Scene(root));
+                stage.show();
+            }
+            else{
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Users table");
+                alert.setHeaderText("change users table");
+                alert.setContentText("Only the system administrator can change customer details.");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -718,15 +771,15 @@ public class CatalogController_employee {
             }
             return;
         }
-
+        
         // Special handling for delete events (catalog_type = -1)
         if (event.get_catalog_type() == -1) {
             System.out.println("*** NETWORK DELETE EVENT PROCESSING (EMPLOYEE) ***");
             System.out.println("Updating UI for all clients with " + event.get_flowers().size() + " flowers");
-
+            
             // Store current store selection
             String currentStore = Stores.getValue();
-
+            
             // Request fresh data for the current store to ensure we have the latest information
             if (currentStore != null) {
                 try {
@@ -749,18 +802,18 @@ public class CatalogController_employee {
                     e.printStackTrace();
                 }
             }
-
+            
             System.out.println("*** NETWORK DELETE EVENT PROCESSED (EMPLOYEE) ***");
             return;
         }
-
+        
         // Only reload if this event is for our current store selection
         String selectedStore = Stores.getValue();
         if (selectedStore != null) {
             int currentStoreId = getCurrentStoreId(selectedStore);
             System.out.println("Current store ID: " + currentStoreId);
             System.out.println("Event catalog type: " + event.get_catalog_type());
-
+            
             if (event.get_catalog_type() == currentStoreId) {
                 System.out.println("Add flower event matches current store, updating UI");
                 // Update the UI with the new data from the event
@@ -781,7 +834,7 @@ public class CatalogController_employee {
         System.out.println("Current type: " + type);
         System.out.println("Current store selection: " + Stores.getValue());
         System.out.println("Flower name: " + event.get_flower_name());
-
+        
         // Special handling for network operations (catalog_type = -1)
         if (event.get_catalog_type() == -1) {
             System.out.println("*** NETWORK DISCOUNT EVENT PROCESSING ***");
@@ -792,15 +845,15 @@ public class CatalogController_employee {
             System.out.println("*** NETWORK DISCOUNT EVENT PROCESSED ***");
             return;
         }
-
+        
         // For discount events (catalog_type = 4), update immediately for all clients
         if (event.get_catalog_type() == 4) {
             System.out.println("*** DISCOUNT EVENT PROCESSING - IMMEDIATE UPDATE ***");
             System.out.println("Updating catalog with " + event.get_flowers().size() + " flowers");
-
+            
             // Store current store selection
             String currentStore = Stores.getValue();
-
+            
             // Request fresh data for the current store to ensure we have the latest information
             if (currentStore != null) {
                 try {
@@ -823,18 +876,18 @@ public class CatalogController_employee {
                     e.printStackTrace();
                 }
             }
-
+            
             System.out.println("*** DISCOUNT EVENT PROCESSED - IMMEDIATE UPDATE ***");
             return;
         }
-
+        
         // Only reload if this event is for our current store selection
         String selectedStore = Stores.getValue();
         if (selectedStore != null) {
             int currentStoreId = getCurrentStoreId(selectedStore);
             System.out.println("Current store ID: " + currentStoreId);
             System.out.println("Event catalog type: " + event.get_catalog_type());
-
+            
             if (event.get_catalog_type() == currentStoreId) {
                 System.out.println("Discount event matches current store, updating UI");
                 // Update the UI with the new data from the event
@@ -877,7 +930,7 @@ public class CatalogController_employee {
             // Update the catalog with the fresh flower list from database
             flowersList_c = event.get_flowers();
             setCatalogData(event.get_flowers());
-
+            
             // Also update the storesList to reflect the changes
             if (storesList != null) {
                 Store updatedStore = storesList.stream()
@@ -906,9 +959,9 @@ public class CatalogController_employee {
                 System.out.println("No store selected, cannot reload catalog");
                 return;
             }
-
+            
             System.out.println("Reloading catalog from database for store: " + selectedStore);
-
+            
             // Request fresh data from server based on current store selection
             if (selectedStore.equals("network")) {
                 // For network view, get all flowers
@@ -977,7 +1030,7 @@ public class CatalogController_employee {
         System.out.println("=== EMPLOYEE SET CATALOG DATA CALLED ===");
         System.out.println("Flower list size: " + (flowerList == null ? 0 : flowerList.size()));
         System.out.println("Current store selection: " + Stores.getValue());
-
+        
         Platform.runLater(() -> {
             System.out.println("=== PLATFORM.RUNLATER EXECUTING ===");
             if (catalogFlowPane == null) {
@@ -1135,48 +1188,63 @@ public class CatalogController_employee {
     private void deleteFlower(Flower flower) throws IOException {
         // Get the selected store from the filter
         String selectedStore = Stores.getValue();
-
-        if (selectedStore != null && selectedStore.equals("network")) {
-            // For network view, delete from Flowers table and all store_flowers entries
-            String message = "delete_flower_from_network_" + flower.getId();
-            SimpleClient.getClient().sendToServer(message);
-            System.out.println("Requested deletion of flower ID " + flower.getId() + " from network (Flowers table and all store_flowers entries)");
-        } else {
-            // For store view, delete from specific store only
+        if(this.user.getEmployeetype() == 0 || this.user.getEmployeetype() == 3) {
             String storeIdentifier = "";
-
-            // Convert store name to store identifier
-            if (selectedStore != null) {
-                switch (selectedStore) {
-                    case "Haifa":
-                        storeIdentifier = "1";
-                        break;
-                    case "Krayot":
-                        storeIdentifier = "2";
-                        break;
-                    case "Nahariyya":
-                        storeIdentifier = "3";
-                        break;
-                    case "network":
-                        storeIdentifier = "4";
-                        break;
-                    default:
-                        storeIdentifier = String.valueOf(type);
-                        break;
-                }
+            if (selectedStore != null && selectedStore.equals("network") && this.user.getStore() == 4) {
+                // For network view, delete from Flowers table and all store_flowers entries
+                String message = "delete_flower_from_network_" + flower.getId();
+                SimpleClient.getClient().sendToServer(message);
+                System.out.println("Requested deletion of flower ID " + flower.getId() + " from network (Flowers table and all store_flowers entries)");
             } else {
-                storeIdentifier = String.valueOf(type);
+                // For store view, delete from specific store only
+                // Convert store name to store identifier
+                if (selectedStore != null) {
+                    switch (selectedStore) {
+                        case "Haifa":
+                            storeIdentifier = "1";
+                            break;
+                        case "Krayot":
+                            storeIdentifier = "2";
+                            break;
+                        case "Nahariyya":
+                            storeIdentifier = "3";
+                            break;
+                        case "network":
+                            storeIdentifier = "4";
+                            break;
+                        default:
+                            storeIdentifier = String.valueOf(type);
+                            break;
+                    }
+                } else {
+                    storeIdentifier = String.valueOf(type);
+                }
             }
 
-            // Send delete request to server with flower ID instead of name
-            System.out.println(storeIdentifier+ "," + selectedStore+ "," + flower.getId()+ "," +flower.getFlowerName());
-            String message = "delete_flower_from_store_" + flower.getId() + "_" + storeIdentifier;
-            SimpleClient.getClient().sendToServer(message);
-        }
+            if(storeIdentifier.equals(new String(String.valueOf(this.user.getStore()))) || this.user.getStore() == 4) {
+                // Send delete request to server with flower ID instead of name
+                System.out.println(storeIdentifier + "," + selectedStore + "," + flower.getId() + "," + flower.getFlowerName());
+                String message = "delete_flower_from_store_" + flower.getId() + "_" + storeIdentifier;
+                SimpleClient.getClient().sendToServer(message);
 
-        // Show success message
-        Success success = new Success("Flower '" + flower.getFlowerName() + "' removed from " + selectedStore + " store!");
-        EventBus.getDefault().post(new SuccessEvent(success));
+                // Show success message
+                Success success = new Success("Flower '" + flower.getFlowerName() + "' removed from " + selectedStore + " store!");
+                EventBus.getDefault().post(new SuccessEvent(success));
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Delete Flower");
+                alert.setHeaderText("");
+                alert.setContentText("You can delete flower only from your store");
+                alert.showAndWait();
+            }
+
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Delete Flower");
+            alert.setHeaderText("");
+            alert.setContentText("Only store manager and Lilach manager can delete flowers");
+            alert.showAndWait();
+        }
     }
 
     // Add setImageFromDatabase method to load images from database
@@ -1296,7 +1364,30 @@ public class CatalogController_employee {
             }
         }
     }
-
+//mark sort
+ /*   @FXML
+    public void combo_choose(ActionEvent actionEvent) throws IOException {
+        System.out.println("combo_choose CALLED");
+        String selectedSort = combo.getValue();
+        System.out.println("Selected sort option: " + selectedSort);
+        
+        if (selectedSort == null || selectedSort.equals("Sort")) {
+            System.out.println("No sorting selected, showing original order");
+            return;
+        }
+        
+        if (flowersList_c == null || flowersList_c.isEmpty()) {
+            System.out.println("No flowers to sort");
+            return;
+        }
+        
+        // Apply sorting using the existing method
+        List<Flower> sortedFlowers = applySortingToFlowers(flowersList_c, selectedSort);
+        
+        // Update the display with sorted flowers
+        setCatalogSorting(sortedFlowers);
+        System.out.println("Sorting applied successfully");
+    }*/
     @FXML
     void open_complain_box(ActionEvent event)throws IOException
     {
@@ -1316,7 +1407,6 @@ public class CatalogController_employee {
                 stage.initModality(Modality.WINDOW_MODAL);
                 stage.initOwner(((Node) event.getSource()).getScene().getWindow());
                 stage.show();
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -1353,12 +1443,12 @@ public class CatalogController_employee {
             stage.setScene(new Scene(root));
             stage.setWidth(1200);
             stage.setHeight(900);
-            
+
             // Set up cleanup when window is closed
             stage.setOnCloseRequest(e -> {
                 controller.cleanup();
             });
-            
+
             stage.show();
 
         } catch (IOException e) {
@@ -1395,36 +1485,6 @@ public class CatalogController_employee {
 
     }
 
-
-
-
-    @FXML
-    void request(ActionEvent event)
-    {
-        if(user.get_send_complain())
-        {
-            Warning warning = new Warning("You already send a  request.");
-            EventBus.getDefault().post(new WarningEvent(warning));
-            return;
-        }
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("worker_request_scene.fxml"));
-            Parent root = fxmlLoader.load();
-            worker_request_controller Controller = fxmlLoader.getController();
-            Controller.setCatalogController(this);
-
-            Stage stage = new Stage();
-            stage.setTitle("Send request");
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(((Node) event.getSource()).getScene().getWindow());
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
     public void receiveNewComplain(Complain complain)
     {
         // Handle new complain
@@ -1448,26 +1508,42 @@ public class CatalogController_employee {
     // Add missing action methods
     @FXML
     void add_flower_action(ActionEvent event) throws IOException {
-        String selectedStore = Stores.getValue();
-        boolean isNetworkMode = selectedStore != null && selectedStore.equals("network");
+        if(this.user.getEmployeetype() == 0 || this.user.getEmployeetype() == 3) {
+            if (this.user.getStore() == 4 || this.user.getStore() == getCurrentStoreId(Stores.getValue())) {
+                String selectedStore = Stores.getValue();
+                boolean isNetworkMode = selectedStore != null && selectedStore.equals("network");
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("add_flower.fxml"));
-        Parent root = loader.load();
-        AddFlower_Controller controller = loader.getController();
-        controller.setCatalogController(this);
-        controller.setNetworkMode(isNetworkMode);
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("add_flower.fxml"));
+                Parent root = loader.load();
+                AddFlower_Controller controller = loader.getController();
+                controller.setCatalogController(this);
+                controller.setNetworkMode(isNetworkMode);
 
-        if (!isNetworkMode) {
-            fetchAvailableFlowersForStore(selectedStore, controller);
+                if (!isNetworkMode) {
+                    fetchAvailableFlowersForStore(selectedStore, controller);
+                }
+
+                Stage stage = new Stage();
+                stage.setTitle(isNetworkMode ? "Add New Item" : "Add Item to Store");
+                stage.setScene(new Scene(root));
+                stage.setResizable(false);
+                stage.initModality(Modality.WINDOW_MODAL);
+                stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+                stage.show();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Add item");
+                alert.setHeaderText("");
+                alert.setContentText("you can Add item only from your store");
+                alert.showAndWait();
+            }
+        } else{
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Add item");
+            alert.setHeaderText("");
+            alert.setContentText("Only store manager and Lilach manager can add flowers");
+            alert.showAndWait();
         }
-
-        Stage stage = new Stage();
-        stage.setTitle(isNetworkMode ? "Add New Item" : "Add Item to Store");
-        stage.setScene(new Scene(root));
-        stage.setResizable(false);
-        stage.initModality(Modality.WINDOW_MODAL);
-        stage.initOwner(((Node) event.getSource()).getScene().getWindow());
-        stage.show();
     }
 
     private void fetchAvailableFlowersForStore(String selectedStore, AddFlower_Controller controller) {
@@ -1490,11 +1566,11 @@ public class CatalogController_employee {
     }
     private AddFlower_Controller pendingAddFlowerController;
     private String pendingStoreName;
-
+    
     public void setPendingAddFlowerController(AddFlower_Controller controller) {
         this.pendingAddFlowerController = controller;
     }
-
+    
     public void setPendingStoreName(String storeName) {
         this.pendingStoreName = storeName;
     }
@@ -1503,7 +1579,7 @@ public class CatalogController_employee {
         if (pendingAddFlowerController != null && pendingStoreName != null) {
             // Get the current store's flower list from the catalog instead of storesList
             List<Flower> currentStoreFlowers = flowersList_c;
-
+            
             // If we don't have the current store's flowers, try to get them from storesList as fallback
             if (currentStoreFlowers == null || currentStoreFlowers.isEmpty()) {
                 Store currentStore = storesList.stream()
@@ -1514,10 +1590,10 @@ public class CatalogController_employee {
                     currentStoreFlowers = currentStore.getFlowersList();
                 }
             }
-
+            
             // Create a final reference for the lambda expression
             final List<Flower> finalCurrentStoreFlowers = currentStoreFlowers;
-
+            
             if (finalCurrentStoreFlowers != null) {
                 // Filter out flowers that are already in the current store
                 List<Flower> availableFlowers = allFlowers.stream()
@@ -1536,16 +1612,6 @@ public class CatalogController_employee {
 
     @FXML
     void discount_action(ActionEvent event) throws IOException {
-        // Check if user is in network mode (type == 4)
-        if (type != 4) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Access Denied");
-            alert.setHeaderText("Network Access Required");
-            alert.setContentText("You can only set discounts when viewing the network catalog. Please switch to 'network' view.");
-            alert.showAndWait();
-            return;
-        }
-
         // Check if current store selection is "network"
         String selectedStore = Stores.getValue();
         if (selectedStore == null || !selectedStore.equals("network")) {
@@ -1553,6 +1619,15 @@ public class CatalogController_employee {
             alert.setTitle("Access Denied");
             alert.setHeaderText("Network View Required");
             alert.setContentText("Please select 'network' from the store filter to set discounts.");
+            alert.showAndWait();
+            return;
+        }
+
+        if (type != 4) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Access Denied");
+            alert.setHeaderText("Store manager required");
+            alert.setContentText("Only the Lilach manager can set discounts.");
             alert.showAndWait();
             return;
         }
@@ -1662,13 +1737,13 @@ public class CatalogController_employee {
     public void setFilteredCatalogData(List<Flower> filteredFlowerList) {
         System.out.println("=== EMPLOYEE SET FILTERED CATALOG DATA CALLED ===");
         System.out.println("Filtered flower list size: " + (filteredFlowerList == null ? 0 : filteredFlowerList.size()));
-
+        
         Platform.runLater(() -> {
             if (catalogFlowPane == null) {
                 System.out.println("catalogFlowPane is NULL! Check FXML wiring.");
                 return;
             }
-
+            
             catalogFlowPane.getChildren().clear();
             if (filteredFlowerList == null || filteredFlowerList.isEmpty()) {
                 System.out.println("No flowers match the current filters.");
@@ -1677,11 +1752,11 @@ public class CatalogController_employee {
                 catalogFlowPane.getChildren().add(emptyLabel);
                 return;
             }
-
+            
             // Check if we're in network view
             String selectedStore = Stores.getValue();
             boolean isNetworkView = selectedStore != null && selectedStore.equals("network");
-
+            
             for (Flower f : filteredFlowerList) {
                 VBox card = new VBox(5);
                 card.setPrefWidth(160);
@@ -1709,9 +1784,10 @@ public class CatalogController_employee {
                 TextField priceField = new TextField(String.format("%.2f", f.getFlowerPrice()));
                 priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px;");
 
-                // Make price field editable only in network view
-                priceField.setEditable(isNetworkView);
-                if (isNetworkView) {
+                System.out.println("wwwwwwwwwwwwwww" + this.user.getEmployeetype() + ":" + this.user.getStore());
+                if (isNetworkView && this.user.getEmployeetype() == 0 && this.user.getStore() == 4) {
+                    // Make price field editable only in network view
+                    priceField.setEditable(true);
                     priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px; -fx-background-color: #f0f0f0;");
                     priceField.setPromptText("Click to edit price");
 
@@ -1800,33 +1876,33 @@ public class CatalogController_employee {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_filter.fxml"));
             Parent root = loader.load();
-
+            
             CatalogFilterController filterController = loader.getController();
             filterController.setCatalogController(this);
             filterController.setOriginalFlowersList(flowersList_c);
-
+            
             // Pass current filter state to restore UI
             filterController.setCurrentFilterState(
-                currentMinPrice,
-                currentMaxPrice,
-                currentSelectedColors,
-                currentSelectedCategories,
+                currentMinPrice, 
+                currentMaxPrice, 
+                currentSelectedColors, 
+                currentSelectedCategories, 
                 currentSortOption
             );
-
+            
             Stage filterStage = new Stage();
             filterStage.setTitle("Filter Catalog");
             filterStage.setScene(new Scene(root));
             filterStage.setResizable(false);
             filterController.setFilterStage(filterStage);
-
+            
             filterStage.show();
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Error opening filter window: " + e.getMessage());
         }
     }
-
+    
     /**
      * Updates the current filter state from the filter controller
      */
@@ -1855,7 +1931,7 @@ public class CatalogController_employee {
 
     // Add flag to prevent infinite loops
     private boolean isRefreshingUserState = false;
-    
+
     // Add method to refresh user state from server
     private void refreshUserState() {
         if (user != null && !isRefreshingUserState) {
@@ -1863,7 +1939,7 @@ public class CatalogController_employee {
                 isRefreshingUserState = true;
                 System.out.println("[CatalogController_employee] Refreshing user state for: " + user.getUsername());
                 SimpleClient.getClient().sendToServer("getUserDetails_" + user.getUsername());
-                
+
                 // Don't send getComplaints here to avoid infinite loop
                 // The complaint update event already contains the updated complaints
             } catch (IOException e) {
@@ -1905,8 +1981,8 @@ public class CatalogController_employee {
             List<Complain> complaints = event.getUpdatedItems();
             if (complaints != null) {
                 boolean hasUnreadMessages = complaints.stream()
-                    .anyMatch(c -> c.getClient().equals(user.getUsername()) && c.getComplaint().startsWith("answer to"));
-                
+                    .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
+
                 if (hasUnreadMessages && !user.isReceive_answer()) {
                     // User has unread messages but flag is not set, refresh user state
                     Platform.runLater(this::refreshUserState);
@@ -1924,8 +2000,8 @@ public class CatalogController_employee {
         System.out.println("[CatalogController_employee] Received complaints list with " + (complaints != null ? complaints.size() : 0) + " complaints");
         if (user != null && complaints != null) {
             boolean hasUnreadMessages = complaints.stream()
-                .anyMatch(c -> c.getClient().equals(user.getUsername()) && c.getComplaint().startsWith("answer to"));
-            
+                .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
+
             // Update user's receive_answer flag based on actual complaints
             if (hasUnreadMessages != user.isReceive_answer()) {
                 user.set_receive_answer(hasUnreadMessages);
