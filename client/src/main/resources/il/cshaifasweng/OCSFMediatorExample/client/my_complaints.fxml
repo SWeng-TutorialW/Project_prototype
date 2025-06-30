@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
 
 <AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #f8f9fa;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.MyComplaintsController">
    <children>
       <!-- Header -->
-      <Label contentDisplay="CENTER" layoutX="-2.0" layoutY="-3.0" prefHeight="68.0" prefWidth="800.0" 
-             style="-fx-background-color: #C8A2C8;" text="📝 My Complaints" textAlignment="CENTER" 
-             textFill="#fdfdfd">
+      <Label contentDisplay="CENTER" layoutX="-2.0" layoutY="-3.0" prefHeight="68.0" prefWidth="800.0" style="-fx-background-color: #C8A2C8;" text="📝 My Complaints" textAlignment="CENTER" textFill="#fdfdfd">
          <font>
             <Font name="Segoe UI" size="24.0" />
          </font>
@@ -21,41 +21,36 @@
       </Label>
       
       <!-- Content Area -->
-      <VBox layoutX="20.0" layoutY="80.0" prefHeight="500.0" prefWidth="760.0" 
-            style="-fx-background-color: white; -fx-border-color: #C8A2C8; -fx-border-width: 2; -fx-border-radius: 10;">
+      <VBox layoutX="20.0" layoutY="80.0" prefHeight="500.0" prefWidth="760.0" style="-fx-background-color: white; -fx-border-color: #C8A2C8; -fx-border-width: 2; -fx-border-radius: 10;">
          <children>
-            <Label text="Your Complaints and Responses" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #C8A2C8;">
+            <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #C8A2C8;" text="Your Complaints and Responses">
                <padding>
-                  <Insets top="15" left="20" />
+                  <Insets left="20" top="15" />
                </padding>
             </Label>
             
             <!-- Table -->
-            <TableView fx:id="complaintsTable" prefHeight="400.0" prefWidth="720.0" 
-                       style="-fx-background-color: white; -fx-border-color: #ddd;">
+            <TableView fx:id="complaintsTable" prefHeight="400.0" prefWidth="720.0" style="-fx-background-color: white; -fx-border-color: #ddd;">
                <columns>
-                  <TableColumn fx:id="dateCol" prefWidth="120.0" text="Date" />
-                  <TableColumn fx:id="typeCol" prefWidth="100.0" text="Type" />
-                  <TableColumn fx:id="complaintCol" prefWidth="200.0" text="Complaint" />
-                  <TableColumn fx:id="responseCol" prefWidth="200.0" text="Response" />
-                  <TableColumn fx:id="refundCol" prefWidth="100.0" text="Refund" />
+                  <TableColumn fx:id="dateCol" prefWidth="165.0" text="Date" />
+                  <TableColumn fx:id="typeCol" prefWidth="135.0" text="Type" />
+                  <TableColumn fx:id="complaintCol" prefWidth="373.0" text="Complaint" />
                </columns>
                <padding>
-                  <Insets left="20" right="20" bottom="20" />
+                  <Insets bottom="20" left="20" right="20" />
                </padding>
             </TableView>
             
             <!-- Status Label -->
-            <Label fx:id="statusLabel" text="Loading complaints..." style="-fx-text-fill: #666; -fx-font-size: 14;" 
-                   alignment="CENTER">
+            <Label fx:id="statusLabel" alignment="CENTER" style="-fx-text-fill: #666; -fx-font-size: 14;" text="Loading complaints...">
                <padding>
                   <Insets bottom="15" />
                </padding>
             </Label>
          </children>
          <padding>
-            <Insets left="20" right="20" bottom="20" />
+            <Insets bottom="20" left="20" right="20" />
          </padding>
       </VBox>
    </children>
-</AnchorPane> 
+</AnchorPane>

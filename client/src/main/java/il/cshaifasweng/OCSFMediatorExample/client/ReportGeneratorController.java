@@ -292,7 +292,16 @@ public class ReportGeneratorController {
         ChartUtils.updateRevenueChart(revenueChart, revenueData);
 
         // Update product chart
-        ChartUtils.updateProductChart(productChart, productData);
+        ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList();
+        for (Map.Entry<String, Integer> entry : productData.entrySet()) {
+            String name = entry.getKey();
+            int count = entry.getValue();
+            if (name == null || name.isEmpty() || name.equals("0") || name.equals("null")) {
+                name = "Custom Item";
+            }
+            pieChartData.add(new PieChart.Data(name, count));
+        }
+        productChart.setData(pieChartData);
     }
 
     private void updateCustomerCharts() {
@@ -786,6 +795,16 @@ public class ReportGeneratorController {
     // Add methods to manage current user
     public void setCurrentUser(LoginRegCheck user) {
         this.currentUser = user;
+        if (!(user.getEmployeetype() == 0 && (user.getStore() >= 1 && user.getStore() <= 3 || user.getStore() == 4))) {
+            generateReportBtn.setDisable(true);
+            exportPdfBtn.setDisable(true);
+            exportCsvBtn.setDisable(true);
+            emailReportBtn.setDisable(true);
+            quickRangeBtn.setDisable(true);
+            ordersReport.setDisable(true);
+            customersReport.setDisable(true);
+            complaintsReport.setDisable(true);
+        }
         System.out.println("[ReportGenerator] Current user set to: " + (user != null ? user.getUsername() : "null"));
     }
 

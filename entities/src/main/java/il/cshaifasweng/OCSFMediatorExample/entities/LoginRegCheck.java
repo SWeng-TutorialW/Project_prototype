@@ -35,6 +35,7 @@ public class LoginRegCheck implements Serializable {
         return Employeetype;
     }
 
+
     public void setEmployeetype(int employeetype) {
         Employeetype = employeetype;
     }

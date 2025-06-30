@@ -35,12 +35,6 @@ public class MyComplaintsController {
     private TableColumn<ComplaintRow, String> complaintCol;
 
     @FXML
-    private TableColumn<ComplaintRow, String> responseCol;
-
-    @FXML
-    private TableColumn<ComplaintRow, String> refundCol;
-
-    @FXML
     private Label statusLabel;
 
     private LoginRegCheck currentUser;
@@ -64,19 +58,14 @@ public class MyComplaintsController {
         dateCol.setCellValueFactory(new PropertyValueFactory<>("date"));
         typeCol.setCellValueFactory(new PropertyValueFactory<>("type"));
         complaintCol.setCellValueFactory(new PropertyValueFactory<>("complaint"));
-        responseCol.setCellValueFactory(new PropertyValueFactory<>("response"));
-        refundCol.setCellValueFactory(new PropertyValueFactory<>("refund"));
 
         // Set column widths
         dateCol.setPrefWidth(120);
         typeCol.setPrefWidth(100);
         complaintCol.setPrefWidth(200);
-        responseCol.setPrefWidth(200);
-        refundCol.setPrefWidth(100);
 
         // Enable text wrapping for complaint and response columns
         complaintCol.setStyle("-fx-alignment: TOP_LEFT;");
-        responseCol.setStyle("-fx-alignment: TOP_LEFT;");
     }
 
     private void loadComplaints() {
@@ -104,8 +93,10 @@ public class MyComplaintsController {
 
         // Filter complaints for current user and answers to them
         List<Complain> userComplaints = event.getUpdatedItems().stream()
-            .filter(c -> c != null && (currentUser.getUsername().equals(c.getClient()) ||
-                (c.getComplaint() != null && c.getComplaint().startsWith("answer to" + currentUser.getUsername())))) //TODO: maybe add a space
+            .filter(c -> c != null && (
+                currentUser.getUsername().equals(c.getClient()) ||
+                (c.getClient() != null && c.getClient().equals("answer to" + currentUser.getUsername()))
+            ))
             .collect(Collectors.toList());
 
         // Create complaint rows
@@ -120,16 +111,12 @@ public class MyComplaintsController {
             String complaintText = complaint.getComplaint() != null ? complaint.getComplaint() : "";
             
             // Check if this is a response (starts with "answer to <username>")
-            String response = "";
-            if (complaintText.startsWith("answer to")) {
-                response = complaintText.substring(("answer to"+currentUser.getUsername()).length()).trim();
-                complaintText = "Response received";
-            }
+
             
             String refund = complaint.getRefundAmount() > 0 ? 
                 String.format("₪%.2f", complaint.getRefundAmount()) : "";
             
-            rows.add(new ComplaintRow(date, type, complaintText, response, refund));
+            rows.add(new ComplaintRow(date, type, complaintText));
         }
 
         Platform.runLater(() -> {
@@ -173,21 +160,16 @@ public class MyComplaintsController {
         private final String date;
         private final String type;
         private final String complaint;
-        private final String response;
-        private final String refund;
 
-        public ComplaintRow(String date, String type, String complaint, String response, String refund) {
+        public ComplaintRow(String date, String type, String complaint) {
             this.date = date;
             this.type = type;
             this.complaint = complaint;
-            this.response = response;
-            this.refund = refund;
         }
 
         public String getDate() { return date; }
         public String getType() { return type; }
         public String getComplaint() { return complaint; }
-        public String getResponse() { return response; }
-        public String getRefund() { return refund; }
+
     }
 } 

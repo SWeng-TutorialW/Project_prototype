@@ -2,6 +2,7 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.CatalogUpdateEvent;
 import il.cshaifasweng.OCSFMediatorExample.entities.Complain;
+import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.ComplainUpdateEvent;
 import javafx.application.Platform;
@@ -58,9 +59,24 @@ public class ComplainController_employee implements Initializable {
     private TableColumn<Complain, String> timeColumn;
 
     private CatalogController_employee catalogController;
+    private LoginRegCheck user;
 
     public void setCatalogController(CatalogController_employee controller) {
         this.catalogController = controller;
+    }
+
+    public void setUser(LoginRegCheck user) {
+        this.user = user;
+        if (user.getEmployeetype() != 2) {
+            complains.setDisable(true);
+            complains.setVisible(false);
+            if (complains.getScene() != null && complains.getScene().getWindow() != null) {
+                complains.getScene().getWindow().hide();
+            }
+        } else {
+            complains.setDisable(false);
+            complains.setVisible(true);
+        }
     }
 
     @FXML
@@ -150,7 +166,8 @@ public class ComplainController_employee implements Initializable {
 
             ReplyComplainController controller = loader.getController();
             controller.setComplain(complain);
-
+            System.out.println("printing user type for debug" + this.user.getEmployeetype());
+            controller.setUser(user);
 
             Stage stage = new Stage();
             stage.setTitle("Reply to Complaint");

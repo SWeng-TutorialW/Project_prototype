@@ -355,10 +355,12 @@ public class CatalogController_employee {
         System.out.println("set_user updated");
         System.out.println("user send?"+user.get_send_complain());
         System.out.println("user recieve?"+user.isReceive_answer());
-
-        if (type != 4) {
-            discount.setDisable(true); // Disable the discount button for non-network users
-            discount.setStyle("-fx-opacity: 0.5;");
+        if (user.getEmployeetype() != 2) {
+            contact.setDisable(true);
+            contact.setStyle("-fx-opacity: 0.5;");
+        } else {
+            contact.setDisable(false);
+            contact.setStyle("-fx-background-color: #C8A2C8; -fx-border-color: white; -fx-text-fill: #fdfdfd;");
         }
         if(this.user.getEmployeetype() != 1) {
             users_btn.setDisable(true); // Disable the discount button for non-network users
@@ -450,6 +452,9 @@ public class CatalogController_employee {
     private ComplainController_employee complainController;
     public void setCatalogController(ComplainController_employee controller) {
         this.complainController = controller;
+        if (controller != null && user != null) {
+            controller.setUser(user);
+        }
     }
     public void  set_sorting_type(int value)
     {
@@ -483,7 +488,6 @@ public class CatalogController_employee {
 
         // Refresh user state from server
         refreshUserState();
-
         Stores.getItems().addAll("Haifa", "Krayot","Nahariyya","network");
 
         nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12 };
@@ -496,6 +500,9 @@ public class CatalogController_employee {
             try {
                 if (user != null) {
                     user.setIsLogin(0);
+                    if( user.getEmployeetype() != 2){
+                        contact.setDisable(true);
+                    }
                     change_user_login tt = new change_user_login(user,0);
                     System.out.println("the user is " + user.getUsername()+"logged out");
                     SimpleClient.getClient().sendToServer(tt);
@@ -1393,7 +1400,7 @@ public class CatalogController_employee {
                 Parent root = fxmlLoader.load();
                 ComplainController_employee complainControllerEmployee = fxmlLoader.getController();
                 complainControllerEmployee.setCatalogController(this);
-
+                complainControllerEmployee.setUser(user);
                 Stage stage = new Stage();
                 stage.setTitle("Complaints");
                 stage.setScene(new Scene(root));

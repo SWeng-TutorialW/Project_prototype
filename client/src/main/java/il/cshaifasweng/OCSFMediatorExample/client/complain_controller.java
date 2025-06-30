@@ -167,6 +167,7 @@ public class complain_controller implements Initializable {
 
     @FXML
     public void send_complain(ActionEvent event) {
+        // Complaints are routed to the service employee (employeetype 2) on the server side.
         if (currentUser != null && currentUser.isType()) {
             Warning warning = new Warning("Workers should use the request feature instead of complaints.");
             EventBus.getDefault().post(new WarningEvent(warning));
