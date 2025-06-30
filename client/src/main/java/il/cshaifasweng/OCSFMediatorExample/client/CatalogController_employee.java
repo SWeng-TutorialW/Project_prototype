@@ -46,7 +46,6 @@ public class CatalogController_employee {
     private Button cart;
 
 
-
     @FXML
     private ComboBox<String> Stores;
 
@@ -331,9 +330,6 @@ public class CatalogController_employee {
     @FXML
     private Button end_sale_btn;
 
-    @FXML
-    private Button request_btn;
-
     private List<Flower> flowersList_c;
     private Label[] nameLabels;
     private Label[] typeLabels;
@@ -348,12 +344,6 @@ public class CatalogController_employee {
     public void  set_type(int value)
     {
         type=value;
-        if(type!=4)
-        {
-            discount.setText("Send request to the admin");
-            discount.setPrefWidth(240);
-            discount.setOnAction(this::request);
-        }
     }
     private LoginRegCheck user;
     public void set_user(LoginRegCheck user) {
@@ -361,7 +351,15 @@ public class CatalogController_employee {
         System.out.println("set_user updated");
         System.out.println("user send?"+user.get_send_complain());
         System.out.println("user recieve?"+user.isReceive_answer());
-        
+
+        if (type != 4) {
+            discount.setDisable(true); // Disable the discount button for non-network users
+            discount.setStyle("-fx-opacity: 0.5;");
+        }
+        if(this.user.getEmployeetype() != 1) {
+            users_btn.setDisable(true); // Disable the discount button for non-network users
+            users_btn.setStyle("-fx-opacity: 0.5;");
+        }
         // Set default store filter based on user's store
         setDefaultStoreFilter();
     }
@@ -671,12 +669,20 @@ public class CatalogController_employee {
     void show_users(ActionEvent event)
     {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("users_table.fxml"));
-            Parent root = loader.load();
-            Stage stage = new Stage();
-            stage.setTitle("User Management");
-            stage.setScene(new Scene(root));
-            stage.show();
+            if(this.user.getEmployeetype() == 1) {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("users_table.fxml"));
+                Parent root = loader.load();
+                Stage stage = new Stage();
+                stage.setTitle("User Management");
+                stage.setScene(new Scene(root));
+                stage.show();
+            }
+            else{
+                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Users table");
+                alert.setHeaderText("change users table");
+                alert.setContentText("Only the system administrator can change customer details.");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1374,36 +1380,6 @@ public class CatalogController_employee {
 
     }
 
-
-
-
-    @FXML
-    void request(ActionEvent event)
-    {
-        if(user.get_send_complain())
-        {
-            Warning warning = new Warning("You already send a  request.");
-            EventBus.getDefault().post(new WarningEvent(warning));
-            return;
-        }
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("worker_request_scene.fxml"));
-            Parent root = fxmlLoader.load();
-            worker_request_controller Controller = fxmlLoader.getController();
-            Controller.setCatalogController(this);
-
-            Stage stage = new Stage();
-            stage.setTitle("Send request");
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.initModality(Modality.WINDOW_MODAL);
-            stage.initOwner(((Node) event.getSource()).getScene().getWindow());
-            stage.show();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
     public void receiveNewComplain(Complain complain)
     {
         // Handle new complain
@@ -1515,16 +1491,6 @@ public class CatalogController_employee {
 
     @FXML
     void discount_action(ActionEvent event) throws IOException {
-        // Check if user is in network mode (type == 4)
-        if (type != 4) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Access Denied");
-            alert.setHeaderText("Network Access Required");
-            alert.setContentText("You can only set discounts when viewing the network catalog. Please switch to 'network' view.");
-            alert.showAndWait();
-            return;
-        }
-        
         // Check if current store selection is "network"
         String selectedStore = Stores.getValue();
         if (selectedStore == null || !selectedStore.equals("network")) {
@@ -1532,6 +1498,15 @@ public class CatalogController_employee {
             alert.setTitle("Access Denied");
             alert.setHeaderText("Network View Required");
             alert.setContentText("Please select 'network' from the store filter to set discounts.");
+            alert.showAndWait();
+            return;
+        }
+
+        if (type != 4) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Access Denied");
+            alert.setHeaderText("Store manager required");
+            alert.setContentText("Only the Lilach manager can set discounts.");
             alert.showAndWait();
             return;
         }

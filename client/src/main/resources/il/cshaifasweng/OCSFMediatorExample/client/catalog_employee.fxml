@@ -79,7 +79,7 @@
                         <Font size="14.0" />
                     </font>
                 </Button>
-                
+
                 <!-- Discount button -->
                 <Button fx:id="discount" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="421.0" layoutY="71.0" mnemonicParsing="false" onAction="#discount_action" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Discount" textFill="#fdfdfd">
                     <font>
@@ -96,13 +96,6 @@
                 
                 <!-- End sale button -->
                 <Button fx:id="end_sale_btn" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="740.0" layoutY="120.0" mnemonicParsing="false" onAction="#end_sale_action" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="End Sale" textFill="#fdfdfd" visible="false">
-                    <font>
-                        <Font size="14.0" />
-                    </font>
-                </Button>
-                
-                <!-- Request button -->
-                <Button fx:id="request_btn" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="647.0" layoutY="71.0" mnemonicParsing="false" onAction="#request" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Request" textFill="#fdfdfd">
                     <font>
                         <Font size="14.0" />
                     </font>
