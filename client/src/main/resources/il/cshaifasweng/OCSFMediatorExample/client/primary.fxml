@@ -6,49 +6,67 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
 <AnchorPane prefHeight="386.0" prefWidth="562.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.PrimaryController">
    <children>
-      <Label layoutX="142.0" layoutY="-7.0" prefHeight="76.0" prefWidth="279.0" text="Welcome to Liliac Systems" textFill="#83328a">
+      <GridPane layoutX="-1.0" layoutY="41.0" prefHeight="341.0" prefWidth="570.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="307.0" minWidth="10.0" prefWidth="288.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="250.0" minWidth="10.0" prefWidth="223.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints maxHeight="56.0" minHeight="10.0" prefHeight="52.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="80.0" minHeight="10.0" prefHeight="49.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="99.0" minHeight="10.0" prefHeight="66.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="56.0" minHeight="0.0" prefHeight="42.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="128.0" minHeight="10.0" prefHeight="128.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label prefHeight="47.0" prefWidth="281.0" text="Please enter the appropariate fields" GridPane.halignment="CENTER">
+               <font>
+                  <Font name="Dubai Medium" size="18.0" />
+               </font>
+            </Label>
+            <Label fx:id="ip_label" alignment="BASELINE_CENTER" prefHeight="35.0" prefWidth="102.0" text="IP " GridPane.halignment="LEFT" GridPane.rowIndex="1">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+            <TextField fx:id="IP" prefHeight="30.0" prefWidth="188.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </TextField>
+            <Label fx:id="port" alignment="CENTER_RIGHT" prefHeight="35.0" prefWidth="102.0" text="PORT " GridPane.halignment="LEFT" GridPane.rowIndex="2">
+               <font>
+                  <Font size="24.0" />
+               </font>
+            </Label>
+            <TextField fx:id="port_box" prefHeight="30.0" prefWidth="196.0" text="3000" GridPane.columnIndex="1" GridPane.rowIndex="2">
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </TextField>
+            <Button fx:id="Catalog" mnemonicParsing="false" onAction="#show_connect" prefHeight="36.0" prefWidth="79.0" text="Connect " GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+            <ImageView fx:id="image_2" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="4">
+               <image>
+                  <Image url="@../../../../images/entery_flowers.png" />
+               </image>
+            </ImageView>
+            <ImageView fx:id="image_1" fitHeight="150.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" GridPane.halignment="LEFT" GridPane.rowIndex="4">
+               <image>
+                  <Image url="@../../../../images/entery_flowers.png" />
+               </image>
+            </ImageView>
+         </children>
+      </GridPane>
+      <Label alignment="CENTER" layoutX="145.0" prefHeight="65.0" prefWidth="279.0" text="Welcome to Liliac Systems" textAlignment="CENTER" textFill="#83328a">
          <font>
             <Font name="Dubai Medium" size="18.0" />
          </font></Label>
-      <Button fx:id="Catalog" layoutX="236.0" layoutY="278.0" mnemonicParsing="false" onAction="#show_connect" text="Connect " />
-      <Label fx:id="ip_label" layoutX="64.0" layoutY="136.0" prefHeight="35.0" prefWidth="102.0" text="IP :">
-         <font>
-            <Font size="24.0" />
-         </font>
-      </Label>
-      <TextField fx:id="IP" layoutX="181.0" layoutY="138.0" prefHeight="30.0" prefWidth="188.0">
-         <font>
-            <Font size="14.0" />
-         </font>
-      </TextField>
-      <Label fx:id="port" layoutX="58.0" layoutY="193.0" prefHeight="35.0" prefWidth="102.0" text="PORT :">
-         <font>
-            <Font size="24.0" />
-         </font>
-      </Label>
-      <Label layoutX="48.0" layoutY="60.0" prefHeight="76.0" prefWidth="279.0" text="Please enter the appropariate fields">
-         <font>
-            <Font name="Dubai Medium" size="18.0" />
-         </font>
-      </Label>
-      <TextField fx:id="port_box" text="3000" layoutX="177.0" layoutY="196.0" prefHeight="30.0" prefWidth="196.0">
-         <font>
-            <Font size="14.0" />
-         </font>
-      </TextField>
-      <ImageView fx:id="image_1" fitHeight="150.0" fitWidth="200.0" layoutY="259.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../../../../images/entery_flowers.png" />
-         </image>
-      </ImageView>
-      <ImageView fx:id="image_2" fitHeight="150.0" fitWidth="200.0" layoutX="362.0" layoutY="260.0" pickOnBounds="true" preserveRatio="true">
-         <image>
-            <Image url="@../../../../images/entery_flowers.png" />
-         </image>
-      </ImageView>
    </children>
 </AnchorPane>

@@ -145,13 +145,20 @@ public class MyAccountController {
             myOrdersButton.setDisable(true);
             myComplaintsButton.setDisable(true);
             subscribeBtn.setDisable(true);
+            myOrdersButton.setVisible(false);
+            subscribeBtn.setVisible(false);
+            subscriptionExpireLbl.setVisible(false);
         }
-        myAccountLbl.setText("My Account - Hello " + current_User.getFullName());
-        myAccountLbl.setAlignment(CENTER);
+        centerHelloAccountLbl();
 
 
     }
+    void centerHelloAccountLbl() {
+        myAccountLbl.setText("My Account - Hello " + current_User.getFullName());
+        myAccountLbl.setAlignment(CENTER);
+        myAccountLbl.setLayoutX(myAccUsers.getWidth() / 2 - myAccountLbl.getWidth() / 2);
 
+    }
     @FXML
     private void handleMyOrdersButton() {
         if (current_User == null) {
@@ -241,37 +248,38 @@ public class MyAccountController {
                     alert.setHeaderText("Username Already Exists");
                     alert.setContentText("The username you entered is already taken. Please choose a different username.");
                     alert.showAndWait();
-                    userChangeTxtB.setText(current_User.getUsername());
+                    loadUserInfo();
                 });
         }
 
     }
 
     @Subscribe
-    public void onSuccessfulUpdate(String str) {
-        System.out.println("onSuccessfulUpdate called with: " + str);
-        if(str.startsWith("#userUpdateSuccess")) {
+    public void onSuccessfulUpdate(UpdateUserEvent event) {
+        System.out.println("onSuccessfulUpdate called with: " + event.getMsg());
+        if(event.getMsg().startsWith("#userUpdateSuccess")) {
             System.out.println("#userUpdateSuccess detected, posting SuccessEvent");
             Platform.runLater(() -> {
+                current_User = event.getUpdatedUser();
                 // Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 // alert.setTitle("Update Success");
                 // alert.setHeaderText("Successfully Updated User Details");
                 // alert.setContentText("Your Details Are Up-To-Date.");
                 // alert.showAndWait();
                 Success success = new Success("Your details are up-to-date.");
-                org.greenrobot.eventbus.EventBus.getDefault().post(new SuccessEvent(success));
+                EventBus.getDefault().post(new SuccessEvent(success));
             });
             loadUserInfo();
         }
     }
 
-    @Subscribe
+    /*@Subscribe
     public void getUserDetails(UpdateUserEvent user) {
         if(Objects.equals(user.getUpdatedUser().getId(), current_User.getId())) { // just to make sure we are updating the correct user
             catalogController.set_user(current_User);
             loadUserInfo();
         }
-    }
+    } IRRELEVANT */
 
     @FXML
     void sendUserUpdate(ActionEvent event) {
@@ -279,33 +287,37 @@ public class MyAccountController {
         passErrorMsgLbl.setVisible(false);
         UpdateUserEvent updatedUser;
         LoginRegCheck currentUser = current_User;
-
         currentUser.setUsername(userChangeTxtB.getText());
         currentUser.setEmail(emailChangeTxtB.getText());
         currentUser.setPhoneNum(phoneChangeTxtB.getText());
-        // currentUser.setPassword(newPassTxtB.getText()); Irrelevant, a different function handles password changes
         currentUser.setFullName(fNameTxtB.getText());
+        // currentUser.setPassword(newPassTxtB.getText()); Irrelevant, a different function handles password changes
         updatedUser = new UpdateUserEvent(currentUser);
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Confirm Update");
+        confirmation.setHeaderText("Are you sure you want to update your details?");
+
+        ButtonType yes = new ButtonType("Yes");
+        ButtonType no = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+        confirmation.getButtonTypes().setAll(yes, no);
+        Optional<ButtonType> result = confirmation.showAndWait();
+        if (result.isPresent() && result.get() == no) {
+            // User chose not to update, return early
+            return;
+        }
         try {
             SimpleClient.client.sendToServer(updatedUser);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        Platform.runLater(() -> {
-            // Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            // alert.setTitle("Update Success");
-            // alert.setHeaderText("Successfully Updated User Details");
-            // alert.setContentText("Your Details Are Up-To-Date.");
-            // alert.showAndWait();
-            Success success = new Success("Your details are up-to-date.");
-            EventBus.getDefault().post(new SuccessEvent(success));
-        });
+
     }
 
 
     @FXML
     void onChangePassword(ActionEvent event) {
+
         if (newPassTxtB.getText().isEmpty() || confNewPassTxtB.getText().isEmpty()) {
             passErrorMsgLbl.setVisible(true);
             passErrorMsgLbl.setText("Please fill in both password fields.");
@@ -322,7 +334,18 @@ public class MyAccountController {
             passErrorMsgLbl.setText("New password cannot be the same as the current password.");
             return;
         }
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Confirm Password Change");
+        confirmation.setHeaderText("Are you sure you want to update your Password?");
 
+        ButtonType yes = new ButtonType("Yes");
+        ButtonType no = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
+        confirmation.getButtonTypes().setAll(yes, no);
+        Optional<ButtonType> result = confirmation.showAndWait();
+        if (result.isPresent() && result.get() == no) {
+            // User chose not to update, return early
+            return;
+        }
         current_User.setPassword(newPassTxtB.getText());
         Platform.runLater(() -> {
             Success success = new Success("Your New Password Has Been Changed Successfully.");
