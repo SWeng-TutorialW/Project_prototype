@@ -45,9 +45,6 @@ public class CatalogController_employee {
     private Button add_flower;
 
     @FXML
-    private Button cart;
-
-    @FXML
     private ComboBox<String> Stores;
 
     @FXML
@@ -361,23 +358,28 @@ public class CatalogController_employee {
 
         if (type != 4) {
             discount.setDisable(true); // Disable the discount button for non-network users
-            discount.setStyle("-fx-opacity: 0.5;");
+            discount.setStyle("-fx-background-color: #EBD9EB; -fx-text-fill: #A58BA5; -fx-border-color: #D1BBD1;");
+
         }
         if(this.user.getEmployeetype() != 1) {
             users_btn.setDisable(true); // Disable the discount button for non-network users
-            users_btn.setStyle("-fx-opacity: 0.5;");
+            users_btn.setStyle("-fx-background-color: #EBD9EB; -fx-text-fill: #A58BA5; -fx-border-color: #D1BBD1;");
+
         }
         if(this.user.getEmployeetype() != 0) {
             reportsBtn.setDisable(true); // Disable the discount button for non-network users
-            reportsBtn.setStyle("-fx-opacity: 0.5;");
-
-            add_flower.setDisable(true);
-            add_flower.setStyle("-fx-opacity: 0.5;");
+            reportsBtn.setStyle("-fx-background-color: #EBD9EB; -fx-text-fill: #A58BA5; -fx-border-color: #D1BBD1;");
 
             discount.setDisable(true);
-            discount.setStyle("-fx-opacity: 0.5;");
-
+            discount.setStyle("-fx-background-color: #EBD9EB; -fx-text-fill: #A58BA5; -fx-border-color: #D1BBD1;");
         }
+         if (this.user.getEmployeetype() == 0 || this.user.getEmployeetype() == 3){
+             add_flower.setDisable(false);
+         }
+         else{
+             add_flower.setDisable(true);
+             add_flower.setStyle("-fx-background-color: #EBD9EB; -fx-text-fill: #A58BA5; -fx-border-color: #D1BBD1;");
+         }
 
 
         // Set default store filter based on user's store
@@ -505,13 +507,7 @@ public class CatalogController_employee {
             }
         });
 
-        cart.setOnAction(e -> {
-            try {
-                open_complain_box(e);
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        });
+
         
         // Add event listener for combo box selection changes
       /*  combo.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
@@ -637,7 +633,7 @@ public class CatalogController_employee {
 
                 // Make price field editable only in network view
                 priceField.setEditable(isNetworkView);
-                if (isNetworkView) {
+                if (isNetworkView && this.user.getEmployeetype() == 0 && this.user.getStore() == 4 ) {
                     priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px; -fx-background-color: #f0f0f0;");
                     priceField.setPromptText("Click to edit price");
 
@@ -1083,7 +1079,7 @@ public class CatalogController_employee {
 
                 // Make price field editable only in network view
                 priceField.setEditable(isNetworkView);
-                if (isNetworkView) {
+                if (isNetworkView && this.user.getEmployeetype() == 0 && this.user.getStore() == 4 ) {
                     priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px; -fx-background-color: #f0f0f0;");
                     priceField.setPromptText("Click to edit price");
 
@@ -1785,9 +1781,8 @@ public class CatalogController_employee {
                 priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px;");
 
                 if (isNetworkView && this.user.getEmployeetype() == 0 && this.user.getStore() == 4) {
-                    System.out.println("wwwwwwwwwwwww" + user.getEmployeetype());
                     // Make price field editable only in network view
-                    priceField.setEditable(isNetworkView);
+                    priceField.setEditable(true);
                     priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px; -fx-background-color: #f0f0f0;");
                     priceField.setPromptText("Click to edit price");
 

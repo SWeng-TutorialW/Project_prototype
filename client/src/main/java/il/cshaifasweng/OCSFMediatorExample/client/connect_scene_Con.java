@@ -81,6 +81,18 @@ public class connect_scene_Con  {
     }
     private  CatalogController catalogController;
     private CatalogController_employee employeeController;
+    private static Stage registerStageInstance = null;
+    public static boolean isRegStageOpen() {
+        return registerStageInstance != null && registerStageInstance.isShowing();
+    }
+    public static void setRegStageInstance(Stage stage) {
+        registerStageInstance = stage;
+        if (registerStageInstance != null) {
+            registerStageInstance.setOnHidden(e -> registerStageInstance = null);
+        }
+    }
+
+
     @FXML
     void initialize() {
 
@@ -95,6 +107,13 @@ public class connect_scene_Con  {
 
     @FXML
     void show_reg(ActionEvent event) {
+        if (isRegStageOpen()) {
+            Warning warning = new Warning("Registration window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            registerStageInstance.toFront();
+            registerStageInstance.requestFocus();
+            return;
+        }
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
             RegistrationController regController = fxmlLoader.getController();
@@ -109,6 +128,9 @@ public class connect_scene_Con  {
             Stage stage = new Stage();
             stage.setTitle("Create New Account");
             stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            setRegStageInstance(stage);
+
             stage.show();
 
         } catch (IOException e) {
@@ -372,10 +394,17 @@ public class connect_scene_Con  {
 
                                     }
                                 }
-                                App.getScene().setRoot(root);
-                                App.getStage().setWidth(980);
-                                App.getStage().setHeight(750);
-                                App.getStage().centerOnScreen();
+                                if(catalogController!=null){
+                                    App.getScene().setRoot(root);
+                                    App.getStage().setWidth(1020);
+                                    App.getStage().setHeight(750);
+                                    App.getStage().centerOnScreen();
+                                } else {
+                                    App.getScene().setRoot(root);
+                                    App.getStage().setWidth(750);
+                                    App.getStage().setHeight(750);
+                                    App.getStage().centerOnScreen();
+                                }
 
                                 System.out.println("show the catalog as user/employee first time");
 

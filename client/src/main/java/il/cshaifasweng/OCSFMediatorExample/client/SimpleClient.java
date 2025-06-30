@@ -126,8 +126,7 @@ public class SimpleClient extends AbstractClient {
 
 		}
 		else if(msg.getClass().equals(UpdateUserEvent.class)){ // Update user event has been received
-			EventBus.getDefault().post(msg);
-			EventBus.getDefault().post("#userUpdateSuccess");
+			EventBus.getDefault().post(new UpdateUserEvent(((UpdateUserEvent) msg).getUpdatedUser(),"#userUpdateSuccess"));
 		}
 		else if(msg.getClass().equals(GetUserDetails.class)){
 			EventBus.getDefault().post(msg); // This will send the user details to the UI
@@ -174,12 +173,17 @@ public class SimpleClient extends AbstractClient {
 			EventBus.getDefault().post(msgString);
 		}
 		else if(msgString.startsWith("Flower is already in this store")) {
+			Warning warning = new Warning("Flower is already in this store");
+			EventBus.getDefault().post(new WarningEvent(warning));
 			EventBus.getDefault().post(msgString);
 		}
 		else if(msgString.startsWith("Flower or store not found")) {
 			EventBus.getDefault().post(msgString);
 		}
 		else if(msgString.startsWith("Error adding flower to store:")) {
+			EventBus.getDefault().post(msgString);
+		}
+		else if(msgString.equals("flower_available") || msgString.equals("flower_not_available")) {
 			EventBus.getDefault().post(msgString);
 		}
 		
