@@ -288,7 +288,26 @@ public class DatabaseInitializer {
         service.setEmployeetype(2);
         session.save(service);
         session.flush();
-        
+
+        //store managers
+        LoginRegCheck Haifa = new LoginRegCheck("Haifa", "123", "haifa.HaifaWorker@gmail.com", 0, true, 1, "050-1234567", "HaifaWorker", "123456789", false);
+        session.save(Haifa);
+        Haifa.setEmployeetype(0);
+        session.flush();
+
+        LoginRegCheck nahariyya = new LoginRegCheck("nahariyya", "123", "haifa.nahariyyaWorker@gmail.com", 0, true, 3, "050-1234567", "nahariyyaWorker", "123456789", false);
+        session.save(nahariyya);
+        nahariyya.setEmployeetype(0);
+        session.flush();
+
+        LoginRegCheck Krayot = new LoginRegCheck("Krayot", "123", "haifa.KrayotWorker@gmail.com", 0, true, 2, "050-1234567", "KrayotWorker", "123456789", false);
+        session.save(Krayot);
+        Krayot.setEmployeetype(0);
+        session.flush();
+
+
+
+
         // Additional Client Users
         LoginRegCheck itayMalich = new LoginRegCheck("Itay", "123", "itay.malich2@gmail.com", 0, false, 4, "050-1234567", "Itay Malich", "123456789", false);
         session.save(itayMalich);

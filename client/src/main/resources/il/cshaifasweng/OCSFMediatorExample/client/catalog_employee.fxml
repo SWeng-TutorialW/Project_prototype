@@ -13,39 +13,29 @@
 
 <ScrollPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="850.0" prefWidth="798.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogController_employee">
     <content>
-        <AnchorPane prefHeight="846.0" prefWidth="788.0">
+        <AnchorPane prefHeight="846.0" prefWidth="775.0">
             <children>
-                <Label fx:id="copyrightLBl" alignment="CENTER" layoutX="232.0" layoutY="818.0" prefHeight="28.0" prefWidth="253.0" text="LilachSystem v0.1 © 2025 BestGroup. All rights reserved.">
+                <Label fx:id="copyrightLBl" alignment="CENTER" layoutX="232.0" layoutY="818.0" prefHeight="28.0" prefWidth="253.0" text="">
                     <font>
                         <Font name="Segoe UI" size="10.0" />
                     </font>
                 </Label>
-                <Label layoutX="-2.0" layoutY="-3.0" prefHeight="68.0" prefWidth="791.0" style="-fx-background-color: #C8A2C8;" text="LILACH FLOWERS" textFill="#fdfdfd57">
+                <Label layoutX="-1.0" layoutY="-3.0" prefHeight="68.0" prefWidth="720.0" style="-fx-background-color: #C8A2C8;" text="LILACH FLOWERS" textFill="#fdfdfd57">
                     <font>
                         <Font name="Palatino Linotype" size="24.0" />
                     </font>
                 </Label>
-                <Button fx:id="my_account" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="360.0" layoutY="-1.0" mnemonicParsing="false" onAction="#gotoEmployeeAcc" prefHeight="41.0" prefWidth="161.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="    My Account" textFill="#fdfdfd">
+                <Button fx:id="my_account" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="356.0" layoutY="11.0" mnemonicParsing="false" onAction="#gotoEmployeeAcc" prefHeight="41.0" prefWidth="161.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="    My Account" textFill="#fdfdfd">
                     <font>
                         <Font size="18.0" />
                     </font>
                 </Button>
-                <ImageView fitHeight="36.0" fitWidth="34.0" layoutX="359.0" layoutY="2.0" pickOnBounds="true">
+                <ImageView fitHeight="36.0" fitWidth="34.0" layoutX="359.0" layoutY="13.0" pickOnBounds="true">
                     <image>
                         <Image url="@../../../../images/person_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.png" />
                     </image>
                 </ImageView>
-                <Button fx:id="cart" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="520.0" layoutY="-1.0" mnemonicParsing="false" prefHeight="41.0" prefWidth="114.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text=" Cart" textFill="#fdfdfd">
-                    <font>
-                        <Font size="18.0" />
-                    </font>
-                </Button>
-                <ImageView fitHeight="39.0" fitWidth="27.0" layoutX="520.0" pickOnBounds="true">
-                    <image>
-                        <Image url="@../../../../images/cart.png" />
-                    </image>
-                </ImageView>
-                <Button fx:id="contact" alignment="CENTER" contentDisplay="CENTER" layoutX="630.0" layoutY="-1.0" mnemonicParsing="false" onAction="#open_complain_box" prefHeight="41.0" prefWidth="160.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Mail Box" textFill="#fdfdfd">
+                <Button fx:id="contact" alignment="CENTER" contentDisplay="CENTER" layoutX="527.0" layoutY="11.0" mnemonicParsing="false" onAction="#open_complain_box" prefHeight="41.0" prefWidth="160.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Mail Box" textFill="#fdfdfd">
                     <font>
                         <Font size="16.0" />
                     </font>
@@ -57,23 +47,23 @@
                         </ImageView>
                     </graphic>
                 </Button>
-                <Button fx:id="reportsBtn" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="248.0" layoutY="-1.0" mnemonicParsing="false" onAction="#openReports" prefHeight="41.0" prefWidth="111.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="📊 Reports" textFill="#fdfdfd">
+                <Button fx:id="reportsBtn" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="236.0" layoutY="11.0" mnemonicParsing="false" onAction="#openReports" prefHeight="42.0" prefWidth="111.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="📊 Reports" textFill="#fdfdfd">
                     <font>
                         <Font size="16.0" />
                     </font>
                 </Button>
-                
+
                 <!-- Dynamic FlowPane for flowers -->
-                <FlowPane fx:id="catalogFlowPane" hgap="20.0" layoutX="20.0" layoutY="120.0" prefHeight="650.0" prefWidth="800.0" vgap="20.0">
+                <FlowPane fx:id="catalogFlowPane" hgap="20.0" layoutX="-9.0" layoutY="131.0" prefHeight="692.0" prefWidth="804.0" vgap="20.0">
                     <padding>
                         <Insets bottom="20" left="20" right="20" top="20" />
                     </padding>
                 </FlowPane>
-                
+
                 <!-- Store selection and sorting controls -->
                 <AnchorPane fx:id="for_combo" layoutX="14.0" layoutY="80.0" prefHeight="30.0" prefWidth="150.0">
                <children>
-                      
+
                       <!-- Filter button -->
                       <Button fx:id="filterButton" layoutX="10.0" layoutY="-7.0" mnemonicParsing="false" onAction="#openFilterWindow" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #C8A2C8; -fx-text-fill: white;" text="Filter">
                           <font>
@@ -82,9 +72,9 @@
                       </Button>
                </children>
                 </AnchorPane>
-                
+
                 <ComboBox fx:id="Stores" layoutX="137.0" layoutY="74.0" onAction="#stores_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
-                
+
                 <!-- Add flower button -->
                 <Button fx:id="add_flower" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="309.0" layoutY="71.0" mnemonicParsing="false" onAction="#add_flower_action" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Add Item" textFill="#fdfdfd">
                     <font>
@@ -98,14 +88,14 @@
                         <Font size="14.0" />
                     </font>
                 </Button>
-                
+
                 <!-- Users button -->
                 <Button fx:id="users_btn" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="532.0" layoutY="71.0" mnemonicParsing="false" onAction="#show_users" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Users" textFill="#fdfdfd">
                     <font>
                         <Font size="14.0" />
                     </font>
                 </Button>
-                
+
                 <!-- End sale button -->
                 <Button fx:id="end_sale_btn" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="740.0" layoutY="120.0" mnemonicParsing="false" onAction="#end_sale_action" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="End Sale" textFill="#fdfdfd" visible="false">
                     <font>
