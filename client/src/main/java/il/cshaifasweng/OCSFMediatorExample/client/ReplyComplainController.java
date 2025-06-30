@@ -135,9 +135,10 @@ public class ReplyComplainController {
             newComplain.setOrder(originalComplain.getOrder()); // Optional, keep order context if needed
     
             // Send new complaint + wrapper to server
-            change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(userToBeAnswered, true, true);
+            // Don't send wrapper to reset user flags since multiple complaints are now allowed
+            // change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(userToBeAnswered, true, true);
             SimpleClient.getClient().sendToServer(newComplain);
-            SimpleClient.getClient().sendToServer(wrapper);
+            // SimpleClient.getClient().sendToServer(wrapper);
             SimpleClient.getClient().sendToServer("getComplaints");
     
         } catch (IOException e) {

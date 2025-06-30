@@ -1225,9 +1225,10 @@ public class CatalogController {
     public void receiveNewComplain(Complain complain)
     {
         complain.setClient(user.getUsername());
-        change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(user, true,false);
+        // Don't set send_complain flag to true - allow multiple complaints
+        // change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(user, true,false);
         try {
-            SimpleClient.getClient().sendToServer(wrapper);
+            // SimpleClient.getClient().sendToServer(wrapper);
             SimpleClient.getClient().sendToServer(complain);// try to send the complain to the DB
         } catch (IOException e) {
             e.printStackTrace();
@@ -1243,21 +1244,23 @@ public class CatalogController {
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
-        if(user.isReceive_answer())
-        {
+        
+        // Check if user has any unread responses by querying complaints
+        // This replaces the old logic that relied on user flags
+        try {
+            SimpleClient.getClient().sendToServer("getComplaints");
+            // The mailbox icon will be updated based on the complaint data received
+            // For now, we'll show the mailbox and let the complaint handler determine if there are messages
             SimpleClient.getClient().sendToServer("I#want#to#see#my#answer_"+user.getUsername());
             System.out.println("I#want#to#see#my#answer_"+user.getUsername());
-            return;
-        }
-        else
-        {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Mailbox");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
             alert.setHeaderText("");
-            alert.setContentText("You dont have any messages");
+            alert.setContentText("Error checking mailbox: " + e.getMessage());
             alert.showAndWait();
         }
-
     }
     @FXML
     void complaint(ActionEvent event)throws IOException
@@ -1269,19 +1272,6 @@ public class CatalogController {
             return;
 
         }
-        if(user.get_send_complain() && user.isReceive_answer())
-        {
-            Warning warning = new Warning("You have a answer from the admin");
-            EventBus.getDefault().post(new WarningEvent(warning));
-            return;
-        }
-        if(user.get_send_complain() && !user.isReceive_answer())
-        {
-            Warning warning = new Warning("You already send a  complain.");
-            EventBus.getDefault().post(new WarningEvent(warning));
-            return;
-        }
-
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("complain_scene.fxml"));
             Parent root = fxmlLoader.load();

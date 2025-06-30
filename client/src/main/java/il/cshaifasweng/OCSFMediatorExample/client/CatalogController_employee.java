@@ -1414,17 +1414,22 @@ public class CatalogController_employee {
         }
         else
         {
-            if(user.isReceive_answer())
-            {
+            // Check if user has any unread responses by querying complaints
+            // This replaces the old logic that relied on user flags
+            try {
+                SimpleClient.getClient().sendToServer("getComplaints");
+                // The mailbox icon will be updated based on the complaint data received
+                // For now, we'll show the mailbox and let the complaint handler determine if there are messages
                 SimpleClient.getClient().sendToServer("I#want#to#see#my#answer_"+user.getUsername());
                 System.out.println("I#want#to#see#my#answer_"+user.getUsername());
-                return;
+            } catch (IOException e) {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText("");
+                alert.setContentText("Error checking mailbox: " + e.getMessage());
+                alert.showAndWait();
             }
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Mailbox");
-            alert.setHeaderText("");
-            alert.setContentText("You dont have any messages");
-            alert.showAndWait();
         }
     }
 
@@ -1489,6 +1494,16 @@ public class CatalogController_employee {
     public void receiveNewComplain(Complain complain)
     {
         // Handle new complain
+        complain.setClient(user.getUsername());
+        // Don't set send_complain flag to true - allow multiple complaints/requests
+        // change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(user, true,false);
+        try {
+            // SimpleClient.getClient().sendToServer(wrapper);
+            SimpleClient.getClient().sendToServer(complain);// try to send the complain to the DB
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     boolean sale=false;
