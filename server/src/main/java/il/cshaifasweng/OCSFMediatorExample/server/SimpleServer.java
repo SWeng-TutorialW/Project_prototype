@@ -1275,7 +1275,7 @@ public class SimpleServer extends AbstractServer {
 				client.sendToClient("order_success");
 
 				// Notify all clients about the new order
-				sendToAllClients("update_catalog_after_change");
+				//sendToAllClients("update_catalog_after_change");
 
 				// Call EmailService after successful order save
 				EmailService.sendOrderConfirmationEmail(order);

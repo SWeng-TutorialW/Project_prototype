@@ -223,8 +223,14 @@ public class connect_scene_Con  {
                         {
                             if(loginRegCheck.getIsLogin()==1)
                             {
-                                Warning warning = new Warning("this user already in the system");
-                                EventBus.getDefault().post(new WarningEvent(warning));
+                                Platform.runLater(() -> {
+                                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                                    alert.setTitle("Login Error");
+                                    alert.setHeaderText("Already Logged In");
+                                    alert.setContentText("This user is already logged in elsewhere. Please log out from other devices first.");
+                                    alert.showAndWait();
+                                });
+                                user = null;
                                 return;
                             }
                             user = loginRegCheck;
@@ -238,9 +244,16 @@ public class connect_scene_Con  {
                         {
                             if(loginRegCheck.getIsLogin()==1)
                             {
-                                Warning warning = new Warning("this user already in the system");
-                                EventBus.getDefault().post(new WarningEvent(warning));
+                                Platform.runLater(() -> {
+                                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                                    alert.setTitle("Login Error");
+                                    alert.setHeaderText("Already Logged In");
+                                    alert.setContentText("This user is already logged in elsewhere. Please log out from other devices first.");
+                                    alert.showAndWait();
+                                });
+                                user = null;
                                 return;
+
                             }
                             user = loginRegCheck;
                             type_Client = true;
