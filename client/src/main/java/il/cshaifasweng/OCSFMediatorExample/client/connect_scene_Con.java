@@ -44,6 +44,10 @@ public class connect_scene_Con  {
     private Label ip_label;
 
     @FXML
+    private CheckBox passCheckBox;
+    @FXML
+    private TextField passTxtB;
+    @FXML
     private Label port;
 
     @FXML
@@ -55,8 +59,7 @@ public class connect_scene_Con  {
     @FXML
     private PrimaryController ctlr;
 
-    @FXML
-    private CheckBox showPasswordCheckBox;
+
 
     boolean guess = false;
     boolean type_Client = false;
@@ -109,7 +112,18 @@ public class connect_scene_Con  {
     }
 
 
-
+    @FXML
+    void show_pass(ActionEvent event) {
+        if (passCheckBox.isSelected()) {
+            password.setVisible(false);
+            passTxtB.setVisible(true);
+            passTxtB.setText(password.getText());
+        } else {
+            password.setVisible(true);
+            passTxtB.setVisible(false);
+            password.setText(passTxtB.getText());
+        }
+    }
     @FXML
     void show_reg(ActionEvent event) {
         RegistrationController.cameFromConnect = true;
