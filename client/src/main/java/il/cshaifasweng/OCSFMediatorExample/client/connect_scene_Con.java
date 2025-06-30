@@ -100,6 +100,24 @@ public class connect_scene_Con  {
     }
 
 
+    private static Stage paymentStageInstance = null;
+
+    public static boolean isPaymentStageOpen() {
+        return paymentStageInstance != null && paymentStageInstance.isShowing();
+    }
+
+    public static void setPaymentStageInstance(Stage stage) {
+        paymentStageInstance = stage;
+        if (paymentStageInstance != null) {
+            paymentStageInstance.setOnHidden(e -> paymentStageInstance = null);
+        }
+    }
+    public static void closeAllPopups() {
+        if (isRegStageOpen()) registerStageInstance.close();
+        if (isPaymentStageOpen()) paymentStageInstance.close();
+    }
+
+
     @FXML
     void initialize() {
 
@@ -135,6 +153,12 @@ public class connect_scene_Con  {
             registerStageInstance.requestFocus();
             return;
         }
+        if (isPaymentStageOpen()) {
+            Warning warning = new Warning("Cannot open registration while payment window is open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
             RegistrationController regController = fxmlLoader.getController();
@@ -161,6 +185,7 @@ public class connect_scene_Con  {
     @FXML
     void guess_enter(ActionEvent event)
     {
+        connect_scene_Con.closeAllPopups();
         SimpleClient.isGuest = true;
         guess = true;
         try {
@@ -228,6 +253,8 @@ public class connect_scene_Con  {
             System.out.println("Processing as guest");
             Platform.runLater(() -> {
                 try {
+                    connect_scene_Con.closeAllPopups();
+
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
                     Parent root = loader.load();
 
@@ -320,6 +347,7 @@ public class connect_scene_Con  {
                                 Parent root;
 
                                 if (loginRegCheck.isType()) {
+                                    connect_scene_Con.closeAllPopups();
                                     loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
                                     root = loader.load();
                                     CatalogController_employee controller = loader.getController();
@@ -367,6 +395,7 @@ public class connect_scene_Con  {
 
                                 }
                                 else {
+                                    connect_scene_Con.closeAllPopups();
                                     loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
                                     root = loader.load();
                                     CatalogController controller = loader.getController();
