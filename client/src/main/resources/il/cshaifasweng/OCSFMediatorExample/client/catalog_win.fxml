@@ -189,9 +189,9 @@
                            </font>
                         </Label>
                         <Button fx:id="bouqut_btn" mnemonicParsing="false" onAction="#create_bouqut" prefHeight="25.0" prefWidth="97.0" style="-fx-background-color: #fdfdfd;" text="MY BOUQUET" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                        <ImageView fx:id="cus_img" fitHeight="199.0" fitWidth="197.0" pickOnBounds="true" GridPane.rowIndex="2" />
                      </children>
                   </GridPane>
+                  <ImageView fx:id="cus_img" fitHeight="199.0" fitWidth="197.0" pickOnBounds="true" GridPane.rowIndex="2" />
                </children>
             </AnchorPane>
             <ButtonBar fx:id="btnPane" layoutX="284.0" layoutY="9.0" nodeOrientation="RIGHT_TO_LEFT" prefHeight="50.0" prefWidth="689.0">

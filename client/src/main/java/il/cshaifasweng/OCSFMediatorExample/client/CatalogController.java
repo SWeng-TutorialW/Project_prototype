@@ -40,7 +40,8 @@ import java.util.Random;
 import java.util.Set;
 
 public class CatalogController {
-
+    @FXML
+    private TextField calc_price;
     @FXML
     private Button cart;
     @FXML
@@ -445,9 +446,9 @@ public class CatalogController {
                 ex.printStackTrace();
             }
         });
-        
+
         // Hide reports button for non-employee users
-        if (user == null || !user.isType()) {
+        if ((user == null || !user.isType()) && reportsBtn != null) {
             reportsBtn.setVisible(false);
         }
     }

@@ -75,7 +75,7 @@
                   <Font size="24.0" />
                </font>
             </Label>
-            <TextField fx:id="calc_price" alignment="CENTER" editable="false" prefHeight="25.0" prefWidth="139.0" GridPane.columnIndex="2" GridPane.rowIndex="6" />
+             <Label fx:id="calc_price" text="" alignment="CENTER" prefHeight="25.0" prefWidth="139.0" GridPane.columnIndex="2" GridPane.rowIndex="6" />
          </children>
       </GridPane>
         <Label alignment="TOP_CENTER" layoutX="1.0" layoutY="25.0" prefHeight="71.0" prefWidth="800.0" text="My Custom Bouquet" textAlignment="CENTER" textFill="WHITE">
