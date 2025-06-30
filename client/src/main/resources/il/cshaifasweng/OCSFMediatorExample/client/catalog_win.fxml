@@ -208,7 +208,7 @@
                         </ImageView>
                      </graphic>
                   </Button>
-                  <Button fx:id="Mail_box" alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#open_mail" prefHeight="125.0" prefWidth="111.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Mail Box" textFill="#fdfdfd">
+                  <Button fx:id="Mail_box" alignment="CENTER_RIGHT" contentDisplay="RIGHT" mnemonicParsing="false" onAction="#open_mail" prefHeight="125.0" prefWidth="111.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Mail Box" textFill="#fdfdfd">
                      <font>
                         <Font size="18.0" />
                      </font>

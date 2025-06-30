@@ -39,13 +39,6 @@
                     <font>
                         <Font size="16.0" />
                     </font>
-                    <graphic>
-                        <ImageView fx:id="mailbox_icon" fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" visible="false">
-                            <image>
-                                <Image url="@../../../../images/active.png" />
-                            </image>
-                        </ImageView>
-                    </graphic>
                 </Button>
                 <Button fx:id="reportsBtn" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="236.0" layoutY="11.0" mnemonicParsing="false" onAction="#openReports" prefHeight="42.0" prefWidth="111.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="📊 Reports" textFill="#fdfdfd">
                     <font>

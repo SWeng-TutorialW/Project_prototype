@@ -331,8 +331,7 @@ public class CatalogController_employee {
     @FXML
     private Button reportsBtn;
 
-    @FXML
-    private ImageView mailbox_icon;
+
 
     private List<Flower> flowersList_c;
     private Label[] nameLabels;
@@ -384,9 +383,6 @@ public class CatalogController_employee {
 
         // Set default store filter based on user's store
         setDefaultStoreFilter();
-
-        // Update mailbox icon when user is updated
-        Platform.runLater(this::updateMailboxIcon);
     }
 
     public LoginRegCheck getUser() {
@@ -478,27 +474,7 @@ public class CatalogController_employee {
     void initialize() {
         EventBus.getDefault().register(this);
         
-        // Initialize mailbox icon after FXML injection is complete
-        Platform.runLater(this::updateMailboxIcon);
-        
-        // Set up periodic check for new messages (every 30 seconds)
-        if (user != null) {
-            java.util.Timer timer = new java.util.Timer();
-            timer.scheduleAtFixedRate(new java.util.TimerTask() {
-                @Override
-                public void run() {
-                    Platform.runLater(() -> {
-                        if (user != null) {
-                            updateMailboxIcon();
-                        }
-                    });
-                }
-            }, 30000, 30000); // Check every 30 seconds
-        }
-
         System.out.println("CatalogController employee initialized");
-
-        Platform.runLater(this::updateMailboxIcon);
 
         // Refresh user state from server
         refreshUserState();
@@ -543,32 +519,7 @@ public class CatalogController_employee {
         });*/
     }
 
-    public void updateMailboxIcon() {
-        System.out.println("[CatalogController_employee] updateMailboxIcon called");
-        System.out.println("[CatalogController_employee] mailbox_icon is null: " + (mailbox_icon == null));
-        System.out.println("[CatalogController_employee] user is null: " + (user == null));
 
-        // Check if mailbox_icon is null (FXML injection not complete yet)
-        if (mailbox_icon == null) {
-            System.out.println("[CatalogController_employee] mailbox_icon is null, returning");
-            return;
-        }
-
-        if (user != null) {
-            // Query complaints to check for unread responses
-            try {
-                SimpleClient.getClient().sendToServer("getComplaints");
-                // The actual visibility will be set in handleComplaintsList method
-                System.out.println("[CatalogController_employee] Requested complaints to check for unread messages");
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("[CatalogController_employee] Error requesting complaints for mailbox icon update");
-            }
-        } else {
-            System.out.println("[CatalogController_employee] User is null, setting mailbox icon invisible");
-            mailbox_icon.setVisible(false);
-        }
-    }
 
     @FXML
     void gotoEmployeeAcc(ActionEvent event){
@@ -1438,13 +1389,7 @@ public class CatalogController_employee {
                 SimpleClient.getClient().sendToServer("I#want#to#see#my#answer_"+user.getUsername());
                 System.out.println("I#want#to#see#my#answer_"+user.getUsername());
                 
-                // Mark messages as read by hiding the notification icon
-                Platform.runLater(() -> {
-                    if (mailbox_icon != null) {
-                        mailbox_icon.setVisible(false);
-                        System.out.println("[CatalogController_employee] Marked messages as read - hiding notification icon");
-                    }
-                });
+
             } catch (IOException e) {
                 e.printStackTrace();
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -1957,14 +1902,7 @@ public class CatalogController_employee {
         if (event.getUpdatedUser() != null && event.getUpdatedUser().getUsername().equals(user.getUsername())) {
             // Update the local user object
             this.user = event.getUpdatedUser();
-            // Update mailbox icon
-            Platform.runLater(this::updateMailboxIcon);
         }
-    }
-
-    // Add this method to be called after FXML injection is complete
-    public void initializeMailboxIcon() {
-        updateMailboxIcon();
     }
 
     // Add flag to prevent infinite loops
@@ -2003,8 +1941,6 @@ public class CatalogController_employee {
         if (userDetails.getUser() != null && userDetails.getUser().getUsername().equals(user.getUsername())) {
             // Update the local user object with fresh data from server
             this.user = userDetails.getUser();
-            // Update mailbox icon
-            Platform.runLater(this::updateMailboxIcon);
             System.out.println("[CatalogController_employee] Updated user state from server: " + user.getUsername() + ", isReceive_answer: " + user.isReceive_answer());
         }
     }
@@ -2012,31 +1948,16 @@ public class CatalogController_employee {
     // Add EventBus handler for complaint updates to refresh mailbox icon
     @Subscribe
     public void handleComplaintUpdate(ComplainUpdateEvent event) {
-        System.out.println("[CatalogController_employee] Received complaint update event");
-        // Refresh mailbox icon when complaints are updated
-        if (user != null) {
-            Platform.runLater(this::updateMailboxIcon);
-        }
+        // Employee catalog doesn't need mailbox icon functionality
+        // This method is kept for compatibility but does nothing
     }
 
-     // TODO check can cause infinite loop
+    // TODO check can cause infinite loop
     @Subscribe
     public void handleComplaintsList(List<Complain> complaints) {
-        System.out.println("[CatalogController_employee] Received complaints list with " + (complaints != null ? complaints.size() : 0) + " complaints");
-        if (user != null && complaints != null) {
-            boolean hasUnreadMessages = complaints.stream()
-                .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
-
-            // Update mailbox icon visibility based on actual complaints
-            Platform.runLater(() -> {
-                if (mailbox_icon != null) {
-                    mailbox_icon.setVisible(hasUnreadMessages);
-                    System.out.println("[CatalogController_employee] Updated mailbox icon visibility: " + hasUnreadMessages);
-                }
-            });
-        }
+        // Employee catalog doesn't need mailbox icon functionality
+        // This method is kept for compatibility but does nothing
     }
-
 }
 
 

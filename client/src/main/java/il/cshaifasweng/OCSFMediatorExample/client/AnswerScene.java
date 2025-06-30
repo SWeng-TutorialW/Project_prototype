@@ -18,6 +18,7 @@ import java.io.IOException;
 public class AnswerScene {
     private Complain complain;
     private LoginRegCheck user;
+    
     public void set_user(LoginRegCheck user) {
         this.user = user;
     }
@@ -40,11 +41,7 @@ public class AnswerScene {
     @FXML
     void finish_request(ActionEvent event)throws IOException
     {
-        // Don't reset user flags since multiple complaints are now allowed
-        // change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(user, false,false);
-        // SimpleClient.getClient().sendToServer(wrapper);
         ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
-
     }
 
 }

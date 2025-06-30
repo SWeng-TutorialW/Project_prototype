@@ -278,6 +278,8 @@ public class CatalogController {
     public static LoginRegCheck getUser() {
         return user;
     }
+    
+
     public void  set_type(int value)
     {
         type=value;
@@ -452,19 +454,17 @@ public class CatalogController {
             reportsBtn.setVisible(false);
         }
         
-        // Set up periodic check for new messages (every 30 seconds)
+        // Initial check for new messages (no periodic timer to avoid spam)
         if (user != null) {
-            java.util.Timer timer = new java.util.Timer();
-            timer.scheduleAtFixedRate(new java.util.TimerTask() {
-                @Override
-                public void run() {
-                    Platform.runLater(() -> {
-                        if (user != null) {
-                            updateMailboxIcon();
-                        }
-                    });
+            // Check once on initialization
+            Platform.runLater(() -> {
+                try {
+                    Thread.sleep(1000); // Wait 1 second for UI to be ready
+                    updateMailboxIcon();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
-            }, 30000, 30000); // Check every 30 seconds
+            });
         }
     }
     
@@ -475,8 +475,6 @@ public class CatalogController {
         if (event.getUpdatedUser() != null && event.getUpdatedUser().getUsername().equals(user.getUsername())) {
             // Update the local user object
             CatalogController.user = event.getUpdatedUser();
-            // Update mailbox icon
-            Platform.runLater(this::updateMailboxIcon);
         }
     }
 
@@ -487,21 +485,38 @@ public class CatalogController {
         if (userDetails.getUser() != null && userDetails.getUser().getUsername().equals(user.getUsername())) {
             // Update the local user object with fresh data from server
             CatalogController.user = userDetails.getUser();
-            // Update mailbox icon
-            Platform.runLater(this::updateMailboxIcon);
             System.out.println("[CatalogController] Updated user state from server: " + user.getUsername() + ", isReceive_answer: " + user.isReceive_answer());
         }
     }
 
-    // Add EventBus handler for complaint updates to refresh mailbox icon
-    @Subscribe
-    public void handleComplaintUpdate(ComplainUpdateEvent event) {
-        System.out.println("[CatalogController] Received complaint update event");
-        // Refresh mailbox icon when complaints are updated
-        if (user != null) {
-            Platform.runLater(this::updateMailboxIcon);
-        }
-    }
+//    todo fight for the notification feature
+//    @Subscribe
+//    public void handleComplaintUpdate(ComplainUpdateEvent event) {
+//        System.out.println("[CatalogController] Received complaint update event");
+//        if (user != null && event.getUpdatedItems() != null) {
+//            // Only show success if there are admin replies AND the current user is not the one who just submitted a complaint
+//            // We can detect this by checking if the user's own complaint is in the list (meaning they just submitted one)
+//            boolean userJustSubmittedComplaint = event.getUpdatedItems().stream()
+//                .filter(c -> c != null && c.getClient() != null)
+//                .anyMatch(c -> c.getClient().equals(user.getUsername()));
+//
+//            boolean hasAdminReplies = event.getUpdatedItems().stream()
+//                .filter(c -> c != null && c.getClient() != null)
+//                .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
+//
+//            System.out.println("[CatalogController] User just submitted complaint: " + userJustSubmittedComplaint);
+//            System.out.println("[CatalogController] Has admin replies: " + hasAdminReplies);
+//
+//            // Only show success if there are admin replies AND user didn't just submit a complaint
+//            if (hasAdminReplies && !userJustSubmittedComplaint) {
+//                Platform.runLater(() -> {
+//                    Success success = new Success("You have received a reply from admin!");
+//                    EventBus.getDefault().post(new SuccessEvent(success));
+//                    System.out.println("[CatalogController] Showed success message for admin reply");
+//                });
+//            }
+//        }
+//    }
 
     // TODO check can cause infinite loop
     @Subscribe
@@ -509,15 +524,8 @@ public class CatalogController {
         System.out.println("[CatalogController] Received complaints list with " + (complaints != null ? complaints.size() : 0) + " complaints");
         if (user != null && complaints != null) {
             boolean hasUnreadMessages = complaints.stream()
-                .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
-            
-            // Update mailbox icon visibility based on actual complaints
-            Platform.runLater(() -> {
-                if (mailbox_icon != null) {
-                    mailbox_icon.setVisible(hasUnreadMessages);
-                    System.out.println("[CatalogController] Updated mailbox icon visibility: " + hasUnreadMessages);
-                }
-            });
+                .filter(c -> c != null && c.getClient() != null) // Filter out null complaints and null clients
+                .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()) && !c.getClient().equals(user.getUsername()));
         }
     }
 
@@ -1240,7 +1248,7 @@ public class CatalogController {
     }
     @FXML
     void open_mail(ActionEvent event)throws IOException
-    {
+    { 
         if(type==0)
         {
             Warning warning = new Warning("not available for guest");
@@ -1249,21 +1257,10 @@ public class CatalogController {
         }
         
         // Check if user has any unread responses by querying complaints
-        // This replaces the old logic that relied on user flags
         try {
             SimpleClient.getClient().sendToServer("getComplaints");
-            // The mailbox icon will be updated based on the complaint data received
-            // For now, we'll show the mailbox and let the complaint handler determine if there are messages
             SimpleClient.getClient().sendToServer("I#want#to#see#my#answer_"+user.getUsername());
             System.out.println("I#want#to#see#my#answer_"+user.getUsername());
-            
-            // Mark messages as read by hiding the notification icon
-            Platform.runLater(() -> {
-                if (mailbox_icon != null) {
-                    mailbox_icon.setVisible(false);
-                    System.out.println("[CatalogController] Marked messages as read - hiding notification icon");
-                }
-            });
         } catch (IOException e) {
             e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -1378,16 +1375,13 @@ public class CatalogController {
             // Query complaints to check for unread responses
             try {
                 SimpleClient.getClient().sendToServer("getComplaints");
-                // The actual visibility will be set in handleComplaintsList method
                 System.out.println("[CatalogController] Requested complaints to check for unread messages");
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("[CatalogController] Error requesting complaints for mailbox icon update");
             }
-        } else {
-            System.out.println("[CatalogController] User is null, setting mailbox icon invisible");
-            mailbox_icon.setVisible(false);
         }
+        // Don't set icon visibility here - only in complaint update events and open_mail
     }
 
     @FXML
