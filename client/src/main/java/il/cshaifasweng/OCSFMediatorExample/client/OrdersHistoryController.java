@@ -348,7 +348,7 @@ public class OrdersHistoryController {
         if (order == null) return false;
         
         String status = order.getStatus();
-        return !("CANCELLED".equals(status) || "DELIVERED".equals(status));
+        return !("CANCELLED".equals(status) || "DELIVERED".equals(status) || "PICKED_UP".equals(status));
     }
     
     /**

@@ -74,10 +74,10 @@ public class GreetingCardPreviewController {
     private String getImagePathForTheme(String theme) {
         // התאמה בין שמות הרקעים לקבצים
         return switch (theme) {
-            case "Background 1" -> "/images/greeting_cards/bg1.jpg";
-            case "Background 2" -> "/images/greeting_cards/bg2.jpg";
-            case "Background 3" -> "/images/greeting_cards/bg3.jpg";
-            case "Background 4" -> "/images/greeting_cards/bg4.jpg";
+            case "Floral Pink Dream" -> "/images/greeting_cards/bg1.jpg";
+            case "Cherry Blossom Glow" -> "/images/greeting_cards/bg2.jpg";
+            case "Elegant Garden Frame" -> "/images/greeting_cards/bg3.jpg";
+            case "Vintage Rose Frame" -> "/images/greeting_cards/bg4.jpg";
             default -> "/images/greeting_cards/bg1.jpg";
         };
     }

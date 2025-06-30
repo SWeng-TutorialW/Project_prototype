@@ -73,7 +73,7 @@
                </children>
                 </AnchorPane>
 
-                <ComboBox fx:id="Stores" layoutX="137.0" layoutY="74.0" onAction="#stores_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
+                <ComboBox fx:id="Stores" layoutX="137.0" layoutY="72.0" onAction="#stores_choose" prefHeight="30.0" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
 
                 <!-- Add flower button -->
                 <Button fx:id="add_flower" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="309.0" layoutY="71.0" mnemonicParsing="false" onAction="#add_flower_action" prefHeight="30.0" prefWidth="100.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Add Item" textFill="#fdfdfd">

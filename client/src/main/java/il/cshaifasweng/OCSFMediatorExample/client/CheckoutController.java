@@ -287,10 +287,10 @@ public class CheckoutController {
     private void initializeGreetingCardOptions() {
         // Add greeting card background options
         greetingCardBackgroundComboBox.getItems().addAll(
-            "Background 1",
-            "Background 2", 
-            "Background 3",
-            "Background 4"
+            "Floral Pink Dream",
+            "Cherry Blossom Glow",
+            "Elegant Garden Frame",
+            "Vintage Rose Frame"
         );
         
         // Initially disable greeting card options

@@ -394,10 +394,17 @@ public class connect_scene_Con  {
 
                                     }
                                 }
-                                App.getScene().setRoot(root);
-                                App.getStage().setWidth(980);
-                                App.getStage().setHeight(750);
-                                App.getStage().centerOnScreen();
+                                if(catalogController!=null){
+                                    App.getScene().setRoot(root);
+                                    App.getStage().setWidth(1020);
+                                    App.getStage().setHeight(750);
+                                    App.getStage().centerOnScreen();
+                                } else {
+                                    App.getScene().setRoot(root);
+                                    App.getStage().setWidth(750);
+                                    App.getStage().setHeight(750);
+                                    App.getStage().centerOnScreen();
+                                }
 
                                 System.out.println("show the catalog as user/employee first time");
 

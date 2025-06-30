@@ -170,8 +170,8 @@
                   </Button>
                </children>
             </HBox>
-            <ComboBox fx:id="Stores" layoutX="145.0" layoutY="84.0" onAction="#stores_choose" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
-            <AnchorPane fx:id="costu" layoutX="773.0" layoutY="-1.0" prefHeight="836.0" prefWidth="200.0" style="-fx-background-color: #C8A2C8;">
+            <ComboBox fx:id="Stores" layoutX="145.0" layoutY="84.0" onAction="#stores_choose" prefHeight="30.0" prefWidth="150.0" style="-fx-background-color: #C8A2C8;" />
+            <AnchorPane fx:id="costu" layoutX="773.0" layoutY="-1.0" prefWidth="200.0" style="-fx-background-color: #C8A2C8;" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
                   <GridPane layoutX="1.0" layoutY="132.0" prefHeight="331.0" prefWidth="199.0">
                     <columnConstraints>
