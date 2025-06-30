@@ -446,7 +446,7 @@ public class CatalogController {
         });
 
         // Hide reports button for non-employee users
-        if (user == null || !user.isType()) {
+        if ((user == null || !user.isType()) && reportsBtn != null) {
             reportsBtn.setVisible(false);
         }
     }

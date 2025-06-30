@@ -216,10 +216,10 @@ public class RegistrationController {
     @FXML
     void RegToSys(MouseEvent event) throws IOException {
 
-        String email = regEmailTxtB.getText();
-        String regUser = regUserTxtB.getText();
+        String email = regEmailTxtB.getText().trim();
+        String regUser = regUserTxtB.getText().trim();
         String fullName = regFullNameTxtB.getText();
-        String phoneNumber = regPhoneTxtB.getText();
+        String phoneNumber = regPhoneTxtB.getText().trim();
         String regPass = regShowPassCB.isSelected() ? regPassVisibleTxtB.getText() : regPassTxtB.getText();
         String confPass = regShowPassCB.isSelected() ? regPassConfVisibleTxtB.getText() : regPassConfTxtB.getText();
         String account_type = select_account_type.getValue();

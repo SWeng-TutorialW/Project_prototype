@@ -919,7 +919,6 @@ public class SimpleServer extends AbstractServer {
 		else if (msg.getClass().equals(UpdateUserEvent.class)){ // USER UPDATE
 			LoginRegCheck userToUpdate = ((UpdateUserEvent) msg).getUpdatedUser();
 			Session session = null;
-
 			try{
 				session = App.getSessionFactory().openSession();
 				session.beginTransaction();
@@ -927,8 +926,18 @@ public class SimpleServer extends AbstractServer {
 						.setParameter("username", userToUpdate.getUsername())
 						.getResultList();
 				session.getTransaction().commit();
-				if(!existingUser.isEmpty() && existingUser.get(0).getId() != userToUpdate.getId()) {System.err.println("ERROR: Someone tried to set his username into someone else's, NOT ALLOWED!");
-				client.sendToClient(new Warning("#updateFail_UserExists")); session.close(); return;} // user already exists, cannot update
+				if(!existingUser.isEmpty() && existingUser.get(0).getId() != userToUpdate.getId()) {
+					if(existingUser.get(0).getIdNum() == userToUpdate.getIdNum()) {
+						System.err.println("ERROR: Someone tried to set his ID number into someone else's, NOT ALLOWED!");
+						client.sendToClient(new Warning("#updateFail_IdExists"));
+					} else {
+						// User tried to set a username that already exists for another user
+						System.err.println("ERROR: Someone tried to set his username into someone else's, NOT ALLOWED!");
+						client.sendToClient(new Warning("#updateFail_UserExists"));
+					}
+					session.close();
+					return;
+				}
 				session.close();
 				session = App.getSessionFactory().openSession();
 				session.beginTransaction();
