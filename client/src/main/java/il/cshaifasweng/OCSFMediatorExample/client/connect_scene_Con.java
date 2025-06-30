@@ -2,16 +2,16 @@ package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -47,13 +47,17 @@ public class connect_scene_Con  {
     private Label port;
 
     @FXML
-    private TextField password;
+    private PasswordField password;
 
     @FXML
     private Button registerBtn;
 
     @FXML
     private PrimaryController ctlr;
+
+    @FXML
+    private CheckBox showPasswordCheckBox;
+
     boolean guess = false;
     boolean type_Client = false;
     boolean type_Employee = false;
@@ -101,15 +105,18 @@ public class connect_scene_Con  {
         } else {
             EventBus.getDefault().register(this);
         }
+
     }
 
 
 
     @FXML
     void show_reg(ActionEvent event) {
+        RegistrationController.cameFromConnect = true;
         if (isRegStageOpen()) {
             Warning warning = new Warning("Registration window is already open.");
             EventBus.getDefault().post(new WarningEvent(warning));
+            RegistrationController.cameFromConnect = true;
             registerStageInstance.toFront();
             registerStageInstance.requestFocus();
             return;

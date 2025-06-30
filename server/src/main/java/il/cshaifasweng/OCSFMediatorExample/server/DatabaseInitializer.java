@@ -525,6 +525,10 @@ public class DatabaseInitializer {
                 if (status.equals("CANCELLED")) {
                     int hoursBefore = rand.nextInt(5);
                     long cancelTime = deliveryTime.getTime() - (hoursBefore * 3600_000L);
+                    long now = System.currentTimeMillis();
+                    if (cancelTime > now) {
+                        cancelTime = now;
+                    }
                     order.setCancellationDate(new java.util.Date(cancelTime));
                     if (hoursBefore >= 3) {
                         order.setRefundAmount(order.getTotalAmount());

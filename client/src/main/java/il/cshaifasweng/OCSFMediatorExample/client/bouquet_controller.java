@@ -299,6 +299,14 @@ public class bouquet_controller {
 
     @FXML
     private void addToCart() {
+        // Validate that all visible flower ComboBoxes have a selection
+        for (int i = 0; i < flowerBoxes.length; i++) {
+            if (flowerBoxes[i].isVisible() && (flowerBoxes[i].getValue() == null || flowerBoxes[i].getValue().isEmpty())) {
+                Warning warning = new Warning("Please select a flower for each visible flower slot in your bouquet.");
+                org.greenrobot.eventbus.EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
+        }
         // Collect selected flowers and quantities
         List<String> selectedFlowers = new ArrayList<>();
         Spinner[] spinners = new Spinner[]{quantity1, quantity2, quantity3, quantity4, quantity5};

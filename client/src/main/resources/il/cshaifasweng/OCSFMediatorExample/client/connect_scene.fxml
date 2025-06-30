@@ -11,6 +11,8 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.CheckBox?>
 <AnchorPane prefHeight="413.0" prefWidth="334.0" style="-fx-background-color: #c8a2c8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.connect_scene_Con">
     <children>
       <AnchorPane layoutX="62.0" layoutY="14.0" prefHeight="291.0" prefWidth="473.0" AnchorPane.bottomAnchor="108.0" AnchorPane.leftAnchor="62.0" AnchorPane.rightAnchor="61.0" AnchorPane.topAnchor="14.0">
@@ -45,11 +47,11 @@
                             <Font size="14.0" />
                         </font>
                     </TextField>
-                    <TextField fx:id="password" prefHeight="30.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                    <PasswordField fx:id="password" prefHeight="30.0" prefWidth="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
                         <font>
                             <Font size="14.0" />
                         </font>
-                    </TextField>
+                    </PasswordField>
                </children>
             </GridPane>
               <Label alignment="CENTER" layoutX="101.0" layoutY="38.0" prefHeight="76.0" prefWidth="279.0" text="Please enter the appropariate fields">

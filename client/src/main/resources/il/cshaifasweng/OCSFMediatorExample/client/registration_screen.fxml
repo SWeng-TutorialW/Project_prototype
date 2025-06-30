@@ -69,7 +69,9 @@
                   <RowConstraints maxHeight="37.0" minHeight="10.0" prefHeight="37.0" vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-      
+                  <TextField fx:id="regPassConfVisibleTxtB" prefWidth="360.0" GridPane.rowIndex="13" />
+                  <TextField fx:id="regPassVisibleTxtB" prefWidth="360.0" GridPane.rowIndex="11" />
+
                   <!-- Username -->
                   <Label text="Username">
                      <font>
@@ -132,7 +134,6 @@
                         <Font name="Segoe UI" size="13.0" />
                      </font>
                   </CheckBox>
-                  <TextField fx:id="regPassVisibleTxtB" prefWidth="360.0" GridPane.rowIndex="11" />
       
                   <!-- Register Button -->
                   <Button fx:id="regBtn" onMouseClicked="#RegToSys" prefHeight="40.0" prefWidth="123.0" style="-fx-background-color: #e9a4c7; -fx-text-fill: white; -fx-background-radius: 8;" text="Register" GridPane.halignment="CENTER" GridPane.rowIndex="15">
@@ -145,7 +146,6 @@
             <Label fx:id="regLbl" layoutX="137.0" layoutY="14.0" text="Registration">
                <font><Font name="Segoe UI Semibold" size="24.0" /></font>
             </Label>
-            <TextField fx:id="regPassConfVisibleTxtB" layoutX="10.0" layoutY="430.0" prefWidth="360.0" visible="false" />
 
             <!-- Error Message -->
             <Label fx:id="regErrMsgLbl" layoutX="10.0" layoutY="490.0" prefWidth="360.0" style="-fx-text-fill: red;" text="___" visible="false" wrapText="true" />

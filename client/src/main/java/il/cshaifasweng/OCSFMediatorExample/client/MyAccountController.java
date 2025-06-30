@@ -135,11 +135,19 @@ public class MyAccountController {
         EventBus.getDefault().register(this);
         // AnchorPane margins
         loadUserInfo();
+        userChangeTxtB.setEditable(false);
         AnchorPane.setBottomAnchor(my_account_data, 58.0);
         AnchorPane.setTopAnchor(my_account_data, 58.0);
         AnchorPane.setRightAnchor(my_account_data, 89.0);
         AnchorPane.setLeftAnchor(my_account_data, 89.0);
-
+        if(idNumTxtB.getText().isEmpty() || Objects.equals(idNumTxtB.getText(), "null")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("ID Number Missing");
+            alert.setHeaderText("ID Number Not Found");
+            alert.setContentText("Please enter your Israeli ID number to proceed with account updates.");
+            alert.showAndWait();
+            idNumTxtB.editableProperty().set(true);
+        }
         if(current_User.isType()) // an employee
         {
             myOrdersButton.setDisable(true);
@@ -156,9 +164,9 @@ public class MyAccountController {
         confNewPassTxtB.textProperty().addListener((obs, oldText, newText) -> passErrorMsgLbl.setVisible(false));
     }
     void centerHelloAccountLbl() {
-        myAccountLbl.setText("My Account - Hello " + current_User.getFullName());
+        myAccountLbl.setText("Hello " + current_User.getFullName() != null ? current_User.getFullName() : "User");
         myAccountLbl.setAlignment(CENTER);
-        myAccountLbl.setLayoutX(myAccUsers.getWidth() / 2 - myAccountLbl.getWidth() / 2);
+        //myAccountLbl.setLayoutX(myAccUsers.getWidth() / 2 - myAccountLbl.getWidth() / 2);
 
     }
     @FXML
@@ -286,6 +294,14 @@ public class MyAccountController {
     @FXML
     void sendUserUpdate(ActionEvent event) {
 
+        if(!checkIsraeliID(idNumTxtB.getText())) {
+            passErrorMsgLbl.setVisible(true);
+            passErrorMsgLbl.setText("Invalid Israeli ID number. Please enter a valid 9-digit ID.");
+            idNumTxtB.setDisable(false);
+            idNumTxtB.setEditable(true);
+            return;
+        }
+
         passErrorMsgLbl.setVisible(false);
         UpdateUserEvent updatedUser;
         LoginRegCheck currentUser = current_User;
@@ -293,7 +309,7 @@ public class MyAccountController {
         currentUser.setEmail(emailChangeTxtB.getText());
         currentUser.setPhoneNum(phoneChangeTxtB.getText());
         currentUser.setFullName(fNameTxtB.getText());
-        // currentUser.setPassword(newPassTxtB.getText()); Irrelevant, a different function handles password changes
+        currentUser.setIdNum(idNumTxtB.getText());
         updatedUser = new UpdateUserEvent(currentUser);
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("Confirm Update");
@@ -353,6 +369,7 @@ public class MyAccountController {
             // User chose not to update, return early
             return;
         }
+        passErrorMsgLbl.setVisible(false);
         current_User.setPassword(newPassTxtB.getText());
         Platform.runLater(() -> {
             Success success = new Success("Your New Password Has Been Changed Successfully.");
@@ -367,7 +384,7 @@ public class MyAccountController {
 
 
     @FXML
-    void onSubscribe(ActionEvent event) {
+    void onSubscribe(ActionEvent event) throws IOException {
         if (current_User == null) { // Good, we're making sure the user is indeed logged in
             System.out.println("No user logged in");
             return;
@@ -383,9 +400,42 @@ public class MyAccountController {
             loadUserInfo();  //added
             showAlert(Alert.AlertType.INFORMATION, "Upgraded", null,
                     "Your account has been upgraded to a Network account.\nYou may now proceed to register for the yearly subscription.");
+            SimpleClient.getClient().sendToServer(new UpdateUserEvent(current_User)); // update user
         }
 
         openPaymentWindow();
+    }
+
+    public static boolean checkIsraeliID(String idNumber){
+
+        // 1. Check length: Israeli ID numbers must be 9 digits long.
+        if (idNumber == null || idNumber.length() != 9) {
+            return false;
+        }
+
+        // 2. Check if all characters are digits.
+        if (!idNumber.matches("\\d+")) {
+            return false;
+        }
+
+        long sum = 0;
+        for (int i = 0; i < idNumber.length(); i++) {
+            // Get the digit from the right (least significant)
+            int digit = Character.getNumericValue(idNumber.charAt(idNumber.length() - 1 - i));
+
+            // Apply Luhn algorithm logic: multiply every second digit by 2
+            // and sum the digits of the result if it's a two-digit number.
+            if (i % 2 != 0) { // Every second digit from the right
+                digit *= 2;
+                if (digit > 9) {
+                    digit = (digit % 10) + (digit / 10); // Sum the digits (e.g., 12 -> 1+2=3)
+                }
+            }
+            sum += digit;
+        }
+
+        // 3. The sum of the digits, after applying the Luhn algorithm, must be divisible by 10.
+        return sum % 10 == 0;
     }
 
     private void openPaymentWindow() {

@@ -115,7 +115,7 @@ public class SimpleClient extends AbstractClient {
 			}
 
 		}
-		else if(msgString.startsWith("#registerSuccess") || msgString.startsWith("#registerFailed")|| msgString.startsWith("#loginSuccess")||msgString.startsWith("#loginFailed")) {EventBus.getDefault().post(msgString);}
+		else if(msgString.startsWith("#registerSuccess") || msgString.startsWith("#registerFail")|| msgString.startsWith("#loginSuccess")||msgString.startsWith("#loginFailed")) {EventBus.getDefault().post(msgString);}
 		else if(msgString.startsWith("The network manager has deleted flower."))
 		{
 			try {

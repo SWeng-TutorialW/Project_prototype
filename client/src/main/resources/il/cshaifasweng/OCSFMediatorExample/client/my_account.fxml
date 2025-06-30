@@ -83,10 +83,10 @@
                         <TextField fx:id="idNumTxtB" GridPane.columnIndex="1" GridPane.rowIndex="3" />
 
                         <Label fx:id="accTypeLbl" text="Account Type " GridPane.rowIndex="5" />
-                        <Label fx:id="accountTypeEmptyLbl" prefHeight="17.0" prefWidth="78.0" text="_" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <Label fx:id="accountTypeEmptyLbl" prefHeight="17.0" prefWidth="179.0" text="_" GridPane.columnIndex="1" GridPane.rowIndex="5" />
 
                         <Label fx:id="subscriptionExpireLbl" text="Subscription Expiration Date " GridPane.rowIndex="6" />
-                        <Label fx:id="subscriptionExpireTitleLbl" text=" " GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <Label fx:id="subscriptionExpireTitleLbl" text=" " GridPane.columnIndex="1" GridPane.rowIndex="6" />
 
                         <Label fx:id="changePassLbl" text="Change Password" GridPane.rowIndex="7">
                      <font>
@@ -106,7 +106,7 @@
                 </GridPane>
 
                 <!-- כותרת -->
-                <Label fx:id="myAccountLbl" layoutX="235.0" layoutY="4.0" text="My Account">
+                <Label fx:id="myAccountLbl" alignment="CENTER" layoutX="235.0" layoutY="4.0" text="My Account">
                     <font><Font name="Segoe UI Semibold" size="24.0" /></font>
                 </Label>
             </children>

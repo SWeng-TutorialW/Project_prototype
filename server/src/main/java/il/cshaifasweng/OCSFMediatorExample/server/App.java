@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-
+import javax.swing.JOptionPane;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
 import org.hibernate.HibernateException;
@@ -52,11 +52,15 @@ public class App
             configuration.addAnnotatedClass(Order.class);
             configuration.addAnnotatedClass(CartItem.class);
             configuration.addAnnotatedClass(Store.class);
+            // Prompt for DB password
+            String password = JOptionPane.showInputDialog(null, "Enter database password:", "Database Login", JOptionPane.PLAIN_MESSAGE);
+            if (password == null) password = "";
+            configuration.setProperty("hibernate.connection.password", password);
             ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                     .applySettings(configuration.getProperties())
                     .build();
             sessionFactory = configuration.buildSessionFactory(serviceRegistry);
-            return configuration.buildSessionFactory(serviceRegistry);
+            return sessionFactory;
         }
         return sessionFactory;
     }

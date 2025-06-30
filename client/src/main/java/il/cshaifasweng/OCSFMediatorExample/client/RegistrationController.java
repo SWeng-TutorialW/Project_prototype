@@ -36,6 +36,7 @@ import java.util.List;
 
 public class RegistrationController {
 
+    public static boolean cameFromConnect = false;
     @FXML private Label credit_Card;
     @FXML private PasswordField credit_card_box;
     @FXML private Label id;
@@ -235,10 +236,10 @@ public class RegistrationController {
     @FXML
     void RegToSys(MouseEvent event) throws IOException {
 
-        String email = regEmailTxtB.getText();
-        String regUser = regUserTxtB.getText();
+        String email = regEmailTxtB.getText().trim();
+        String regUser = regUserTxtB.getText().trim();
         String fullName = regFullNameTxtB.getText();
-        String phoneNumber = regPhoneTxtB.getText();
+        String phoneNumber = regPhoneTxtB.getText().trim();
         String regPass = regShowPassCB.isSelected() ? regPassVisibleTxtB.getText() : regPassTxtB.getText();
         String confPass = regShowPassCB.isSelected() ? regPassConfVisibleTxtB.getText() : regPassConfTxtB.getText();
         String account_type = select_account_type.getValue();
@@ -250,9 +251,9 @@ public class RegistrationController {
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
-
-        LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, phoneNumber, fullName, userId, false); // for now it's it meant to be for registration only.
-
+        int isLogin = RegistrationController.cameFromConnect ? 0 : 1; // if we came from connect scene, we are not logged in yet, so isLogin = 0, else isLogin = 1
+        LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, isLogin, false, store, phoneNumber, fullName, userId, false); // for now it's it meant to be for registration only.
+        tempUser = new_user; // maybe this user will be registered successfully
         Runnable sendAndClose = () -> {
             try {
                 SimpleClient.getClient().sendToServer(new_user);
@@ -280,14 +281,34 @@ public class RegistrationController {
             SimpleClient.isGuest = false;
             CatalogController.set_user(new_user); // Set the user in CatalogController
             sendAndClose.run();
-            Success success = new Success("Registration Completed!");
-            EventBus.getDefault().post(new SuccessEvent(success));
         }
     }
+    @Subscribe
+    public void onRegisterEvent(String message) {
+        if(message == "#registerSuccess") {
+            if (is_yearly_subscription) {
+                Success success = new Success("Registration Completed!\nYour yearly subscription has been successfully activated.");
+                EventBus.getDefault().post(new SuccessEvent(success));
+            } else {
+                Success success = new Success("Registration Successful!");
+                EventBus.getDefault().post(new SuccessEvent(success));
+            }
+            CatalogController.set_user(tempUser); // Set the user in CatalogController
+            EventBus.getDefault().unregister(this);
+            Stage stage = (Stage) regAnchPane.getScene().getWindow();
+            stage.close();
 
+
+        } else if(message == "#registerFail") {
+            Warning warning = new Warning("Registration Failed! Please try again.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            CatalogController.set_user(null);
+        }
+    }
     @FXML
     void initialize() throws IOException {
         EventBus.getDefault().register(this);
+        regIdTxtB.setDisable(true);
         if(gotFromConnectScene){
             gotFromConnectScene = false;
             logAnchPane.setVisible(false);
@@ -297,6 +318,7 @@ public class RegistrationController {
             logAnchPane.setVisible(true);
             regAnchPane.setVisible(false);
         }
+
         AnchorPane.setBottomAnchor(logAnchPane, 109.0);
         AnchorPane.setTopAnchor(logAnchPane, 60.0);
         AnchorPane.setLeftAnchor(logAnchPane, 28.0);
@@ -334,8 +356,7 @@ public class RegistrationController {
             controller.setOnPaymentSuccess(() -> {
                 onSuccess.run();
                 paymentStage.close();
-                Success success = new Success("Registration Completed!\nYour yearly subscription has been successfully activated.");
-                EventBus.getDefault().post(new SuccessEvent(success));
+
             });
 
             controller.setOnPaymentCancel(() -> {
@@ -361,7 +382,7 @@ public class RegistrationController {
     void selected_account(ActionEvent event) {
         String account_type = select_account_type.getValue();
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-
+        regIdTxtB.setText("");
         switch (account_type) {
             case "Store" -> {
                 alert.setTitle("Store Subscription");
@@ -388,6 +409,7 @@ public class RegistrationController {
                 alert.setHeaderText("What is a Yearly Subscription?");
                 alert.setContentText("A yearly subscription allows customers to shop in all of our stores. It costs 100 shekels and grants a 10% discount on every purchase above 50 shekels.");
                 store = 4;
+                regIdTxtB.setDisable(false);
                 is_yearly_subscription = true;
                 select_store_label.setVisible(false);
                 select_store.setVisible(false);
