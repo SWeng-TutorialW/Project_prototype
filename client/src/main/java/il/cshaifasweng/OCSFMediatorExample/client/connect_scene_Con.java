@@ -107,6 +107,13 @@ public class connect_scene_Con  {
 
     @FXML
     void show_reg(ActionEvent event) {
+        if (isRegStageOpen()) {
+            Warning warning = new Warning("Registration window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            registerStageInstance.toFront();
+            registerStageInstance.requestFocus();
+            return;
+        }
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
             RegistrationController regController = fxmlLoader.getController();
@@ -121,6 +128,9 @@ public class connect_scene_Con  {
             Stage stage = new Stage();
             stage.setTitle("Create New Account");
             stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            setRegStageInstance(stage);
+
             stage.show();
 
         } catch (IOException e) {
