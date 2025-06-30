@@ -263,6 +263,7 @@ public class MyAccountController {
                 idNumTxtB.setEditable(true);
         }
         idNumTxtB.setEditable(false);
+
     }
 
     @Subscribe
