@@ -149,7 +149,9 @@ public class MyAccountController {
         myAccountLbl.setText("My Account - Hello " + current_User.getFullName());
         myAccountLbl.setAlignment(CENTER);
 
-
+        //add listeners
+        newPassTxtB.textProperty().addListener((obs, oldText, newText) -> passErrorMsgLbl.setVisible(false));
+        confNewPassTxtB.textProperty().addListener((obs, oldText, newText) -> passErrorMsgLbl.setVisible(false));
     }
 
     @FXML
@@ -309,6 +311,11 @@ public class MyAccountController {
         if (newPassTxtB.getText().isEmpty() || confNewPassTxtB.getText().isEmpty()) {
             passErrorMsgLbl.setVisible(true);
             passErrorMsgLbl.setText("Please fill in both password fields.");
+            return;
+        }
+        if (newPassTxtB.getText().length() < 3 || confNewPassTxtB.getText().length() < 3) {
+            passErrorMsgLbl.setVisible(true);
+            passErrorMsgLbl.setText("Password must be at least 3 characters long.");
             return;
         }
 

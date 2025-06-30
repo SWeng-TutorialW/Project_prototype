@@ -78,6 +78,16 @@ public class RegistrationController {
     private TextField regIdTxtB;
 
 
+    private static Stage paymentStageInstance = null;
+    public static boolean isPaymentStageOpen() {
+        return paymentStageInstance != null && paymentStageInstance.isShowing();
+    }
+    public static void setPaymentStageInstance(Stage stage) {
+        paymentStageInstance = stage;
+        if (paymentStageInstance != null) {
+            paymentStageInstance.setOnHidden(e -> paymentStageInstance = null);
+        }
+    }
 
     private CatalogController catalogController;
     public void setCatalogController(CatalogController controller) {
@@ -303,13 +313,20 @@ public class RegistrationController {
     }
 
     private void openPaymentWindow(Runnable onSuccess, Runnable onCancel, MouseEvent event) {
+        if (isPaymentStageOpen()) {
+            Warning warning = new Warning("The subscription/payment window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            paymentStageInstance.toFront();
+            paymentStageInstance.requestFocus();
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("payment.fxml"));
             Parent root = loader.load();
 
             PaymentController controller = loader.getController();
             Stage paymentStage = new Stage();
-
+            setPaymentStageInstance(paymentStage);
             controller.setPayUpgrade(true);
             controller.setStage(paymentStage);
             controller.postInitialize();
