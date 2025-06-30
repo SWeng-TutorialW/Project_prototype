@@ -1784,10 +1784,10 @@ public class CatalogController_employee {
                 TextField priceField = new TextField(String.format("%.2f", f.getFlowerPrice()));
                 priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px;");
 
+                System.out.println("wwwwwwwwwwwwwww" + this.user.getEmployeetype() + ":" + this.user.getStore());
                 if (isNetworkView && this.user.getEmployeetype() == 0 && this.user.getStore() == 4) {
-                    System.out.println("wwwwwwwwwwwww" + user.getEmployeetype());
                     // Make price field editable only in network view
-                    priceField.setEditable(isNetworkView);
+                    priceField.setEditable(true);
                     priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px; -fx-background-color: #f0f0f0;");
                     priceField.setPromptText("Click to edit price");
 
