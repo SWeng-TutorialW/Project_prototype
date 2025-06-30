@@ -31,6 +31,9 @@ public class DatabaseInitializer {
             // Initialize users
             initializeUsers(session);
             
+            // Initialize orders for client users
+            initializeOrders(session);
+            
             // Load stores from database to ensure they have the proper flower relationships
             App.loadStoresFromDatabase();
             
@@ -203,7 +206,7 @@ public class DatabaseInitializer {
             flowers.get(21), // Pink Vase
             flowers.get(22), // Green Vase
             flowers.get(27)  // Purple Crown
-        ));
+      ));
         
         List<Flower> krayotFlowers = new ArrayList<>(Arrays.asList(
 
@@ -264,66 +267,66 @@ public class DatabaseInitializer {
         // Nahariyya Store Workers
         
         // Regular Customers
-        LoginRegCheck tamar = new LoginRegCheck("tamar", "123", "tamar@", 0, false, 1);
+        LoginRegCheck tamar = new LoginRegCheck("tamar", "123", "tr@lilach.com", 0, false, 1);
         session.save(tamar);
         session.flush();
         
-        LoginRegCheck amit = new LoginRegCheck("amit", "123", "amit@", 0, false, 1);
+        LoginRegCheck amit = new LoginRegCheck("amit", "123", "at@lilach.com", 0, false, 1);
         session.save(amit);
         session.flush();
         
         // Network Admin
-        LoginRegCheck malci = new LoginRegCheck("malci", "123", "malci@", 0, true, 4);
+        LoginRegCheck malci = new LoginRegCheck("malci", "123", "mc@lilach.com", 0, true, 4);
         session.save(malci);
         session.flush();
 
         // System Administrator
-        LoginRegCheck System = new LoginRegCheck("System", "123", "haifa.System@lilach.com", 0, true, 4, "050-1112223", "System Cohen", "111222333", false);
+        LoginRegCheck System = new LoginRegCheck("System", "123", "haifa.System@lilach.com", 0, true, 4, "0501112223", "System Cohen", "111222333", false);
         System.setEmployeetype(1);
         session.save(System);
         session.flush();
 
         // Customer service employee
-        LoginRegCheck service = new LoginRegCheck("service", "123", "haifa.service@lilach.com", 0, true, 4, "050-1112223", "service Cohen", "111222333", false);
+        LoginRegCheck service = new LoginRegCheck("service", "123", "haifa.service@lilach.com", 0, true, 4, "0501112223", "service Cohen", "111222333", false);
         service.setEmployeetype(2);
         session.save(service);
         session.flush();
         
         // Additional Client Users
-        LoginRegCheck itayMalich = new LoginRegCheck("Itay", "123", "itay.malich2@gmail.com", 0, false, 4, "050-1234567", "Itay Malich", "123456789", false);
+        LoginRegCheck itayMalich = new LoginRegCheck("Itay", "123", "it@walla.com", 0, false, 4, "0501234567", "Itay Malich", "123456789", false);
         session.save(itayMalich);
         session.flush();
 
         //add workers of stores
-        LoginRegCheck HaifaWorker = new LoginRegCheck("HaifaWorker", "123", "haifa.HaifaWorker@gmail.com", 0, true, 1, "050-1234567", "HaifaWorker", "123456789", false);
+        LoginRegCheck HaifaWorker = new LoginRegCheck("HaifaWorker", "123", "haifa.HaifaWorker@lilach.com", 0, true, 1, "0501234567", "HaifaWorker", "123456789", false);
         session.save(HaifaWorker);
         HaifaWorker.setEmployeetype(3);
         session.flush();
 
-        LoginRegCheck nahariyyaWorker = new LoginRegCheck("nahariyyaWorker", "123", "haifa.nahariyyaWorker@gmail.com", 0, true, 3, "050-1234567", "nahariyyaWorker", "123456789", false);
+        LoginRegCheck nahariyyaWorker = new LoginRegCheck("nahariyyaWorker", "123", "haifa.nahariyyaWorker@lilach.com", 0, true, 3, "0501234567", "nahariyyaWorker", "123456789", false);
         session.save(nahariyyaWorker);
         nahariyyaWorker.setEmployeetype(3);
         session.flush();
 
-        LoginRegCheck KrayotWorker = new LoginRegCheck("KrayotWorker", "123", "haifa.KrayotWorker@gmail.com", 0, true, 2, "050-1234567", "KrayotWorker", "123456789", false);
+        LoginRegCheck KrayotWorker = new LoginRegCheck("KrayotWorker", "123", "haifa.KrayotWorker@lilach.com", 0, true, 2, "0501234567", "KrayotWorker", "123456789", false);
         session.save(KrayotWorker);
         KrayotWorker.setEmployeetype(3);
         session.flush();
 
         
-        LoginRegCheck asafYaakov = new LoginRegCheck("Asaf", "123", "Asafyaakov555@gmail.com", 0, false, 2, "052-9876543", "Asaf Yaakov", "987654321", false);
+        LoginRegCheck asafYaakov = new LoginRegCheck("Asaf", "123", "ay@lilach.com", 0, false, 2, "0529876543", "Asaf Yaakov", "987654321", false);
         session.save(asafYaakov);
         session.flush();
         
-        LoginRegCheck nissimDeri = new LoginRegCheck("Nissim", "123", "nissimderi123@gmail.com", 0, false, 1, "054-5551234", "Nissim Deri", "456789123", false);
+        LoginRegCheck nissimDeri = new LoginRegCheck("Nissim", "123", "ns@lilach.com", 0, false, 1, "0545551234", "Nissim Deri", "456789123", false);
         session.save(nissimDeri);
         session.flush();
         
-        LoginRegCheck yardNetziar = new LoginRegCheck("Yarden", "123", "yardnetziar@gmail.com", 0, false, 2, "053-7778889", "Yarden Tziar", "789123456", false);
+        LoginRegCheck yardNetziar = new LoginRegCheck("Yarden", "123", "yt@lilach.com", 0, false, 2, "0537778889", "Yarden Tziar", "789123456", false);
         session.save(yardNetziar);
         session.flush();
         
-        LoginRegCheck dorG2005 = new LoginRegCheck("Dor", "12345", "dorg2005@gmail.com", 0, false, 1, "058-4445556", "Dor Gilad", "321654987", false);
+        LoginRegCheck dorG2005 = new LoginRegCheck("Dor", "12345", "dg@lilach.com", 0, false, 1, "0584445556", "Dor Gilad", "321654987", false);
         session.save(dorG2005);
         session.flush();
         
@@ -386,5 +389,156 @@ public class DatabaseInitializer {
             System.err.println("Error checking database initialization: " + e.getMessage());
             return false;
         }
+    }
+
+    // Add 100 orders for client users, distributed by user and across different months (past and future)
+    private static void initializeOrders(Session session) {
+        System.out.println(">>> CREATING SAMPLE ORDERS FOR CLIENT USERS...");
+        // Fetch all client users (type == false)
+        List<LoginRegCheck> clients = session.createQuery("FROM LoginRegCheck WHERE type = false", LoginRegCheck.class).getResultList();
+        if (clients.isEmpty()) {
+            System.out.println("No client users found, skipping order creation.");
+            return;
+        }
+        // Fetch all stores
+        List<Store> stores = session.createQuery("FROM Store", Store.class).getResultList();
+        if (stores.isEmpty()) {
+            System.out.println("No stores found, skipping order creation.");
+            return;
+        }
+        java.util.Random rand = new java.util.Random();
+        int totalOrders = 100;
+        int usersCount = clients.size();
+        // We'll use a base date and offset by months for variety
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        cal.set(java.util.Calendar.DAY_OF_MONTH, 15); // Middle of month for variety
+        long baseTime = cal.getTimeInMillis();
+        int[] monthOffsets = {-3, -2, -1, 0, 1, 2, 3}; // 3 months back to 3 months forward
+        int monthOffsetsLen = monthOffsets.length;
+        // Example city/address data for realism
+        String[] cities = {"Haifa", "Krayot", "Nahariyya", "Tel Aviv", "Jerusalem"};
+        String[] streets = {"Herzl", "Ben Gurion", "Rothschild", "Weizmann", "Bialik", "Jabotinsky"};
+        String[] greetingBackgrounds = {"bg1.jpg", "bg2.jpg", "bg3.jpg", "bg4.jpg"};
+        String[] greetingMessages = {"Happy Birthday!", "Congratulations!", "Best Wishes!", "With Love!", "Thank You!"};
+        // Skewed order distribution: some users get more orders
+        int[] userOrderWeights = new int[clients.size()];
+        int totalWeight = 0;
+        for (int i = 0; i < clients.size(); i++) {
+            userOrderWeights[i] = 1 + rand.nextInt(4); // 1-4 weight per user
+            totalWeight += userOrderWeights[i];
+        }
+        // Assign orders proportionally to weights
+        int[] ordersPerUser = new int[clients.size()];
+        int assignedOrders = 0;
+        for (int i = 0; i < clients.size(); i++) {
+            ordersPerUser[i] = (int) Math.round((userOrderWeights[i] / (double) totalWeight) * totalOrders);
+            assignedOrders += ordersPerUser[i];
+        }
+        // Adjust for rounding
+        while (assignedOrders < totalOrders) { ordersPerUser[rand.nextInt(clients.size())]++; assignedOrders++; }
+        while (assignedOrders > totalOrders) { int idx = rand.nextInt(clients.size()); if (ordersPerUser[idx] > 0) { ordersPerUser[idx]--; assignedOrders--; } }
+        int orderIdx = 0;
+        for (int u = 0; u < clients.size(); u++) {
+            LoginRegCheck client = clients.get(u);
+            int userOrders = ordersPerUser[u];
+            // Determine allowed stores for this user
+            List<Store> allowedStores = new ArrayList<>();
+            if (client.getStore() == 4) {
+                allowedStores.addAll(stores);
+            } else {
+                for (Store s : stores) {
+                    if (s.getId() == client.getStore()) allowedStores.add(s);
+                }
+            }
+            for (int i = 0; i < userOrders; i++, orderIdx++) {
+                // Pick a random allowed store
+                Store store = allowedStores.get(rand.nextInt(allowedStores.size()));
+                // Pick 1-3 random flowers from the store
+                List<Flower> storeFlowers = store.getFlowersList();
+                int numFlowers = 1 + rand.nextInt(3);
+                List<Flower> chosenFlowers = new ArrayList<>();
+                for (int j = 0; j < numFlowers; j++) {
+                    Flower flower = storeFlowers.get(rand.nextInt(storeFlowers.size()));
+                    chosenFlowers.add(flower);
+                }
+                // Create order
+                Order order = new Order(client.getUsername(), client.getEmail(), client);
+                // Set order status (no PENDING)
+                String[] statuses = {"CANCELLED", "DELIVERED", "PICKED_UP", "CONFIRMED"};
+                String status = statuses[rand.nextInt(statuses.length)];
+                order.setStatus(status);
+                boolean delivery = rand.nextBoolean();
+                if (status.equals("DELIVERED")) {
+                    order.setRequiresDelivery(true);
+                } else if (status.equals("PICKED_UP")) {
+                    order.setRequiresDelivery(false);
+                } else {
+                    order.setRequiresDelivery(delivery);
+                }
+                // Address details for delivery
+                if (order.isRequiresDelivery()) {
+                    order.setCity(cities[rand.nextInt(cities.length)]);
+                    order.setStreetAddress(streets[rand.nextInt(streets.length)] + " " + (rand.nextInt(100) + 1));
+                    order.setApartment(String.valueOf(rand.nextInt(20) + 1));
+                }
+                // Set delivery/pickup time: spread across different months (past/future)
+                int monthOffset = monthOffsets[orderIdx % monthOffsetsLen];
+                cal.setTimeInMillis(baseTime);
+                cal.add(java.util.Calendar.MONTH, monthOffset);
+                cal.set(java.util.Calendar.DAY_OF_MONTH, 1 + rand.nextInt(28));
+                cal.set(java.util.Calendar.HOUR_OF_DAY, rand.nextInt(24));
+                cal.set(java.util.Calendar.MINUTE, rand.nextInt(60));
+                java.util.Date deliveryTime = cal.getTime();
+                order.setDeliveryTime(deliveryTime);
+                // Set order date: if delivery/pickup is in the future, order date should be before today
+                java.util.Date nowDate = new java.util.Date();
+                if (deliveryTime.after(nowDate)) {
+                    long maxOrderTime = nowDate.getTime() - 3600_000L;
+                    long minOrderTime = maxOrderTime - (14L * 24 * 3600_000L);
+                    long orderDateMillis = minOrderTime + (long) (rand.nextDouble() * (maxOrderTime - minOrderTime));
+                    order.setOrderDate(new java.util.Date(orderDateMillis));
+                } else {
+                    long orderDateMillis = deliveryTime.getTime() - (3600_000L * (1 + rand.nextInt(48)));
+                    order.setOrderDate(new java.util.Date(orderDateMillis));
+                }
+                // Greeting card (randomly include)
+                if (rand.nextDouble() < 0.4) { // 40% of orders have a greeting card
+                    order.setIncludeGreetingCard(true);
+                    order.setGreetingCardBackground(greetingBackgrounds[rand.nextInt(greetingBackgrounds.length)]);
+                    order.setGreetingCardMessage(greetingMessages[rand.nextInt(greetingMessages.length)]);
+                } else {
+                    order.setIncludeGreetingCard(false);
+                }
+                // Add 1-3 cart items (already randomized above)
+                for (Flower flower : chosenFlowers) {
+                    int quantity = 1 + rand.nextInt(3);
+                    CartItem item = new CartItem(flower, quantity, store.getStoreName());
+                    order.addItem(item);
+                }
+                // Remove discount logic: always set discountAmount to 0.0
+                order.setDiscountAmount(0.0);
+                // Ensure total includes delivery fee
+                if (order.isRequiresDelivery()) {
+                    order.setTotalAmount(order.getTotalAmount() + order.getDeliveryFee());
+                }
+                // Set order status logic for cancellation/refund
+                if (status.equals("CANCELLED")) {
+                    int hoursBefore = rand.nextInt(5);
+                    long cancelTime = deliveryTime.getTime() - (hoursBefore * 3600_000L);
+                    order.setCancellationDate(new java.util.Date(cancelTime));
+                    if (hoursBefore >= 3) {
+                        order.setRefundAmount(order.getTotalAmount());
+                    } else if (hoursBefore >= 1) {
+                        order.setRefundAmount(order.getTotalAmount() * 0.5);
+                    } else {
+                        order.setRefundAmount(0.0);
+                    }
+                    order.setCancellationReason("Cancelled by user");
+                }
+                session.save(order);
+                session.flush();
+            }
+        }
+        System.out.println(">>> CREATED 100 ORDERS FOR CLIENT USERS");
     }
 } 
