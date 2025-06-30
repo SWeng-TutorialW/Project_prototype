@@ -26,7 +26,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
-import org.hibernate.SessionFactory;
 
 import java.io.IOException;
 import java.net.URL;
@@ -133,12 +132,12 @@ public class ComplainController_employee implements Initializable {
     private String extractOrderPrice(String complaintText) {
         if (complaintText == null) return "N/A";
         
-        // Look for price pattern like "Price: $123.45" or "Total: $123.45"
-        Pattern pattern = Pattern.compile("(?:Price|Total): \\$([\\d.]+)");
+        // Look for price pattern like "Price: ₪123.45" or "Total: ₪123.45"
+        Pattern pattern = Pattern.compile("(?:Price|Total): ₪([\\d.]+)");
         Matcher matcher = pattern.matcher(complaintText);
         
         if (matcher.find()) {
-            return "$" + matcher.group(1);
+            return "₪" + matcher.group(1);
         }
         
         return "N/A";

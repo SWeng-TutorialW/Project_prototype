@@ -33,11 +33,12 @@ public class bouquet_controller {
     public void setFlowersList(List<Flower> flowersList)
     {
         this.flowersList_c = flowersList;
-         flowerNames = flowersList.stream()
+        
+        // Filter flowers to only include those with category "Flower"
+        this.flowerNames = flowersList.stream()
+                .filter(flower -> "Flower".equals(flower.getCategory()))
                 .map(Flower::getFlowerName)
                 .collect(Collectors.toList());
-
-
 
         flower_num1.getItems().setAll(flowerNames);
         flower_num2.getItems().setAll(flowerNames);
@@ -79,7 +80,7 @@ public class bouquet_controller {
     @FXML
     private Label name_labl;
     @FXML
-    private TextField calc_price;
+    private Label calc_price;
     private ComboBox<String>[] flowerBoxes;
 
     @FXML

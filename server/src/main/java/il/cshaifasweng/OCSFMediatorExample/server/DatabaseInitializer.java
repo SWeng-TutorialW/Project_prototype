@@ -13,10 +13,7 @@ import java.util.List;
  */
 public class DatabaseInitializer {
     
-    /**
-     * Initialize the database with all required data
-     * @param sessionFactory The Hibernate session factory
-     */
+
     public static void initializeDatabase(SessionFactory sessionFactory) {
         Session session = null;
         try {
@@ -56,11 +53,7 @@ public class DatabaseInitializer {
         }
     }
     
-    /**
-     * Initialize all flowers in the database
-     * @param session The Hibernate session
-     * @return List of created flowers
-     */
+
     private static List<Flower> initializeFlowers(Session session) {
         System.out.println(">>> INSERTING FLOWERS TO DB...");
         
@@ -107,53 +100,84 @@ public class DatabaseInitializer {
         session.flush();
         flowers.add(flower_8);
 
+
+        Flower flower_9 = new Flower("Spring Begonia", 18.99, "Lily", "images/FlowerImages/Begonia.png", "Pink", "Flower");
+        session.save(flower_9); session.flush(); flowers.add(flower_9);
+        
+        Flower flower_10 = new Flower("Elegant Camellia", 24.99, "Lily", "images/FlowerImages/Camellia.png", "White", "Flower");
+        session.save(flower_10); session.flush(); flowers.add(flower_10);
+        
+
+
         // Premium flower
-        Flower pf1 = new Flower("Royal Orchid", 199.99, "Orchid", "images/FlowerImages/Royal_Orchid.png", "Red", "Premium flower");
+
+
+
+        Flower pf1 = new Flower("Classic Carnation", 12.99, "Lily", "images/FlowerImages/Carnation.png", "Pink", "Flower");
         session.save(pf1); session.flush(); flowers.add(pf1);
-        Flower pf2 = new Flower("Golden Rose", 159.99, "Rose", "images/FlowerImages/Golden_Rose.png", "Yellow", "Premium flower");
+        
+        Flower pf2 = new Flower("Autumn Chrysanthemum", 19.99, "Lily", "images/FlowerImages/Chrysanthemum.png", "Yellow", "Flower");
         session.save(pf2); session.flush(); flowers.add(pf2);
-        Flower pf3 = new Flower("Diamond Lily", 179.99, "Lily", "images/FlowerImages/Diamond_Lilly.png", "Purple", "Premium flower");
+        
+        Flower pf3 = new Flower("Cosmic Cosmos", 16.99, "Daffodil", "images/FlowerImages/Cosmos.png", "Pink", "Flower");
         session.save(pf3); session.flush(); flowers.add(pf3);
-        Flower pf4 = new Flower("Emerald Tulip", 189.99, "Tulip", "images/FlowerImages/Emerald_Tulip.png", "White", "Premium flower");
+        
+        Flower pf4 = new Flower("Dazzling Dahlia", 21.99, "Daffodil", "images/FlowerImages/Dahlia.png", "Purple", "Flower");
         session.save(pf4); session.flush(); flowers.add(pf4);
-        Flower pf5 = new Flower("Sapphire Iris", 259.99, "Iris", "images/FlowerImages/Sapphire_Iris.png", "Blue", "Premium flower");
+        
+        Flower pf5 = new Flower("Delicate Delphinium", 17.99, "Daffodil", "images/FlowerImages/Delphinium.png", "Blue", "Flower");
         session.save(pf5); session.flush(); flowers.add(pf5);
+        
+        Flower pf6 = new Flower("Fragrant Freesia", 14.99, "Daffodil", "images/FlowerImages/Freesia.png", "White", "Flower");
+        session.save(pf6); session.flush(); flowers.add(pf6);
+        
+        Flower pf7 = new Flower("Gerbera Daisy", 13.99, "Daffodil", "images/FlowerImages/Gerbera.png", "Orange", "Flower");
+        session.save(pf7); session.flush(); flowers.add(pf7);
+        
+        Flower pf10 = new Flower("Graceful Gladiolus", 20.99, "Orchid", "images/FlowerImages/Gladiolus.png", "Pink", "Flower");
+        session.save(pf10); session.flush(); flowers.add(pf10);
+        
+
+       
 
         // Flowers Wreath
-        Flower fw1 = new Flower("Spring Wreath", 19.99, "Wreath", "images/FlowerImages/wreath1.png", "Mixed", "Flowers Wreath");
+        Flower fw1 = new Flower("Yellow Wreath", 24.99, "Wreath", "images/FlowerImages/YellowWreath.png", "Yellow", "Flowers Wreath");
         session.save(fw1); session.flush(); flowers.add(fw1);
-        Flower fw2 = new Flower("Summer Wreath", 21.99, "Wreath", "images/FlowerImages/wreath2.png", "Yellow", "Flowers Wreath");
+        
+        Flower fw2 = new Flower("Pink Wreath", 26.99, "Wreath", "images/FlowerImages/PinkWreath.png", "Pink", "Flowers Wreath");
         session.save(fw2); session.flush(); flowers.add(fw2);
-        Flower fw3 = new Flower("Autumn Wreath", 22.99, "Wreath", "images/FlowerImages/wreath3.png", "Orange", "Flowers Wreath");
+        
+        Flower fw3 = new Flower("Purple Wreath", 25.99, "Wreath", "images/FlowerImages/PurpleWreath.png", "Purple", "Flowers Wreath");
         session.save(fw3); session.flush(); flowers.add(fw3);
-        Flower fw4 = new Flower("Winter Wreath", 20.99, "Wreath", "images/FlowerImages/wreath4.png", "White", "Flowers Wreath");
-        session.save(fw4); session.flush(); flowers.add(fw4);
-        Flower fw5 = new Flower("Romantic Wreath", 23.99, "Wreath", "images/FlowerImages/wreath5.png", "Red", "Flowers Wreath");
-        session.save(fw5); session.flush(); flowers.add(fw5);
 
-        // Vase
-        Flower v1 = new Flower("Classic Vase", 15.99, "Vase", "images/FlowerImages/vase1.png", "White", "Vase");
+
+        //  Vases
+        Flower v1 = new Flower("Pink Vase", 19.99, "Vase", "images/FlowerImages/PinkVassa.png", "Pink", "Vase");
         session.save(v1); session.flush(); flowers.add(v1);
-        Flower v2 = new Flower("Modern Vase", 18.99, "Vase", "images/FlowerImages/vase2.png", "Black", "Vase");
+        
+        Flower v2 = new Flower("Green Vase", 16.99, "Vase", "images/FlowerImages/GreenVassa.png", "Green", "Vase");
         session.save(v2); session.flush(); flowers.add(v2);
-        Flower v3 = new Flower("Glass Vase", 17.99, "Vase", "images/FlowerImages/vase3.png", "Transparent", "Vase");
+        
+        Flower v3 = new Flower("Purple Vase", 20.99, "Vase", "images/FlowerImages/PurpleVassa.png", "Purple", "Vase");
         session.save(v3); session.flush(); flowers.add(v3);
-        Flower v4 = new Flower("Ceramic Vase", 16.99, "Vase", "images/FlowerImages/vase4.png", "Blue", "Vase");
+        
+        Flower v4 = new Flower("Squared Vase", 18.99, "Vase", "images/FlowerImages/SquaredVassa.png", "White", "Vase");
         session.save(v4); session.flush(); flowers.add(v4);
-        Flower v5 = new Flower("Rustic Vase", 14.99, "Vase", "images/FlowerImages/vase5.png", "Brown", "Vase");
+        
+        Flower v5 = new Flower("Circle Vase", 17.99, "Vase", "images/FlowerImages/CircleVassa.png", "Clear", "Vase");
         session.save(v5); session.flush(); flowers.add(v5);
 
+
         // Flower Crowns
-        Flower fc1 = new Flower("Princess Crown", 24.99, "Crown", "images/FlowerImages/crown1.png", "Pink", "Flower Crowns");
+        Flower fc1 = new Flower("White Crown", 29.99, "Crown", "images/FlowerImages/WhiteCrown.png", "White", "Flower Crowns");
         session.save(fc1); session.flush(); flowers.add(fc1);
-        Flower fc2 = new Flower("Boho Crown", 22.99, "Crown", "images/FlowerImages/crown2.png", "Yellow", "Flower Crowns");
+        
+        Flower fc2 = new Flower("Purple Crown", 31.99, "Crown", "images/FlowerImages/PurpleCrown.png", "Purple", "Flower Crowns");
         session.save(fc2); session.flush(); flowers.add(fc2);
-        Flower fc3 = new Flower("Festival Crown", 23.99, "Crown", "images/FlowerImages/crown3.png", "Mixed", "Flower Crowns");
+        
+        Flower fc3 = new Flower("Pink Crown", 28.99, "Crown", "images/FlowerImages/PinkCrown.png", "Pink", "Flower Crowns");
         session.save(fc3); session.flush(); flowers.add(fc3);
-        Flower fc4 = new Flower("Romantic Crown", 25.99, "Crown", "images/FlowerImages/crown4.png", "Red", "Flower Crowns");
-        session.save(fc4); session.flush(); flowers.add(fc4);
-        Flower fc5 = new Flower("Nature Crown", 21.99, "Crown", "images/FlowerImages/crown5.png", "Green", "Flower Crowns");
-        session.save(fc5); session.flush(); flowers.add(fc5);
+
         
         System.out.println(">>> CREATED " + flowers.size() + " FLOWERS");
         return flowers;
@@ -167,35 +191,46 @@ public class DatabaseInitializer {
     private static void initializeStores(Session session, List<Flower> flowers) {
         System.out.println(">>> CREATING STORES WITH FLOWERS...");
         
-        // Define flower lists for each store
+        // Create random flower lists for each store (12-15 flowers each)
         List<Flower> haifaFlowers = new ArrayList<>(Arrays.asList(
-            flowers.get(0), // Rose
-            flowers.get(1), // Sunflower
-            flowers.get(2), // Tulip
-            flowers.get(3), // Jacarande
-            flowers.get(4), // Orchid
-            flowers.get(5), // Lily
-            flowers.get(6)  // Daffodil
+            flowers.get(0),  // Rose
+            flowers.get(1),  // Sunflower
+            flowers.get(4),  // Orchid
+            flowers.get(5),  // Lily
+            flowers.get(9),  // Camellia
+            flowers.get(10), // Carnation
+            flowers.get(18), // Yellow Wreath
+            flowers.get(21), // Pink Vase
+            flowers.get(22), // Green Vase
+            flowers.get(27)  // Purple Crown
         ));
         
         List<Flower> krayotFlowers = new ArrayList<>(Arrays.asList(
-            flowers.get(0), // Rose
-            flowers.get(1), // Sunflower
-            flowers.get(2), // Tulip
-            flowers.get(3), // Jacarande
-            flowers.get(4), // Orchid
-            flowers.get(5), // Lily
-            flowers.get(6), // Daffodil
-            flowers.get(7)  // Hyacinth
+
+            flowers.get(2),  // Tulip
+            flowers.get(10), // Carnation
+            flowers.get(11), // Chrysanthemum
+            flowers.get(12), // Cosmos
+            flowers.get(19), // Pink Wreath
+            flowers.get(20), // Purple Wreath
+            flowers.get(23), // Purple Vase
+            flowers.get(28)  // Pink Crown
         ));
         
         List<Flower> nahariyyaFlowers = new ArrayList<>(Arrays.asList(
-            flowers.get(0), // Rose
-            flowers.get(1), // Sunflower
-            flowers.get(2), // Tulip
-            flowers.get(3), // Jacarande
-            flowers.get(4), // Orchid
-            flowers.get(5)  // Lily
+            flowers.get(1),  // Sunflower
+            flowers.get(6),  // Daffodil
+            flowers.get(7),  // Hyacinth
+            flowers.get(10), // Carnation
+            flowers.get(13), // Dahlia
+            flowers.get(14), // Delphinium
+            flowers.get(16), // Gerbera
+            flowers.get(19), // Pink Wreath
+            flowers.get(20), // Purple Wreath
+            flowers.get(22), // Green Vase
+            flowers.get(25), // Circle Vase            flowers.get(26), // White Crown
+            flowers.get(27)  // Purple Crown
+
         ));
         
         // Create stores
@@ -222,31 +257,11 @@ public class DatabaseInitializer {
         System.out.println(">>> CREATING USERS...");
         
         // Haifa Store Workers
-        LoginRegCheck Dor = new LoginRegCheck("Dor", "123", "Dor@", 0, true, 1);
-        session.save(Dor);
-        session.flush();
-        
-        LoginRegCheck Asaf = new LoginRegCheck("Asaf", "123", "Asaf@", 0, true, 1);
-        session.save(Asaf);
-        session.flush();
         
         // Krayot Store Workers
-        LoginRegCheck Nissim = new LoginRegCheck("Nissim", "123", "Nissim@", 0, true, 2);
-        session.save(Nissim);
-        session.flush();
         
-        LoginRegCheck Yarden = new LoginRegCheck("Yarden", "123", "Yarden@", 0, true, 2);
-        session.save(Yarden);
-        session.flush();
         
         // Nahariyya Store Workers
-        LoginRegCheck Itay = new LoginRegCheck("Itay", "123", "Itay@", 0, true, 3);
-        session.save(Itay);
-        session.flush();
-        
-        LoginRegCheck Diana = new LoginRegCheck("Diana", "123", "Diana@", 0, true, 3);
-        session.save(Diana);
-        session.flush();
         
         // Regular Customers
         LoginRegCheck tamar = new LoginRegCheck("tamar", "123", "tamar@", 0, false, 1);
@@ -261,8 +276,57 @@ public class DatabaseInitializer {
         LoginRegCheck malci = new LoginRegCheck("malci", "123", "malci@", 0, true, 4);
         session.save(malci);
         session.flush();
+
+        // System Administrator
+        LoginRegCheck System = new LoginRegCheck("System", "123", "haifa.System@lilach.com", 0, true, 4, "050-1112223", "System Cohen", "111222333", false);
+        System.setEmployeetype(1);
+        session.save(System);
+        session.flush();
+
+        // Customer service employee
+        LoginRegCheck service = new LoginRegCheck("service", "123", "haifa.service@lilach.com", 0, true, 4, "050-1112223", "service Cohen", "111222333", false);
+        service.setEmployeetype(2);
+        session.save(service);
+        session.flush();
         
-        System.out.println(">>> CREATED 9 USERS");
+        // Additional Client Users
+        LoginRegCheck itayMalich = new LoginRegCheck("Itay", "123", "itay.malich2@gmail.com", 0, false, 4, "050-1234567", "Itay Malich", "123456789", false);
+        session.save(itayMalich);
+        session.flush();
+
+        //add workers of stores
+        LoginRegCheck HaifaWorker = new LoginRegCheck("HaifaWorker", "123", "haifa.HaifaWorker@gmail.com", 0, true, 1, "050-1234567", "HaifaWorker", "123456789", false);
+        session.save(HaifaWorker);
+        HaifaWorker.setEmployeetype(3);
+        session.flush();
+
+        LoginRegCheck nahariyyaWorker = new LoginRegCheck("nahariyyaWorker", "123", "haifa.nahariyyaWorker@gmail.com", 0, true, 3, "050-1234567", "nahariyyaWorker", "123456789", false);
+        session.save(nahariyyaWorker);
+        nahariyyaWorker.setEmployeetype(3);
+        session.flush();
+
+        LoginRegCheck KrayotWorker = new LoginRegCheck("KrayotWorker", "123", "haifa.KrayotWorker@gmail.com", 0, true, 2, "050-1234567", "KrayotWorker", "123456789", false);
+        session.save(KrayotWorker);
+        KrayotWorker.setEmployeetype(3);
+        session.flush();
+
+        
+        LoginRegCheck asafYaakov = new LoginRegCheck("Asaf", "123", "Asafyaakov555@gmail.com", 0, false, 2, "052-9876543", "Asaf Yaakov", "987654321", false);
+        session.save(asafYaakov);
+        session.flush();
+        
+        LoginRegCheck nissimDeri = new LoginRegCheck("Nissim", "123", "nissimderi123@gmail.com", 0, false, 1, "054-5551234", "Nissim Deri", "456789123", false);
+        session.save(nissimDeri);
+        session.flush();
+        
+        LoginRegCheck yardNetziar = new LoginRegCheck("Yarden", "123", "yardnetziar@gmail.com", 0, false, 2, "053-7778889", "Yarden Tziar", "789123456", false);
+        session.save(yardNetziar);
+        session.flush();
+        
+        LoginRegCheck dorG2005 = new LoginRegCheck("Dor", "12345", "dorg2005@gmail.com", 0, false, 1, "058-4445556", "Dor Gilad", "321654987", false);
+        session.save(dorG2005);
+        session.flush();
+        
     }
     
     /**

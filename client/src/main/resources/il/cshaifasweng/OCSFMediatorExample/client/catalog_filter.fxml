@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
 
 <AnchorPane prefHeight="600.0" prefWidth="400.0" style="-fx-background-color: #f8f9fa;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogFilterController">
    <children>
@@ -26,7 +33,7 @@
             
             <!-- Price Range Section -->
             <VBox spacing="10.0">
-               <Label text="Price Range (₪)" style="-fx-font-weight: bold; -fx-font-size: 16px;">
+               <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Price Range (₪)">
                   <font>
                      <Font name="Segoe UI" size="16.0" />
                   </font>
@@ -34,7 +41,7 @@
                
                <HBox alignment="CENTER" spacing="10.0">
                   <Label fx:id="minPriceLabel" text="0" />
-                  <Slider fx:id="priceRangeSlider" min="0.0" max="300.0" majorTickUnit="50" minorTickCount="0" showTickLabels="true" showTickMarks="true" prefWidth="200.0" />
+                  <Slider fx:id="priceRangeSlider" majorTickUnit="50" max="300.0" min="0.0" minorTickCount="0" prefWidth="200.0" showTickLabels="true" showTickMarks="true" />
                   <Label fx:id="maxPriceLabel" text="300" />
                </HBox>
                
@@ -48,7 +55,7 @@
             
             <!-- Color Filter Section -->
             <VBox spacing="10.0">
-               <Label text="Colors" style="-fx-font-weight: bold; -fx-font-size: 16px;">
+               <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Colors">
                   <font>
                      <Font name="Segoe UI" size="16.0" />
                   </font>
@@ -74,7 +81,7 @@
             
             <!-- Category Filter Section -->
             <VBox spacing="10.0">
-               <Label text="Categories" style="-fx-font-weight: bold; -fx-font-size: 16px;">
+               <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Categories">
                   <font>
                      <Font name="Segoe UI" size="16.0" />
                   </font>
@@ -84,10 +91,10 @@
                   <content>
                      <VBox fx:id="categoryCheckBoxContainer" spacing="5.0">
                         <CheckBox fx:id="flowerCheckBox" text="Flower" />
-                        <CheckBox fx:id="bouquetCheckBox" text="Bouquet" />
-                        <CheckBox fx:id="plantCheckBox" text="Plant" />
-                        <CheckBox fx:id="giftCheckBox" text="Gift" />
-                        <CheckBox fx:id="seasonalCheckBox" text="Seasonal" />
+                        <CheckBox fx:id="premiumFlowerCheckBox" text="Premium Flowers" />
+                        <CheckBox fx:id="flowersWreathCheckBox" text="Flowers Wreath" />
+                        <CheckBox fx:id="flowerCrownsCheckBox" text="Flower Crowns" />
+                        <CheckBox fx:id="vaseCheckBox" text="Vase" />
                      </VBox>
                   </content>
                </ScrollPane>
@@ -95,7 +102,7 @@
             
             <!-- Sort Options -->
             <VBox spacing="10.0">
-               <Label text="Sort By" style="-fx-font-weight: bold; -fx-font-size: 16px;">
+               <Label style="-fx-font-weight: bold; -fx-font-size: 16px;" text="Sort By">
                   <font>
                      <Font name="Segoe UI" size="16.0" />
                   </font>
@@ -117,16 +124,7 @@
                   </font>
                </Button>
             </HBox>
-            
-            <!-- Results Summary -->
-            <VBox spacing="5.0">
-               <Label fx:id="resultsLabel" text="Showing all items" style="-fx-font-style: italic;">
-                  <font>
-                     <Font name="Segoe UI" size="12.0" />
-                  </font>
-               </Label>
-            </VBox>
          </children>
       </VBox>
    </children>
-</AnchorPane> 
+</AnchorPane>

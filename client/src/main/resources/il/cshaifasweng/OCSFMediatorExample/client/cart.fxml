@@ -34,7 +34,7 @@
             </TableView>
 
             <HBox alignment="CENTER_RIGHT" spacing="20.0">
-                <Label fx:id="cartTotal" text="Total: $0.00" textFill="WHITE">
+                <Label fx:id="cartTotal" text="Total: ₪0.00" textFill="WHITE">
                     <font>
                         <Font size="24.0" />
                     </font>

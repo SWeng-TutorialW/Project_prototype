@@ -4,6 +4,8 @@ import il.cshaifasweng.OCSFMediatorExample.entities.CartItem;
 import il.cshaifasweng.OCSFMediatorExample.entities.Flower;
 import il.cshaifasweng.OCSFMediatorExample.entities.LoginRegCheck;
 import il.cshaifasweng.OCSFMediatorExample.entities.Warning;
+import il.cshaifasweng.OCSFMediatorExample.entities.update_local_catalog;
+import il.cshaifasweng.OCSFMediatorExample.entities.Add_flower_event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -14,6 +16,7 @@ import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Logger;
+import org.greenrobot.eventbus.Subscribe;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,11 +41,43 @@ public class OrderPageController {
     
     private Flower selectedFlower;
     private static List<CartItem> cartItems = new ArrayList<>();
-    
+    private List<Flower> currentCatalogFlowers; // Store the current catalog flowers for validation
+    private boolean catalogRefreshRequested = false; // Flag to track if catalog refresh was requested
+
+
     public void initialize() {
         // Set up quantity spinner listener
         quantitySpinner.valueProperty().addListener((obs, oldValue, newValue) -> {
             updateTotalPrice();
+        });
+        
+        // Register with EventBus to receive catalog updates
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
+        
+        // Unregister from EventBus when window closes
+        addToCartButton.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                if (newScene.getWindow() != null) {
+                    newScene.getWindow().setOnHidden(e -> {
+                        if (EventBus.getDefault().isRegistered(this)) {
+                            EventBus.getDefault().unregister(this);
+                        }
+                    });
+                } else {
+                    // Listen for the window property to become non-null
+                    newScene.windowProperty().addListener((obsWin, oldWin, newWin) -> {
+                        if (newWin != null) {
+                            newWin.setOnHidden(e -> {
+                                if (EventBus.getDefault().isRegistered(this)) {
+                                    EventBus.getDefault().unregister(this);
+                                }
+                            });
+                        }
+                    });
+                }
+            }
         });
     }
     
@@ -59,7 +94,13 @@ public class OrderPageController {
         this.user = user;
     }
 
-
+    /**
+     * Set the current catalog flowers for validation
+     * @param flowers The list of flowers currently in the catalog
+     */
+    public void setCurrentCatalogFlowers(List<Flower> flowers) {
+        this.currentCatalogFlowers = flowers;
+    }
 
     private void updateUI() {
         if (selectedFlower != null) {
@@ -70,7 +111,7 @@ public class OrderPageController {
             System.out.println("The store of the flower is: " + this.store);
             storeName.setText("Store: " + this.store);
 
-            flowerPrice.setText(String.format("Price: $%.2f", selectedFlower.getFlowerPrice()));
+            flowerPrice.setText(String.format("Price: ₪%.2f", selectedFlower.getFlowerPrice()));
             updateTotalPrice();
             
             // Set flower image using database path with fallback
@@ -164,22 +205,91 @@ public class OrderPageController {
         if (selectedFlower != null) {
             int quantity = quantitySpinner.getValue();
             double total = selectedFlower.getFlowerPrice() * quantity;
-            totalPrice.setText(String.format("Total: $%.2f", total));
+            totalPrice.setText(String.format("Total: ₪%.2f", total));
         }
     }
 
     @FXML
     private void addToCart() {
-        if (user == null || user.getIsLogin() == 0) {
+        if (user == null || user.getIsLogin() == 0 || SimpleClient.isGuest) {
             System.out.println("User not logged in");
             Warning warning = new Warning("Please log in to add items to cart");
             EventBus.getDefault().post(new WarningEvent(warning));
-            return; // Exit the method to prevent further execution
+            closeWindow();
+            return;
         }
 
-        // Prevent adding from another store if not network
-        if (user.getStore() != 4 && !this.store.equals(this.user.getStoreName())) {
+        // אם המשתמש לא מנהל רשת – ניתן להזמין רק מהחנות שלו
+        if (user.getStore() != 4 && !this.store.equals(user.getStoreName())) {
             Warning warning = new Warning("You can only order from your own store: " + user.getStoreName());
+            EventBus.getDefault().post(new WarningEvent(warning));
+            closeWindow();
+            return;
+        }
+
+        int quantity = quantitySpinner.getValue();
+
+        // הוספה לעגלה לפי store השמור בקונטרולר
+        boolean found = false;
+        for (CartItem item : cartItems) {
+            if (item.getFlower().getId() == selectedFlower.getId() && item.getStore().equals(this.store)) {
+                item.setQuantity(item.getQuantity() + quantity);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
+            cartItems.add(cartItem);
+            System.out.println("✅ Added to cart: " + selectedFlower.getFlowerName() + " x" + quantity);
+        }
+
+        EventBus.getDefault().post(new SuccessEvent(new Success("Item added to cart successfully!")));
+        EventBus.getDefault().post(new CartUpdatedEvent());
+        closeWindow();
+    }
+
+
+
+    /**
+     * Handle catalog updates from server
+     */
+    @Subscribe
+    public void handleCatalogUpdate(update_local_catalog event) {
+        if (catalogRefreshRequested) {
+            // Update the current catalog flowers with fresh data
+            this.currentCatalogFlowers = event.get_flowers();
+            catalogRefreshRequested = false;
+            
+            // Now perform the validation with fresh data
+            performAddToCartValidation();
+        }
+    }
+    
+    /**
+     * Handle network catalog updates from server
+     */
+    @Subscribe
+    public void handleNetworkCatalogUpdate(Add_flower_event event) {
+        if (catalogRefreshRequested && this.store.equals("network")) {
+            // Update the current catalog flowers with fresh data
+            this.currentCatalogFlowers = event.get_flowers();
+            catalogRefreshRequested = false;
+            
+            // Now perform the validation with fresh data
+            performAddToCartValidation();
+        }
+    }
+    
+    /**
+     * Perform the actual add to cart validation and operation
+     */
+    private void performAddToCartValidation() {
+        // Check if the flower is available in the current store's catalog
+        System.out.println("performAddToCartValidation CALLED");
+        if (!isFlowerAvailableInStore(selectedFlower, this.store)) {
+            Warning warning = new Warning("This flower is not available in the current store catalog. Please refresh the catalog or try a different store.");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
@@ -204,10 +314,8 @@ public class OrderPageController {
             // Notify cart window to refresh
             EventBus.getDefault().post(new CartUpdatedEvent());
         }
-
-        // Close current window
-        Stage stage = (Stage) addToCartButton.getScene().getWindow();
-        stage.close();
+        
+        // Note: Window is already closed, so no need to close it again
     }
     
     @FXML
@@ -256,5 +364,66 @@ public class OrderPageController {
         cartItems.clear();
     }
 
+    /**
+     * Check if a flower is available in the current store's catalog
+     * @param flower The flower to check
+     * @param storeName The store name to check against
+     * @return true if the flower is available in the store catalog, false otherwise
+     */
+    private boolean isFlowerAvailableInStore(Flower flower, String storeName) {
+        if (flower == null || storeName == null) {
+            return false;
+        }
+        
+        // If we have the current catalog flowers, check if the flower exists in it
+        if (currentCatalogFlowers != null && !currentCatalogFlowers.isEmpty()) {
+            return currentCatalogFlowers.stream()
+                .anyMatch(catalogFlower -> catalogFlower.getId() == flower.getId());
+        }
+        
+        // If we don't have catalog data, assume it's available to avoid blocking valid operations
+        // This could happen if the order page is opened directly without going through catalog
+        return true;
+    }
 
+    /**
+     * Refresh the store's flower list from database before validation
+     */
+    private void refreshStoreCatalog() {
+        try {
+            if (this.store != null) {
+                if (this.store.equals("network")) {
+                    // For network view, get all flowers
+                    SimpleClient.getClient().sendToServer("get_all_flowers");
+                } else {
+                    // For specific store, get store-specific catalog
+                    int storeId = getStoreIdFromName(this.store);
+                    if (storeId != -1) {
+                        SimpleClient.getClient().sendToServer("get_catalog_" + storeId);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error refreshing store catalog: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Helper method to get store ID from store name
+     */
+    private int getStoreIdFromName(String storeName) {
+        switch (storeName) {
+            case "Haifa": return 1;
+            case "Krayot": return 2;
+            case "Nahariyya": return 3;
+            case "network": return 4;
+            default: return -1;
+        }
+    }
+
+    private void closeWindow() {
+        Stage stage = (Stage) addToCartButton.getScene().getWindow();
+        stage.close();
+    }
 } 

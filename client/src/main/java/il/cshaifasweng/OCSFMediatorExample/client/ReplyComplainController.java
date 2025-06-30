@@ -39,21 +39,21 @@ public class ReplyComplainController {
         public void setComplain(Complain complain) {
             this.originalComplain = complain;
             
-            // Check if this is a worker request (no order ID in complaint text)
-            String complaintText = complain.getComplaint();
-            if (complaintText != null && !complaintText.contains("Order #")) {
+            // Check if this complaint has an associated order
+            if (complain.getOrder() != null || (complain.getComplaint() != null && complain.getComplaint().contains("Order #"))) {
+                isWorkerRequest = false;
+                titleLabel.setText("Reply to Complaint:");
+                refundCheckBox.setVisible(true);
+                refundCheckBox.setManaged(true);
+                moneyTf.setVisible(true);
+                moneyTf.setManaged(true);
+            } else {
                 isWorkerRequest = true;
                 titleLabel.setText("Reply to Request:");
                 refundCheckBox.setVisible(false);
                 refundCheckBox.setManaged(false);
                 moneyTf.setVisible(false);
                 moneyTf.setManaged(false);
-            } else {
-                titleLabel.setText("Reply to Complaint:");
-                refundCheckBox.setVisible(true);
-                refundCheckBox.setManaged(true);
-                moneyTf.setVisible(true);
-                moneyTf.setManaged(true);
             }
         }
 
@@ -73,8 +73,9 @@ public class ReplyComplainController {
                     @Override
                     public void changed(ObservableValue<? extends String> observable, String oldValue,
                                         String newValue) {
-                        if (!newValue.matches("\\d*")) {
-                            moneyTf.setText(newValue.replaceAll("[^\\d]", ""));
+                        // Allow decimal numbers (e.g., 123.45)
+                        if (!newValue.matches("\\d*\\.?\\d*")) {
+                            moneyTf.setText(oldValue);
                         }
                     }
                 });
@@ -109,12 +110,12 @@ public class ReplyComplainController {
                 double orderPrice = extractOrderPrice(originalComplain.getComplaint());
     
                 if (orderPrice > 0 && refundValue > orderPrice) {
-                    Warning warning = new Warning("Cannot refund more than order price ($" + String.format("%.2f", orderPrice) + ")");
+                    Warning warning = new Warning("Cannot refund more than order price (₪" + String.format("%.2f", orderPrice) + ")");
                     EventBus.getDefault().post(new WarningEvent(warning));
                     return;
                 }
     
-                replyText = replyText.concat("\nWe have refunded your account with ").concat(refundAmount).concat(" $");
+                replyText = replyText.concat("\n\nWe have refunded your account with ").concat(refundAmount).concat(" ₪");
                 newComplain.setRefundAmount(refundValue);
             }
     
@@ -138,8 +139,8 @@ public class ReplyComplainController {
         private double extractOrderPrice(String complaintText) {
             if (complaintText == null) return 0.0;
             
-            // Look for "Price: $123.45" pattern
-            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("Price: \\$([\\d.]+)");
+            // Look for "Price: ₪123.45" pattern
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("Price: ₪([\\d.]+)");
             java.util.regex.Matcher matcher = pattern.matcher(complaintText);
             
             if (matcher.find()) {

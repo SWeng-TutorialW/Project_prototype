@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -222,8 +223,14 @@ public class connect_scene_Con  {
                         {
                             if(loginRegCheck.getIsLogin()==1)
                             {
-                                Warning warning = new Warning("this user already in the system");
-                                EventBus.getDefault().post(new WarningEvent(warning));
+                                Platform.runLater(() -> {
+                                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                                    alert.setTitle("Login Error");
+                                    alert.setHeaderText("Already Logged In");
+                                    alert.setContentText("This user is already logged in elsewhere. Please log out from other devices first.");
+                                    alert.showAndWait();
+                                });
+                                user = null;
                                 return;
                             }
                             user = loginRegCheck;
@@ -237,9 +244,16 @@ public class connect_scene_Con  {
                         {
                             if(loginRegCheck.getIsLogin()==1)
                             {
-                                Warning warning = new Warning("this user already in the system");
-                                EventBus.getDefault().post(new WarningEvent(warning));
+                                Platform.runLater(() -> {
+                                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                                    alert.setTitle("Login Error");
+                                    alert.setHeaderText("Already Logged In");
+                                    alert.setContentText("This user is already logged in elsewhere. Please log out from other devices first.");
+                                    alert.showAndWait();
+                                });
+                                user = null;
                                 return;
+
                             }
                             user = loginRegCheck;
                             type_Client = true;
@@ -372,9 +386,28 @@ public class connect_scene_Con  {
                         return;
                     }
                 }
-                Warning warning = new Warning("Username or password doesn't match");
-                EventBus.getDefault().post(new WarningEvent(warning));
-            }
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Login Failed");
+                alert.setHeaderText("Invalid Credentials");
+                alert.setContentText("Username or password is incorrect. Please check your credentials and try again.");
+                alert.showAndWait();
+            });
 
     }
+
+    @Subscribe
+    public void handleLoginResponse(String response) {
+        if (response.equals("#loginFailed")) {
+            Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Login Failed");
+                alert.setHeaderText("Invalid Credentials");
+                alert.setContentText("Username or password is incorrect. Please check your credentials and try again.");
+                alert.showAndWait();
+            });
+        }
+    }
+
+}
 
