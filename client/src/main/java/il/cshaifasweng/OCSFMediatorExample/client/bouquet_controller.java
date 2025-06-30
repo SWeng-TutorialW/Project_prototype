@@ -33,7 +33,7 @@ public class bouquet_controller {
     public void setFlowersList(List<Flower> flowersList)
     {
         this.flowersList_c = flowersList;
-        
+
         // Filter flowers to only include those with category "Flower"
         this.flowerNames = flowersList.stream()
                 .filter(flower -> "Flower".equals(flower.getCategory()))
@@ -349,4 +349,3 @@ public class bouquet_controller {
     }
 
 }
-

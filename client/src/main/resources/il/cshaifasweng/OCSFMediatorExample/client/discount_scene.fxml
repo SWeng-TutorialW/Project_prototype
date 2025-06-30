@@ -13,7 +13,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="700.0" prefWidth="900.0" style="-fx-background-color: #C8A2C8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.discount_Controller">
+<AnchorPane prefHeight="700.0" prefWidth="900.0" style="-fx-background-color: #C8A2C8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.discount_Controller" stylesheets="@../../../../styles/button-hover.css">
    <children>
       <Text fill="WHITE" fontSmoothingType="LCD" layoutX="250.0" layoutY="50.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Set Flower Discount" textAlignment="CENTER" wrappingWidth="400.0">
          <font>

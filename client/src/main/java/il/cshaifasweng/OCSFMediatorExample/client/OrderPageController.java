@@ -229,7 +229,36 @@ public class OrderPageController {
             return;
         }
 
-        // Send a check to the server before adding to cart
+        // For network mode, check availability locally since we have all flowers
+        if (this.store.equals("network")) {
+            if (isFlowerAvailableInStore(selectedFlower, this.store)) {
+                // Add to cart directly
+                int quantity = quantitySpinner.getValue();
+                boolean found = false;
+                for (CartItem item : cartItems) {
+                    if (item.getFlower().getId() == selectedFlower.getId() && item.getStore().equals(this.store)) {
+                        item.setQuantity(item.getQuantity() + quantity);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
+                    cartItems.add(cartItem);
+                    System.out.println("✅ Added to cart: " + selectedFlower.getFlowerName() + " x" + quantity);
+                }
+                EventBus.getDefault().post(new SuccessEvent(new Success("Item added to cart successfully!")));
+                EventBus.getDefault().post(new CartUpdatedEvent());
+                closeWindow();
+            } else {
+                Warning warning = new Warning("This flower is not available in the network catalog.");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                closeWindow();
+            }
+            return;
+        }
+
+        // For specific stores, send a check to the server before adding to cart
         int storeId = getStoreIdFromName(this.store);
         if (selectedFlower != null && storeId > 0) {
             // Register for the result event if not already
@@ -392,6 +421,7 @@ public class OrderPageController {
 
     /**
      * Check if a flower is available in the current store's catalog
+     * For network mode, check all stores (i.e., if the flower exists in any store's catalog)
      * @param flower The flower to check
      * @param storeName The store name to check against
      * @return true if the flower is available in the store catalog, false otherwise
@@ -400,13 +430,19 @@ public class OrderPageController {
         if (flower == null || storeName == null) {
             return false;
         }
-        
-        // If we have the current catalog flowers, check if the flower exists in it
+        // In network mode, allow if the flower exists in any store's catalog
+        if (storeName.equals("network")) {
+            if (currentCatalogFlowers != null && !currentCatalogFlowers.isEmpty()) {
+                return currentCatalogFlowers.stream()
+                    .anyMatch(catalogFlower -> catalogFlower.getId() == flower.getId());
+            }
+            return true; // If no catalog data, allow
+        }
+        // Otherwise, check only the current store's catalog
         if (currentCatalogFlowers != null && !currentCatalogFlowers.isEmpty()) {
             return currentCatalogFlowers.stream()
                 .anyMatch(catalogFlower -> catalogFlower.getId() == flower.getId());
         }
-        
         // If we don't have catalog data, assume it's available to avoid blocking valid operations
         // This could happen if the order page is opened directly without going through catalog
         return true;

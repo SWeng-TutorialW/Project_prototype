@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="650.0" style="-fx-background-color: #C8A2C8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.worker_request_controller">
+<AnchorPane prefHeight="400.0" prefWidth="650.0" style="-fx-background-color: #C8A2C8;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.worker_request_controller" stylesheets="@../../../../styles/button-hover.css">
    <children>
       <GridPane layoutX="26.0" layoutY="20.0" prefHeight="346.0" prefWidth="598.0">
         <columnConstraints>

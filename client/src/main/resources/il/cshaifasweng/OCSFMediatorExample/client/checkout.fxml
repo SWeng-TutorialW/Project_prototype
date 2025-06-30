@@ -19,7 +19,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="800.0" prefWidth="800.0" style="-fx-background-color: #EFE7F6;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CheckoutController">
+<AnchorPane prefHeight="800.0" prefWidth="800.0" style="-fx-background-color: #EFE7F6;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CheckoutController" stylesheets="@../../../../styles/button-hover.css">
 
     <children>
         <Label alignment="TOP_CENTER" layoutX="1.0" layoutY="29.0" prefHeight="96.0" prefWidth="800.0" text="Checkout" textAlignment="CENTER" textFill="#4B275F">  <!-- Deep purple headline -->

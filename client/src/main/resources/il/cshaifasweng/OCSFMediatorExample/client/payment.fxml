@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #EFE7F6;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.PaymentController">
+<AnchorPane prefHeight="600.0" prefWidth="800.0" style="-fx-background-color: #EFE7F6;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.PaymentController" stylesheets="@../../../../styles/button-hover.css">
     <children>
         <Label alignment="TOP_CENTER" layoutX="2.0" layoutY="14.0" prefHeight="96.0" prefWidth="800.0" text="Secure Payment" textAlignment="CENTER" textFill="#4B275F">
             <font>

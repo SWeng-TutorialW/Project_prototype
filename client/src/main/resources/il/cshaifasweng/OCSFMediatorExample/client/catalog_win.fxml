@@ -21,7 +21,7 @@
 
 <ScrollPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="850.0" prefWidth="988.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.CatalogController">
    <content>
-      <AnchorPane prefHeight="846.0" prefWidth="987.0">
+      <AnchorPane prefHeight="846.0" prefWidth="987.0" stylesheets="@../../../../styles/button-hover.css">
          <children>
             <Label fx:id="copyrightLBl" alignment="CENTER" layoutX="220.0" layoutY="810.0" prefHeight="28.0" prefWidth="253.0" text="">
                <font>

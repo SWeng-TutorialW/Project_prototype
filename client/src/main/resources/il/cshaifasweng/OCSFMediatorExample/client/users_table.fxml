@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.UsersTableController">
+<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="il.cshaifasweng.OCSFMediatorExample.client.UsersTableController" stylesheets="@../../../../styles/button-hover.css">
     <TableView fx:id="usersTable" layoutX="14.0" layoutY="14.0" prefHeight="400.0" prefWidth="600.0">
         <columns>
             <TableColumn fx:id="usernameCol" text="Username" />

@@ -475,6 +475,8 @@ public class MyAccountController {
 
                 // Add subscription order to user's orders
                 Order subscriptionOrder = new Order(current_User.getUsername(), current_User.getEmail(), current_User);
+                // Set the store ID where the order was created (user's store)
+                subscriptionOrder.setStoreId(current_User.getStore());
                 subscriptionOrder.setStatus("CONFIRMED");
                 subscriptionOrder.setTotalAmount(100.0); // Assuming subscription price is 100
                 subscriptionOrder.setDiscountAmount(0.0);

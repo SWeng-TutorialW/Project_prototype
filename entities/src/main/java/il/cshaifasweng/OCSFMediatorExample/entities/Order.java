@@ -51,6 +51,9 @@ public class Order implements Serializable {
     @JoinColumn(name = "user_id")
     private LoginRegCheck user;
     
+    // Store ID where the order was created
+    private int storeId;
+    
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<CartItem> items = new ArrayList<>();
     
@@ -332,5 +335,13 @@ public class Order implements Serializable {
 
     public void setDiscountAmount(double discountAmount) {
         this.discountAmount = discountAmount;
+    }
+
+    public int getStoreId() {
+        return storeId;
+    }
+
+    public void setStoreId(int storeId) {
+        this.storeId = storeId;
     }
 } 

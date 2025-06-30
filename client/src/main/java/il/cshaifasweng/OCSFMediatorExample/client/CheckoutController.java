@@ -361,6 +361,8 @@ public class CheckoutController {
         System.out.println("CheckoutController: Creating order with user: " + currentUser.getUsername());
         // Create and populate the order with user information
         Order order = new Order(nameField.getText(), emailField.getText(), currentUser);
+        // Set the store ID where the order was created (user's store)
+        order.setStoreId(currentUser.getStore());
         order.setCity(cityField.getText());
         order.setStreetAddress(streetAddressField.getText());
         order.setApartment(apartmentField.getText());

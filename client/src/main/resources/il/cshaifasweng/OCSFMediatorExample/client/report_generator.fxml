@@ -15,7 +15,7 @@
            xmlns:fx="http://javafx.com/fxml/1" 
            fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReportGeneratorController">
    <content>
-      <AnchorPane prefHeight="900.0" prefWidth="1200.0">
+      <AnchorPane prefHeight="900.0" prefWidth="1200.0" stylesheets="@../../../../styles/button-hover.css">
          <children>
             <!-- Header -->
             <Label contentDisplay="CENTER" layoutX="-2.0" layoutY="-3.0" prefHeight="68.0" prefWidth="1200.0" 
