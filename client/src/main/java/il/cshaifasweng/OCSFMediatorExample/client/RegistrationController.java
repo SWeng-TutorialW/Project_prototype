@@ -120,6 +120,10 @@ public class RegistrationController {
                     alert.showAndWait();
                     return;
                 }
+                if (isPaymentStageOpen()) {
+                    paymentStageInstance.close();
+                }
+
                 System.out.println("");
                 change_user_login wrapper = new change_user_login(loginRegCheck, 1);
                 try {
