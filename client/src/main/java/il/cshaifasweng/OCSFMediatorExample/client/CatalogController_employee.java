@@ -1905,7 +1905,7 @@ public class CatalogController_employee {
             List<Complain> complaints = event.getUpdatedItems();
             if (complaints != null) {
                 boolean hasUnreadMessages = complaints.stream()
-                    .anyMatch(c -> c.getClient().equals(user.getUsername()) && c.getComplaint().startsWith("answer to"));
+                    .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
                 
                 if (hasUnreadMessages && !user.isReceive_answer()) {
                     // User has unread messages but flag is not set, refresh user state
@@ -1924,7 +1924,7 @@ public class CatalogController_employee {
         System.out.println("[CatalogController_employee] Received complaints list with " + (complaints != null ? complaints.size() : 0) + " complaints");
         if (user != null && complaints != null) {
             boolean hasUnreadMessages = complaints.stream()
-                .anyMatch(c -> c.getClient().equals(user.getUsername()) && c.getComplaint().startsWith("answer to"));
+                .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
             
             // Update user's receive_answer flag based on actual complaints
             if (hasUnreadMessages != user.isReceive_answer()) {

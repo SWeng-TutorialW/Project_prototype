@@ -32,22 +32,22 @@
                   <Insets />
                </opaqueInsets>
             </Label>
-            <Button fx:id="accountLbl" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="483.0" layoutY="1.0" mnemonicParsing="false" onMouseClicked="#gotoAcc" prefHeight="41.0" prefWidth="142.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="    My Account" textFill="#fdfdfd">
+            <Button fx:id="accountLbl" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="461.0" layoutY="-3.0" mnemonicParsing="false" onMouseClicked="#gotoAcc" prefHeight="45.0" prefWidth="144.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="    My Account" textFill="#fdfdfd">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <ImageView fitHeight="36.0" fitWidth="34.0" layoutX="483.0" layoutY="4.0" pickOnBounds="true">
+            <ImageView fitHeight="36.0" fitWidth="34.0" layoutX="461.0" layoutY="4.0" pickOnBounds="true">
                <image>
                   <Image url="@../../../../images/person_24dp_E3E3E3_FILL0_wght400_GRAD0_opsz24.png" />
                </image>
             </ImageView>
-            <Button fx:id="cart" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="625.0" layoutY="1.0" mnemonicParsing="false" onAction="#openCart" prefHeight="41.0" prefWidth="85.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text=" Cart" textFill="#fdfdfd">
+            <Button fx:id="cart" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="605.0" layoutY="-2.0" mnemonicParsing="false" onAction="#openCart" prefHeight="44.0" prefWidth="105.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text=" Cart" textFill="#fdfdfd">
                <font>
                   <Font size="18.0" />
                </font>
             </Button>
-            <ImageView fitHeight="39.0" fitWidth="27.0" layoutX="625.0" layoutY="2.0" pickOnBounds="true">
+            <ImageView fitHeight="39.0" fitWidth="27.0" layoutX="605.0" layoutY="3.0" pickOnBounds="true">
                <image>
                   <Image url="@../../../../images/cart.png" />
                </image>
@@ -198,7 +198,7 @@
                      <font>
                         <Font size="16.0" />
                      </font></Label>
-                  <Button fx:id="Mail_box" alignment="CENTER" contentDisplay="RIGHT" layoutX="52.0" layoutY="7.0" mnemonicParsing="false" onAction="#open_mail" prefHeight="41.0" prefWidth="147.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Mail Box" textFill="#fdfdfd">
+                  <Button fx:id="Mail_box" alignment="CENTER" contentDisplay="RIGHT" layoutX="52.0" mnemonicParsing="false" onAction="#open_mail" prefHeight="46.0" prefWidth="147.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="Mail Box" textFill="#fdfdfd">
                      <font>
                         <Font size="18.0" />
                      </font>
@@ -210,7 +210,7 @@
                         </ImageView>
                      </graphic>
                   </Button>
-                  <Button fx:id="contact" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="-63.0" layoutY="7.0" mnemonicParsing="false" onAction="#complaint" prefHeight="41.0" prefWidth="127.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="  Contact Us" textFill="#fdfdfd">
+                  <Button fx:id="contact" alignment="TOP_CENTER" contentDisplay="CENTER" layoutX="-63.0" layoutY="1.0" mnemonicParsing="false" onAction="#complaint" prefHeight="45.0" prefWidth="127.0" style="-fx-background-color: #C8A2C8; -fx-border-color: white;" text="  Contact Us" textFill="#fdfdfd">
                      <font>
                         <Font size="18.0" />
                      </font>

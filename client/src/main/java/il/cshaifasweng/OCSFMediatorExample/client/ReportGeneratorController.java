@@ -273,35 +273,13 @@ public class ReportGeneratorController {
     }
     
     private void updateChartsForReportType() {
-        RadioButton selected = (RadioButton) reportTypeGroup.getSelectedToggle();
-        if (selected == null) return;
-        
-        String reportType = selected.getText();
-        System.out.println("[ReportGenerator] Selected report type: '" + reportType + "'");
-        
-        switch (reportType) {
-            case "📦 Orders Summary":
-                System.out.println("[ReportGenerator] Updating orders charts");
-                updateOrdersCharts();
-                updateSummaryLabelsForOrders();
-                break;
-            case "👥 Customer Analysis":
-                System.out.println("[ReportGenerator] Updating customer charts");
-                updateCustomerCharts();
-                updateSummaryLabelsForOrders();
-                break;
-            case "Complaints and Refunds":
-                System.out.println("[ReportGenerator] Updating complaint charts");
-                updateComplaintCharts();
-                updateSummaryLabelsForComplaints();
-                break;
-            default:
-                System.out.println("[ReportGenerator] Unknown report type: '" + reportType + "'");
-                break;
+        if (ordersReport.isSelected()) {
+            updateOrdersCharts();
+        } else if (customersReport.isSelected()) {
+            updateCustomerCharts();
+        } else if (complaintsReport.isSelected()) {
+            updateComplaintCharts();
         }
-        
-        // Update summary statistics after changing report type
-        updateSummaryStatistics();
     }
     
     private void updateOrdersCharts() {
@@ -309,20 +287,6 @@ public class ReportGeneratorController {
         ChartUtils.updateRevenueChart(revenueChart, revenueData);
         
         // Update product chart with order distribution
-        ChartUtils.updateProductChart(productChart, productData);
-    }
-    
-    private void updateProductCharts() {
-        // Reset chart titles for products
-        revenueChart.setTitle("Revenue Trend");
-        revenueXAxis.setLabel("Date");
-        revenueYAxis.setLabel("Revenue ($)");
-        productChart.setTitle("Product Distribution");
-        
-        // Update revenue chart with product sales trend
-        ChartUtils.updateRevenueChart(revenueChart, revenueData);
-        
-        // Update product chart
         ChartUtils.updateProductChart(productChart, productData);
     }
     
@@ -336,59 +300,30 @@ public class ReportGeneratorController {
         // Update revenue chart with customer segments
         ChartUtils.updateRevenueChart(revenueChart, revenueData);
         
-        // Update product chart with customer data - show customer names and their order counts
-        Map<String, Integer> customerOrderCounts = new HashMap<>();
-        for (Order order : allOrders) {
-            LocalDate orderDate = order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-            LocalDate start = startDatePicker.getValue();
-            LocalDate end = endDatePicker.getValue();
-            
-            if ((orderDate.isEqual(start) || orderDate.isAfter(start)) && (orderDate.isEqual(end) || orderDate.isBefore(end))) {
-                String customerName = order.getCustomerName();
-                customerOrderCounts.put(customerName, customerOrderCounts.getOrDefault(customerName, 0) + 1);
-            }
-        }
-        
-        if (customerOrderCounts.isEmpty()) {
+        // Update product chart with customer data - use pre-processed customerData
+        if (customerData.isEmpty()) {
             // If no customers, show a message
             productChart.getData().clear();
             PieChart.Data noData = new PieChart.Data("No Customers", 1);
             productChart.getData().add(noData);
         } else {
-            ChartUtils.updateProductChart(productChart, customerOrderCounts);
+            ChartUtils.updateProductChart(productChart, customerData);
         }
     }
     
     private void updateComplaintCharts() {
-        // Create complaints trend data for the line chart
-        Map<String, Double> complaintsTrendData = new HashMap<>();
-        
-        // Group complaints by date and count them
-        for (Complain complaint : allComplaints) {
-            if (complaint != null && complaint.getTimestamp() != null) {
-                LocalDate complaintDate = complaint.getTimestamp().toLocalDate();
-                LocalDate start = startDatePicker.getValue();
-                LocalDate end = endDatePicker.getValue();
-                
-                if ((complaintDate.isEqual(start) || complaintDate.isAfter(start)) && (complaintDate.isEqual(end) || complaintDate.isBefore(end))) {
-                    String dateStr = complaintDate.toString();
-                    complaintsTrendData.put(dateStr, complaintsTrendData.getOrDefault(dateStr, 0.0) + 1.0);
-                }
-            }
-        }
-        
         // Update chart titles for complaints
         revenueChart.setTitle("Complaints Trend");
         revenueXAxis.setLabel("Date");
         revenueYAxis.setLabel("Number of Complaints");
         
-        // Update revenue chart with complaints trend
-        ChartUtils.updateRevenueChart(revenueChart, complaintsTrendData);
+        // Update revenue chart with complaints trend - use pre-processed revenueData
+        ChartUtils.updateRevenueChart(revenueChart, revenueData);
         
         // Update product chart title for complaints
         productChart.setTitle("Complaint Types Distribution");
         
-        // Update product chart with complaint types
+        // Update product chart with complaint types - use pre-processed complaintData
         if (complaintData.isEmpty()) {
             // If no complaints, show a message
             productChart.getData().clear();

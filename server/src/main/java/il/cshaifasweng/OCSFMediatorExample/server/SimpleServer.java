@@ -1735,8 +1735,7 @@ public class SimpleServer extends AbstractServer {
 				CriteriaQuery<Complain> query = builder.createQuery(Complain.class);
 				Root<Complain> root = query.from(Complain.class);
 
-				// Search for complaints where the client field equals "answer to" + username
-				query.select(root).where(builder.equal(root.get("client"), toSearch));
+				query.select(root).where(builder.equal(root.get("clientName"), toSearch));
 
 				List<Complain> matchingComplaints = session.createQuery(query).getResultList();
 
