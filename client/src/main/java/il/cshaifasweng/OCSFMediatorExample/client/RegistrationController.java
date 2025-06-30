@@ -185,12 +185,12 @@ public class RegistrationController {
         String account_type = select_account_type.getValue();
         String userId = regIdTxtB.getText();
 
-//        String check = checkIfValid(regUser, email, regPass, confPass, fullName, phoneNumber, account_type, userId);
-//        if (check != null) {
-//            Warning warning = new Warning(check);
-//            EventBus.getDefault().post(new WarningEvent(warning));
-//            return;
-//        }
+        String check = checkIfValid(regUser, email, regPass, confPass, fullName, phoneNumber, account_type, userId);
+        if (check != null) {
+            Warning warning = new Warning(check);
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
 
         LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 0, false, store, phoneNumber, fullName, userId, false); // for now it's it meant to be for registration only.
 
