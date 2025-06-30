@@ -135,6 +135,7 @@ public class MyAccountController {
         EventBus.getDefault().register(this);
         // AnchorPane margins
         loadUserInfo();
+        userChangeTxtB.setEditable(false);
         AnchorPane.setBottomAnchor(my_account_data, 58.0);
         AnchorPane.setTopAnchor(my_account_data, 58.0);
         AnchorPane.setRightAnchor(my_account_data, 89.0);
@@ -286,6 +287,8 @@ public class MyAccountController {
         if(!checkIsraeliID(idNumTxtB.getText())) {
             passErrorMsgLbl.setVisible(true);
             passErrorMsgLbl.setText("Invalid Israeli ID number. Please enter a valid 9-digit ID.");
+            idNumTxtB.setDisable(false);
+            idNumTxtB.setEditable(true);
             return;
         }
 
@@ -326,6 +329,11 @@ public class MyAccountController {
         if (newPassTxtB.getText().isEmpty() || confNewPassTxtB.getText().isEmpty()) {
             passErrorMsgLbl.setVisible(true);
             passErrorMsgLbl.setText("Please fill in both password fields.");
+            return;
+        }
+        if (newPassTxtB.getText().length() < 3 || confNewPassTxtB.getText().length() < 3) {
+            passErrorMsgLbl.setVisible(true);
+            passErrorMsgLbl.setText("Password must be at least 3 characters long.");
             return;
         }
 
@@ -388,7 +396,7 @@ public class MyAccountController {
         openPaymentWindow();
     }
 
-    private boolean checkIsraeliID(String idNumber){
+    public static boolean checkIsraeliID(String idNumber){
 
         // 1. Check length: Israeli ID numbers must be 9 digits long.
         if (idNumber == null || idNumber.length() != 9) {

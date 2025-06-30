@@ -1,17 +1,20 @@
 package il.cshaifasweng.OCSFMediatorExample.client;
 
 import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import java.io.IOException;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.ArrayList;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -31,6 +34,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.hibernate.SessionFactory;
@@ -471,6 +475,7 @@ public class CatalogController_employee {
 
     @FXML
     void initialize() {
+
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
             System.out.println("CatalogController_employee registered");
@@ -1180,7 +1185,7 @@ public class CatalogController_employee {
         SimpleClient.getClient().sendToServer(message);
 
         // Show success message
-        Success success = new Success("Price updated for '" + flower.getFlowerName() + "' to $" + String.format("%.2f", newPrice));
+        Success success = new Success("Price updated for '" + flower.getFlowerName() + "' to ₪" + String.format("%.2f", newPrice));
         EventBus.getDefault().post(new SuccessEvent(success));
     }
 
@@ -1188,7 +1193,7 @@ public class CatalogController_employee {
     private void deleteFlower(Flower flower) throws IOException {
         // Get the selected store from the filter
         String selectedStore = Stores.getValue();
-        if(this.user.getEmployeetype() == 0) {
+        if(this.user.getEmployeetype() == 0 || this.user.getEmployeetype() == 3) {
             String storeIdentifier = "";
             if (selectedStore != null && selectedStore.equals("network") && this.user.getStore() == 4) {
                 // For network view, delete from Flowers table and all store_flowers entries
@@ -1784,9 +1789,10 @@ public class CatalogController_employee {
                 TextField priceField = new TextField(String.format("%.2f", f.getFlowerPrice()));
                 priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px;");
 
-                // Make price field editable only in network view
-                priceField.setEditable(isNetworkView);
-                if (isNetworkView) {
+                if (isNetworkView && this.user.getEmployeetype() == 0 && this.user.getStore() == 4) {
+                    System.out.println("wwwwwwwwwwwww" + user.getEmployeetype());
+                    // Make price field editable only in network view
+                    priceField.setEditable(isNetworkView);
                     priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px; -fx-background-color: #f0f0f0;");
                     priceField.setPromptText("Click to edit price");
 

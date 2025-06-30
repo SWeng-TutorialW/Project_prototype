@@ -8,6 +8,14 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+
+import java.io.IOException;
+
+import java.io.InputStream;
+import java.util.List;
+import java.util.Random;
+
+
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -419,6 +427,29 @@ public class CatalogController {
     void initialize() {
         EventBus.getDefault().register(this);
 
+        System.out.println("CatalogController initialized");
+        TranslateTransition transition = new TranslateTransition();
+        transition.setNode(cus_label);
+        transition.setDuration(Duration.seconds(3));
+        transition.setFromX(0);
+        transition.setToX(300);
+        transition.setAutoReverse(true);
+        transition.setCycleCount(TranslateTransition.INDEFINITE);
+        transition.play();
+        Random random = new Random();
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(3), e -> {
+            currentIndex = random.nextInt(imagePaths.length);
+            String fullPath = imagePaths[currentIndex];
+
+
+            String filename = fullPath.substring(fullPath.lastIndexOf("/") + 1);
+            String flowerName = filename.substring(0, filename.lastIndexOf("."));
+
+
+            setImage(cus_img, flowerName);
+        }));
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
         // Initialize mailbox icon after FXML injection is complete
         Platform.runLater(this::updateMailboxIcon);
 
@@ -426,9 +457,14 @@ public class CatalogController {
         refreshUserState();
 
         // Set up store selection
-        Stores.getItems().addAll("Haifa", "Krayot", "Nahariyya", "network");
-        Stores.setValue("network"); // Default to network view
-
+       Stores.getItems().addAll("Haifa", "Krayot", "Nahariyya", "network");
+        /* if(user != null) {
+            Stores.setValue(user.getStoreName());
+        }
+        else {
+            Stores.setValue("network");
+        }*/
+        Stores.setValue("network");// Default to network view
         // Initialize arrays for flower display
         nameLabels = new Label[]{name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12};
         typeLabels = new Label[]{type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12};
@@ -1154,7 +1190,7 @@ public class CatalogController {
     }
     @FXML
     void gotoAcc(MouseEvent event) {
-
+        RegistrationController.cameFromConnect= false;
         if (type==0) {       //guest mode
             Platform.runLater(() -> {
                 try {

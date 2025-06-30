@@ -78,7 +78,17 @@ public class RegistrationController {
     private TextField regIdTxtB;
 
 
-
+    private static Stage paymentStageInstance = null;
+    public static boolean isPaymentStageOpen() {
+        return paymentStageInstance != null && paymentStageInstance.isShowing();
+    }
+    public static void setPaymentStageInstance(Stage stage) {
+        paymentStageInstance = stage;
+        if (paymentStageInstance != null) {
+            paymentStageInstance.setOnHidden(e -> paymentStageInstance = null);
+        }
+    }
+    public static boolean cameFromConnect=false;
     private CatalogController catalogController;
     public void setCatalogController(CatalogController controller) {
         this.catalogController = controller;
@@ -203,7 +213,7 @@ public class RegistrationController {
             if (userId == null || userId.trim().isEmpty()) {
                 return "ID is required for yearly subscription";
             }
-            if (!isValidIsraeliId(userId)) {
+            if (!(MyAccountController.checkIsraeliID(userId))) {
                 return "Please enter a valid 9-digit Israeli ID number";
             }
         }
@@ -231,9 +241,9 @@ public class RegistrationController {
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
-
-        LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, 1, false, store, phoneNumber, fullName, userId, false); // for now it's it meant to be for registration only.
-
+        int isLogin = RegistrationController.cameFromConnect ? 0 : 1; // if we came from connect scene, we are not logged in yet, so isLogin = 0, else isLogin = 1
+        LoginRegCheck new_user = new LoginRegCheck(regUser, regPass, email, isLogin, false, store, phoneNumber, fullName, userId, false); // for now it's it meant to be for registration only.
+        tempUser = new_user; // maybe this user will be registered successfully
         Runnable sendAndClose = () -> {
             try {
                 SimpleClient.getClient().sendToServer(new_user);
@@ -242,15 +252,12 @@ public class RegistrationController {
             }
 
             if (catalogController != null) {
+
                 catalogController.set_user(new_user);
                 catalogController.set_type(store);
             }
-            Platform.runLater(() -> {
-                ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
-                EventBus.getDefault().unregister(this);
-            });
-        };
 
+        };
         if (is_yearly_subscription) {
             openPaymentWindow(() -> {
                 new_user.set_yearly_subscription(true);
@@ -259,16 +266,36 @@ public class RegistrationController {
             }, sendAndClose, event);
         } else {
             SimpleClient.isGuest = false;
-            CatalogController.set_user(new_user); // Set the user in CatalogController
+
             sendAndClose.run();
-            Success success = new Success("Registration Completed!");
-            EventBus.getDefault().post(new SuccessEvent(success));
         }
     }
+    @Subscribe
+    public void onRegisterEvent(String message) {
+        if(message == "#registerSuccess") {
+            if (is_yearly_subscription) {
+                Success success = new Success("Registration Completed!\nYour yearly subscription has been successfully activated.");
+                EventBus.getDefault().post(new SuccessEvent(success));
+            } else {
+                Success success = new Success("Registration Successful!");
+                EventBus.getDefault().post(new SuccessEvent(success));
+            }
+            CatalogController.set_user(tempUser); // Set the user in CatalogController
+            EventBus.getDefault().unregister(this);
+            Stage stage = (Stage) regAnchPane.getScene().getWindow();
+            stage.close();
 
+
+        } else if(message == "#registerFail") {
+            Warning warning = new Warning("Registration Failed! Please try again.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            CatalogController.set_user(null);
+        }
+    }
     @FXML
     void initialize() throws IOException {
         EventBus.getDefault().register(this);
+        regIdTxtB.setDisable(true);
         if(gotFromConnectScene){
             gotFromConnectScene = false;
             logAnchPane.setVisible(false);
@@ -278,6 +305,7 @@ public class RegistrationController {
             logAnchPane.setVisible(true);
             regAnchPane.setVisible(false);
         }
+
         AnchorPane.setBottomAnchor(logAnchPane, 109.0);
         AnchorPane.setTopAnchor(logAnchPane, 60.0);
         AnchorPane.setLeftAnchor(logAnchPane, 28.0);
@@ -294,13 +322,20 @@ public class RegistrationController {
     }
 
     private void openPaymentWindow(Runnable onSuccess, Runnable onCancel, MouseEvent event) {
+        if (isPaymentStageOpen()) {
+            Warning warning = new Warning("The subscription/payment window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            paymentStageInstance.toFront();
+            paymentStageInstance.requestFocus();
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("payment.fxml"));
             Parent root = loader.load();
 
             PaymentController controller = loader.getController();
             Stage paymentStage = new Stage();
-
+            setPaymentStageInstance(paymentStage);
             controller.setPayUpgrade(true);
             controller.setStage(paymentStage);
             controller.postInitialize();
@@ -308,8 +343,7 @@ public class RegistrationController {
             controller.setOnPaymentSuccess(() -> {
                 onSuccess.run();
                 paymentStage.close();
-                Success success = new Success("Registration Completed!\nYour yearly subscription has been successfully activated.");
-                EventBus.getDefault().post(new SuccessEvent(success));
+
             });
 
             controller.setOnPaymentCancel(() -> {
@@ -335,7 +369,7 @@ public class RegistrationController {
     void selected_account(ActionEvent event) {
         String account_type = select_account_type.getValue();
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-
+        regIdTxtB.setText("");
         switch (account_type) {
             case "Store" -> {
                 alert.setTitle("Store Subscription");
@@ -362,6 +396,7 @@ public class RegistrationController {
                 alert.setHeaderText("What is a Yearly Subscription?");
                 alert.setContentText("A yearly subscription allows customers to shop in all of our stores. It costs 100 shekels and grants a 10% discount on every purchase above 50 shekels.");
                 store = 4;
+                regIdTxtB.setDisable(false);
                 is_yearly_subscription = true;
                 select_store_label.setVisible(false);
                 select_store.setVisible(false);
@@ -424,18 +459,7 @@ public class RegistrationController {
         return cb.getValue() == null || cb.getValue().trim().isEmpty();
     }
 
-    private boolean isValidIsraeliId(String id) {
-        if (id == null || id.length() != 9) {
-            return false;
-        }
 
-        // Check if all characters are digits
-        if (!id.matches("^[0-9]{9}$")) {
-            return false;
-        }
-
-        return true;
-    }
 
 
     private boolean isValidIsraeliPhone(String phone) {

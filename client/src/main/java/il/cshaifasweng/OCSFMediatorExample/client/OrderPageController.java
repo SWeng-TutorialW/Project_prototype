@@ -219,8 +219,8 @@ public class OrderPageController {
             return;
         }
 
-        // Prevent adding from another store if not network
-        if (user.getStore() != 4 && !this.store.equals(this.user.getStoreName())) {
+        // אם המשתמש לא מנהל רשת – ניתן להזמין רק מהחנות שלו
+        if (user.getStore() != 4 && !this.store.equals(user.getStoreName())) {
             Warning warning = new Warning("You can only order from your own store: " + user.getStoreName());
             EventBus.getDefault().post(new WarningEvent(warning));
             // Close window even if validation fails
@@ -228,13 +228,26 @@ public class OrderPageController {
             return;
         }
 
-        // Refresh the store's flower list from database before validation
-        refreshStoreCatalog();
-        
-        // Set flag to indicate catalog refresh was requested
-        catalogRefreshRequested = true;
-        
-        // Close window immediately after requesting catalog refresh
+        int quantity = quantitySpinner.getValue();
+
+        // הוספה לעגלה לפי store השמור בקונטרולר
+        boolean found = false;
+        for (CartItem item : cartItems) {
+            if (item.getFlower().getId() == selectedFlower.getId() && item.getStore().equals(this.store)) {
+                item.setQuantity(item.getQuantity() + quantity);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
+            cartItems.add(cartItem);
+            System.out.println("✅ Added to cart: " + selectedFlower.getFlowerName() + " x" + quantity);
+        }
+
+        EventBus.getDefault().post(new SuccessEvent(new Success("Item added to cart successfully!")));
+        EventBus.getDefault().post(new CartUpdatedEvent());
         closeWindow();
         
         // Note: The actual validation will happen when we receive the updated catalog data
@@ -276,6 +289,7 @@ public class OrderPageController {
      */
     private void performAddToCartValidation() {
         // Check if the flower is available in the current store's catalog
+        System.out.println("performAddToCartValidation CALLED");
         if (!isFlowerAvailableInStore(selectedFlower, this.store)) {
             Warning warning = new Warning("This flower is not available in the current store catalog. Please refresh the catalog or try a different store.");
             EventBus.getDefault().post(new WarningEvent(warning));

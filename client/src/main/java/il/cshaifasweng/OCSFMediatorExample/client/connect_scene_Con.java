@@ -81,6 +81,18 @@ public class connect_scene_Con  {
     }
     private  CatalogController catalogController;
     private CatalogController_employee employeeController;
+    private static Stage registerStageInstance = null;
+    public static boolean isRegStageOpen() {
+        return registerStageInstance != null && registerStageInstance.isShowing();
+    }
+    public static void setRegStageInstance(Stage stage) {
+        registerStageInstance = stage;
+        if (registerStageInstance != null) {
+            registerStageInstance.setOnHidden(e -> registerStageInstance = null);
+        }
+    }
+
+
     @FXML
     void initialize() {
 
@@ -95,6 +107,15 @@ public class connect_scene_Con  {
 
     @FXML
     void show_reg(ActionEvent event) {
+        RegistrationController.cameFromConnect = true;
+        if (isRegStageOpen()) {
+            Warning warning = new Warning("Registration window is already open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            RegistrationController.cameFromConnect = true;
+            registerStageInstance.toFront();
+            registerStageInstance.requestFocus();
+            return;
+        }
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
             RegistrationController regController = fxmlLoader.getController();
@@ -109,6 +130,9 @@ public class connect_scene_Con  {
             Stage stage = new Stage();
             stage.setTitle("Create New Account");
             stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            setRegStageInstance(stage);
+
             stage.show();
 
         } catch (IOException e) {
@@ -223,8 +247,14 @@ public class connect_scene_Con  {
                         {
                             if(loginRegCheck.getIsLogin()==1)
                             {
-                                Warning warning = new Warning("this user already in the system");
-                                EventBus.getDefault().post(new WarningEvent(warning));
+                                Platform.runLater(() -> {
+                                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                                    alert.setTitle("Login Error");
+                                    alert.setHeaderText("Already Logged In");
+                                    alert.setContentText("This user is already logged in elsewhere. Please log out from other devices first.");
+                                    alert.showAndWait();
+                                });
+                                user = null;
                                 return;
                             }
                             user = loginRegCheck;
@@ -238,8 +268,14 @@ public class connect_scene_Con  {
                         {
                             if(loginRegCheck.getIsLogin()==1)
                             {
-                                Warning warning = new Warning("this user already in the system");
-                                EventBus.getDefault().post(new WarningEvent(warning));
+                                Platform.runLater(() -> {
+                                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                                    alert.setTitle("Login Error");
+                                    alert.setHeaderText("Already Logged In");
+                                    alert.setContentText("This user is already logged in elsewhere. Please log out from other devices first.");
+                                    alert.showAndWait();
+                                });
+                                user = null;
                                 return;
                             }
                             user = loginRegCheck;

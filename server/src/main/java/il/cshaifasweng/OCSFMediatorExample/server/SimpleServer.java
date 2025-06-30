@@ -834,7 +834,6 @@ public class SimpleServer extends AbstractServer {
 					}
 				}
 			}
-			
 			// Send automatic update to all clients
 			try {
 				String hql = "FROM Flower";
@@ -857,120 +856,73 @@ public class SimpleServer extends AbstractServer {
 		else if (msg.getClass().equals(LoginRegCheck.class)) // login and registration
 		{
 			System.out.println("entered LoginRegCheck");
-			Session session;
+			Session session = null;
 			LoginRegCheck new_user = (LoginRegCheck) msg;
 			System.out.println("new_user name : " + new_user.getUsername());
 
-			switch(new_user.getIsLogin()){
-				case 0: // registration
-					System.out.println("Trying to Register a new user: " + new_user.getUsername());
-					session = App.getSessionFactory().openSession();
-					session.beginTransaction();
-					List<LoginRegCheck> existingUsers = session.createQuery("FROM LoginRegCheck lr WHERE username = :username", LoginRegCheck.class)
-							.setParameter("username", new_user.getUsername())
-							.getResultList();
-					session.getTransaction().commit();
-					session.close();
-					if(existingUsers.isEmpty()){
-						// we can register.
-						try {
-							session = App.getSessionFactory().openSession();
-							new_user.setId(0); // for insertion
-							session.beginTransaction();
-							session.save(new_user);
-							session.getTransaction().commit();
-							client.sendToClient("#registerSuccess");
-						} catch (Exception e) {
-
-							session.getTransaction().rollback();
-							e.printStackTrace();
-						} finally {
-							session.close();
-						}// registration
-					}
-					else {
-						// user already exists
-						try {
-							client.sendToClient("#registerFailed");
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
-					break;
-				case 1: // login
-					System.out.println("Trying to Login a user: " + new_user.getUsername());
-					session = App.getSessionFactory().openSession();
-					session.beginTransaction();
-					List<LoginRegCheck> users = session.createQuery("FROM LoginRegCheck lr WHERE username = :username AND password = :password", LoginRegCheck.class)
-							.setParameter("username", new_user.getUsername())
-							.setParameter("password", new_user.getPassword())
-							.getResultList();
-					session.getTransaction().commit();
-					session.close();
-					if(!users.isEmpty()){
-						try{client.sendToClient("#loginSuccess");}catch(IOException e){e.printStackTrace();} // correct user and password
-					}
-					else{ try{client.sendToClient("#loginFailed");}catch(IOException e){e.printStackTrace();}} // user doesn't exist or password is wrong
-
-					break;
-			}
-		}
-
-		else if (msg.getClass().equals(UpdateUserEvent.class)){ // USER UPDATE
-			LoginRegCheck userToUpdate = ((UpdateUserEvent) msg).getUpdatedUser();
-			Session session = null;
-			try{
+			try {
 				session = App.getSessionFactory().openSession();
 				session.beginTransaction();
-				List<LoginRegCheck> existingUser = session.createQuery("FROM LoginRegCheck lr WHERE username = :username", LoginRegCheck.class)
-						.setParameter("username", userToUpdate.getUsername())
+				List<LoginRegCheck> existingUser = session.createQuery("FROM LoginRegCheck lr WHERE username = :username OR idNum=:idnum", LoginRegCheck.class)
+						.setParameter("username", new_user.getUsername()).setParameter("idnum", new_user.getIdNum())
 						.getResultList();
 				session.getTransaction().commit();
-				if(!existingUser.isEmpty() && existingUser.get(0).getId() != userToUpdate.getId()) {
-					if(existingUser.get(0).getIdNum() == userToUpdate.getIdNum()) {
-						System.err.println("ERROR: Someone tried to set his ID number into someone else's, NOT ALLOWED!");
-						client.sendToClient(new Warning("#updateFail_IdExists"));
-					} else {
-						// User tried to set a username that already exists for another user
-						System.err.println("ERROR: Someone tried to set his username into someone else's, NOT ALLOWED!");
-						client.sendToClient(new Warning("#updateFail_UserExists"));
-					}
+				if (!existingUser.isEmpty()) {
+					// User tried to set a username that already exists for another user
+					System.err.println("ERROR: Someone tried to Register with a username/ID into someone else's, NOT ALLOWED!");
+					client.sendToClient("#registerFail");
 					session.close();
 					return;
 				}
 				session.close();
 				session = App.getSessionFactory().openSession();
 				session.beginTransaction();
+				session.save(new_user); // INSERT statement
+				session.getTransaction().commit();
+				System.out.println("User registered successfully: " + new_user.getUsername());
+				client.sendToClient("#registerSuccess");
 
+			}
+			 catch (Exception e) {
+				if (session != null) session.getTransaction().rollback();
+				e.printStackTrace();
+				System.err.println("ERROR: Could not register user, transaction failed.\n");
+				return;
+			} finally {
+				if (session != null) session.close();
+			}
+		}
+		else if (msg.getClass().equals(UpdateUserEvent.class)){ // USER UPDATE
+			LoginRegCheck userToUpdate = ((UpdateUserEvent) msg).getUpdatedUser();
+			Session session = null;
+			try{
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+				// Check if another user (not the current one) has the same username or ID
+				List<LoginRegCheck> existingUser = session.createQuery("FROM LoginRegCheck lr WHERE idNum = :idnum AND username!=:user", LoginRegCheck.class)
+						.setParameter("idnum", userToUpdate.getIdNum()).setParameter("user", userToUpdate.getUsername())
+						.getResultList();
+				session.getTransaction().commit();
+				if(!existingUser.isEmpty()) {
+					// Another user already has this username or ID
+					System.err.println("ERROR: Someone tried to set his ID Number into someone else's, NOT ALLOWED!");
+					client.sendToClient(new Warning("#updateFail"));
+					session.close();
+					return;
+				}
+				session.close();
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
 				session.update(userToUpdate); // UPDATE statement
 				session.getTransaction().commit();
 				client.sendToClient(new UpdateUserEvent(userToUpdate));
 			} catch (IOException e) {
-                session.getTransaction().rollback(); e.printStackTrace(); System.err.println("ERROR: Could not send update confirmation to client or update failed.\n");
-            } finally {session.close();}
-		}
-		else if(msg.getClass().equals(GetUserDetails.class)) {
-			Session session = null;
-			LoginRegCheck user = ((GetUserDetails) msg).getUser();
-			try {
-				session = App.getSessionFactory().openSession();
-				session.beginTransaction();
-				List<LoginRegCheck> userRequestedList = session.createQuery("FROM LoginRegCheck lr WHERE id = :userID", LoginRegCheck.class)
-						.setParameter("userID", user.getId())
-						.getResultList();
-				session.getTransaction().commit();
-				if (!userRequestedList.isEmpty()) {
-					LoginRegCheck userRequested = userRequestedList.get(0);
-					System.out.println("User requested: " + userRequested.getUsername());
-					client.sendToClient(new GetUserDetails(userRequested));
-				} else {
-					System.err.println("ERROR: User with ID: " + user.getId() + " not found.");
-					client.sendToClient(new Warning("UserNotFoundException"));
-				}
-			} catch (Exception e) {
+				if (session != null) session.getTransaction().rollback();
 				e.printStackTrace();
+				System.err.println("ERROR: Could not send update confirmation to client or update failed.\n");
+			} finally {
+				if (session != null) session.close();
 			}
-
 		}
 		else if (msg.getClass().equals(change_user_login.class)) {
 			change_user_login wrapper = (change_user_login) msg;

@@ -32,6 +32,7 @@ public class SimpleClient extends AbstractClient {
 		
 		String msgString = msg.toString();
 		if (msg.getClass().equals(Warning.class)) {
+			System.out.println("=== SIMPLE CLIENT: WARNING EVENT RECEIVED ===");
 			EventBus.getDefault().post(new WarningEvent((Warning) msg));
 		}
 
@@ -115,7 +116,7 @@ public class SimpleClient extends AbstractClient {
 			}
 
 		}
-		else if(msgString.startsWith("#registerSuccess") || msgString.startsWith("#registerFailed")|| msgString.startsWith("#loginSuccess")||msgString.startsWith("#loginFailed")) {EventBus.getDefault().post(msgString);}
+		else if(msgString.startsWith("#registerSuccess") || msgString.startsWith("#registerFail")|| msgString.startsWith("#loginSuccess")||msgString.startsWith("#loginFailed")) {EventBus.getDefault().post(msgString);}
 		else if(msgString.startsWith("The network manager has deleted flower."))
 		{
 			try {
