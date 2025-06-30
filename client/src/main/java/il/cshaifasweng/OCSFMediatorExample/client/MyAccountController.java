@@ -175,7 +175,6 @@ public class MyAccountController {
             System.out.println("No user logged in");
             return;
         }
-
         if (isMyOrdersOpen()) {
             myOrdersStage.close();
             // Do not return; continue to open a new window
@@ -204,6 +203,7 @@ public class MyAccountController {
         if (current_User == null) {
             System.out.println("No user logged in");
             return;
+
         }
 
         try {
@@ -237,7 +237,6 @@ public class MyAccountController {
         };
         if (current_User.is_yearly_subscription() && current_User.getSubscriptionStartDate() != null) {
             LocalDate expire = current_User.getSubscriptionStartDate().plusYears(1);
-
             subscriptionExpireTitleLbl.setVisible(true);
             subscriptionExpireLbl.setVisible(true);
             subscriptionExpireTitleLbl.setText(expire.toString());
@@ -251,16 +250,19 @@ public class MyAccountController {
     @Subscribe
     public void onFailedUpdate(WarningEvent warning){
 
-        if(warning.getWarning().getMessage().startsWith("#updateFail_UserExists")){
+        if(warning.getWarning().getMessage().startsWith("#updateFail")){
                 Platform.runLater(() -> {
                     Alert alert = new Alert(Alert.AlertType.WARNING);
-                    alert.setTitle("Username Error");
-                    alert.setHeaderText("Username Already Exists");
-                    alert.setContentText("The username you entered is already taken. Please choose a different username.");
+                    alert.setTitle("Details Update Warning");
+                    alert.setHeaderText("ID Number Already Exists");
+                    alert.setContentText("The ID number you entered is already taken. Please choose a different one.");
                     alert.showAndWait();
                     loadUserInfo();
                 });
+                idNumTxtB.setDisable(false);
+                idNumTxtB.setEditable(true);
         }
+        idNumTxtB.setEditable(false);
 
     }
 
@@ -335,7 +337,15 @@ public class MyAccountController {
 
     @FXML
     void onChangePassword(ActionEvent event) {
-
+        if(checkIsraeliID(idNumTxtB.getText())) {
+            passErrorMsgLbl.setVisible(false);
+        } else {
+            passErrorMsgLbl.setVisible(true);
+            passErrorMsgLbl.setText("Invalid Israeli ID number. Please enter a valid 9-digit ID.");
+            idNumTxtB.setDisable(false);
+            idNumTxtB.setEditable(true);
+            return;
+        }
         if (newPassTxtB.getText().isEmpty() || confNewPassTxtB.getText().isEmpty()) {
             passErrorMsgLbl.setVisible(true);
             passErrorMsgLbl.setText("Please fill in both password fields.");
