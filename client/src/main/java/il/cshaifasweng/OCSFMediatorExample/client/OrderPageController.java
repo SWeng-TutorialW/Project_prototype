@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Logger;
 import org.greenrobot.eventbus.Subscribe;
+import javafx.application.Platform;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +44,7 @@ public class OrderPageController {
     private static List<CartItem> cartItems = new ArrayList<>();
     private List<Flower> currentCatalogFlowers; // Store the current catalog flowers for validation
     private boolean catalogRefreshRequested = false; // Flag to track if catalog refresh was requested
+    private boolean waitingForFlowerCheck = false;
 
 
     public void initialize() {
@@ -210,7 +212,7 @@ public class OrderPageController {
     }
 
     @FXML
-    private void addToCart() {
+    private void addToCart() throws IOException {
         if (user == null || user.getIsLogin() == 0 || SimpleClient.isGuest) {
             System.out.println("User not logged in");
             Warning warning = new Warning("Please log in to add items to cart");
@@ -227,30 +229,54 @@ public class OrderPageController {
             return;
         }
 
-        int quantity = quantitySpinner.getValue();
-
-        // הוספה לעגלה לפי store השמור בקונטרולר
-        boolean found = false;
-        for (CartItem item : cartItems) {
-            if (item.getFlower().getId() == selectedFlower.getId() && item.getStore().equals(this.store)) {
-                item.setQuantity(item.getQuantity() + quantity);
-                found = true;
-                break;
+        // Send a check to the server before adding to cart
+        int storeId = getStoreIdFromName(this.store);
+        if (selectedFlower != null && storeId > 0) {
+            // Register for the result event if not already
+            if (!EventBus.getDefault().isRegistered(this)) {
+                EventBus.getDefault().register(this);
             }
+            waitingForFlowerCheck = true;
+            SimpleClient.getClient().sendToServer("check_flower_in_store_" + selectedFlower.getId() + "_" + storeId);
+        } else {
+            Warning warning = new Warning("Invalid flower or store information.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            closeWindow();
         }
-
-        if (!found) {
-            CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
-            cartItems.add(cartItem);
-            System.out.println("✅ Added to cart: " + selectedFlower.getFlowerName() + " x" + quantity);
-        }
-
-        EventBus.getDefault().post(new SuccessEvent(new Success("Item added to cart successfully!")));
-        EventBus.getDefault().post(new CartUpdatedEvent());
-        closeWindow();
     }
 
-
+    @Subscribe
+    public void handleFlowerAvailability(String msg) {
+        if (!waitingForFlowerCheck) return;
+        Platform.runLater(() -> {
+            if (msg.equals("flower_available")) {
+                waitingForFlowerCheck = false;
+                // Proceed to add to cart as before
+                int quantity = quantitySpinner.getValue();
+                boolean found = false;
+                for (CartItem item : cartItems) {
+                    if (item.getFlower().getId() == selectedFlower.getId() && item.getStore().equals(this.store)) {
+                        item.setQuantity(item.getQuantity() + quantity);
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
+                    cartItems.add(cartItem);
+                    System.out.println("✅ Added to cart: " + selectedFlower.getFlowerName() + " x" + quantity);
+                }
+                EventBus.getDefault().post(new SuccessEvent(new Success("Item added to cart successfully!")));
+                EventBus.getDefault().post(new CartUpdatedEvent());
+                closeWindow();
+            } else if (msg.equals("flower_not_available")) {
+                waitingForFlowerCheck = false;
+                Warning warning = new Warning("This flower is no longer available in the store catalog. The window will now close.");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                closeWindow();
+            }
+        });
+    }
 
     /**
      * Handle catalog updates from server

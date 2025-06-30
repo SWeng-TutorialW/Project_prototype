@@ -23,7 +23,7 @@
    <content>
       <AnchorPane prefHeight="846.0" prefWidth="987.0">
          <children>
-            <Label fx:id="copyrightLBl" alignment="CENTER" layoutX="220.0" layoutY="810.0" prefHeight="28.0" prefWidth="253.0" text="LilachSystem v0.1 © 2025 BestGroup. All rights reserved.">
+            <Label fx:id="copyrightLBl" alignment="CENTER" layoutX="220.0" layoutY="810.0" prefHeight="28.0" prefWidth="253.0" text="">
                <font>
                   <Font name="Segoe UI" size="10.0" />
                </font>

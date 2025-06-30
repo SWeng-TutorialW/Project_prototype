@@ -1230,9 +1230,9 @@ public class SimpleServer extends AbstractServer {
 							existing = session.createQuery(query).setMaxResults(1).uniqueResult();
 						} catch (Exception ignored) {}
 						if (existing == null) {
-							// Create and persist if not found
+							// Create but DO NOT persist in DB
 							existing = new Flower("Yearly Subscription", flower.getFlowerPrice(), "Subscription", "", "Gold", "Subscription");
-							session.save(existing);
+							// Do NOT call session.save(existing);
 						}
 						item.setFlower(existing);
 					}
@@ -2201,6 +2201,35 @@ public class SimpleServer extends AbstractServer {
 			}
 			System.out.println("=== END ADD FLOWER TO STORE DEBUG ===");
 		}
+		else if (msgString.startsWith("check_flower_in_store_")) {
+			// Format: check_flower_in_store_<flowerId>_<storeId>
+			String[] parts = msgString.split("_");
+			if (parts.length >= 5) {
+				try {
+					int flowerId = Integer.parseInt(parts[4]);
+					int storeId = Integer.parseInt(parts[5]);
+					Session session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+					Store store = session.get(Store.class, storeId);
+					boolean found = false;
+					if (store != null) {
+						found = store.getFlowersList().stream().anyMatch(f -> f.getId() == flowerId);
+					}
+					session.getTransaction().commit();
+					session.close();
+					if (found) {
+						client.sendToClient("flower_available");
+					} else {
+						client.sendToClient("flower_not_available");
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+					client.sendToClient("flower_not_available");
+				}
+			} else {
+				client.sendToClient("flower_not_available");
+			}
+		}
 
 	}
 
@@ -2313,7 +2342,3 @@ public class SimpleServer extends AbstractServer {
 	}
 
 }
-
-
-
-
