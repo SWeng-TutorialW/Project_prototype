@@ -137,7 +137,7 @@
                                     <CategoryAxis fx:id="revenueXAxis" label="Date" />
                                  </xAxis>
                                  <yAxis>
-                                    <NumberAxis fx:id="revenueYAxis" label="Revenue ($)" />
+                                    <NumberAxis fx:id="revenueYAxis" label="Revenue (₪)" />
                                  </yAxis>
                               </LineChart>
                            </children>
@@ -197,7 +197,7 @@
                         <VBox alignment="CENTER" spacing="5">
                            <children>
                               <Label text="Total Refunds" style="-fx-font-size: 12; -fx-text-fill: #666;" />
-                              <Label fx:id="totalRefundsLbl" text="'$' 0.00" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #dc3545;" />
+                              <Label fx:id="totalRefundsLbl" text="'₪' 0.00" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #dc3545;" />
                            </children>
                         </VBox>
                         <VBox alignment="CENTER" spacing="5">

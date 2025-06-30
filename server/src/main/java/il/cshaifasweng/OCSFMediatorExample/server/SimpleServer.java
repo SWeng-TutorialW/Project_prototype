@@ -980,18 +980,15 @@ public class SimpleServer extends AbstractServer {
 				CriteriaQuery<Complain> query = builder.createQuery(Complain.class);
 				query.from(Complain.class);
 				CriteriaQuery<LoginRegCheck> query1 = builder.createQuery(LoginRegCheck.class);
-				query1.from(LoginRegCheck.class);
+				Root<LoginRegCheck> root1 = query1.from(LoginRegCheck.class);
+				query1.select(root1).where(builder.equal(root1.get("Employeetype"), 2)); // Only service employee
 
 				List<Complain> complainList = session.createQuery(query).getResultList();
-				List<LoginRegCheck> loginRegCheckList = session.createQuery(query1).getResultList();
-				for (Complain c : complainList){
-					System.out.println(c.getComplaint());
-					System.out.println("server getComplaints work!");
-				}
+				List<LoginRegCheck> serviceEmployees = session.createQuery(query1).getResultList();
 				session.getTransaction().commit();
 				session.close();
 
-				ComplainUpdateEvent event = new ComplainUpdateEvent(complainList,loginRegCheckList);
+				ComplainUpdateEvent event = new ComplainUpdateEvent(complainList, serviceEmployees);
 				client.sendToClient(event);
 
 			} catch (Exception e) {

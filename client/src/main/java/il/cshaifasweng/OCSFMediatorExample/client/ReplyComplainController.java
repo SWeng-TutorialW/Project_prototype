@@ -20,46 +20,51 @@ import java.io.IOException;
 
 public class ReplyComplainController {
 
-        @FXML
-        private TextArea replyArea;
+    @FXML
+    private TextArea replyArea;
 
-        @FXML
-        private CheckBox refundCheckBox;
+    @FXML
+    private CheckBox refundCheckBox;
 
-        @FXML
-        private TextField moneyTf;
-        
-        @FXML
-        private Label titleLabel;
+    @FXML
+    private TextField moneyTf;
+    
+    @FXML
+    private Label titleLabel;
 
     private Complain originalComplain;
     private boolean isWorkerRequest = false;
+    private LoginRegCheck user;
 
 
-        public void setComplain(Complain complain) {
-            this.originalComplain = complain;
-            
-            // Check if this complaint has an associated order
-            if (complain.getOrder() != null || (complain.getComplaint() != null && complain.getComplaint().contains("Order #"))) {
-                isWorkerRequest = false;
-                titleLabel.setText("Reply to Complaint:");
-                refundCheckBox.setVisible(true);
-                refundCheckBox.setManaged(true);
-                moneyTf.setVisible(true);
-                moneyTf.setManaged(true);
-            } else {
-                isWorkerRequest = true;
-                titleLabel.setText("Reply to Request:");
-                refundCheckBox.setVisible(false);
-                refundCheckBox.setManaged(false);
-                moneyTf.setVisible(false);
-                moneyTf.setManaged(false);
-            }
+    public void setComplain(Complain complain) {
+        this.originalComplain = complain;
+        
+        // Check if this complaint has an associated order
+        if (complain.getOrder() != null || (complain.getComplaint() != null && complain.getComplaint().contains("Order #"))) {
+            isWorkerRequest = false;
+            titleLabel.setText("Reply to Complaint:");
+            refundCheckBox.setVisible(true);
+            refundCheckBox.setManaged(true);
+            moneyTf.setVisible(true);
+            moneyTf.setManaged(true);
+        } else {
+            isWorkerRequest = true;
+            titleLabel.setText("Reply to Request:");
+            refundCheckBox.setVisible(false);
+            refundCheckBox.setManaged(false);
+            moneyTf.setVisible(false);
+            moneyTf.setManaged(false);
         }
+    }
 
+    public void setUser(LoginRegCheck user) {
+        this.user = user;
+    }
 
     @FXML
     public void initialize() {
+        setUser(user);
         moneyTf.setDisable(true);
         moneyTf.setManaged(false);
         refundCheckBox.selectedProperty().addListener((observable, oldValue, newValue) -> {
@@ -86,6 +91,13 @@ public class ReplyComplainController {
 
     @FXML
     void sendReply(ActionEvent event) {
+        System.out.println("ReplyComplainController: user employeetype=" + (user != null ? user.getEmployeetype() : "null"));
+        if (user == null || user.getEmployeetype() != 2) {
+            Warning warning = new Warning("Only service employees can reply to complaints.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
+            return;
+        }
         String replyText = replyArea.getText();
         String refundAmount = moneyTf.getText();
     
@@ -123,9 +135,10 @@ public class ReplyComplainController {
             newComplain.setOrder(originalComplain.getOrder()); // Optional, keep order context if needed
     
             // Send new complaint + wrapper to server
-            change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(userToBeAnswered, true, true);
+            // Don't send wrapper to reset user flags since multiple complaints are now allowed
+            // change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(userToBeAnswered, true, true);
             SimpleClient.getClient().sendToServer(newComplain);
-            SimpleClient.getClient().sendToServer(wrapper);
+            // SimpleClient.getClient().sendToServer(wrapper);
             SimpleClient.getClient().sendToServer("getComplaints");
     
         } catch (IOException e) {

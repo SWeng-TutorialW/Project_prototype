@@ -288,6 +288,8 @@ public class CatalogController {
     public static LoginRegCheck getUser() {
         return user;
     }
+    
+
     public void  set_type(int value)
     {
         type=value;
@@ -484,6 +486,19 @@ public class CatalogController {
         if ((user == null || !user.isType()) && reportsBtn != null) {
             reportsBtn.setVisible(false);
         }
+        
+        // Initial check for new messages (no periodic timer to avoid spam)
+        if (user != null) {
+            // Check once on initialization
+            Platform.runLater(() -> {
+                try {
+                    Thread.sleep(1000); // Wait 1 second for UI to be ready
+                    updateMailboxIcon();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+        }
     }
     
     // Add EventBus handler for user updates
@@ -493,8 +508,6 @@ public class CatalogController {
         if (event.getUpdatedUser() != null && event.getUpdatedUser().getUsername().equals(user.getUsername())) {
             // Update the local user object
             CatalogController.user = event.getUpdatedUser();
-            // Update mailbox icon
-            Platform.runLater(this::updateMailboxIcon);
         }
     }
 
@@ -505,34 +518,38 @@ public class CatalogController {
         if (userDetails.getUser() != null && userDetails.getUser().getUsername().equals(user.getUsername())) {
             // Update the local user object with fresh data from server
             CatalogController.user = userDetails.getUser();
-            // Update mailbox icon
-            Platform.runLater(this::updateMailboxIcon);
             System.out.println("[CatalogController] Updated user state from server: " + user.getUsername() + ", isReceive_answer: " + user.isReceive_answer());
         }
     }
 
-    // Add EventBus handler for complaint updates to refresh mailbox icon
-    @Subscribe
-    public void handleComplaintUpdate(ComplainUpdateEvent event) {
-        System.out.println("[CatalogController] Received complaint update event");
-        // Only refresh user state if we're not already refreshing and if the user might have new messages
-        if (!isRefreshingUserState && user != null) {
-            // Check if this user has any unread messages in the complaints
-            List<Complain> complaints = event.getUpdatedItems();
-            if (complaints != null) {
-                boolean hasUnreadMessages = complaints.stream()
-                    .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
-                
-                if (hasUnreadMessages && !user.isReceive_answer()) {
-                    // User has unread messages but flag is not set, refresh user state
-                    Platform.runLater(this::refreshUserState);
-                } else if (!hasUnreadMessages && user.isReceive_answer()) {
-                    // User has no unread messages but flag is set, refresh user state
-                    Platform.runLater(this::refreshUserState);
-                }
-            }
-        }
-    }
+//    todo fight for the notification feature
+//    @Subscribe
+//    public void handleComplaintUpdate(ComplainUpdateEvent event) {
+//        System.out.println("[CatalogController] Received complaint update event");
+//        if (user != null && event.getUpdatedItems() != null) {
+//            // Only show success if there are admin replies AND the current user is not the one who just submitted a complaint
+//            // We can detect this by checking if the user's own complaint is in the list (meaning they just submitted one)
+//            boolean userJustSubmittedComplaint = event.getUpdatedItems().stream()
+//                .filter(c -> c != null && c.getClient() != null)
+//                .anyMatch(c -> c.getClient().equals(user.getUsername()));
+//
+//            boolean hasAdminReplies = event.getUpdatedItems().stream()
+//                .filter(c -> c != null && c.getClient() != null)
+//                .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
+//
+//            System.out.println("[CatalogController] User just submitted complaint: " + userJustSubmittedComplaint);
+//            System.out.println("[CatalogController] Has admin replies: " + hasAdminReplies);
+//
+//            // Only show success if there are admin replies AND user didn't just submit a complaint
+//            if (hasAdminReplies && !userJustSubmittedComplaint) {
+//                Platform.runLater(() -> {
+//                    Success success = new Success("You have received a reply from admin!");
+//                    EventBus.getDefault().post(new SuccessEvent(success));
+//                    System.out.println("[CatalogController] Showed success message for admin reply");
+//                });
+//            }
+//        }
+//    }
 
     // TODO check can cause infinite loop
     @Subscribe
@@ -540,14 +557,8 @@ public class CatalogController {
         System.out.println("[CatalogController] Received complaints list with " + (complaints != null ? complaints.size() : 0) + " complaints");
         if (user != null && complaints != null) {
             boolean hasUnreadMessages = complaints.stream()
-                .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
-            
-            // Update user's receive_answer flag based on actual complaints
-            if (hasUnreadMessages != user.isReceive_answer()) {
-                user.set_receive_answer(hasUnreadMessages);
-                Platform.runLater(this::updateMailboxIcon);
-                System.out.println("[CatalogController] Updated mailbox icon based on complaints: " + hasUnreadMessages);
-            }
+                .filter(c -> c != null && c.getClient() != null) // Filter out null complaints and null clients
+                .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()) && !c.getClient().equals(user.getUsername()));
         }
     }
 
@@ -1258,9 +1269,10 @@ public class CatalogController {
     public void receiveNewComplain(Complain complain)
     {
         complain.setClient(user.getUsername());
-        change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(user, true,false);
+        // Don't set send_complain flag to true - allow multiple complaints
+        // change_sendOrRecieve_messages wrapper = new change_sendOrRecieve_messages(user, true,false);
         try {
-            SimpleClient.getClient().sendToServer(wrapper);
+            // SimpleClient.getClient().sendToServer(wrapper);
             SimpleClient.getClient().sendToServer(complain);// try to send the complain to the DB
         } catch (IOException e) {
             e.printStackTrace();
@@ -1269,28 +1281,27 @@ public class CatalogController {
     }
     @FXML
     void open_mail(ActionEvent event)throws IOException
-    {
+    { 
         if(type==0)
         {
             Warning warning = new Warning("not available for guest");
             EventBus.getDefault().post(new WarningEvent(warning));
             return;
         }
-        if(user.isReceive_answer())
-        {
+        
+        // Check if user has any unread responses by querying complaints
+        try {
+            SimpleClient.getClient().sendToServer("getComplaints");
             SimpleClient.getClient().sendToServer("I#want#to#see#my#answer_"+user.getUsername());
             System.out.println("I#want#to#see#my#answer_"+user.getUsername());
-            return;
-        }
-        else
-        {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Mailbox");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
             alert.setHeaderText("");
-            alert.setContentText("You dont have any messages");
+            alert.setContentText("Error checking mailbox: " + e.getMessage());
             alert.showAndWait();
         }
-
     }
     @FXML
     void complaint(ActionEvent event)throws IOException
@@ -1302,19 +1313,6 @@ public class CatalogController {
             return;
 
         }
-        if(user.get_send_complain() && user.isReceive_answer())
-        {
-            Warning warning = new Warning("You have a answer from the admin");
-            EventBus.getDefault().post(new WarningEvent(warning));
-            return;
-        }
-        if(user.get_send_complain() && !user.isReceive_answer())
-        {
-            Warning warning = new Warning("You already send a  complain.");
-            EventBus.getDefault().post(new WarningEvent(warning));
-            return;
-        }
-
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("complain_scene.fxml"));
             Parent root = fxmlLoader.load();
@@ -1407,18 +1405,16 @@ public class CatalogController {
         }
 
         if (user != null) {
-            System.out.println("[CatalogController] User: " + user.getUsername() + ", isReceive_answer: " + user.isReceive_answer());
-            if (user.isReceive_answer()) {
-                System.out.println("[CatalogController] Setting mailbox icon visible for user: " + user.getUsername());
-                mailbox_icon.setVisible(true);
-            } else {
-                System.out.println("[CatalogController] Setting mailbox icon invisible for user: " + user.getUsername());
-                mailbox_icon.setVisible(false);
+            // Query complaints to check for unread responses
+            try {
+                SimpleClient.getClient().sendToServer("getComplaints");
+                System.out.println("[CatalogController] Requested complaints to check for unread messages");
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("[CatalogController] Error requesting complaints for mailbox icon update");
             }
-        } else {
-            System.out.println("[CatalogController] User is null, setting mailbox icon invisible");
-            mailbox_icon.setVisible(false);
         }
+        // Don't set icon visibility here - only in complaint update events and open_mail
     }
 
     @FXML

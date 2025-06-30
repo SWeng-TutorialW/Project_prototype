@@ -33,13 +33,13 @@ public class PDFExporter {
             writer.write("SUMMARY STATISTICS\n");
             writer.write("==================\n");
             writer.write(String.format("Total Orders: %d\n", controller.getTotalOrders()));
-            writer.write(String.format("Total Revenue: $%.2f\n", controller.getTotalRevenue()));
-            writer.write(String.format("Average Order Value: $%.2f\n", controller.getAvgOrderValue()));
+            writer.write(String.format("Total Revenue: ₪%.2f\n", controller.getTotalRevenue()));
+            writer.write(String.format("Average Order Value: ₪%.2f\n", controller.getAvgOrderValue()));
             writer.write(String.format("Top Product: %s\n", controller.getTopProduct()));
             
             // Add complaints and refunds data if available
             if (controller.getComplaintData() != null && !controller.getComplaintData().isEmpty()) {
-                writer.write(String.format("Total Refunds: $%.2f\n", controller.getTotalRefunds()));
+                writer.write(String.format("Total Refunds: ₪%.2f\n", controller.getTotalRefunds()));
             }
             writer.write("\n");
             
@@ -49,7 +49,7 @@ public class PDFExporter {
             
             // Revenue data
             writer.write("Daily Revenue:\n");
-            writer.write("Date\t\tRevenue ($)\tOrders\n");
+            writer.write("Date\t\tRevenue (₪)\tOrders\n");
             writer.write("----\t\t-----------\t------\n");
             
             Map<String, Double> revenueData = controller.getRevenueData();
@@ -85,31 +85,7 @@ public class PDFExporter {
                 writer.write("\nDetailed Complaints:\n");
                 writer.write("Date\t\tCustomer\t\tComplaint\t\tResponse\t\tRefund\n");
                 writer.write("----\t\t--------\t\t---------\t\t--------\t\t------\n");
-                
-                List<Complain> allComplaints = controller.getAllComplaints();
-                if (allComplaints != null) {
-                    for (Complain complaint : allComplaints) {
-                        if (complaint != null) {
-                            String date = complaint.getTimestamp() != null ? 
-                                complaint.getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : "N/A";
-                            String customer = complaint.getClient() != null ? complaint.getClient() : "N/A";
-                            String complaintText = complaint.getComplaint() != null ? complaint.getComplaint() : "";
-                            
-                            // Check if this is a response
-                            String response = "";
-                            if (complaintText.startsWith("answer to")) {
-                                response = complaintText.substring("answer to".length()).trim();
-                                complaintText = "Response received";
-                            }
-                            
-                            String refund = complaint.getRefundAmount() > 0 ? 
-                                String.format("$%.2f", complaint.getRefundAmount()) : "";
-                            
-                            writer.write(String.format("%s\t\t%s\t\t%s\t\t%s\t\t%s\n", 
-                                date, customer, complaintText, response, refund));
-                        }
-                    }
-                }
+
             }
             
             writer.write("\nReport generated on: " + 

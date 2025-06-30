@@ -28,7 +28,7 @@ public class ChartUtils {
         chart.setAnimated(true);
         
         xAxis.setLabel("Date");
-        yAxis.setLabel("Revenue ($)");
+        yAxis.setLabel("Revenue (₪)");
         
         // Style the chart
         chart.setStyle("-fx-background-color: white; -fx-border-color: #C8A2C8; -fx-border-width: 1;");

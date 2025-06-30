@@ -156,7 +156,7 @@ public class AddFlower_Controller {
         flowerTypeLabel.setText("Type: " + flower.getFlowerType());
         flowerColorLabel.setText("Color: " + (flower.getColor() != null ? flower.getColor() : "N/A"));
         flowerCategoryLabel.setText("Category: " + (flower.getCategory() != null ? flower.getCategory() : "N/A"));
-        flowerPriceLabel.setText(String.format("Price: $%.2f", flower.getFlowerPrice()));
+        flowerPriceLabel.setText(String.format("Price: ₪%.2f", flower.getFlowerPrice()));
 
         // Load flower image
         setFlowerImage(flower);

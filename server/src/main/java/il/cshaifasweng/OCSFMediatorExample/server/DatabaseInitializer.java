@@ -30,10 +30,10 @@ public class DatabaseInitializer {
             
             // Initialize users
             initializeUsers(session);
-            
+
             // Initialize orders for client users
             initializeOrders(session);
-            
+
             // Load stores from database to ensure they have the proper flower relationships
             App.loadStoresFromDatabase();
             
@@ -196,18 +196,18 @@ public class DatabaseInitializer {
         
         // Create random flower lists for each store (12-15 flowers each)
         List<Flower> haifaFlowers = new ArrayList<>(Arrays.asList(
-            flowers.get(0),  // Rose
-            flowers.get(1),  // Sunflower
-            flowers.get(4),  // Orchid
-            flowers.get(5),  // Lily
-            flowers.get(9),  // Camellia
-            flowers.get(10), // Carnation
-            flowers.get(18), // Yellow Wreath
-            flowers.get(21), // Pink Vase
-            flowers.get(22), // Green Vase
-            flowers.get(27)  // Purple Crown
-      ));
-        
+                flowers.get(0),  // Rose
+                flowers.get(1),  // Sunflower
+                flowers.get(4),  // Orchid
+                flowers.get(5),  // Lily
+                flowers.get(9),  // Camellia
+                flowers.get(10), // Carnation
+                flowers.get(18), // Yellow Wreath
+                flowers.get(21), // Pink Vase
+                flowers.get(22), // Green Vase
+                flowers.get(27)  // Purple Crown
+        ));
+
         List<Flower> krayotFlowers = new ArrayList<>(Arrays.asList(
 
             flowers.get(2),  // Tulip
@@ -267,66 +267,85 @@ public class DatabaseInitializer {
         // Nahariyya Store Workers
         
         // Regular Customers
-        LoginRegCheck tamar = new LoginRegCheck("tamar", "123", "tr@lilach.com", 0, false, 1);
+        LoginRegCheck tamar = new LoginRegCheck("tamar", "123", "tamar@", 0, false, 1);
         session.save(tamar);
         session.flush();
         
-        LoginRegCheck amit = new LoginRegCheck("amit", "123", "at@lilach.com", 0, false, 1);
+        LoginRegCheck amit = new LoginRegCheck("amit", "123", "amit@", 0, false, 1);
         session.save(amit);
         session.flush();
         
         // Network Admin
-        LoginRegCheck malci = new LoginRegCheck("malci", "123", "mc@lilach.com", 0, true, 4);
+        LoginRegCheck malci = new LoginRegCheck("malci", "123", "malci@", 0, true, 4);
         session.save(malci);
         session.flush();
 
         // System Administrator
-        LoginRegCheck System = new LoginRegCheck("System", "123", "haifa.System@lilach.com", 0, true, 4, "0501112223", "System Cohen", "111222333", false);
+        LoginRegCheck System = new LoginRegCheck("System", "123", "haifa.System@lilach.com", 0, true, 4, "050-1112223", "System Cohen", "111222333", false);
         System.setEmployeetype(1);
         session.save(System);
         session.flush();
 
         // Customer service employee
-        LoginRegCheck service = new LoginRegCheck("service", "123", "haifa.service@lilach.com", 0, true, 4, "0501112223", "service Cohen", "111222333", false);
+        LoginRegCheck service = new LoginRegCheck("service", "123", "haifa.service@lilach.com", 0, true, 4, "050-1112223", "service Cohen", "111222333", false);
         service.setEmployeetype(2);
         session.save(service);
         session.flush();
-        
+
+        //store managers
+        LoginRegCheck Haifa = new LoginRegCheck("Haifa", "123", "haifa.HaifaWorker@gmail.com", 0, true, 1, "050-1234567", "HaifaWorker", "123456789", false);
+        session.save(Haifa);
+        Haifa.setEmployeetype(0);
+        session.flush();
+
+        LoginRegCheck nahariyya = new LoginRegCheck("nahariyya", "123", "haifa.nahariyyaWorker@gmail.com", 0, true, 3, "050-1234567", "nahariyyaWorker", "123456789", false);
+        session.save(nahariyya);
+        nahariyya.setEmployeetype(0);
+        session.flush();
+
+        LoginRegCheck Krayot = new LoginRegCheck("Krayot", "123", "haifa.KrayotWorker@gmail.com", 0, true, 2, "050-1234567", "KrayotWorker", "123456789", false);
+        session.save(Krayot);
+        Krayot.setEmployeetype(0);
+        session.flush();
+
+
+
+
         // Additional Client Users
-        LoginRegCheck itayMalich = new LoginRegCheck("Itay", "123", "it@walla.com", 0, false, 4, "0501234567", "Itay Malich", "123456789", false);
+        LoginRegCheck itayMalich = new LoginRegCheck("Itay", "123", "itay.malich2@gmail.com", 0, false, 4, "050-1234567", "Itay Malich", "123456789", false);
         session.save(itayMalich);
         session.flush();
 
         //add workers of stores
-        LoginRegCheck HaifaWorker = new LoginRegCheck("HaifaWorker", "123", "haifa.HaifaWorker@lilach.com", 0, true, 1, "0501234567", "HaifaWorker", "123456789", false);
+        LoginRegCheck HaifaWorker = new LoginRegCheck("HaifaWorker", "123", "haifa.HaifaWorker@gmail.com", 0, true, 1, "050-1234567", "HaifaWorker", "123456789", false);
         session.save(HaifaWorker);
         HaifaWorker.setEmployeetype(3);
         session.flush();
 
-        LoginRegCheck nahariyyaWorker = new LoginRegCheck("nahariyyaWorker", "123", "haifa.nahariyyaWorker@lilach.com", 0, true, 3, "0501234567", "nahariyyaWorker", "123456789", false);
+        LoginRegCheck nahariyyaWorker = new LoginRegCheck("nahariyyaWorker", "123", "haifa.nahariyyaWorker@gmail.com", 0, true, 3, "050-1234567", "nahariyyaWorker", "123456789", false);
         session.save(nahariyyaWorker);
         nahariyyaWorker.setEmployeetype(3);
         session.flush();
 
-        LoginRegCheck KrayotWorker = new LoginRegCheck("KrayotWorker", "123", "haifa.KrayotWorker@lilach.com", 0, true, 2, "0501234567", "KrayotWorker", "123456789", false);
+        LoginRegCheck KrayotWorker = new LoginRegCheck("KrayotWorker", "123", "haifa.KrayotWorker@gmail.com", 0, true, 2, "050-1234567", "KrayotWorker", "123456789", false);
         session.save(KrayotWorker);
         KrayotWorker.setEmployeetype(3);
         session.flush();
 
         
-        LoginRegCheck asafYaakov = new LoginRegCheck("Asaf", "123", "ay@lilach.com", 0, false, 2, "0529876543", "Asaf Yaakov", "987654321", false);
+        LoginRegCheck asafYaakov = new LoginRegCheck("Asaf", "123", "Asafyaakov555@gmail.com", 0, false, 2, "052-9876543", "Asaf Yaakov", "987654321", false);
         session.save(asafYaakov);
         session.flush();
         
-        LoginRegCheck nissimDeri = new LoginRegCheck("Nissim", "123", "ns@lilach.com", 0, false, 1, "0545551234", "Nissim Deri", "456789123", false);
+        LoginRegCheck nissimDeri = new LoginRegCheck("Nissim", "123", "nissimderi123@gmail.com", 0, false, 1, "054-5551234", "Nissim Deri", "456789123", false);
         session.save(nissimDeri);
         session.flush();
         
-        LoginRegCheck yardNetziar = new LoginRegCheck("Yarden", "123", "yt@lilach.com", 0, false, 2, "0537778889", "Yarden Tziar", "789123456", false);
+        LoginRegCheck yardNetziar = new LoginRegCheck("Yarden", "123", "yardnetziar@gmail.com", 0, false, 2, "053-7778889", "Yarden Tziar", "789123456", false);
         session.save(yardNetziar);
         session.flush();
         
-        LoginRegCheck dorG2005 = new LoginRegCheck("Dor", "12345", "dg@lilach.com", 0, false, 1, "0584445556", "Dor Gilad", "321654987", false);
+        LoginRegCheck dorG2005 = new LoginRegCheck("Dor", "12345", "dorg2005@gmail.com", 0, false, 1, "058-4445556", "Dor Gilad", "321654987", false);
         session.save(dorG2005);
         session.flush();
         
@@ -550,4 +569,4 @@ public class DatabaseInitializer {
         }
         System.out.println(">>> CREATED 100 ORDERS FOR CLIENT USERS");
     }
-} 
+}
