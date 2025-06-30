@@ -333,14 +333,14 @@ public class ReportGeneratorController {
             PieChart.Data noData = new PieChart.Data("No Complaints", 1);
             productChart.getData().add(noData);
         } else {
-            ChartUtils.updateProductChart(productChart, complaintData);
+            //add here complaint handle function - just show on the left side graph the amount of refund in each complaint - right side should be empty
         }
     }
 
     private void updateSummaryStatistics() {
         totalOrdersLbl.setText(String.valueOf(totalOrders));
-        totalRevenueLbl.setText(String.format("$%.2f", totalRevenue));
-        avgOrderLbl.setText(String.format("$%.2f", avgOrderValue));
+        totalRevenueLbl.setText(String.format("₪%.2f", totalRevenue));
+        avgOrderLbl.setText(String.format("₪%.2f", avgOrderValue));
         topProductLbl.setText(topProduct);
     }
 
@@ -407,12 +407,6 @@ public class ReportGeneratorController {
             writer.write(String.format("Average Order Value,%.2f\n", avgOrderValue));
             writer.write(String.format("Top Product,%s\n", topProduct));
         }
-    }
-
-    @FXML
-    void emailReport(ActionEvent event) {
-        // This would integrate with the existing email service
-        showAlert("Email functionality will be implemented soon!");
     }
 
     @FXML
@@ -757,7 +751,7 @@ public class ReportGeneratorController {
         // Update the total refunds label
         Platform.runLater(() -> {
             if (totalRefundsLbl != null) {
-                totalRefundsLbl.setText(String.format("$%.2f", totalRefunds));
+                totalRefundsLbl.setText(String.format("₪%.2f", totalRefunds));
             }
             updateChartsForReportType();
             updateSummaryStatistics();

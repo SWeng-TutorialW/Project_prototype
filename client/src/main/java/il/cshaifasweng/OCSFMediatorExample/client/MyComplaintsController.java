@@ -127,7 +127,7 @@ public class MyComplaintsController {
             }
             
             String refund = complaint.getRefundAmount() > 0 ? 
-                String.format("$%.2f", complaint.getRefundAmount()) : "";
+                String.format("₪%.2f", complaint.getRefundAmount()) : "";
             
             rows.add(new ComplaintRow(date, type, complaintText, response, refund));
         }

@@ -33,13 +33,13 @@ public class PDFExporter {
             writer.write("SUMMARY STATISTICS\n");
             writer.write("==================\n");
             writer.write(String.format("Total Orders: %d\n", controller.getTotalOrders()));
-            writer.write(String.format("Total Revenue: $%.2f\n", controller.getTotalRevenue()));
-            writer.write(String.format("Average Order Value: $%.2f\n", controller.getAvgOrderValue()));
+            writer.write(String.format("Total Revenue: ₪%.2f\n", controller.getTotalRevenue()));
+            writer.write(String.format("Average Order Value: ₪%.2f\n", controller.getAvgOrderValue()));
             writer.write(String.format("Top Product: %s\n", controller.getTopProduct()));
             
             // Add complaints and refunds data if available
             if (controller.getComplaintData() != null && !controller.getComplaintData().isEmpty()) {
-                writer.write(String.format("Total Refunds: $%.2f\n", controller.getTotalRefunds()));
+                writer.write(String.format("Total Refunds: ₪%.2f\n", controller.getTotalRefunds()));
             }
             writer.write("\n");
             
@@ -49,7 +49,7 @@ public class PDFExporter {
             
             // Revenue data
             writer.write("Daily Revenue:\n");
-            writer.write("Date\t\tRevenue ($)\tOrders\n");
+            writer.write("Date\t\tRevenue (₪)\tOrders\n");
             writer.write("----\t\t-----------\t------\n");
             
             Map<String, Double> revenueData = controller.getRevenueData();
