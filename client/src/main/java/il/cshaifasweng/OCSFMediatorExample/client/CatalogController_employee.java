@@ -47,8 +47,6 @@ public class CatalogController_employee {
     @FXML
     private Button cart;
 
-
-
     @FXML
     private ComboBox<String> Stores;
 
@@ -334,7 +332,7 @@ public class CatalogController_employee {
     private Button end_sale_btn;
 
     @FXML
-    private Button request_btn;
+    private Button reportsBtn;
 
     @FXML
     private ImageView mailbox_icon;
@@ -369,6 +367,19 @@ public class CatalogController_employee {
             users_btn.setDisable(true); // Disable the discount button for non-network users
             users_btn.setStyle("-fx-opacity: 0.5;");
         }
+        if(this.user.getEmployeetype() != 0) {
+            reportsBtn.setDisable(true); // Disable the discount button for non-network users
+            reportsBtn.setStyle("-fx-opacity: 0.5;");
+
+            add_flower.setDisable(true);
+            add_flower.setStyle("-fx-opacity: 0.5;");
+
+            discount.setDisable(true);
+            discount.setStyle("-fx-opacity: 0.5;");
+
+        }
+
+
         // Set default store filter based on user's store
         setDefaultStoreFilter();
 
@@ -1177,48 +1188,63 @@ public class CatalogController_employee {
     private void deleteFlower(Flower flower) throws IOException {
         // Get the selected store from the filter
         String selectedStore = Stores.getValue();
-
-        if (selectedStore != null && selectedStore.equals("network")) {
-            // For network view, delete from Flowers table and all store_flowers entries
-            String message = "delete_flower_from_network_" + flower.getId();
-            SimpleClient.getClient().sendToServer(message);
-            System.out.println("Requested deletion of flower ID " + flower.getId() + " from network (Flowers table and all store_flowers entries)");
-        } else {
-            // For store view, delete from specific store only
+        if(this.user.getEmployeetype() == 0) {
             String storeIdentifier = "";
-
-            // Convert store name to store identifier
-            if (selectedStore != null) {
-                switch (selectedStore) {
-                    case "Haifa":
-                        storeIdentifier = "1";
-                        break;
-                    case "Krayot":
-                        storeIdentifier = "2";
-                        break;
-                    case "Nahariyya":
-                        storeIdentifier = "3";
-                        break;
-                    case "network":
-                        storeIdentifier = "4";
-                        break;
-                    default:
-                        storeIdentifier = String.valueOf(type);
-                        break;
-                }
+            if (selectedStore != null && selectedStore.equals("network") && this.user.getStore() == 4) {
+                // For network view, delete from Flowers table and all store_flowers entries
+                String message = "delete_flower_from_network_" + flower.getId();
+                SimpleClient.getClient().sendToServer(message);
+                System.out.println("Requested deletion of flower ID " + flower.getId() + " from network (Flowers table and all store_flowers entries)");
             } else {
-                storeIdentifier = String.valueOf(type);
+                // For store view, delete from specific store only
+                // Convert store name to store identifier
+                if (selectedStore != null) {
+                    switch (selectedStore) {
+                        case "Haifa":
+                            storeIdentifier = "1";
+                            break;
+                        case "Krayot":
+                            storeIdentifier = "2";
+                            break;
+                        case "Nahariyya":
+                            storeIdentifier = "3";
+                            break;
+                        case "network":
+                            storeIdentifier = "4";
+                            break;
+                        default:
+                            storeIdentifier = String.valueOf(type);
+                            break;
+                    }
+                } else {
+                    storeIdentifier = String.valueOf(type);
+                }
             }
 
-            // Send delete request to server with flower ID instead of name
-            System.out.println(storeIdentifier+ "," + selectedStore+ "," + flower.getId()+ "," +flower.getFlowerName());
-            String message = "delete_flower_from_store_" + flower.getId() + "_" + storeIdentifier;
-            SimpleClient.getClient().sendToServer(message);
-        }
+            if(storeIdentifier.equals(new String(String.valueOf(this.user.getStore()))) || this.user.getStore() == 4) {
+                // Send delete request to server with flower ID instead of name
+                System.out.println(storeIdentifier + "," + selectedStore + "," + flower.getId() + "," + flower.getFlowerName());
+                String message = "delete_flower_from_store_" + flower.getId() + "_" + storeIdentifier;
+                SimpleClient.getClient().sendToServer(message);
 
-        // Show success message
-        Success success = new Success("Flower '" + flower.getFlowerName() + "' removed from " + selectedStore + " store!");
-        EventBus.getDefault().post(new SuccessEvent(success));
+                // Show success message
+                Success success = new Success("Flower '" + flower.getFlowerName() + "' removed from " + selectedStore + " store!");
+                EventBus.getDefault().post(new SuccessEvent(success));
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Delete Flower");
+                alert.setHeaderText("");
+                alert.setContentText("You can delete flower only from your store");
+                alert.showAndWait();
+            }
+
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Delete Flower");
+            alert.setHeaderText("");
+            alert.setContentText("Only store manager and Lilach manager can delete flowers");
+            alert.showAndWait();
+        }
     }
 
     // Add setImageFromDatabase method to load images from database
@@ -1482,26 +1508,42 @@ public class CatalogController_employee {
     // Add missing action methods
     @FXML
     void add_flower_action(ActionEvent event) throws IOException {
-        String selectedStore = Stores.getValue();
-        boolean isNetworkMode = selectedStore != null && selectedStore.equals("network");
+        if(this.user.getEmployeetype() == 0) {
+            if (this.user.getStore() == 4 || this.user.getStore() == getCurrentStoreId(Stores.getValue())) {
+                String selectedStore = Stores.getValue();
+                boolean isNetworkMode = selectedStore != null && selectedStore.equals("network");
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("add_flower.fxml"));
-        Parent root = loader.load();
-        AddFlower_Controller controller = loader.getController();
-        controller.setCatalogController(this);
-        controller.setNetworkMode(isNetworkMode);
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("add_flower.fxml"));
+                Parent root = loader.load();
+                AddFlower_Controller controller = loader.getController();
+                controller.setCatalogController(this);
+                controller.setNetworkMode(isNetworkMode);
 
-        if (!isNetworkMode) {
-            fetchAvailableFlowersForStore(selectedStore, controller);
+                if (!isNetworkMode) {
+                    fetchAvailableFlowersForStore(selectedStore, controller);
+                }
+
+                Stage stage = new Stage();
+                stage.setTitle(isNetworkMode ? "Add New Item" : "Add Item to Store");
+                stage.setScene(new Scene(root));
+                stage.setResizable(false);
+                stage.initModality(Modality.WINDOW_MODAL);
+                stage.initOwner(((Node) event.getSource()).getScene().getWindow());
+                stage.show();
+            } else {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Add item");
+                alert.setHeaderText("");
+                alert.setContentText("you can Add item only from your store");
+                alert.showAndWait();
+            }
+        } else{
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Add item");
+            alert.setHeaderText("");
+            alert.setContentText("Only store manager and Lilach manager can add flowers");
+            alert.showAndWait();
         }
-
-        Stage stage = new Stage();
-        stage.setTitle(isNetworkMode ? "Add New Item" : "Add Item to Store");
-        stage.setScene(new Scene(root));
-        stage.setResizable(false);
-        stage.initModality(Modality.WINDOW_MODAL);
-        stage.initOwner(((Node) event.getSource()).getScene().getWindow());
-        stage.show();
     }
 
     private void fetchAvailableFlowersForStore(String selectedStore, AddFlower_Controller controller) {
