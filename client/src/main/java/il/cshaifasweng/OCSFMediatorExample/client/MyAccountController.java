@@ -203,6 +203,7 @@ public class MyAccountController {
         if (current_User == null) {
             System.out.println("No user logged in");
             return;
+
         }
 
         try {
