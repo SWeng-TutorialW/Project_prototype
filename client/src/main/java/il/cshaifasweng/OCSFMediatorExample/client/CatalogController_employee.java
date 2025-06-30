@@ -1188,7 +1188,7 @@ public class CatalogController_employee {
     private void deleteFlower(Flower flower) throws IOException {
         // Get the selected store from the filter
         String selectedStore = Stores.getValue();
-        if(this.user.getEmployeetype() == 0) {
+        if(this.user.getEmployeetype() == 0 || this.user.getEmployeetype() == 3) {
             String storeIdentifier = "";
             if (selectedStore != null && selectedStore.equals("network") && this.user.getStore() == 4) {
                 // For network view, delete from Flowers table and all store_flowers entries
@@ -1508,7 +1508,7 @@ public class CatalogController_employee {
     // Add missing action methods
     @FXML
     void add_flower_action(ActionEvent event) throws IOException {
-        if(this.user.getEmployeetype() == 0) {
+        if(this.user.getEmployeetype() == 0 || this.user.getEmployeetype() == 3) {
             if (this.user.getStore() == 4 || this.user.getStore() == getCurrentStoreId(Stores.getValue())) {
                 String selectedStore = Stores.getValue();
                 boolean isNetworkMode = selectedStore != null && selectedStore.equals("network");
@@ -1784,9 +1784,10 @@ public class CatalogController_employee {
                 TextField priceField = new TextField(String.format("%.2f", f.getFlowerPrice()));
                 priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px;");
 
-                // Make price field editable only in network view
-                priceField.setEditable(isNetworkView);
-                if (isNetworkView) {
+                if (isNetworkView && this.user.getEmployeetype() == 0 && this.user.getStore() == 4) {
+                    System.out.println("wwwwwwwwwwwww" + user.getEmployeetype());
+                    // Make price field editable only in network view
+                    priceField.setEditable(isNetworkView);
                     priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px; -fx-background-color: #f0f0f0;");
                     priceField.setPromptText("Click to edit price");
 

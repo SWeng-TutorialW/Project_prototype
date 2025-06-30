@@ -420,11 +420,16 @@ public class CatalogController {
         
         // Refresh user state from server
         refreshUserState();
-        
+
         // Set up store selection
-        Stores.getItems().addAll("Haifa", "Krayot", "Nahariyya", "network");
-        Stores.setValue("network"); // Default to network view
-        
+       Stores.getItems().addAll("Haifa", "Krayot", "Nahariyya", "network");
+        /* if(user != null) {
+            Stores.setValue(user.getStoreName());
+        }
+        else {
+            Stores.setValue("network");
+        }*/
+        Stores.setValue("network");// Default to network view
         // Initialize arrays for flower display
         nameLabels = new Label[]{name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12};
         typeLabels = new Label[]{type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12};
