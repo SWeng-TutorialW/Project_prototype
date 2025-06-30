@@ -1,14 +1,260 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.chart.*?>
+<?import java.lang.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReportGenerator"
-            prefHeight="400.0" prefWidth="600.0">
-
-</AnchorPane>
+<ScrollPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
+           prefHeight="900.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/23.0.1" 
+           xmlns:fx="http://javafx.com/fxml/1" 
+           fx:controller="il.cshaifasweng.OCSFMediatorExample.client.ReportGeneratorController">
+   <content>
+      <AnchorPane prefHeight="900.0" prefWidth="1200.0">
+         <children>
+            <!-- Header -->
+            <Label contentDisplay="CENTER" layoutX="-2.0" layoutY="-3.0" prefHeight="68.0" prefWidth="1200.0" 
+                   style="-fx-background-color: #C8A2C8;" text="📊 Report Generator" textAlignment="CENTER" 
+                   textFill="#fdfdfd">
+               <font>
+                  <Font name="Segoe UI" size="36.0" />
+               </font>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+            </Label>
+            
+            <!-- Date Range Section -->
+            <VBox layoutX="20.0" layoutY="80.0" prefHeight="120.0" prefWidth="1160.0" 
+                  style="-fx-background-color: #f8f9fa; -fx-border-color: #C8A2C8; -fx-border-width: 2; -fx-border-radius: 10;">
+               <children>
+                  <Label text="📅 Select Date Range" style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #C8A2C8;">
+                     <padding>
+                        <Insets top="10" left="15" />
+                     </padding>
+                  </Label>
+                  <HBox spacing="20" alignment="CENTER">
+                     <children>
+                        <VBox spacing="5">
+                           <children>
+                              <Label text="Start Date:" style="-fx-font-weight: bold; -fx-text-fill: #C8A2C8;" />
+                              <DatePicker fx:id="startDatePicker" promptText="Select start date" 
+                                         style="-fx-font-size: 14;" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="5">
+                           <children>
+                              <Label text="End Date:" style="-fx-font-weight: bold; -fx-text-fill: #C8A2C8;" />
+                              <DatePicker fx:id="endDatePicker" promptText="Select end date" 
+                                         style="-fx-font-size: 14;" />
+                           </children>
+                        </VBox>
+                        <VBox spacing="5" fx:id="storeSelectionContainer" visible="false">
+                           <children>
+                              <Label text="Store:" style="-fx-font-weight: bold; -fx-text-fill: #C8A2C8;" />
+                              <ComboBox fx:id="storeComboBox" promptText="Select store" 
+                                       style="-fx-font-size: 14;" />
+                           </children>
+                        </VBox>
+                        <Button fx:id="generateReportBtn" mnemonicParsing="false" onAction="#generateReport" 
+                                prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #C8A2C8; -fx-text-fill: white;" 
+                                text="Generate Report">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                        <Button fx:id="quickRangeBtn" mnemonicParsing="false" onAction="#setQuickRange" 
+                                prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #28a745; -fx-text-fill: white;" 
+                                text="This Month">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Button>
+                     </children>
+                     <padding>
+                        <Insets bottom="15" />
+                     </padding>
+                  </HBox>
+               </children>
+            </VBox>
+            
+            <!-- Report Type Selection -->
+            <VBox layoutX="20.0" layoutY="220.0" prefHeight="80.0" prefWidth="1160.0" 
+                  style="-fx-background-color: #f8f9fa; -fx-border-color: #C8A2C8; -fx-border-width: 2; -fx-border-radius: 10;">
+               <children>
+                  <Label text="📋 Report Type" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #C8A2C8;">
+                     <padding>
+                        <Insets top="10" left="15" />
+                     </padding>
+                  </Label>
+                  <HBox spacing="20" alignment="CENTER">
+                     <children>
+                        <RadioButton fx:id="ordersReport" mnemonicParsing="false" selected="true" 
+                                     style="-fx-font-size: 14; -fx-text-fill: #C8A2C8;" text="📦 Orders Summary" />
+                        <RadioButton fx:id="customersReport" mnemonicParsing="false" 
+                                     style="-fx-font-size: 14; -fx-text-fill: #C8A2C8;" text="👥 Customer Analysis" />
+                        <RadioButton fx:id="complaintsReport" mnemonicParsing="false" 
+                                     style="-fx-font-size: 14; -fx-text-fill: #C8A2C8;" text="Complaints and Refunds" />
+                     </children>
+                     <padding>
+                        <Insets bottom="15" />
+                     </padding>
+                  </HBox>
+               </children>
+            </VBox>
+            
+            <!-- Charts Section -->
+            <VBox layoutX="20.0" layoutY="320.0" prefHeight="400.0" prefWidth="1160.0" 
+                  style="-fx-background-color: #f8f9fa; -fx-border-color: #C8A2C8; -fx-border-width: 2; -fx-border-radius: 10;">
+               <children>
+                  <Label text="📈 Charts and Analytics" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #C8A2C8;">
+                     <padding>
+                        <Insets top="10" left="15" />
+                     </padding>
+                  </Label>
+                  
+                  <!-- Chart Container -->
+                  <HBox layoutX="15.0" layoutY="50.0" prefHeight="320.0" prefWidth="1130.0" spacing="20">
+                     <children>
+                        <!-- Line Chart -->
+                        <VBox prefHeight="320.0" prefWidth="550.0" 
+                              style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-radius: 5;">
+                           <children>
+                              <Label text="Revenue Trend" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #C8A2C8;" 
+                                     alignment="CENTER">
+                                 <padding>
+                                    <Insets top="10" />
+                                 </padding>
+                              </Label>
+                              <LineChart fx:id="revenueChart" prefHeight="250.0" prefWidth="530.0" 
+                                         style="-fx-background-color: white;">
+                                 <xAxis>
+                                    <CategoryAxis fx:id="revenueXAxis" label="Date" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis fx:id="revenueYAxis" label="Revenue ($)" />
+                                 </yAxis>
+                              </LineChart>
+                           </children>
+                           <padding>
+                              <Insets left="10" right="10" bottom="10" />
+                           </padding>
+                        </VBox>
+                        
+                        <!-- Pie Chart -->
+                        <VBox prefHeight="320.0" prefWidth="550.0" 
+                              style="-fx-background-color: white; -fx-border-color: #ddd; -fx-border-radius: 5;">
+                           <children>
+                              <Label text="Product Distribution" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #C8A2C8;" 
+                                     alignment="CENTER">
+                                 <padding>
+                                    <Insets top="10" />
+                                 </padding>
+                              </Label>
+                              <PieChart fx:id="productChart" prefHeight="250.0" prefWidth="530.0" 
+                                        style="-fx-background-color: white;" />
+                           </children>
+                           <padding>
+                              <Insets left="10" right="10" bottom="10" />
+                           </padding>
+                        </VBox>
+                     </children>
+                     <padding>
+                        <Insets left="15" right="15" bottom="15" />
+                     </padding>
+                  </HBox>
+               </children>
+            </VBox>
+            
+            <!-- Summary Statistics -->
+            <VBox layoutX="20.0" layoutY="740.0" prefHeight="120.0" prefWidth="1160.0" 
+                  style="-fx-background-color: #f8f9fa; -fx-border-color: #C8A2C8; -fx-border-width: 2; -fx-border-radius: 10;">
+               <children>
+                  <Label text="📊 Summary Statistics" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #C8A2C8;">
+                     <padding>
+                        <Insets top="10" left="15" />
+                     </padding>
+                  </Label>
+                  <HBox spacing="50" alignment="CENTER">
+                     <children>
+                        <VBox alignment="CENTER" spacing="5">
+                           <children>
+                              <Label fx:id="totalOrdersLabel" text="Total Orders" style="-fx-font-size: 12; -fx-text-fill: #666;" />
+                              <Label fx:id="totalOrdersLbl" text="0" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #C8A2C8;" />
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="5">
+                           <children>
+                              <Label fx:id="totalRevenueLabel" text="Total Revenue" style="-fx-font-size: 12; -fx-text-fill: #666;" />
+                              <Label fx:id="totalRevenueLbl" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #28a745;" />
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="5">
+                           <children>
+                              <Label text="Total Refunds" style="-fx-font-size: 12; -fx-text-fill: #666;" />
+                              <Label fx:id="totalRefundsLbl" text="'$' 0.00" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #dc3545;" />
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="5">
+                           <children>
+                              <Label fx:id="avgOrderLabel" text="Average Order Value" style="-fx-font-size: 12; -fx-text-fill: #666;" />
+                              <Label fx:id="avgOrderLbl" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #ffc107;" />
+                           </children>
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="5">
+                           <children>
+                              <Label fx:id="topProductLabel" text="Top Product" style="-fx-font-size: 12; -fx-text-fill: #666;" />
+                              <Label fx:id="topProductLbl" text="N/A" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: #dc3545;" />
+                           </children>
+                        </VBox>
+                     </children>
+                     <padding>
+                        <Insets bottom="15" />
+                     </padding>
+                  </HBox>
+               </children>
+            </VBox>
+            
+            <!-- Export Section -->
+            <HBox layoutX="20.0" layoutY="880.0" prefHeight="60.0" prefWidth="1160.0" spacing="20" alignment="CENTER">
+               <children>
+                  <Button fx:id="exportPdfBtn" mnemonicParsing="false" onAction="#exportToPDF" 
+                          prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: #dc3545; -fx-text-fill: white;" 
+                          text="📄 Export Report">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="exportCsvBtn" mnemonicParsing="false" onAction="#exportToCSV" 
+                          prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: #17a2b8; -fx-text-fill: white;" 
+                          text="📊 Export CSV">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </Button>
+                  <Button fx:id="refreshBtn" mnemonicParsing="false" onAction="#refreshData" 
+                          prefHeight="45.0" prefWidth="150.0" style="-fx-background-color: #fd7e14; -fx-text-fill: white;" 
+                          text="🔄 Refresh">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </Button>
+               </children>
+            </HBox>
+            
+            <!-- Copyright -->
+            <Label fx:id="copyrightLBl" alignment="CENTER" layoutX="400.0" layoutY="870.0" prefHeight="28.0" prefWidth="400.0" 
+                   text="LilachSystem v0.1 © 2025 BestGroup. All rights reserved.">
+               <font>
+                  <Font name="Segoe UI" size="10.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+   </content>
+</ScrollPane>

@@ -5,15 +5,9 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-
-import java.io.IOException;
-
-import java.io.InputStream;
-import java.util.List;
-import java.util.Random;
-
-
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,12 +16,10 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -39,8 +31,12 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import javafx.scene.layout.FlowPane;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 public class CatalogController {
@@ -241,7 +237,10 @@ public class CatalogController {
     private AnchorPane custom;
     @FXML
     private Label cus_label;
-
+    @FXML
+    private ImageView mailbox_icon;
+    @FXML
+    private Button reportsBtn;
 
     boolean is_login=false;
     public void set_isLogin(boolean is_login) {
@@ -249,7 +248,7 @@ public class CatalogController {
     }
     @FXML
     private ComboBox<String> Stores;
-    
+
     private List<Flower> flowersList_c;
     private Label[] nameLabels;
     private Label[] typeLabels;
@@ -266,6 +265,11 @@ public class CatalogController {
         user=usr;
         System.out.println("the user is " + user.getUsername());
         System.out.println(" user send: " + user.get_send_complain());
+        System.out.println(" user receive_answer: " + user.isReceive_answer());
+        
+        // Update mailbox icon when user is updated
+        // Note: Since this is a static method, we need to trigger the update through EventBus
+        EventBus.getDefault().post("update_mailbox_icon");
     }
     public connect_scene_Con getController() {
         return con;
@@ -276,6 +280,20 @@ public class CatalogController {
     public void  set_type(int value)
     {
         type=value;
+        // Show reports button only for admin users (type=4)
+        if (type == 4) {
+            // Admin users can see reports
+            if (reportsBtn != null) {
+                reportsBtn.setVisible(true);
+                reportsBtn.setManaged(true);
+            }
+        } else {
+            // Hide reports button for non-admin users
+            if (reportsBtn != null) {
+                reportsBtn.setVisible(false);
+                reportsBtn.setManaged(false);
+            }
+        }
     }
     public void  set_sorting_type(int value)
     {
@@ -314,6 +332,35 @@ public class CatalogController {
     private Set<String> currentSelectedCategories = new HashSet<>();
     private String currentSortOption = "Name (A-Z)";
 
+    // Add flag to prevent infinite loops
+    private static boolean isRefreshingUserState = false;
+    
+    // Add method to refresh user state from server
+    private void refreshUserState() {
+        if (user != null && !isRefreshingUserState) {
+            try {
+                isRefreshingUserState = true;
+                System.out.println("[CatalogController] Refreshing user state for: " + user.getUsername());
+                SimpleClient.getClient().sendToServer("getUserDetails_" + user.getUsername());
+                
+                // Don't send getComplaints here to avoid infinite loop
+                // The complaint update event already contains the updated complaints
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                // Reset flag after a short delay to allow the response to be processed
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(1000); // Wait 1 second
+                        isRefreshingUserState = false;
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }).start();
+            }
+        }
+    }
+
     @FXML
     void create_bouqut(ActionEvent event)
     {
@@ -326,11 +373,11 @@ public class CatalogController {
             alert.showAndWait();
             return;
         }
-        
+
         // Check if user can create bouquet based on their store assignment
         int userStore = user.getStore();
         String currentCatalog = Stores.getValue();
-        
+
         if (userStore != 4) {
             // User is assigned to a specific store - can only create bouquet in their own store
             String userStoreName = getStoreNameByNumber(userStore);
@@ -344,7 +391,7 @@ public class CatalogController {
             }
         }
         // If userStore == 4 (network), they can always create bouquet
-        
+
         Platform.runLater(() -> {
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("bouquet.fxml"));
@@ -366,97 +413,105 @@ public class CatalogController {
 
     @FXML
     void initialize() {
-        System.out.println("CatalogController initialized");
-        TranslateTransition transition = new TranslateTransition();
-        transition.setNode(cus_label);
-        transition.setDuration(Duration.seconds(3));
-        transition.setFromX(0);
-        transition.setToX(300);
-        transition.setAutoReverse(true);
-        transition.setCycleCount(TranslateTransition.INDEFINITE);
-        transition.play();
-        Random random = new Random();
-        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(3), e -> {
-            currentIndex = random.nextInt(imagePaths.length);
-            String fullPath = imagePaths[currentIndex];
-
-
-            String filename = fullPath.substring(fullPath.lastIndexOf("/") + 1);
-            String flowerName = filename.substring(0, filename.lastIndexOf("."));
-
-
-            setImage(cus_img, flowerName);
-        }));
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
-
-
-        Stores.getItems().addAll("Haifa", "Krayot","Nahariyya","network");
-        // Set default store selection
-        if (user != null) {
-            if (user.getStore() == 4 || user.is_yearly_subscription()) {
-                Stores.setValue("network");
-            } else if (user.getStore() == 1) {
-                Stores.setValue("Haifa");
-            } else if (user.getStore() == 2) {
-                Stores.setValue("Krayot");
-            } else if (user.getStore() == 3) {
-                Stores.setValue("Nahariyya");
-            }
-            
-            // Request catalog data for the user's store after setting the selection
+        EventBus.getDefault().register(this);
+        
+        // Initialize mailbox icon after FXML injection is complete
+        Platform.runLater(this::updateMailboxIcon);
+        
+        // Refresh user state from server
+        refreshUserState();
+        
+        // Set up store selection
+        Stores.getItems().addAll("Haifa", "Krayot", "Nahariyya", "network");
+        Stores.setValue("network"); // Default to network view
+        
+        // Initialize arrays for flower display
+        nameLabels = new Label[]{name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12};
+        typeLabels = new Label[]{type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12};
+        priceFields = new TextField[]{price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12};
+        imageViews = new ImageView[]{pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12};
+        price_Before_sale = new Text[]{price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale};
+        
+        // Set up cart button
+        cart.setOnAction(e -> {
             try {
-                String selectedStore = Stores.getValue();
-                if (selectedStore != null) {
-                    if (selectedStore.equals("network")) {
-                        SimpleClient.getClient().sendToServer("get_all_flowers");
-                    } else {
-                        int storeId = getCurrentStoreId(selectedStore);
-                        if (storeId != -1) {
-                            SimpleClient.getClient().sendToServer("get_catalog_" + storeId);
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            Stores.setValue("network"); // Guest default
-        }
-
-        nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12 };
-        typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12 };
-        priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
-        imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12 };
-        nameLabels = new Label[] { name_1, name_2, name_3, name_4, name_5, name_6, name_7, name_8, name_9, name_10, name_11, name_12 };
-        typeLabels = new Label[] { type_1, type_2, type_3, type_4, type_5, type_6, type_7, type_8, type_9, type_10, type_11, type_12 };
-        priceFields = new TextField[] { price_1, price_2, price_3, price_4, price_5, price_6, price_7, price_8, price_9, price_10, price_11, price_12 };
-        imageViews = new ImageView[] { pic_1, pic_2, pic_3, pic_4, pic_5, pic_6, pic_7, pic_8, pic_9, pic_10, pic_11, pic_12 };
-        price_Before_sale = new Text[] { price_1_before_sale, price_2_before_sale, price_3_before_sale, price_4_before_sale, price_5_before_sale, price_6_before_sale, price_7_before_sale, price_8_before_sale, price_9_before_sale, price_10_before_sale, price_11_before_sale, price_12_before_sale };
-        if (!EventBus.getDefault().isRegistered(this)) {
-            EventBus.getDefault().register(this);
-            System.out.println("CatalogController_ registered");
-        } else {
-            System.out.println("CatalogController_ already registered");
-        }
-        Stage stage = App.getStage();
-        stage.setOnCloseRequest(event1 -> {
-            try {
-                if (user != null) {
-                    user.setIsLogin(0);
-                    change_user_login tt = new change_user_login(user,0);
-                    System.out.println("the user is " + user.getUsername()+"logged out");
-                    SimpleClient.getClient().sendToServer(tt);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+                openCart(e);
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
         });
-
-        Stores.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            updateCatalogForSelectedStore();
-        });
+        
+        // Hide reports button for non-employee users
+        if (user == null || !user.isType()) {
+            reportsBtn.setVisible(false);
+        }
     }
+    
+    // Add EventBus handler for user updates
+    @Subscribe
+    public void handleUserUpdate(UpdateUserEvent event) {
+        System.out.println("[CatalogController] Received user update event");
+        if (event.getUpdatedUser() != null && event.getUpdatedUser().getUsername().equals(user.getUsername())) {
+            // Update the local user object
+            CatalogController.user = event.getUpdatedUser();
+            // Update mailbox icon
+            Platform.runLater(this::updateMailboxIcon);
+        }
+    }
+
+    // Add EventBus handler for GetUserDetails response
+    @Subscribe
+    public void handleGetUserDetails(GetUserDetails userDetails) {
+        System.out.println("[CatalogController] Received GetUserDetails response");
+        if (userDetails.getUser() != null && userDetails.getUser().getUsername().equals(user.getUsername())) {
+            // Update the local user object with fresh data from server
+            CatalogController.user = userDetails.getUser();
+            // Update mailbox icon
+            Platform.runLater(this::updateMailboxIcon);
+            System.out.println("[CatalogController] Updated user state from server: " + user.getUsername() + ", isReceive_answer: " + user.isReceive_answer());
+        }
+    }
+
+    // Add EventBus handler for complaint updates to refresh mailbox icon
+    @Subscribe
+    public void handleComplaintUpdate(ComplainUpdateEvent event) {
+        System.out.println("[CatalogController] Received complaint update event");
+        // Only refresh user state if we're not already refreshing and if the user might have new messages
+        if (!isRefreshingUserState && user != null) {
+            // Check if this user has any unread messages in the complaints
+            List<Complain> complaints = event.getUpdatedItems();
+            if (complaints != null) {
+                boolean hasUnreadMessages = complaints.stream()
+                    .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
+                
+                if (hasUnreadMessages && !user.isReceive_answer()) {
+                    // User has unread messages but flag is not set, refresh user state
+                    Platform.runLater(this::refreshUserState);
+                } else if (!hasUnreadMessages && user.isReceive_answer()) {
+                    // User has no unread messages but flag is set, refresh user state
+                    Platform.runLater(this::refreshUserState);
+                }
+            }
+        }
+    }
+
+    // TODO check can cause infinite loop
+    @Subscribe
+    public void handleComplaintsList(List<Complain> complaints) {
+        System.out.println("[CatalogController] Received complaints list with " + (complaints != null ? complaints.size() : 0) + " complaints");
+        if (user != null && complaints != null) {
+            boolean hasUnreadMessages = complaints.stream()
+                .anyMatch(c -> c.getClient().startsWith("answer to" + user.getUsername()));
+            
+            // Update user's receive_answer flag based on actual complaints
+            if (hasUnreadMessages != user.isReceive_answer()) {
+                user.set_receive_answer(hasUnreadMessages);
+                Platform.runLater(this::updateMailboxIcon);
+                System.out.println("[CatalogController] Updated mailbox icon based on complaints: " + hasUnreadMessages);
+            }
+        }
+    }
+
     public void setCatalogSorting(List<Flower> flowerList) {
         Platform.runLater(() -> {
             flowersList_c = flowerList;
@@ -473,15 +528,15 @@ public class CatalogController {
                 nameLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 18px;");
                 Label typeLabel = new Label(f.getFlowerType());
                 typeLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 14px;");
-                
+
                 // Add color label
                 Label colorLabel = new Label("Color: " + (f.getColor() != null ? f.getColor() : "N/A"));
                 colorLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 12px;");
-                
+
                 // Add category label
                 Label categoryLabel = new Label("Category: " + (f.getCategory() != null ? f.getCategory() : "N/A"));
                 categoryLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 12px;");
-                
+
                 TextField priceField = new TextField(String.format("%.2f", f.getFlowerPrice()));
                 priceField.setEditable(false);
                 priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px;");
@@ -524,7 +579,7 @@ public class CatalogController {
         System.out.println("Current type: " + type);
         System.out.println("Current store selection: " + Stores.getValue());
         System.out.println("Flower name: " + event.get_flower_name());
-        
+
         // Special handling for network operations (catalog_type = -1)
         if (event.get_catalog_type() == -1) {
             System.out.println("*** NETWORK DISCOUNT EVENT PROCESSING ***");
@@ -535,15 +590,15 @@ public class CatalogController {
             System.out.println("*** NETWORK DISCOUNT EVENT PROCESSED ***");
             return;
         }
-        
+
         // For discount events (catalog_type = 4), update immediately for all clients
         if (event.get_catalog_type() == 4) {
             System.out.println("*** DISCOUNT EVENT PROCESSING - IMMEDIATE UPDATE ***");
             System.out.println("Updating catalog with " + event.get_flowers().size() + " flowers");
-            
+
             // Store current store selection
             String currentStore = Stores.getValue();
-            
+
             // Request fresh data for the current store to ensure we have the latest information
             if (currentStore != null) {
                 try {
@@ -566,18 +621,18 @@ public class CatalogController {
                     e.printStackTrace();
                 }
             }
-            
+
             System.out.println("*** DISCOUNT EVENT PROCESSED - IMMEDIATE UPDATE ***");
             return;
         }
-        
+
         // Only reload if this event is for our current store selection
         String selectedStore = Stores.getValue();
         if (selectedStore != null) {
             int currentStoreId = getCurrentStoreId(selectedStore);
             System.out.println("Current store ID: " + currentStoreId);
             System.out.println("Event catalog type: " + event.get_catalog_type());
-            
+
             if (event.get_catalog_type() == currentStoreId) {
                 System.out.println("Discount event matches current store, updating UI");
                 // Update the UI with the new data from the event
@@ -592,7 +647,7 @@ public class CatalogController {
             System.out.println("No store selected, cannot process discount event");
         }
     }
-    
+
     @Subscribe
     public void handleCatalogUpdate(Add_flower_event event)throws IOException {
         System.out.println("=== CATALOG CONTROLLER: ADD FLOWER EVENT RECEIVED ===");
@@ -604,26 +659,23 @@ public class CatalogController {
         if(event.get_flowers()==null)
         {
             System.out.println("the user is " + user.getUsername());
-            if(type!=4)
+            System.out.println("the user that came from the event " +event.getUser().getUsername());
+            if(user.getUsername().equals(event.getUser().getUsername()))
             {
-                System.out.println("the user that came from the event " +event.getUser().getUsername());
-                if(user.getUsername().equals(event.getUser().getUsername()))
-                {
-                    set_user(event.getUser());
-                    return;
-                }
+                set_user(event.getUser());
+                return;
             }
             return;
         }
-        
+
         // Special handling for delete events (catalog_type = -1)
         if (event.get_catalog_type() == -1) {
             System.out.println("*** NETWORK DELETE EVENT PROCESSING ***");
             System.out.println("Updating UI for all clients with " + event.get_flowers().size() + " flowers");
-            
+
             // Store current store selection
             String currentStore = Stores.getValue();
-            
+
             // Request fresh data for the current store to ensure we have the latest information
             if (currentStore != null) {
                 try {
@@ -646,18 +698,18 @@ public class CatalogController {
                     e.printStackTrace();
                 }
             }
-            
+
             System.out.println("*** NETWORK DELETE EVENT PROCESSED ***");
             return;
         }
-        
+
         // Only reload if this event is for our current store selection
         String selectedStore = Stores.getValue();
         if (selectedStore != null) {
             int currentStoreId = getCurrentStoreId(selectedStore);
             System.out.println("Current store ID: " + currentStoreId);
             System.out.println("Event catalog type: " + event.get_catalog_type());
-            
+
             if (event.get_catalog_type() == currentStoreId) {
                 System.out.println("Add flower event matches current store, updating UI");
                 // Update the UI with the new data from the event
@@ -672,21 +724,21 @@ public class CatalogController {
             System.out.println("No store selected, cannot process add flower event");
         }
     }
-    
+
     @Subscribe
     public void handleCatalogUpdate(update_local_catalog event) {
         System.out.println("=== UPDATE LOCAL CATALOG EVENT ===");
         System.out.println("Event catalog type: " + event.get_catalog_type());
         System.out.println("Current selected store: " + Stores.getValue());
         System.out.println("Current type: " + type);
-        
+
         // Check if this update is for the store we're currently viewing
         String selectedStore = Stores.getValue();
         if (selectedStore != null) {
             int currentStoreId = getCurrentStoreId(selectedStore);
             System.out.println("Current store ID: " + currentStoreId);
             System.out.println("Event store ID: " + event.get_catalog_type());
-            
+
             if (currentStoreId == event.get_catalog_type()) {
                 System.out.println("Update local catalog event matches current store, updating UI");
                 // Update the UI with the new data from the event
@@ -701,7 +753,7 @@ public class CatalogController {
             System.out.println("No store selected, cannot process update local catalog event");
         }
     }
-    
+
     /**
      * Reloads the catalog with fresh data from the database
      * This ensures all clients have the most current data after any catalog changes
@@ -713,9 +765,9 @@ public class CatalogController {
                 System.out.println("No store selected, cannot reload catalog");
                 return;
             }
-            
+
             System.out.println("Reloading catalog from database for store: " + selectedStore);
-            
+
             // Request fresh data from server based on current store selection
             if (selectedStore.equals("network")) {
                 // For network view, get all flowers
@@ -732,7 +784,7 @@ public class CatalogController {
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Helper method to get current store ID based on selected store
      */
@@ -751,7 +803,7 @@ public class CatalogController {
         System.out.println("=== SET CATALOG DATA CALLED ===");
         System.out.println("Flower list size: " + (flowerList == null ? 0 : flowerList.size()));
         System.out.println("Current store selection: " + Stores.getValue());
-        
+
         Platform.runLater(() -> {
             System.out.println("=== PLATFORM.RUNLATER EXECUTING ===");
             if (catalogFlowPane == null) {
@@ -781,15 +833,15 @@ public class CatalogController {
                 nameLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 18px;");
                 Label typeLabel = new Label(f.getFlowerType());
                 typeLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 14px;");
-                
+
                 // Add color label
                 Label colorLabel = new Label("Color: " + (f.getColor() != null ? f.getColor() : "N/A"));
                 colorLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 12px;");
-                
+
                 // Add category label
                 Label categoryLabel = new Label("Category: " + (f.getCategory() != null ? f.getCategory() : "N/A"));
                 categoryLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 12px;");
-                
+
                 TextField priceField = new TextField(String.format("%.2f", f.getFlowerPrice()));
                 priceField.setEditable(false);
                 priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px;");
@@ -812,18 +864,18 @@ public class CatalogController {
             System.out.println("=== SET CATALOG DATA COMPLETED ===");
         });
     }
-    
+
     // New method for filtered catalog data
     public void setFilteredCatalogData(List<Flower> filteredFlowerList) {
         System.out.println("=== SET FILTERED CATALOG DATA CALLED ===");
         System.out.println("Filtered flower list size: " + (filteredFlowerList == null ? 0 : filteredFlowerList.size()));
-        
+
         Platform.runLater(() -> {
             if (catalogFlowPane == null) {
                 System.out.println("catalogFlowPane is NULL! Check FXML wiring.");
                 return;
             }
-            
+
             catalogFlowPane.getChildren().clear();
             if (filteredFlowerList == null || filteredFlowerList.isEmpty()) {
                 System.out.println("No flowers match the current filters.");
@@ -832,7 +884,7 @@ public class CatalogController {
                 catalogFlowPane.getChildren().add(emptyLabel);
                 return;
             }
-            
+
             for (Flower f : filteredFlowerList) {
                 VBox card = new VBox(5);
                 card.setPrefWidth(160);
@@ -845,15 +897,15 @@ public class CatalogController {
                 nameLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 18px;");
                 Label typeLabel = new Label(f.getFlowerType());
                 typeLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 14px;");
-                
+
                 // Add color label
                 Label colorLabel = new Label("Color: " + (f.getColor() != null ? f.getColor() : "N/A"));
                 colorLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 12px;");
-                
+
                 // Add category label
                 Label categoryLabel = new Label("Category: " + (f.getCategory() != null ? f.getCategory() : "N/A"));
                 categoryLabel.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 12px;");
-                
+
                 TextField priceField = new TextField(String.format("%.2f", f.getFlowerPrice()));
                 priceField.setEditable(false);
                 priceField.setStyle("-fx-text-fill: #c8a2c8; -fx-font-size: 16px;");
@@ -876,7 +928,7 @@ public class CatalogController {
             System.out.println("=== SET FILTERED CATALOG DATA COMPLETED ===");
         });
     }
-    
+
     /**
      * Updates the current filter state from the filter controller
      */
@@ -887,33 +939,33 @@ public class CatalogController {
         this.currentSelectedCategories = new HashSet<>(categories);
         this.currentSortOption = sortOption;
     }
-    
+
     // Method to open filter window
     @FXML
     void openFilterWindow(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_filter.fxml"));
             Parent root = loader.load();
-            
+
             CatalogFilterController filterController = loader.getController();
             filterController.setCatalogController(this);
             filterController.setOriginalFlowersList(flowersList_c);
-            
+
             // Pass current filter state to restore UI
             filterController.setCurrentFilterState(
-                currentMinPrice, 
-                currentMaxPrice, 
-                currentSelectedColors, 
-                currentSelectedCategories, 
+                currentMinPrice,
+                currentMaxPrice,
+                currentSelectedColors,
+                currentSelectedCategories,
                 currentSortOption
             );
-            
+
             Stage filterStage = new Stage();
             filterStage.setTitle("Filter Catalog");
             filterStage.setScene(new Scene(root));
             filterStage.setResizable(false);
             filterController.setFilterStage(filterStage);
-            
+
             filterStage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -932,11 +984,11 @@ public class CatalogController {
             String selectedStore = Stores.getValue();
             controller.setStore(selectedStore); // Set store first
             controller.setFlower(flower);       // Then set flower (so updateUI sees the store)
-            
+
             // Pass the current catalog flowers for validation
             List<Flower> currentCatalog = flowersList_sorting != null ? flowersList_sorting : flowersList_c;
             controller.setCurrentCatalogFlowers(currentCatalog);
-            
+
             Stage stage = new Stage();
             stage.setTitle("Order Flower");
             stage.setScene(new Scene(root));
@@ -995,20 +1047,20 @@ public class CatalogController {
         System.out.println("combo_choose CALLED");
         String selectedSort = combo.getValue();
         System.out.println("Selected sort option: " + selectedSort);
-        
+
         if (selectedSort == null || selectedSort.equals("Sort")) {
             System.out.println("No sorting selected, showing original order");
             return;
         }
-        
+
         if (flowersList_c == null || flowersList_c.isEmpty()) {
             System.out.println("No flowers to sort");
             return;
         }
-        
+
         // Create a copy of the current flower list for sorting
         List<Flower> sortedFlowers = new ArrayList<>(flowersList_c);
-        
+
         // Apply sorting based on selection
         switch (selectedSort) {
             case "Price High to LOW":
@@ -1023,7 +1075,7 @@ public class CatalogController {
                 System.out.println("Unknown sort option: " + selectedSort);
                 return;
         }
-        
+
         // Update the display with sorted flowers
         setCatalogSorting(sortedFlowers);
         System.out.println("Sorting applied successfully");
@@ -1074,13 +1126,13 @@ public class CatalogController {
             // First try FlowerImages directory
             String imagePath = "/images/FlowerImages/" + flowerName + ".png";
             InputStream inputStream = getClass().getResourceAsStream(imagePath);
-            
+
             if (inputStream == null) {
                 // If not found in FlowerImages, try main images directory
                 imagePath = "/images/" + flowerName + ".png";
                 inputStream = getClass().getResourceAsStream(imagePath);
             }
-            
+
             if (inputStream != null) {
                 Image image = new Image(inputStream);
                 imageView.setImage(image);
@@ -1282,7 +1334,7 @@ public class CatalogController {
             orderController.setStore(Stores.getValue());
             orderController.setFlower(targetFlower);
             orderController.setUser(user);
-            
+
             // Pass the current catalog flowers for validation
             List<Flower> currentCatalog = flowersList_sorting != null ? flowersList_sorting : flowersList_c;
             orderController.setCurrentCatalogFlowers(currentCatalog);
@@ -1303,6 +1355,31 @@ public class CatalogController {
             }
         }
         return -1;
+    }
+    public void updateMailboxIcon() {
+        System.out.println("[CatalogController] updateMailboxIcon called");
+        System.out.println("[CatalogController] mailbox_icon is null: " + (mailbox_icon == null));
+        System.out.println("[CatalogController] user is null: " + (user == null));
+
+        // Check if mailbox_icon is null (FXML injection not complete yet)
+        if (mailbox_icon == null) {
+            System.out.println("[CatalogController] mailbox_icon is null, returning");
+            return;
+        }
+
+        if (user != null) {
+            System.out.println("[CatalogController] User: " + user.getUsername() + ", isReceive_answer: " + user.isReceive_answer());
+            if (user.isReceive_answer()) {
+                System.out.println("[CatalogController] Setting mailbox icon visible for user: " + user.getUsername());
+                mailbox_icon.setVisible(true);
+            } else {
+                System.out.println("[CatalogController] Setting mailbox icon invisible for user: " + user.getUsername());
+                mailbox_icon.setVisible(false);
+            }
+        } else {
+            System.out.println("[CatalogController] User is null, setting mailbox icon invisible");
+            mailbox_icon.setVisible(false);
+        }
     }
 
     @FXML
@@ -1340,10 +1417,45 @@ public class CatalogController {
         }
     }
 
+    @FXML
+    void openReports(ActionEvent event) throws IOException {
+        // Only allow employees and admins to access reports
+        if (user == null || !user.isType()) {
+            Warning warning = new Warning("Access denied. Only employees and administrators can view reports.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("report_generator.fxml"));
+            Parent root = fxmlLoader.load();
+
+            ReportGeneratorController controller = fxmlLoader.getController();
+            // Pass the current user to prevent session loss
+            controller.setCurrentUser(user);
+
+            Stage stage = new Stage();
+            stage.setTitle("Report Generator");
+            stage.setScene(new Scene(root));
+            stage.setWidth(1200);
+            stage.setHeight(900);
+            
+            // Set up cleanup when window is closed
+            stage.setOnCloseRequest(e -> {
+                controller.cleanup();
+            });
+            
+            stage.show();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void setImageFromDatabase(ImageView imageView, String databaseImagePath, String flowerType) {
         try {
             String imagePath = null;
-            
+
             // If database has a valid image path, use it
             if (databaseImagePath != null && !databaseImagePath.trim().isEmpty()) {
                 imagePath = databaseImagePath;
@@ -1351,7 +1463,7 @@ public class CatalogController {
                 // Fallback to flower type if no image path in database
                 imagePath = "images/" + flowerType + ".png";
             }
-            
+
             // Handle different path formats
             String finalImagePath;
             if (imagePath.startsWith("images/")) {
@@ -1364,19 +1476,19 @@ public class CatalogController {
                 // Assume it's a relative path, add images/ prefix
                 finalImagePath = "/images/" + imagePath;
             }
-            
+
             System.out.println("Loading image from database path: " + imagePath + " -> " + finalImagePath);
-            
+
             Image image = new Image(getClass().getResourceAsStream(finalImagePath));
             imageView.setImage(image);
-            
+
         } catch (Exception e) {
             System.err.println("Failed to load image from database path: " + databaseImagePath + " for flower type: " + flowerType);
             // Try fallback to flower type
             setImageFallback(imageView, flowerType);
         }
     }
-    
+
     // Fallback method for loading images by flower type
     private void setImageFallback(ImageView imageView, String flowerType) {
         try {
@@ -1390,7 +1502,7 @@ public class CatalogController {
             setNoPhotoImage(imageView);
         }
     }
-    
+
     // Method to load no_photo image
     private void setNoPhotoImage(ImageView imageView) {
         try {
@@ -1423,7 +1535,7 @@ public class CatalogController {
     private void updateBouquetButtonState(String selectedStore) {
         if (bouqut_btn != null && user != null) {
             int userStore = user.getStore();
-            
+
             if (userStore == 4) {
                 // Network users can always create bouquets
                 bouqut_btn.setDisable(false);
@@ -1449,6 +1561,14 @@ public class CatalogController {
             bouqut_btn.setDisable(true);
             bouqut_btn.setStyle("-fx-background-color: #cccccc; -fx-text-fill: #666666;");
             bouqut_btn.setTooltip(new Tooltip("Please log in to create bouquets"));
+        }
+    }
+
+    // Add EventBus handler for mailbox icon updates
+    @Subscribe
+    public void handleMailboxIconUpdate(String message) {
+        if ("update_mailbox_icon".equals(message)) {
+            Platform.runLater(this::updateMailboxIcon);
         }
     }
 }

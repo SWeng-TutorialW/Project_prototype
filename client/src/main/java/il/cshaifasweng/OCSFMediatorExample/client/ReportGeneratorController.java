@@ -1,0 +1,841 @@
+package il.cshaifasweng.OCSFMediatorExample.client;
+
+import il.cshaifasweng.OCSFMediatorExample.entities.*;
+import javafx.application.Platform;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.chart.*;
+import javafx.scene.control.*;
+import javafx.scene.image.WritableImage;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+
+public class ReportGeneratorController {
+
+    @FXML
+    private DatePicker startDatePicker;
+    
+    @FXML
+    private DatePicker endDatePicker;
+    
+    @FXML
+    private Button generateReportBtn;
+    
+    @FXML
+    private Button quickRangeBtn;
+    
+    @FXML
+    private RadioButton ordersReport;
+    
+    @FXML
+    private RadioButton customersReport;
+    
+    @FXML
+    private RadioButton complaintsReport;
+    
+    @FXML
+    private LineChart<String, Number> revenueChart;
+    
+    @FXML
+    private CategoryAxis revenueXAxis;
+    
+    @FXML
+    private NumberAxis revenueYAxis;
+    
+    @FXML
+    private PieChart productChart;
+    
+    @FXML
+    private Label totalOrdersLbl;
+    
+    @FXML
+    private Label totalRevenueLbl;
+    
+    @FXML
+    private Label avgOrderLbl;
+    
+    @FXML
+    private Label topProductLbl;
+    
+    @FXML
+    private Label totalRefundsLbl;
+    
+    @FXML
+    private Button exportPdfBtn;
+    
+    @FXML
+    private Button exportCsvBtn;
+    
+    @FXML
+    private Button emailReportBtn;
+    
+    @FXML
+    private Button refreshBtn;
+    
+    @FXML
+    private Button backBtn;
+    
+    @FXML
+    private Label totalOrdersLabel;
+    
+    @FXML
+    private Label totalRevenueLabel;
+    
+    @FXML
+    private Label avgOrderLabel;
+    
+    @FXML
+    private Label topProductLabel;
+    
+    // Sample data for demonstration (will be replaced with real data)
+    private Map<String, Double> revenueData = new HashMap<>();
+    private Map<String, Integer> productData = new HashMap<>();
+    private Map<String, Integer> customerData = new HashMap<>();
+    private Map<String, Integer> complaintData = new HashMap<>();
+    private Map<String, Double> branchData = new HashMap<>();
+    
+    private int totalOrders = 0;
+    private double totalRevenue = 0.0;
+    private double avgOrderValue = 0.0;
+    private String topProduct = "N/A";
+    
+    private ToggleGroup reportTypeGroup;
+
+    // Track order fetching state
+    private List<Order> allOrders = new ArrayList<>();
+    private List<LoginRegCheck> allUsers = new ArrayList<>();
+    private List<Complain> allComplaints = new ArrayList<>();
+    private int pendingOrderRequests = 0;
+    
+    // Add flag to prevent duplicate processing
+    private boolean isProcessingUsers = false;
+    
+    // Add current user field to prevent session loss
+    private LoginRegCheck currentUser;
+
+    @FXML
+    void initialize() {
+        // Ensure we're only registered once
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+            System.out.println("[ReportGenerator] Registered to EventBus");
+        } else {
+            System.out.println("[ReportGenerator] Already registered to EventBus - skipping registration");
+        }
+        
+        setupDatePickers();
+        setupReportTypeGroup();
+        setupCharts();
+        updateQuickRangeButton();
+    }
+    
+    private void setupDatePickers() {
+        // Set default dates (current month)
+        LocalDate now = LocalDate.now();
+        startDatePicker.setValue(now.withDayOfMonth(1));
+        endDatePicker.setValue(now);
+        
+        // Add listeners for date changes
+        startDatePicker.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null && endDatePicker.getValue() != null) {
+                if (newValue.isAfter(endDatePicker.getValue())) {
+                    endDatePicker.setValue(newValue);
+                }
+            }
+        });
+        
+        endDatePicker.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null && startDatePicker.getValue() != null) {
+                if (newValue.isBefore(startDatePicker.getValue())) {
+                    startDatePicker.setValue(newValue);
+                }
+            }
+        });
+    }
+    
+    private void setupReportTypeGroup() {
+        reportTypeGroup = new ToggleGroup();
+        ordersReport.setToggleGroup(reportTypeGroup);
+        customersReport.setToggleGroup(reportTypeGroup);
+        complaintsReport.setToggleGroup(reportTypeGroup);
+        
+        // Default selection
+        ordersReport.setSelected(true);
+        
+        // Add listeners for report type changes
+        reportTypeGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                updateChartsForReportType();
+            }
+        });
+    }
+    
+    private void setupCharts() {
+        // Setup revenue chart using ChartUtils
+        ChartUtils.setupRevenueChart(revenueChart, revenueXAxis, revenueYAxis);
+        
+        // Setup product chart using ChartUtils
+        ChartUtils.setupProductChart(productChart);
+    }
+    
+    private void updateQuickRangeButton() {
+        LocalDate now = LocalDate.now();
+        LocalDate monthStart = now.withDayOfMonth(1);
+        
+        if (startDatePicker.getValue().equals(monthStart) && endDatePicker.getValue().equals(now)) {
+            quickRangeBtn.setText("This Month");
+        } else {
+            quickRangeBtn.setText("Set This Month");
+        }
+    }
+    
+    @FXML
+    void generateReport(ActionEvent event) {
+        if (startDatePicker.getValue() == null || endDatePicker.getValue() == null) {
+            showAlert("Please select both start and end dates.");
+            return;
+        }
+        
+        // Check user permissions using local currentUser field
+        if (currentUser == null) {
+            showAlert("User session not found. Please log in again.");
+            return;
+        }
+        
+        // Only allow employees and admins to access reports
+        if (!currentUser.isType()) {
+            showAlert("Access denied. Only employees and administrators can view reports.");
+            return;
+        }
+        
+        // Reset state for new report generation
+        resetReportState();
+        
+        System.out.println("[ReportGenerator] Generating report: requesting user list...");
+        generateReportBtn.setText("Generating...");
+        generateReportBtn.setDisable(true);
+        // Fetch all users first
+        try {
+            SimpleClient.getClient().sendToServer("asks_for_users");
+            SimpleClient.getClient().sendToServer("getComplaints");
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error fetching data: " + e.getMessage());
+            generateReportBtn.setText("Generate Report");
+            generateReportBtn.setDisable(false);
+        }
+    }
+    
+    private void resetReportState() {
+        // Clear all data and reset counters
+        allOrders.clear();
+        allUsers.clear();
+        allComplaints.clear();
+        pendingOrderRequests = 0;
+        isProcessingUsers = false; // Reset processing flag
+        revenueData.clear();
+        productData.clear();
+        customerData.clear();
+        complaintData.clear();
+        totalOrders = 0;
+        totalRevenue = 0.0;
+        avgOrderValue = 0.0;
+        topProduct = "N/A";
+        
+        System.out.println("[ReportGenerator] Reset report state for new generation");
+    }
+    
+    @FXML
+    void setQuickRange(ActionEvent event) {
+        LocalDate now = LocalDate.now();
+        LocalDate monthStart = now.withDayOfMonth(1);
+        
+        startDatePicker.setValue(monthStart);
+        endDatePicker.setValue(now);
+        
+        updateQuickRangeButton();
+    }
+    
+    private void updateChartsForReportType() {
+        if (ordersReport.isSelected()) {
+            updateOrdersCharts();
+        } else if (customersReport.isSelected()) {
+            updateCustomerCharts();
+        } else if (complaintsReport.isSelected()) {
+            updateComplaintCharts();
+        }
+    }
+    
+    private void updateOrdersCharts() {
+        // Update revenue chart with order data
+        ChartUtils.updateRevenueChart(revenueChart, revenueData);
+        
+        // Update product chart with order distribution
+        ChartUtils.updateProductChart(productChart, productData);
+    }
+    
+    private void updateCustomerCharts() {
+        // Reset chart titles for customers
+        revenueChart.setTitle("Revenue Trend");
+        revenueXAxis.setLabel("Date");
+        revenueYAxis.setLabel("Revenue ($)");
+        productChart.setTitle("Customer Order Distribution");
+        
+        // Update revenue chart with customer segments
+        ChartUtils.updateRevenueChart(revenueChart, revenueData);
+        
+        // Update product chart with customer data - use pre-processed customerData
+        if (customerData.isEmpty()) {
+            // If no customers, show a message
+            productChart.getData().clear();
+            PieChart.Data noData = new PieChart.Data("No Customers", 1);
+            productChart.getData().add(noData);
+        } else {
+            ChartUtils.updateProductChart(productChart, customerData);
+        }
+    }
+    
+    private void updateComplaintCharts() {
+        // Update chart titles for complaints
+        revenueChart.setTitle("Complaints Trend");
+        revenueXAxis.setLabel("Date");
+        revenueYAxis.setLabel("Number of Complaints");
+        
+        // Update revenue chart with complaints trend - use pre-processed revenueData
+        ChartUtils.updateRevenueChart(revenueChart, revenueData);
+        
+        // Update product chart title for complaints
+        productChart.setTitle("Complaint Types Distribution");
+        
+        // Update product chart with complaint types - use pre-processed complaintData
+        if (complaintData.isEmpty()) {
+            // If no complaints, show a message
+            productChart.getData().clear();
+            PieChart.Data noData = new PieChart.Data("No Complaints", 1);
+            productChart.getData().add(noData);
+        } else {
+            ChartUtils.updateProductChart(productChart, complaintData);
+        }
+    }
+    
+    private void updateSummaryStatistics() {
+        RadioButton selected = (RadioButton) reportTypeGroup.getSelectedToggle();
+        if (selected != null && selected.getText().equals("Complaints and Refunds")) {
+            // Show complaints-related statistics
+            int totalComplaints = allComplaints.size();
+            double totalRefunds = getTotalRefunds();
+            int resolvedComplaints = (int) allComplaints.stream()
+                .filter(c -> c != null && c.getComplaint() != null && c.getComplaint().startsWith("answer to"))
+                .count();
+            int pendingComplaints = totalComplaints - resolvedComplaints;
+            
+            totalOrdersLbl.setText(String.valueOf(totalComplaints));
+            totalRevenueLbl.setText(String.format("$%.2f", totalRefunds));
+            avgOrderLbl.setText(String.valueOf(resolvedComplaints));
+            topProductLbl.setText(String.valueOf(pendingComplaints));
+        } else {
+            // Show regular order statistics
+            totalOrdersLbl.setText(String.valueOf(totalOrders));
+            totalRevenueLbl.setText(String.format("$%.2f", totalRevenue));
+            avgOrderLbl.setText(String.format("$%.2f", avgOrderValue));
+            topProductLbl.setText(topProduct);
+        }
+    }
+    
+    private void updateSummaryLabelsForComplaints() {
+        if (totalOrdersLabel != null) totalOrdersLabel.setText("Total Complaints");
+        if (totalRevenueLabel != null) totalRevenueLabel.setText("Total Refunds");
+        if (avgOrderLabel != null) avgOrderLabel.setText("Resolved Complaints");
+        if (topProductLabel != null) topProductLabel.setText("Pending Complaints");
+    }
+    
+    private void updateSummaryLabelsForOrders() {
+        if (totalOrdersLabel != null) totalOrdersLabel.setText("Total Orders");
+        if (totalRevenueLabel != null) totalRevenueLabel.setText("Total Revenue");
+        if (avgOrderLabel != null) avgOrderLabel.setText("Average Order Value");
+        if (topProductLabel != null) topProductLabel.setText("Top Product");
+    }
+    
+    @FXML
+    void exportToPDF(ActionEvent event) {
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save Report");
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Text Files", "*.txt")
+            );
+            fileChooser.setInitialFileName("flower_store_report.txt");
+            
+            File file = fileChooser.showSaveDialog(App.getStage());
+            if (file != null) {
+                PDFExporter.exportToPDF(file, this);
+                showAlert("Report exported successfully to: " + file.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error exporting report: " + e.getMessage());
+        }
+    }
+    
+    @FXML
+    void exportToCSV(ActionEvent event) {
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save CSV Report");
+            fileChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV Files", "*.csv")
+            );
+            fileChooser.setInitialFileName("flower_store_report.csv");
+            
+            File file = fileChooser.showSaveDialog(App.getStage());
+            if (file != null) {
+                exportCSVData(file);
+                showAlert("CSV exported successfully to: " + file.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert("Error exporting CSV: " + e.getMessage());
+        }
+    }
+    
+    private void exportCSVData(File file) throws IOException {
+        try (FileWriter writer = new FileWriter(file)) {
+            // Write header
+            writer.write("Date,Revenue,Orders\n");
+            
+            // Write revenue data
+            List<String> sortedDates = new ArrayList<>(revenueData.keySet());
+            sortedDates.sort(Comparator.naturalOrder());
+            
+            for (String date : sortedDates) {
+                writer.write(String.format("%s,%.2f,%d\n", date, revenueData.get(date), 
+                    (int)(revenueData.get(date) / avgOrderValue)));
+            }
+            
+            // Write summary
+            writer.write("\nSummary\n");
+            writer.write(String.format("Total Orders,%d\n", totalOrders));
+            writer.write(String.format("Total Revenue,%.2f\n", totalRevenue));
+            writer.write(String.format("Average Order Value,%.2f\n", avgOrderValue));
+            writer.write(String.format("Top Product,%s\n", topProduct));
+        }
+    }
+    
+    @FXML
+    void emailReport(ActionEvent event) {
+        // This would integrate with the existing email service
+        showAlert("Email functionality will be implemented soon!");
+    }
+    
+    @FXML
+    void refreshData(ActionEvent event) {
+        generateReport(null); // Just re-fetch real data
+        showAlert("Data refreshed successfully!");
+    }
+    
+    
+    private void showAlert(String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Report Generator");
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
+    }
+    
+    // Getters for PDF export
+    public LineChart<String, Number> getRevenueChart() {
+        return revenueChart;
+    }
+    
+    public PieChart getProductChart() {
+        return productChart;
+    }
+    
+    public Map<String, Double> getRevenueData() {
+        return revenueData;
+    }
+    
+    public Map<String, Integer> getProductData() {
+        return productData;
+    }
+    
+    public int getTotalOrders() {
+        return totalOrders;
+    }
+    
+    public double getTotalRevenue() {
+        return totalRevenue;
+    }
+    
+    public double getAvgOrderValue() {
+        return avgOrderValue;
+    }
+    
+    public String getTopProduct() {
+        return topProduct;
+    }
+    
+    public LocalDate getStartDate() {
+        return startDatePicker.getValue();
+    }
+    
+    public LocalDate getEndDate() {
+        return endDatePicker.getValue();
+    }
+    
+    public String getSelectedReportType() {
+        RadioButton selected = (RadioButton) reportTypeGroup.getSelectedToggle();
+        return selected != null ? selected.getText() : "Orders Summary";
+    }
+    
+    public Map<String, Integer> getComplaintData() {
+        return complaintData;
+    }
+    
+    public double getTotalRefunds() {
+        // Calculate total refunds from all complaints
+        return allComplaints.stream()
+            .filter(c -> c != null && c.getRefundAmount() > 0)
+            .mapToDouble(Complain::getRefundAmount)
+            .sum();
+    }
+    
+    public List<Complain> getAllComplaints() {
+        return allComplaints;
+    }
+
+    // Single EventBus handler for all data types to prevent conflicts
+    @Subscribe
+    public void handleAllEvents(Object event) {
+        try {
+            if (event instanceof List<?>) {
+                List<?> list = (List<?>) event;
+                if (list.isEmpty()) {
+                    System.out.println("[ReportGenerator] Received empty list - this might be orders for a user with no orders");
+                    // Decrement pending requests for empty order lists
+                    pendingOrderRequests--;
+                    if (pendingOrderRequests == 0) {
+                        System.out.println("[ReportGenerator] All user orders received. Total orders: " + allOrders.size());
+                        processOrders(allOrders);
+                    }
+                    return;
+                }
+                
+                Object firstElement = list.get(0);
+                
+                if (firstElement instanceof LoginRegCheck) {
+                    @SuppressWarnings("unchecked")
+                    List<LoginRegCheck> users = (List<LoginRegCheck>) list;
+                    // Only process user list if we're not already processing and if the button is disabled (indicating we're generating a report)
+                    if (!isProcessingUsers && generateReportBtn.isDisabled()) {
+                        handleUsersList(users);
+                    } else {
+                        System.out.println("[ReportGenerator] Ignoring user list - already processing or not generating report");
+                    }
+                } else if (firstElement instanceof Order) {
+                    @SuppressWarnings("unchecked")
+                    List<Order> orders = (List<Order>) list;
+                    handleOrdersList(orders);
+                } else if (firstElement instanceof Complain) {
+                    @SuppressWarnings("unchecked")
+                    List<Complain> complaints = (List<Complain>) list;
+                    handleComplaintsList(complaints);
+                } else {
+                    System.out.println("[ReportGenerator] Received unknown list type: " + firstElement.getClass().getName());
+                }
+            } else if (event instanceof ComplainUpdateEvent) {
+                ComplainUpdateEvent complainEvent = (ComplainUpdateEvent) event;
+                System.out.println("[ReportGenerator] Received ComplainUpdateEvent with size: " + 
+                                 (complainEvent.getUpdatedItems() != null ? complainEvent.getUpdatedItems().size() : 0));
+                handleComplaintsList(complainEvent.getUpdatedItems());
+            } else {
+                System.out.println("[ReportGenerator] Received unknown event: " + event.getClass().getName());
+            }
+        } catch (Exception e) {
+            System.err.println("[ReportGenerator] Error in handleAllEvents: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // Internal methods for processing different data types
+    private void handleUsersList(List<LoginRegCheck> users) {
+        if (isProcessingUsers) {
+            System.out.println("[ReportGenerator] Already processing users, ignoring duplicate user list");
+            return;
+        }
+        
+        System.out.println("[ReportGenerator] Processing user list of size: " + users.size());
+        isProcessingUsers = true;
+        allUsers.clear();
+        allUsers.addAll(users);
+        allOrders.clear();
+        pendingOrderRequests = users.size();
+        
+        // Debug: Print user types to understand the mix
+        System.out.println("[ReportGenerator] User types in system:");
+        for (LoginRegCheck user : users) {
+            System.out.println("  - " + user.getUsername() + " (type: " + user.isType() + ", store: " + user.getStore() + ")");
+        }
+        
+        if (pendingOrderRequests == 0) {
+            System.out.println("[ReportGenerator] No users found, skipping order fetch.");
+            isProcessingUsers = false;
+            processOrders(allOrders);
+            return;
+        }
+        
+        for (LoginRegCheck user : users) {
+            System.out.println("[ReportGenerator] Requesting orders for user: " + user.getUsername() + " (type: " + user.isType() + ")");
+            try {
+                SimpleClient.getClient().sendToServer("getOrdersForUser_" + user.getUsername());
+            } catch (IOException e) {
+                e.printStackTrace();
+                pendingOrderRequests--;
+            }
+        }
+    }
+
+    private void handleOrdersList(List<Order> orders) {
+        System.out.println("[ReportGenerator] Processing orders list of size: " + orders.size());
+        
+        // Add some debugging for empty orders
+        if (orders.isEmpty()) {
+            System.out.println("[ReportGenerator] Received empty orders list - this is normal for users with no orders");
+            pendingOrderRequests--;
+            
+            if (pendingOrderRequests == 0) {
+                System.out.println("[ReportGenerator] All user orders received. Total orders: " + allOrders.size());
+                processOrders(allOrders);
+            }
+            return;
+        }
+        
+        // Debug: Print some order details
+        for (Order order : orders) {
+            System.out.println("[ReportGenerator] Order ID: " + order.getId() + ", Customer: " + order.getCustomerName() + ", Amount: " + order.getTotalAmount());
+        }
+        
+        allOrders.addAll(orders);
+        pendingOrderRequests--;
+        
+        System.out.println("[ReportGenerator] Pending order requests remaining: " + pendingOrderRequests);
+        
+        if (pendingOrderRequests == 0) {
+            System.out.println("[ReportGenerator] All user orders received. Total orders: " + allOrders.size());
+            processOrders(allOrders);
+        }
+    }
+
+    private void handleComplaintsList(List<Complain> complaints) {
+        System.out.println("[ReportGenerator] Processing complaints list of size: " + (complaints != null ? complaints.size() : 0));
+        processComplaints(complaints);
+    }
+
+    // Remove all other EventBus handlers to prevent conflicts
+    // @Subscribe methods removed to prevent multiple handlers for the same data
+
+    private void processOrders(List<Order> orders) {
+        System.out.println("[ReportGenerator] Processing " + orders.size() + " total orders");
+        
+        // If there are no orders, show a message and set default date range
+        if (orders.isEmpty()) {
+            System.out.println("[ReportGenerator] No orders found in the system");
+            // Set default date range to current month if no orders exist
+            LocalDate now = LocalDate.now();
+            if (startDatePicker.getValue() == null) {
+                startDatePicker.setValue(now.withDayOfMonth(1));
+            }
+            if (endDatePicker.getValue() == null) {
+                endDatePicker.setValue(now);
+            }
+            
+            // Clear all data and show empty state
+            revenueData.clear();
+            productData.clear();
+            customerData.clear();
+            complaintData.clear();
+            totalOrders = 0;
+            totalRevenue = 0.0;
+            avgOrderValue = 0.0;
+            topProduct = "N/A";
+            
+            Platform.runLater(() -> {
+                updateChartsForReportType();
+                updateSummaryStatistics();
+                generateReportBtn.setText("Generate Report");
+                generateReportBtn.setDisable(false);
+                showAlert("No orders found in the system for the selected date range.\n\nThis could mean:\n• No orders have been placed yet\n• All orders are outside the selected date range\n• The database is empty\n\nTry selecting a different date range or check if orders exist in the system.");
+                isProcessingUsers = false; // Reset flag when done
+            });
+            return;
+        }
+        
+        // Debug: Print all orders with their dates
+        System.out.println("[ReportGenerator] All orders in system:");
+        for (Order order : orders) {
+            LocalDate orderDate = order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+            System.out.println("  - Order ID: " + order.getId() + ", Customer: " + order.getCustomerName() + 
+                             ", Date: " + orderDate + ", Amount: " + order.getTotalAmount());
+        }
+        
+        // If there are orders, set the default date range to the earliest and latest order dates
+        LocalDate earliest = orders.stream()
+            .map(order -> order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate())
+            .min(LocalDate::compareTo).orElse(startDatePicker.getValue());
+        LocalDate latest = orders.stream()
+            .map(order -> order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate())
+            .max(LocalDate::compareTo).orElse(endDatePicker.getValue());
+        
+        System.out.println("[ReportGenerator] Order date range: " + earliest + " to " + latest);
+        System.out.println("[ReportGenerator] Selected date range: " + startDatePicker.getValue() + " to " + endDatePicker.getValue());
+        
+        if (startDatePicker.getValue() == null || endDatePicker.getValue() == null ||
+            startDatePicker.getValue().isAfter(latest) || endDatePicker.getValue().isBefore(earliest)) {
+            startDatePicker.setValue(earliest);
+            endDatePicker.setValue(latest);
+            System.out.println("[ReportGenerator] Adjusted date range to: " + earliest + " to " + latest);
+        }
+        
+        // Filter by date range
+        LocalDate start = startDatePicker.getValue();
+        LocalDate end = endDatePicker.getValue();
+        revenueData.clear();
+        productData.clear();
+        customerData.clear();
+        Set<String> customers = new HashSet<>();
+        totalOrders = 0;
+        totalRevenue = 0.0;
+        
+        System.out.println("[ReportGenerator] Filtering orders between " + start + " and " + end);
+        
+        for (Order order : orders) {
+            LocalDate orderDate = order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+            if ((orderDate.isEqual(start) || orderDate.isAfter(start)) && (orderDate.isEqual(end) || orderDate.isBefore(end))) {
+                String dateStr = orderDate.toString();
+                revenueData.put(dateStr, revenueData.getOrDefault(dateStr, 0.0) + order.getTotalAmount());
+                totalRevenue += order.getTotalAmount();
+                totalOrders++;
+                System.out.println("[ReportGenerator] Including order: " + order.getId() + " from " + orderDate + " amount: " + order.getTotalAmount());
+                
+                for (CartItem item : order.getItems()) {
+                    String productName = item.getFlower().getFlowerName();
+                    productData.put(productName, productData.getOrDefault(productName, 0) + item.getQuantity());
+                }
+                customers.add(order.getCustomerEmail());
+            } else {
+                System.out.println("[ReportGenerator] Excluding order: " + order.getId() + " from " + orderDate + " (outside date range)");
+            }
+        }
+        
+        avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0.0;
+        topProduct = productData.entrySet().stream().max(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse("N/A");
+        customerData.put("Unique Customers", customers.size());
+        
+        System.out.println("[ReportGenerator] Final stats - Orders: " + totalOrders + ", Revenue: " + totalRevenue + 
+                         ", Avg: " + avgOrderValue + ", Customers: " + customers.size());
+        
+        Platform.runLater(() -> {
+            updateChartsForReportType();
+            updateSummaryStatistics();
+            generateReportBtn.setText("Generate Report");
+            generateReportBtn.setDisable(false);
+            isProcessingUsers = false; // Reset flag when done
+        });
+    }
+
+    private void processComplaints(List<Complain> complaints) {
+        if (complaints == null) {
+            System.out.println("[ReportGenerator] No complaints to process");
+            return;
+        }
+        
+        // Store all complaints for refund calculations
+        allComplaints.clear();
+        allComplaints.addAll(complaints);
+        
+        complaintData.clear();
+        
+        for (Complain c : complaints) {
+            if (c != null && c.getComplaint() != null) {
+                String type = categorizeComplaint(c.getComplaint());
+                complaintData.put(type, complaintData.getOrDefault(type, 0) + 1);
+            }
+        }
+        
+        // Calculate total refunds separately
+        final double totalRefunds = complaints.stream()
+            .filter(c -> c != null && c.getRefundAmount() > 0)
+            .mapToDouble(Complain::getRefundAmount)
+            .sum();
+        
+        // Update the total refunds label
+        Platform.runLater(() -> {
+            if (totalRefundsLbl != null) {
+                totalRefundsLbl.setText(String.format("$%.2f", totalRefunds));
+            }
+            updateChartsForReportType();
+            updateSummaryStatistics();
+        });
+    }
+
+    private String categorizeComplaint(String complaintText) {
+        if (complaintText == null) return "Other";
+        String lower = complaintText.toLowerCase();
+        if (lower.contains("delivery")) return "Delivery Issues";
+        if (lower.contains("refund")) return "Refunds";
+        if (lower.contains("quality")) return "Quality Issues";
+        if (lower.contains("wrong")) return "Wrong Items";
+        if (lower.contains("service")) return "Customer Service";
+        return "Other";
+    }
+
+    // Listen for order updates from server
+    @Subscribe
+    public void handleOrderUpdate(String message) {
+        if ("update_catalog_after_change".equals(message)) {
+            System.out.println("[ReportGenerator] Received order update notification, refreshing data...");
+            // Automatically refresh data when new orders are created
+            Platform.runLater(() -> {
+                if (startDatePicker.getValue() != null && endDatePicker.getValue() != null) {
+                    generateReport(null);
+                }
+            });
+        }
+    }
+
+    // Add methods to manage current user
+    public void setCurrentUser(LoginRegCheck user) {
+        this.currentUser = user;
+        System.out.println("[ReportGenerator] Current user set to: " + (user != null ? user.getUsername() : "null"));
+    }
+    
+    public LoginRegCheck getCurrentUser() {
+        return currentUser;
+    }
+    
+    // Add cleanup method to be called when window is closed
+    public void cleanup() {
+        if (EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().unregister(this);
+            System.out.println("[ReportGenerator] Cleanup: Unregistered from EventBus");
+        }
+    }
+} 

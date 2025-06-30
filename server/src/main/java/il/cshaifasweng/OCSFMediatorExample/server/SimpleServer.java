@@ -39,6 +39,8 @@ import il.cshaifasweng.OCSFMediatorExample.server.EmailService;
 
 public class SimpleServer extends AbstractServer {
 	private static ArrayList<SubscribedClient> SubscribersList = new ArrayList<>();
+	// Add a map to track user-client associations
+	private static Map<ConnectionToClient, String> clientUserMap = new HashMap<>();
 
 	public SimpleServer(int port) {
 		super(port);
@@ -72,6 +74,44 @@ public class SimpleServer extends AbstractServer {
 			}
 		}
 		else if(msgString.startsWith("remove client")){
+			// Get the username associated with this client
+			String username = clientUserMap.get(client);
+			
+			if (username != null) {
+				System.out.println("Client disconnected, logging out user: " + username);
+				
+				// Log out the user in the database
+				Session session = null;
+				try {
+					session = App.getSessionFactory().openSession();
+					session.beginTransaction();
+
+					CriteriaBuilder builder = session.getCriteriaBuilder();
+					CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
+					Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
+					query.select(root).where(builder.equal(root.get("username"), username));
+
+					LoginRegCheck userInDb = session.createQuery(query).uniqueResult();
+
+					if (userInDb != null) {
+						userInDb.setIsLogin(0); // Set to logged out
+						session.update(userInDb);
+						System.out.println("User " + username + " logged out due to client disconnect");
+					}
+
+					session.getTransaction().commit();
+				} catch (Exception e) {
+					if (session != null) session.getTransaction().rollback();
+					e.printStackTrace();
+				} finally {
+					if (session != null) session.close();
+				}
+				
+				// Remove from tracking
+				clientUserMap.remove(client);
+			}
+			
+			// Remove from subscribers list
 			if(!SubscribersList.isEmpty()){
 				for(SubscribedClient subscribedClient: SubscribersList){
 					if(subscribedClient.getClient().equals(client)){
@@ -947,6 +987,16 @@ public class SimpleServer extends AbstractServer {
 				if (userInDb != null) {
 					userInDb.setIsLogin(new_state);
 					session.update(userInDb);
+					
+					// Track user-client association when user logs in
+					if (new_state == 1) {
+						clientUserMap.put(client, user.getUsername());
+						System.out.println("User " + user.getUsername() + " logged in and associated with client");
+					} else {
+						// User logged out, remove from tracking
+						clientUserMap.remove(client);
+						System.out.println("User " + user.getUsername() + " logged out and removed from client tracking");
+					}
 				}
 
 				session.getTransaction().commit();
@@ -1689,23 +1739,33 @@ public class SimpleServer extends AbstractServer {
 
 				List<Complain> matchingComplaints = session.createQuery(query).getResultList();
 
+				// Also update the user's receive_answer flag to false since they're checking their answers
+				CriteriaQuery<LoginRegCheck> userQuery = builder.createQuery(LoginRegCheck.class);
+				Root<LoginRegCheck> userRoot = userQuery.from(LoginRegCheck.class);
+				userQuery.select(userRoot).where(builder.equal(userRoot.get("username"), username));
+				
+				List<LoginRegCheck> users = session.createQuery(userQuery).getResultList();
+				if (!users.isEmpty()) {
+					LoginRegCheck user = users.get(0);
+					user.set_receive_answer(false); // User has seen their answers
+					session.update(user);
+					System.out.println("Updated user " + username + " receive_answer flag to false");
+				}
+
 				session.getTransaction().commit();
 
 				if (!matchingComplaints.isEmpty()) {
-
 					Complain latest = matchingComplaints.stream()
 							.max((c1, c2) -> c1.getTimestamp().compareTo(c2.getTimestamp()))
 							.orElse(null);
 
-					if (latest != null)
-					{
+					if (latest != null) {
 						System.out.println("Found complaint: " + latest.getComplaint());
 						client.sendToClient(latest);
 					}
 				} else {
 					System.out.println("No matching complaints found for: " + toSearch);
 				}
-
 
 			} catch (Exception e) {
 				if (session != null) session.getTransaction().rollback();
@@ -2198,6 +2258,58 @@ public class SimpleServer extends AbstractServer {
 			e.printStackTrace();
 		}
 		return result;
+	}
+	
+	@Override
+	protected void clientDisconnected(ConnectionToClient client) {
+		// Handle unexpected client disconnections
+		String username = clientUserMap.get(client);
+		
+		if (username != null) {
+			System.out.println("Client unexpectedly disconnected, logging out user: " + username);
+			
+			// Log out the user in the database
+			Session session = null;
+			try {
+				session = App.getSessionFactory().openSession();
+				session.beginTransaction();
+
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery<LoginRegCheck> query = builder.createQuery(LoginRegCheck.class);
+				Root<LoginRegCheck> root = query.from(LoginRegCheck.class);
+				query.select(root).where(builder.equal(root.get("username"), username));
+
+				LoginRegCheck userInDb = session.createQuery(query).uniqueResult();
+
+				if (userInDb != null) {
+					userInDb.setIsLogin(0); // Set to logged out
+					session.update(userInDb);
+					System.out.println("User " + username + " logged out due to unexpected client disconnect");
+				}
+
+				session.getTransaction().commit();
+			} catch (Exception e) {
+				if (session != null) session.getTransaction().rollback();
+				e.printStackTrace();
+			} finally {
+				if (session != null) session.close();
+			}
+			
+			// Remove from tracking
+			clientUserMap.remove(client);
+		}
+		
+		// Remove from subscribers list
+		if(!SubscribersList.isEmpty()){
+			for(SubscribedClient subscribedClient: SubscribersList){
+				if(subscribedClient.getClient().equals(client)){
+					SubscribersList.remove(subscribedClient);
+					break;
+				}
+			}
+		}
+		
+		super.clientDisconnected(client);
 	}
 
 }
