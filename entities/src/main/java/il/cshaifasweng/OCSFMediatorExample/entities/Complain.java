@@ -20,8 +20,9 @@ public class Complain implements Serializable {
     private LocalDateTime timestamp;
     private String clientName;
     private double refundAmount;
-
-
+    
+    // Store ID where the complaint was created
+    private int storeId;
 
     public Complain() {} // ctor
 
@@ -30,14 +31,35 @@ public class Complain implements Serializable {
         this.complaint = complaint;
         this.timestamp = LocalDateTime.now();
         this.order = null;
-        this.refundAmount =0;
+        this.refundAmount = 0;
+        this.storeId = 0; // Default to 0 (no store assigned)
     }
+    
     public Complain(String complaint, Order order){
         super();
         this.complaint = complaint;
         this.timestamp = LocalDateTime.now();
         this.order = order;
-        this.refundAmount =0;
+        this.refundAmount = 0;
+        this.storeId = 0; // Default to 0 (no store assigned)
+    }
+    
+    public Complain(String complaint, int storeId){
+        super();
+        this.complaint = complaint;
+        this.timestamp = LocalDateTime.now();
+        this.order = null;
+        this.refundAmount = 0;
+        this.storeId = storeId;
+    }
+    
+    public Complain(String complaint, Order order, int storeId){
+        super();
+        this.complaint = complaint;
+        this.timestamp = LocalDateTime.now();
+        this.order = order;
+        this.refundAmount = 0;
+        this.storeId = storeId;
     }
 
     public Order getOrder() {
@@ -68,4 +90,12 @@ public class Complain implements Serializable {
     public void setClient(String name) { clientName = name; }
 
     public int getId() { return id; }
+    
+    public int getStoreId() {
+        return storeId;
+    }
+    
+    public void setStoreId(int storeId) {
+        this.storeId = storeId;
+    }
 }

@@ -185,6 +185,8 @@ public class complain_controller implements Initializable {
         Complain complain = new Complain(client_complaint);
         if (currentUser != null) {
             complain.setClient(currentUser.getUsername());
+            // Set store ID for report filtering
+            complain.setStoreId(currentUser.getStore());
         }
         
         // If an order is selected, include order information

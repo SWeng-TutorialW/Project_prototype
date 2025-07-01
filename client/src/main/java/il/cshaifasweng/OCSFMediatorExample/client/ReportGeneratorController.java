@@ -360,14 +360,19 @@ public class ReportGeneratorController {
         // Update revenue chart with customer segments
         ChartUtils.updateRevenueChart(revenueChart, revenueData);
 
-        // Update product chart with customer data - show customer names and their order counts
+        // Update product chart with customer data - show customer names and their order counts (filtered by store)
         Map<String, Integer> customerOrderCounts = new HashMap<>();
         for (Order order : allOrders) {
             LocalDate orderDate = order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
             LocalDate start = startDatePicker.getValue();
             LocalDate end = endDatePicker.getValue();
 
-            if ((orderDate.isEqual(start) || orderDate.isAfter(start)) && (orderDate.isEqual(end) || orderDate.isBefore(end))) {
+            // Check date range and store filter
+            boolean inDateRange = (orderDate.isEqual(start) || orderDate.isAfter(start)) && 
+                                 (orderDate.isEqual(end) || orderDate.isBefore(end));
+            boolean inStoreRange = selectedStoreId == -1 || order.getStoreId() == selectedStoreId;
+
+            if (inDateRange && inStoreRange) {
                 String customerName = order.getCustomerName();
                 customerOrderCounts.put(customerName, customerOrderCounts.getOrDefault(customerName, 0) + 1);
             }
@@ -477,16 +482,20 @@ public class ReportGeneratorController {
             writer.write(String.format("Total Complaints,%d,%.2f\n", 
                 complaintData.values().stream().mapToInt(Integer::intValue).sum(), totalComplaintRefunds));
 
-            // Write detailed complaint information
+            // Write detailed complaint information (filtered by store)
             writer.write("\nDetailed Complaint Information\n");
             writer.write("Client,Complaint,Refund Amount\n");
             
             for (Complain complaint : allComplaints) {
                 if (complaint != null) {
-                    String clientName = complaint.getClient() != null ? complaint.getClient() : "Unknown";
-                    String complaintText = complaint.getComplaint() != null ? complaint.getComplaint() : "No complaint text";
-                    double refundAmount = complaint.getRefundAmount();
-                    writer.write(String.format("%s,%s,%.2f\n", clientName, complaintText, refundAmount));
+                    // Filter by store ID
+                    boolean inStoreRange = selectedStoreId == -1 || complaint.getStoreId() == selectedStoreId;
+                    if (inStoreRange) {
+                        String clientName = complaint.getClient() != null ? complaint.getClient() : "Unknown";
+                        String complaintText = complaint.getComplaint() != null ? complaint.getComplaint() : "No complaint text";
+                        double refundAmount = complaint.getRefundAmount();
+                        writer.write(String.format("%s,%s,%.2f\n", clientName, complaintText, refundAmount));
+                    }
                 }
             }
         }
@@ -508,6 +517,7 @@ public class ReportGeneratorController {
     private double getRefundAmountForComplaintType(String complaintType) {
         return allComplaints.stream()
                 .filter(c -> c != null && c.getComplaint() != null && categorizeComplaint(c.getComplaint()).equals(complaintType))
+                .filter(c -> selectedStoreId == -1 || c.getStoreId() == selectedStoreId) // Filter by store
                 .mapToDouble(Complain::getRefundAmount)
                 .sum();
     }
@@ -583,18 +593,22 @@ public class ReportGeneratorController {
         return allComplaints;
     }
 
-
+    public int getSelectedStoreId() {
+        return selectedStoreId;
+    }
 
     public double getTotalRefunds() {
-        // Calculate total refunds from all complaints
+        // Calculate total refunds from complaints (filtered by store)
         double complaintRefunds = allComplaints.stream()
                 .filter(c -> c != null && c.getRefundAmount() > 0)
+                .filter(c -> selectedStoreId == -1 || c.getStoreId() == selectedStoreId) // Filter by store
                 .mapToDouble(Complain::getRefundAmount)
                 .sum();
         
-        // Calculate total refunds from canceled orders
+        // Calculate total refunds from canceled orders (filtered by store)
         double orderRefunds = allOrders.stream()
                 .filter(o -> o != null && "CANCELLED".equals(o.getStatus()) && o.getRefundAmount() > 0)
+                .filter(o -> selectedStoreId == -1 || o.getStoreId() == selectedStoreId) // Filter by store
                 .mapToDouble(Order::getRefundAmount)
                 .sum();
         
@@ -871,7 +885,7 @@ public class ReportGeneratorController {
             return;
         }
 
-        // Store all complaints for refund calculations (no store filtering for complaints)
+        // Store all complaints for refund calculations (with store filtering)
         allComplaints.clear();
         allComplaints.addAll(complaints);
 
@@ -879,8 +893,12 @@ public class ReportGeneratorController {
 
         for (Complain c : complaints) {
             if (c != null && c.getComplaint() != null) {
-                String type = categorizeComplaint(c.getComplaint());
-                complaintData.put(type, complaintData.getOrDefault(type, 0) + 1);
+                // Filter by store ID
+                boolean inStoreRange = selectedStoreId == -1 || c.getStoreId() == selectedStoreId;
+                if (inStoreRange) {
+                    String type = categorizeComplaint(c.getComplaint());
+                    complaintData.put(type, complaintData.getOrDefault(type, 0) + 1);
+                }
             }
         }
 
