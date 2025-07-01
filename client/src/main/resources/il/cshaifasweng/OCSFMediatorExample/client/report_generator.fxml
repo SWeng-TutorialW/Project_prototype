@@ -54,7 +54,7 @@
                                          style="-fx-font-size: 14;" />
                            </children>
                         </VBox>
-                        <VBox spacing="5" fx:id="storeSelectionContainer" visible="false">
+                        <VBox spacing="5" fx:id="storeSelectionContainer" visible="true">
                            <children>
                               <Label text="Store:" style="-fx-font-weight: bold; -fx-text-fill: #C8A2C8;" />
                               <ComboBox fx:id="storeComboBox" promptText="Select store" 
@@ -98,8 +98,7 @@
                                      style="-fx-font-size: 14; -fx-text-fill: #C8A2C8;" text="📦 Orders Summary" />
                         <RadioButton fx:id="customersReport" mnemonicParsing="false" 
                                      style="-fx-font-size: 14; -fx-text-fill: #C8A2C8;" text="👥 Customer Analysis" />
-                        <RadioButton fx:id="complaintsReport" mnemonicParsing="false" 
-                                     style="-fx-font-size: 14; -fx-text-fill: #C8A2C8;" text="Complaints and Refunds" />
+
                      </children>
                      <padding>
                         <Insets bottom="15" />
