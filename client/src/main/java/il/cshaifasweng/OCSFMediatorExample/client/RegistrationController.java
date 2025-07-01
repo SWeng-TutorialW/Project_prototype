@@ -318,7 +318,7 @@ public class RegistrationController {
     @FXML
     void initialize() throws IOException {
         EventBus.getDefault().register(this);
-
+        regIdTxtB.setDisable(true);
         if(gotFromConnectScene){
             gotFromConnectScene = false;
             logAnchPane.setVisible(false);
@@ -419,6 +419,7 @@ public class RegistrationController {
                 alert.setHeaderText("What is a Yearly Subscription?");
                 alert.setContentText("A yearly subscription allows customers to shop in all of our stores. It costs 100 shekels and grants a 10% discount on every purchase above 50 shekels.");
                 store = 4;
+                regIdTxtB.setDisable(false);
                 is_yearly_subscription = true;
                 select_store_label.setVisible(false);
                 select_store.setVisible(false);

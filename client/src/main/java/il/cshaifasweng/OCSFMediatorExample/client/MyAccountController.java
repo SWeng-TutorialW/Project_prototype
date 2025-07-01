@@ -136,7 +136,6 @@ public class MyAccountController {
         // AnchorPane margins
         loadUserInfo();
         userChangeTxtB.setEditable(false);
-        userChangeTxtB.setDisable(true);
         AnchorPane.setBottomAnchor(my_account_data, 58.0);
         AnchorPane.setTopAnchor(my_account_data, 58.0);
         AnchorPane.setRightAnchor(my_account_data, 89.0);
@@ -486,16 +485,12 @@ public class MyAccountController {
 
                 // Add subscription order to user's orders
                 Order subscriptionOrder = new Order(current_User.getUsername(), current_User.getEmail(), current_User);
-                // Set the store ID where the order was created (user's store)
-                subscriptionOrder.setStoreId(current_User.getStore());
                 subscriptionOrder.setStatus("CONFIRMED");
                 subscriptionOrder.setTotalAmount(100.0); // Assuming subscription price is 100
                 subscriptionOrder.setDiscountAmount(0.0);
                 subscriptionOrder.setRequiresDelivery(false);
                 Flower subscriptionFlower = new Flower("Yearly Subscription", 100.0, "Subscription");
-                // For network users, mark subscription items as coming from "Network"
-                String storeName = (current_User.getStore() == 4) ? "Network" : current_User.getStoreName();
-                CartItem subscriptionItem = new CartItem(subscriptionFlower, 1, storeName);
+                CartItem subscriptionItem = new CartItem(subscriptionFlower, 1, current_User.getStoreName());
                 subscriptionOrder.addItem(subscriptionItem);
                 // Optionally, persist or notify the system about the new order
                 // For now, just add to OrdersHistoryController if possible
