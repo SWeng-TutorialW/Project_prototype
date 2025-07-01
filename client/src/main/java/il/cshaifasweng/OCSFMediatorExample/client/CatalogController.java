@@ -562,6 +562,20 @@ public class CatalogController {
         }
     }
 
+    @Subscribe
+    public void handleComplaintsList(Object obj) {
+        if (obj instanceof List<?>) {
+            List<?> list = (List<?>) obj;
+            if (!list.isEmpty() && list.get(0) instanceof Complain) {
+                List<Complain> complaints = (List<Complain>) list;
+                // המשך טיפול רגיל בתלונות
+            } else {
+                // זה לא Complains – לדוגמה Orders – אז מתעלמים
+                System.out.println("[CatalogController] Ignored message – not a complaints list.");
+            }
+        }
+    }
+
     public void setCatalogSorting(List<Flower> flowerList) {
         Platform.runLater(() -> {
             flowersList_c = flowerList;

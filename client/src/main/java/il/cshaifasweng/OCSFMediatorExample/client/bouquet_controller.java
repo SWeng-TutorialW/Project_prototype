@@ -337,6 +337,10 @@ public class bouquet_controller {
         customFlower.setFlowerPrice(priceValue);
         // Add to cart
         String storeName = catalogController != null && catalogController.getUser() != null ? catalogController.getUser().getStoreName() : "Custom";
+        // For network users, mark items as coming from "Network" instead of specific store
+        if (catalogController != null && catalogController.getUser() != null && catalogController.getUser().getStore() == 4) {
+            storeName = "Network";
+        }
         CartItem cartItem = new CartItem(customFlower, 1, storeName);
         OrderPageController.getCartItems().add(cartItem);
         // Notify cart window to refresh

@@ -13,6 +13,7 @@
             <TableColumn fx:id="emailCol" text="Email" />
             <TableColumn fx:id="storeCol" text="Store" />
             <TableColumn fx:id="typeCol" text="Type" />
+            <TableColumn fx:id="employeeTypeCol" text="Employee Type" />
             <TableColumn fx:id="subscriptionCol" text="yearly subscription" />
             <TableColumn fx:id="isLoginCol" text="Login Mode" />
         </columns>

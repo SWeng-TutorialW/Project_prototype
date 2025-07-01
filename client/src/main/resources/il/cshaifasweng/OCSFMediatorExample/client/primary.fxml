@@ -46,7 +46,7 @@
                   <Font size="24.0" />
                </font>
             </Label>
-            <TextField fx:id="port_box" prefHeight="30.0" prefWidth="196.0" text="3000" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <TextField fx:id="port_box" prefHeight="30.0" prefWidth="196.0" text="" GridPane.columnIndex="1" GridPane.rowIndex="2">
                <font>
                   <Font size="14.0" />
                </font>

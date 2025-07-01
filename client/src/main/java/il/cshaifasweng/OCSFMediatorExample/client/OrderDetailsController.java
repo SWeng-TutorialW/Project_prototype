@@ -27,6 +27,9 @@ public class OrderDetailsController {
     private Label statusLabel;
     
     @FXML
+    private Label storeLabel;
+    
+    @FXML
     private Label customerNameLabel;
     
     @FXML
@@ -159,6 +162,7 @@ public class OrderDetailsController {
         orderIdLabel.setText(String.valueOf(currentOrder.getId()));
         orderDateLabel.setText(dateFormat.format(currentOrder.getOrderDate()));
         statusLabel.setText(currentOrder.getStatus());
+        storeLabel.setText(getStoreNameFromId(currentOrder.getStoreId()));
         customerNameLabel.setText(currentOrder.getCustomerName());
         customerEmailLabel.setText(currentOrder.getCustomerEmail());
         
@@ -260,5 +264,20 @@ public class OrderDetailsController {
     @FXML
     private void handleBackButton() {
         ((Stage) backButton.getScene().getWindow()).close();
+    }
+    
+    /**
+     * Convert store ID to store name
+     * @param storeId The store ID
+     * @return The store name
+     */
+    private String getStoreNameFromId(int storeId) {
+        switch (storeId) {
+            case 1: return "Haifa";
+            case 2: return "Krayot";
+            case 3: return "Nahariyya";
+            case 4: return "Network";
+            default: return "Unknown Store";
+        }
     }
 } 

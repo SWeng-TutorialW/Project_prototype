@@ -27,7 +27,8 @@ public class UsersTableController {
     @FXML private TableColumn<LoginRegCheck, String> emailCol;
     @FXML private TableColumn<LoginRegCheck, String> typeCol;
     @FXML private TableColumn<LoginRegCheck, String> storeCol;
-    @FXML private TableColumn<LoginRegCheck, Boolean> subscriptionCol;
+    @FXML private TableColumn<LoginRegCheck, String> subscriptionCol;
+    @FXML private TableColumn<LoginRegCheck, String> employeeTypeCol;
     @FXML private TableColumn<LoginRegCheck, String> isLoginCol;
     @FXML private TableColumn<LoginRegCheck, String> phoneCol;
     @FXML private TableColumn<LoginRegCheck, String> fullNameCol;
@@ -36,6 +37,9 @@ public class UsersTableController {
     private ObservableList<LoginRegCheck> users_date;
     List<LoginRegCheck> users ;
     private final ObservableList<String> storeOptions = FXCollections.observableArrayList("Haifa", "Krayot", "Nahariyya", "Network");
+    private final ObservableList<String> subscriptionOptions = FXCollections.observableArrayList("0", "1");
+    private final ObservableList<String> typeOptions = FXCollections.observableArrayList("0", "1");
+    private final ObservableList<String> employeeTypeOptions = FXCollections.observableArrayList("0", "1", "2", "3");
 
 
 
@@ -51,8 +55,25 @@ public class UsersTableController {
 
 
         typeCol.setCellValueFactory(cellData -> {
-            String typeString = cellData.getValue().isType() ? "employee" : "client";
-            return new ReadOnlyStringWrapper(typeString);
+            String typeValue = cellData.getValue().isType() ? "1" : "0";
+            return new javafx.beans.property.SimpleStringProperty(typeValue);
+        });
+        
+        typeCol.setOnEditCommit(event -> {
+            LoginRegCheck user = event.getRowValue();
+            String newTypeValue = event.getNewValue();
+            String oldTypeValue = event.getOldValue();
+            
+            if (oldTypeValue.equals(newTypeValue)) {
+                System.out.println("type not changed");
+                return;
+            }
+            
+            boolean newType = "1".equals(newTypeValue);
+            user.setType(newType);
+            saveChanges(user, "type", newTypeValue);
+            
+            System.out.println("Updated type for user " + user.getUsername() + " to: " + newTypeValue);
         });
         phoneCol.setCellFactory(col -> new TextFieldTableCell<>(new DefaultStringConverter()));
         phoneCol.setOnEditCommit(event -> {
@@ -171,7 +192,57 @@ public class UsersTableController {
             return new ReadOnlyStringWrapper(value);
         });
 
-        subscriptionCol.setCellValueFactory(cellData -> new javafx.beans.property.SimpleBooleanProperty(cellData.getValue().is_yearly_subscription()).asObject());
+        subscriptionCol.setCellValueFactory(cellData -> {
+            String subscriptionValue = cellData.getValue().is_yearly_subscription() ? "1" : "0";
+            return new javafx.beans.property.SimpleStringProperty(subscriptionValue);
+        });
+        
+        subscriptionCol.setOnEditCommit(event -> {
+            LoginRegCheck user = event.getRowValue();
+            String newSubscriptionValue = event.getNewValue();
+            String oldSubscriptionValue = event.getOldValue();
+            
+            if (oldSubscriptionValue.equals(newSubscriptionValue)) {
+                System.out.println("subscription not changed");
+                return;
+            }
+            
+            boolean newSubscription = "1".equals(newSubscriptionValue);
+            user.set_yearly_subscription(newSubscription);
+            
+            // Handle subscription date
+            if (newSubscription) {
+                user.setSubscriptionStartDate(java.time.LocalDate.now());
+            } else {
+                user.setSubscriptionStartDate(null);
+            }
+            
+            saveChanges(user, "yearly_subscription", newSubscriptionValue);
+            
+            System.out.println("Updated yearly subscription for user " + user.getUsername() + " to: " + newSubscriptionValue);
+        });
+
+        employeeTypeCol.setCellValueFactory(cellData -> {
+            String employeeTypeValue = String.valueOf(cellData.getValue().getEmployeetype());
+            return new javafx.beans.property.SimpleStringProperty(employeeTypeValue);
+        });
+        
+        employeeTypeCol.setOnEditCommit(event -> {
+            LoginRegCheck user = event.getRowValue();
+            String newEmployeeTypeValue = event.getNewValue();
+            String oldEmployeeTypeValue = event.getOldValue();
+            
+            if (oldEmployeeTypeValue.equals(newEmployeeTypeValue)) {
+                System.out.println("employee type not changed");
+                return;
+            }
+            
+            int newEmployeeType = Integer.parseInt(newEmployeeTypeValue);
+            user.setEmployeetype(newEmployeeType);
+            saveChanges(user, "Employeetype", newEmployeeTypeValue);
+            
+            System.out.println("Updated employee type for user " + user.getUsername() + " to: " + newEmployeeTypeValue);
+        });
 
 
 
@@ -215,7 +286,41 @@ public class UsersTableController {
         });
 
 
-        //subscriptionCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        subscriptionCol.setCellFactory(col -> new ComboBoxTableCell<LoginRegCheck, String>(subscriptionOptions) {
+            @Override
+            public void startEdit() {
+                LoginRegCheck user = getTableView().getItems().get(getIndex());
+                if (user.getIsLogin() == 1) {
+                    System.out.println("Blocked subscription edit for logged-in user: " + user.getUsername());
+                    return;
+                }
+                super.startEdit();
+            }
+        });
+
+        typeCol.setCellFactory(col -> new ComboBoxTableCell<LoginRegCheck, String>(typeOptions) {
+            @Override
+            public void startEdit() {
+                LoginRegCheck user = getTableView().getItems().get(getIndex());
+                if (user.getIsLogin() == 1) {
+                    System.out.println("Blocked type edit for logged-in user: " + user.getUsername());
+                    return;
+                }
+                super.startEdit();
+            }
+        });
+
+        employeeTypeCol.setCellFactory(col -> new ComboBoxTableCell<LoginRegCheck, String>(employeeTypeOptions) {
+            @Override
+            public void startEdit() {
+                LoginRegCheck user = getTableView().getItems().get(getIndex());
+                if (user.getIsLogin() == 1) {
+                    System.out.println("Blocked employee type edit for logged-in user: " + user.getUsername());
+                    return;
+                }
+                super.startEdit();
+            }
+        });
 
         usersTable.setEditable(true);
 

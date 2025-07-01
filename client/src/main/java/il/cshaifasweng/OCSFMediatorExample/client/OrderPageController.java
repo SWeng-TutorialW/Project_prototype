@@ -243,7 +243,9 @@ public class OrderPageController {
                     }
                 }
                 if (!found) {
-                    CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
+                    // For network users, mark items as coming from "Network" instead of specific store
+                    String storeForCart = (user != null && user.getStore() == 4) ? "Network" : this.store;
+                    CartItem cartItem = new CartItem(selectedFlower, quantity, storeForCart);
                     cartItems.add(cartItem);
                     System.out.println("✅ Added to cart: " + selectedFlower.getFlowerName() + " x" + quantity);
                 }
@@ -291,7 +293,9 @@ public class OrderPageController {
                     }
                 }
                 if (!found) {
-                    CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
+                    // For network users, mark items as coming from "Network" instead of specific store
+                    String storeForCart = (user != null && user.getStore() == 4) ? "Network" : this.store;
+                    CartItem cartItem = new CartItem(selectedFlower, quantity, storeForCart);
                     cartItems.add(cartItem);
                     System.out.println("✅ Added to cart: " + selectedFlower.getFlowerName() + " x" + quantity);
                 }
@@ -360,7 +364,9 @@ public class OrderPageController {
                 }
             }
             if (!found) {
-                CartItem cartItem = new CartItem(selectedFlower, quantity, this.store);
+                // For network users, mark items as coming from "Network" instead of specific store
+                String storeForCart = (user != null && user.getStore() == 4) ? "Network" : this.store;
+                CartItem cartItem = new CartItem(selectedFlower, quantity, storeForCart);
                 cartItems.add(cartItem);
             }
             // Show confirmation

@@ -536,15 +536,9 @@ public class DatabaseInitializer {
                     CartItem item = new CartItem(flower, quantity, store.getStoreName());
                     order.addItem(item);
                 }
-                // Randomly apply a discount
-                if (rand.nextDouble() < 0.3) { // 30% of orders get a discount
-                    double discount = 0.05 + 0.15 * rand.nextDouble(); // 5%-20%
-                    double discountAmount = order.getTotalAmount() * discount;
-                    order.setDiscountAmount(discountAmount);
-                    order.setTotalAmount(order.getTotalAmount() - discountAmount);
-                } else {
-                    order.setDiscountAmount(0.0);
-                }
+                // No discounts applied to orders
+                order.setDiscountAmount(0.0);
+                
                 // Ensure total includes delivery fee
                 if (order.isRequiresDelivery()) {
                     order.setTotalAmount(order.getTotalAmount() + order.getDeliveryFee());

@@ -265,6 +265,10 @@ public class RegistrationController {
                 throw new RuntimeException(e);
             }
 
+            // Set the user as logged in
+            new_user.setIsLogin(1);
+            SimpleClient.isGuest = false;
+            
             if (catalogController != null) {
                 catalogController.set_user(new_user);
                 catalogController.set_type(store);
@@ -297,6 +301,8 @@ public class RegistrationController {
                 Success success = new Success("Registration Successful!");
                 EventBus.getDefault().post(new SuccessEvent(success));
             }
+            // Set the user as logged in after successful registration
+            tempUser.setIsLogin(1);
             CatalogController.set_user(tempUser); // Set the user in CatalogController
             EventBus.getDefault().unregister(this);
             Stage stage = (Stage) regAnchPane.getScene().getWindow();
@@ -312,7 +318,7 @@ public class RegistrationController {
     @FXML
     void initialize() throws IOException {
         EventBus.getDefault().register(this);
-        regIdTxtB.setDisable(true);
+
         if(gotFromConnectScene){
             gotFromConnectScene = false;
             logAnchPane.setVisible(false);
@@ -416,7 +422,6 @@ public class RegistrationController {
                 alert.setHeaderText("What is a Yearly Subscription?");
                 alert.setContentText("A yearly subscription allows customers to shop in all of our stores. It costs 100 shekels and grants a 10% discount on every purchase above 50 shekels.");
                 store = 4;
-                regIdTxtB.setDisable(false);
                 is_yearly_subscription = true;
                 select_store_label.setVisible(false);
                 select_store.setVisible(false);

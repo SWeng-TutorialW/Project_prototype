@@ -919,7 +919,11 @@ public class SimpleServer extends AbstractServer {
 				session = App.getSessionFactory().openSession();
 				session.beginTransaction();
 				session.update(userToUpdate); // UPDATE statement
+				session.update(userToUpdate);
+				System.out.println("Session update completed for user: " + userToUpdate.getUsername());
 				session.getTransaction().commit();
+				System.out.println("Transaction committed successfully for user: " + userToUpdate.getUsername());
+				System.out.println("User successfully updated: " + userToUpdate.getUsername());
 				client.sendToClient(new UpdateUserEvent(userToUpdate));
 			} catch (IOException e) {
 				if (session != null) session.getTransaction().rollback();
@@ -1040,11 +1044,19 @@ public class SimpleServer extends AbstractServer {
 
 
 
+				System.out.println("=== DEBUG: Processing column update ===");
+				System.out.println("Column: '" + column + "'");
+				System.out.println("New value: '" + newVal + "'");
+				System.out.println("User ID: " + user.getId());
+				System.out.println("User username: " + user.getUsername());
+				
 				switch (column) {
 					case "username":
+						System.out.println("Setting username to: " + newVal);
 						user.setUsername(newVal);
 						break;
 					case "email":
+						System.out.println("Setting email to: " + newVal);
 						user.setEmail(newVal);
 						break;
 					case "store":
@@ -1057,27 +1069,77 @@ public class SimpleServer extends AbstractServer {
 							new_value = 3;
 						else if (update.getNew_value().equals("Network"))
 							new_value = 4;
+						System.out.println("Setting store to: " + new_value);
 						user.setStore(new_value);
 						break;
 					case "phoneNum":
+						System.out.println("Setting phoneNum to: " + newVal);
 						user.setPhoneNum(newVal);
 						break;
 					case "fullName":
+						System.out.println("Setting fullName to: " + newVal);
 						user.setFullName(newVal);
 						break;
 					case "idNum":
+						System.out.println("Setting idNum to: " + newVal);
 						user.setIdNum(newVal);
 						break;
+					case "yearly_subscription":
+						System.out.println("Processing yearly_subscription update for user: " + user.getUsername());
+						System.out.println("New value: " + newVal);
+						boolean newSubscription = "1".equals(newVal);
+						System.out.println("Setting subscription to: " + newSubscription);
+						user.set_yearly_subscription(newSubscription);
+						user.setStore(4);
+						if (newSubscription) {
+							user.setSubscriptionStartDate(java.time.LocalDate.now());
+							System.out.println("Set subscription start date to: " + java.time.LocalDate.now());
+						} else {
+							user.setSubscriptionStartDate(null);
+							System.out.println("Set subscription start date to null");
+						}
+						System.out.println("User subscription after update: " + user.is_yearly_subscription());
+						break;
+					case "type":
+						System.out.println("Processing type update for user: " + user.getUsername());
+						System.out.println("New value: " + newVal);
+						boolean newType = "1".equals(newVal);
+						System.out.println("Setting type to: " + newType);
+						user.setType(newType);
+						System.out.println("User type after update: " + user.isType());
+						break;
+					case "Employeetype":
+						System.out.println("Processing Employeetype update for user: " + user.getUsername());
+						System.out.println("New value: " + newVal);
+						int newEmployeeType = Integer.parseInt(newVal);
+						System.out.println("Setting employee type to: " + newEmployeeType);
+						user.setEmployeetype(newEmployeeType);
+						System.out.println("User employee type after update: " + user.getEmployeetype());
+						break;
+					default:
+						System.out.println("WARNING: Unknown column '" + column + "' - no action taken");
+						break;
 				}
+				
+				System.out.println("=== END DEBUG: Column update processing ===");
 
-
-
-
-
-
+				System.out.println("=== DEBUG: Before session update ===");
+				System.out.println("User ID: " + user.getId());
+				System.out.println("User type: " + user.isType());
+				System.out.println("User employee type: " + user.getEmployeetype());
+				System.out.println("User username: " + user.getUsername());
+				
 				session.update(user);
+				System.out.println("Session update completed for user: " + user.getUsername());
+				
+				System.out.println("=== DEBUG: Before transaction commit ===");
 				session.getTransaction().commit();
+				System.out.println("Transaction committed successfully for user: " + user.getUsername());
 				System.out.println("User successfully updated: " + user.getUsername());
+				
+				System.out.println("=== DEBUG: After commit ===");
+				System.out.println("User type after commit: " + user.isType());
+				System.out.println("User employee type after commit: " + user.getEmployeetype());
 
 			} catch (Exception e) {
 				if (session.getTransaction() != null) {
