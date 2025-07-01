@@ -39,6 +39,9 @@ public class OrdersHistoryController {
     private TableColumn<Order, String> statusColumn;
     
     @FXML
+    private TableColumn<Order, String> storeColumn;
+    
+    @FXML
     private TableColumn<Order, Double> totalAmountColumn;
     
     @FXML
@@ -80,6 +83,11 @@ public class OrdersHistoryController {
         });
         
         statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+        
+        storeColumn.setCellValueFactory(cellData -> {
+            String storeName = getStoreNameFromId(cellData.getValue().getStoreId());
+            return new SimpleStringProperty(storeName);
+        });
         
         totalAmountColumn.setCellValueFactory(cellData -> 
             new SimpleDoubleProperty(cellData.getValue().getTotalAmount()).asObject());
@@ -475,11 +483,25 @@ public class OrdersHistoryController {
     
     @org.greenrobot.eventbus.Subscribe
     public void handleOrderSuccessMessage(String message) {
-        if ("order_success".equals(message)) {
-            // Reload orders if this window is open and user is set
-            if (currentUser != null && ordersTable.getScene() != null && ordersTable.getScene().getWindow().isShowing()) {
-                Platform.runLater(this::loadUserOrders);
-            }
+        if (message.equals("Order created successfully")) {
+            Platform.runLater(() -> {
+                loadUserOrders(); // Refresh the orders list
+            });
+        }
+    }
+    
+    /**
+     * Convert store ID to store name
+     * @param storeId The store ID
+     * @return The store name
+     */
+    private String getStoreNameFromId(int storeId) {
+        switch (storeId) {
+            case 1: return "Haifa";
+            case 2: return "Krayot";
+            case 3: return "Nahariyya";
+            case 4: return "Network";
+            default: return "Unknown Store";
         }
     }
 } 

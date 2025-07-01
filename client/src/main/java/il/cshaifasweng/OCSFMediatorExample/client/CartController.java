@@ -162,8 +162,8 @@ public class CartController {
         updateTotal();
 
         // Show confirmation
-        Warning warning = new Warning("Item removed from cart");
-        EventBus.getDefault().post(new WarningEvent(warning));
+        Success success = new Success("Item removed from cart");
+        EventBus.getDefault().post(new SuccessEvent(success));
     }
 
     @FXML

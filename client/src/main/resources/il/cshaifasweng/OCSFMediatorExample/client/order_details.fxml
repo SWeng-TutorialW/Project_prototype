@@ -35,6 +35,12 @@
                         <Label fx:id="statusLabel" text="Status" />
                      </children>
                   </VBox>
+                  <VBox spacing="5.0" prefWidth="200.0">
+                     <children>
+                        <Label text="Store:" style="-fx-font-weight: bold;" />
+                        <Label fx:id="storeLabel" text="Store" />
+                     </children>
+                  </VBox>
                </children>
             </HBox>
 

@@ -20,6 +20,7 @@
             <TableColumn fx:id="orderIdColumn" prefWidth="70.0" text="Order ID" />
             <TableColumn fx:id="orderDateColumn" prefWidth="110.0" text="Order Date" />
             <TableColumn fx:id="statusColumn" prefWidth="90.0" text="Status" />
+            <TableColumn fx:id="storeColumn" prefWidth="80.0" text="Store" />
             <TableColumn fx:id="totalAmountColumn" prefWidth="90.0" text="Total Amount" />
             <TableColumn fx:id="deliveryColumn" prefWidth="90.0" text="Delivery" />
             <TableColumn fx:id="addressColumn" prefWidth="150.0" text="Address" />
