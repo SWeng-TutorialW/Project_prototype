@@ -20,6 +20,10 @@ public class PDFExporter {
             writer.write("LILACH FLOWERS - STORE REPORT\n");
             writer.write("==============================\n\n");
             
+            // Add store information
+            String storeInfo = controller.getStoreInfo();
+            writer.write("Store: " + storeInfo + "\n");
+            
             // Add date range
             if (controller.getStartDate() != null && controller.getEndDate() != null) {
                 writer.write(String.format("Report Period: %s to %s\n",
@@ -74,22 +78,67 @@ public class PDFExporter {
             Map<String, Integer> complaintData = controller.getComplaintData();
             if (complaintData != null && !complaintData.isEmpty()) {
                 writer.write("\nComplaints by Type:\n");
-                writer.write("Type\t\tCount\n");
-                writer.write("----\t\t-----\n");
+                writer.write("Type\t\tCount\t\tTotal Refund Amount\n");
+                writer.write("----\t\t-----\t\t------------------\n");
                 
+                double totalComplaintRefunds = 0.0;
                 for (Map.Entry<String, Integer> entry : complaintData.entrySet()) {
-                    writer.write(String.format("%s\t\t%d\n", entry.getKey(), entry.getValue()));
+                    String complaintType = entry.getKey();
+                    int count = entry.getValue();
+                    double refundAmount = getRefundAmountForComplaintType(complaintType, controller.getAllComplaints());
+                    totalComplaintRefunds += refundAmount;
+                    writer.write(String.format("%s\t\t%d\t\t%.2f\n", complaintType, count, refundAmount));
                 }
                 
+                writer.write(String.format("Total Complaints:\t%d\t\t%.2f\n", 
+                    complaintData.values().stream().mapToInt(Integer::intValue).sum(), totalComplaintRefunds));
+                
                 // Add detailed complaints information
-                writer.write("\nDetailed Complaints:\n");
-                writer.write("Date\t\tCustomer\t\tComplaint\t\tResponse\t\tRefund\n");
-                writer.write("----\t\t--------\t\t---------\t\t--------\t\t------\n");
-
+                writer.write("\nDetailed Complaints Information:\n");
+                writer.write("Client\t\tComplaint\t\tRefund Amount\n");
+                writer.write("------\t\t---------\t\t-------------\n");
+                
+                List<Complain> allComplaints = controller.getAllComplaints();
+                if (allComplaints != null) {
+                    for (Complain complaint : allComplaints) {
+                        if (complaint != null) {
+                            String clientName = complaint.getClient() != null ? complaint.getClient() : "Unknown";
+                            String complaintText = complaint.getComplaint() != null ? complaint.getComplaint() : "No complaint text";
+                            double refundAmount = complaint.getRefundAmount();
+                            
+                            // Truncate long complaint text for better formatting
+                            if (complaintText.length() > 50) {
+                                complaintText = complaintText.substring(0, 47) + "...";
+                            }
+                            
+                            writer.write(String.format("%s\t\t%s\t\t%.2f\n", clientName, complaintText, refundAmount));
+                        }
+                    }
+                }
             }
             
             writer.write("\nReport generated on: " + 
                     java.time.LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         }
+    }
+    
+    private static double getRefundAmountForComplaintType(String complaintType, List<Complain> complaints) {
+        if (complaints == null) return 0.0;
+        
+        return complaints.stream()
+                .filter(c -> c != null && c.getComplaint() != null && categorizeComplaint(c.getComplaint()).equals(complaintType))
+                .mapToDouble(Complain::getRefundAmount)
+                .sum();
+    }
+    
+    private static String categorizeComplaint(String complaintText) {
+        if (complaintText == null) return "Other";
+        String lower = complaintText.toLowerCase();
+        if (lower.contains("delivery")) return "Delivery Issues";
+        if (lower.contains("refund")) return "Refunds";
+        if (lower.contains("quality")) return "Quality Issues";
+        if (lower.contains("wrong")) return "Wrong Items";
+        if (lower.contains("service")) return "Customer Service";
+        return "Other";
     }
 } 

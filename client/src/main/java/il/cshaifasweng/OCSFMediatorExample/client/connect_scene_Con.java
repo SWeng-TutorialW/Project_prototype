@@ -100,24 +100,6 @@ public class connect_scene_Con  {
     }
 
 
-    private static Stage paymentStageInstance = null;
-
-    public static boolean isPaymentStageOpen() {
-        return paymentStageInstance != null && paymentStageInstance.isShowing();
-    }
-
-    public static void setPaymentStageInstance(Stage stage) {
-        paymentStageInstance = stage;
-        if (paymentStageInstance != null) {
-            paymentStageInstance.setOnHidden(e -> paymentStageInstance = null);
-        }
-    }
-    public static void closeAllPopups() {
-        if (isRegStageOpen()) registerStageInstance.close();
-        if (isPaymentStageOpen()) paymentStageInstance.close();
-    }
-
-
     @FXML
     void initialize() {
 
@@ -126,7 +108,6 @@ public class connect_scene_Con  {
         } else {
             EventBus.getDefault().register(this);
         }
-    }
 
     }
 
@@ -154,12 +135,6 @@ public class connect_scene_Con  {
             registerStageInstance.requestFocus();
             return;
         }
-        if (isPaymentStageOpen()) {
-            Warning warning = new Warning("Cannot open registration while payment window is open.");
-            EventBus.getDefault().post(new WarningEvent(warning));
-            return;
-        }
-
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
             RegistrationController regController = fxmlLoader.getController();
@@ -186,7 +161,6 @@ public class connect_scene_Con  {
     @FXML
     void guess_enter(ActionEvent event)
     {
-        connect_scene_Con.closeAllPopups();
         SimpleClient.isGuest = true;
         guess = true;
         try {
@@ -254,8 +228,6 @@ public class connect_scene_Con  {
             System.out.println("Processing as guest");
             Platform.runLater(() -> {
                 try {
-                    connect_scene_Con.closeAllPopups();
-
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
                     Parent root = loader.load();
 
@@ -279,200 +251,198 @@ public class connect_scene_Con  {
             });
             return;
         }
-            System.out.println("Processing as regular login");
-            String user_Name = user_name.getText().trim();
-            String passWord = password.getText().trim();
-            System.out.println("USERNAME: " + user_Name);
-            System.out.println("PASSWORD: " + passWord);
-            List<LoginRegCheck> users = event.getUsers();
-                for (LoginRegCheck loginRegCheck : users) {
-                    user = loginRegCheck;
-                    if (loginRegCheck.getUsername().equals(user_Name) && loginRegCheck.getPassword().equals(passWord)) {
-                        CatalogController.set_user(user); // I forgot to add this. Now when logging in, the SimpleClient.currentUser isn't NULL. :)
-                        System.out.println("User Logged-In: " + loginRegCheck.getUsername());
-                        if (loginRegCheck.isType())
-                        {
-                            if(loginRegCheck.getIsLogin()==1)
-                            {
-                                Platform.runLater(() -> {
-                                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                                    alert.setTitle("Login Error");
-                                    alert.setHeaderText("Already Logged In");
-                                    alert.setContentText("This user is already logged in elsewhere. Please log out from other devices first.");
-                                    alert.showAndWait();
-                                });
-                                user = null;
-                                return;
-                            }
-                            user = loginRegCheck;
-                            type_Employee = true;
-                            System.out.println("type_Employee is true");
-                            type_local=loginRegCheck.getStore();
-                            System.out.println("the employee is for store "+type_local);
-
-                        }
-                        if (!loginRegCheck.isType())
-                        {
-                            if(loginRegCheck.getIsLogin()==1)
-                            {
-                                Platform.runLater(() -> {
-                                    Alert alert = new Alert(Alert.AlertType.WARNING);
-                                    alert.setTitle("Login Error");
-                                    alert.setHeaderText("Already Logged In");
-                                    alert.setContentText("This user is already logged in elsewhere. Please log out from other devices first.");
-                                    alert.showAndWait();
-                                });
-                                user = null;
-                                return;
-
-                            }
-                            user = loginRegCheck;
-                            type_Client = true;
-                            System.out.println("type_Client is true");
-                            type_local=loginRegCheck.getStore();
-                            System.out.println("the user is mnoy to store "+type_local);
-                            SimpleClient.isGuest = false; // Yarden added this
-
-
-                        }
-                        change_user_login wrapper = new change_user_login(user,1);
-                        try {
-                            SimpleClient.getClient().sendToServer(wrapper);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        loginRegCheck.setIsLogin(1);
+        System.out.println("Processing as regular login");
+        String user_Name = user_name.getText().trim();
+        String passWord = password.getText().trim();
+        System.out.println("USERNAME: " + user_Name);
+        System.out.println("PASSWORD: " + passWord);
+        List<LoginRegCheck> users = event.getUsers();
+        for (LoginRegCheck loginRegCheck : users) {
+            user = loginRegCheck;
+            if (loginRegCheck.getUsername().equals(user_Name) && loginRegCheck.getPassword().equals(passWord)) {
+                CatalogController.set_user(user); // I forgot to add this. Now when logging in, the SimpleClient.currentUser isn't NULL. :)
+                System.out.println("User Logged-In: " + loginRegCheck.getUsername());
+                if (loginRegCheck.isType())
+                {
+                    if(loginRegCheck.getIsLogin()==1)
+                    {
                         Platform.runLater(() -> {
-                            try {
-                                FXMLLoader loader;
-                                Parent root;
-
-                                if (loginRegCheck.isType()) {
-                                    connect_scene_Con.closeAllPopups();
-                                    loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
-                                    root = loader.load();
-                                    CatalogController_employee controller = loader.getController();
-                                    List<Store> stores=event.getStores();
-                                    
-                                    System.out.println("DEBUG: Stores list size: " + (stores != null ? stores.size() : "NULL"));
-                                    
-                                    if(type_local==4)// network
-                                    {
-                                        System.out.println("this employee is network ");
-                                        controller.set_type(type_local);
-                                        controller.set_isLogin(true);
-                                        controller.set_user(loginRegCheck);
-                                        controller.setStoresList(stores);
-                                        controller.setCatalogData(event.getUpdatedItems());
-                                        employeeController=controller;
-
-                                    }
-                                    else
-                                    {
-                                        if (stores == null || stores.isEmpty()) {
-                                            System.err.println("ERROR: Stores list is empty or null for employee!");
-                                            Warning warning = new Warning("Database error: No stores available. Please contact administrator.");
-                                            EventBus.getDefault().post(new WarningEvent(warning));
-                                            return;
-                                        }
-                                        
-                                        if (type_local < 1 || type_local > stores.size()) {
-                                            System.err.println("ERROR: Invalid store index: " + type_local + " for stores size: " + stores.size());
-                                            Warning warning = new Warning("Database error: Invalid store assignment. Please contact administrator.");
-                                            EventBus.getDefault().post(new WarningEvent(warning));
-                                            return;
-                                        }
-                                        
-                                        Store store=stores.get(type_local-1);
-                                        System.out.println("this employee is for store: " + store.getStoreName());
-                                        controller.setFlowersList_c(store.getFlowersList());
-                                        controller.set_isLogin(true);
-                                        controller.set_user(loginRegCheck);
-                                        controller.set_type(type_local);
-                                        controller.setStoresList(stores);
-                                        controller.setCatalogData(event.getUpdatedItems());
-                                        employeeController=controller;
-                                    }
-
-                                }
-                                else {
-                                    connect_scene_Con.closeAllPopups();
-                                    loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
-                                    root = loader.load();
-                                    CatalogController controller = loader.getController();
-                                    List<Store> stores=event.getStores();
-                                    
-                                    System.out.println("DEBUG: Stores list size: " + (stores != null ? stores.size() : "NULL"));
-                                    
-                                    if(type_local==4)// network
-                                    {
-                                        controller.set_type(type_local);
-                                        System.out.println("this client is network ");
-                                        controller.set_isLogin(true);
-                                        controller.set_user(loginRegCheck);
-                                        controller.setStoresList(stores);
-                                        controller.setCatalogData(event.getUpdatedItems());
-                                        catalogController=controller;
-                                        controller.setController(this);
-
-                                    }
-                                    else
-                                    {
-                                        if (stores == null || stores.isEmpty()) {
-                                            System.err.println("ERROR: Stores list is empty or null for client!");
-                                            Warning warning = new Warning("Database error: No stores available. Please contact administrator.");
-                                            EventBus.getDefault().post(new WarningEvent(warning));
-                                            return;
-                                        }
-                                        
-                                        if (type_local < 1 || type_local > stores.size()) {
-                                            System.err.println("ERROR: Invalid store index: " + type_local + " for stores size: " + stores.size());
-                                            Warning warning = new Warning("Database error: Invalid store assignment. Please contact administrator.");
-                                            EventBus.getDefault().post(new WarningEvent(warning));
-                                            return;
-                                        }
-                                        
-                                        Store store=stores.get(type_local-1);
-                                        System.out.println("this client is for store: " + store.getStoreName());
-                                        controller.setFlowersList_c(store.getFlowersList());
-                                        controller.set_type(type_local);
-                                        controller.set_isLogin(true);
-                                        controller.set_user(loginRegCheck);
-                                        controller.setStoresList(stores);
-                                        controller.setCatalogData(event.getUpdatedItems());
-                                        catalogController=controller;
-                                        controller.setController(this);
-
-                                    }
-                                }
-                                if(catalogController!=null){
-                                    App.getScene().setRoot(root);
-                                    App.getStage().setWidth(1020);
-                                    App.getStage().setHeight(750);
-                                    App.getStage().centerOnScreen();
-                                } else {
-                                    App.getScene().setRoot(root);
-                                    App.getStage().setWidth(750);
-                                    App.getStage().setHeight(750);
-                                    App.getStage().centerOnScreen();
-                                }
-
-                                System.out.println("show the catalog as user/employee first time");
-
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
+                            Alert alert = new Alert(Alert.AlertType.WARNING);
+                            alert.setTitle("Login Error");
+                            alert.setHeaderText("Already Logged In");
+                            alert.setContentText("This user is already logged in elsewhere. Please log out from other devices first.");
+                            alert.showAndWait();
                         });
+                        user = null;
                         return;
                     }
+                    user = loginRegCheck;
+                    type_Employee = true;
+                    System.out.println("type_Employee is true");
+                    type_local=loginRegCheck.getStore();
+                    System.out.println("the employee is for store "+type_local);
+
                 }
-            Platform.runLater(() -> {
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Login Failed");
-                alert.setHeaderText("Invalid Credentials");
-                alert.setContentText("Username or password is incorrect. Please check your credentials and try again.");
-                alert.showAndWait();
-            });
+                if (!loginRegCheck.isType())
+                {
+                    if(loginRegCheck.getIsLogin()==1)
+                    {
+                        Platform.runLater(() -> {
+                            Alert alert = new Alert(Alert.AlertType.WARNING);
+                            alert.setTitle("Login Error");
+                            alert.setHeaderText("Already Logged In");
+                            alert.setContentText("This user is already logged in elsewhere. Please log out from other devices first.");
+                            alert.showAndWait();
+                        });
+                        user = null;
+                        return;
+
+                    }
+                    user = loginRegCheck;
+                    type_Client = true;
+                    System.out.println("type_Client is true");
+                    type_local=loginRegCheck.getStore();
+                    System.out.println("the user is mnoy to store "+type_local);
+                    SimpleClient.isGuest = false; // Yarden added this
+
+
+                }
+                change_user_login wrapper = new change_user_login(user,1);
+                try {
+                    SimpleClient.getClient().sendToServer(wrapper);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                loginRegCheck.setIsLogin(1);
+                Platform.runLater(() -> {
+                    try {
+                        FXMLLoader loader;
+                        Parent root;
+
+                        if (loginRegCheck.isType()) {
+                            loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
+                            root = loader.load();
+                            CatalogController_employee controller = loader.getController();
+                            List<Store> stores=event.getStores();
+
+                            System.out.println("DEBUG: Stores list size: " + (stores != null ? stores.size() : "NULL"));
+
+                            if(type_local==4)// network
+                            {
+                                System.out.println("this employee is network ");
+                                controller.set_type(type_local);
+                                controller.set_isLogin(true);
+                                controller.set_user(loginRegCheck);
+                                controller.setStoresList(stores);
+                                controller.setCatalogData(event.getUpdatedItems());
+                                employeeController=controller;
+
+                            }
+                            else
+                            {
+                                if (stores == null || stores.isEmpty()) {
+                                    System.err.println("ERROR: Stores list is empty or null for employee!");
+                                    Warning warning = new Warning("Database error: No stores available. Please contact administrator.");
+                                    EventBus.getDefault().post(new WarningEvent(warning));
+                                    return;
+                                }
+
+                                if (type_local < 1 || type_local > stores.size()) {
+                                    System.err.println("ERROR: Invalid store index: " + type_local + " for stores size: " + stores.size());
+                                    Warning warning = new Warning("Database error: Invalid store assignment. Please contact administrator.");
+                                    EventBus.getDefault().post(new WarningEvent(warning));
+                                    return;
+                                }
+
+                                Store store=stores.get(type_local-1);
+                                System.out.println("this employee is for store: " + store.getStoreName());
+                                controller.setFlowersList_c(store.getFlowersList());
+                                controller.set_isLogin(true);
+                                controller.set_user(loginRegCheck);
+                                controller.set_type(type_local);
+                                controller.setStoresList(stores);
+                                controller.setCatalogData(event.getUpdatedItems());
+                                employeeController=controller;
+                            }
+
+                        }
+                        else {
+                            loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
+                            root = loader.load();
+                            CatalogController controller = loader.getController();
+                            List<Store> stores=event.getStores();
+
+                            System.out.println("DEBUG: Stores list size: " + (stores != null ? stores.size() : "NULL"));
+
+                            if(type_local==4)// network
+                            {
+                                controller.set_type(type_local);
+                                System.out.println("this client is network ");
+                                controller.set_isLogin(true);
+                                controller.set_user(loginRegCheck);
+                                controller.setStoresList(stores);
+                                controller.setCatalogData(event.getUpdatedItems());
+                                catalogController=controller;
+                                controller.setController(this);
+
+                            }
+                            else
+                            {
+                                if (stores == null || stores.isEmpty()) {
+                                    System.err.println("ERROR: Stores list is empty or null for client!");
+                                    Warning warning = new Warning("Database error: No stores available. Please contact administrator.");
+                                    EventBus.getDefault().post(new WarningEvent(warning));
+                                    return;
+                                }
+
+                                if (type_local < 1 || type_local > stores.size()) {
+                                    System.err.println("ERROR: Invalid store index: " + type_local + " for stores size: " + stores.size());
+                                    Warning warning = new Warning("Database error: Invalid store assignment. Please contact administrator.");
+                                    EventBus.getDefault().post(new WarningEvent(warning));
+                                    return;
+                                }
+
+                                Store store=stores.get(type_local-1);
+                                System.out.println("this client is for store: " + store.getStoreName());
+                                controller.setFlowersList_c(store.getFlowersList());
+                                controller.set_type(type_local);
+                                controller.set_isLogin(true);
+                                controller.set_user(loginRegCheck);
+                                controller.setStoresList(stores);
+                                controller.setCatalogData(event.getUpdatedItems());
+                                catalogController=controller;
+                                controller.setController(this);
+
+                            }
+                        }
+                        if(catalogController!=null){
+                            App.getScene().setRoot(root);
+                            App.getStage().setWidth(1020);
+                            App.getStage().setHeight(750);
+                            App.getStage().centerOnScreen();
+                        } else {
+                            App.getScene().setRoot(root);
+                            App.getStage().setWidth(750);
+                            App.getStage().setHeight(750);
+                            App.getStage().centerOnScreen();
+                        }
+
+                        System.out.println("show the catalog as user/employee first time");
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                return;
+            }
+        }
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Login Failed");
+            alert.setHeaderText("Invalid Credentials");
+            alert.setContentText("Username or password is incorrect. Please check your credentials and try again.");
+            alert.showAndWait();
+        });
 
     }
 

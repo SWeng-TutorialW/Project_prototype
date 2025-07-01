@@ -46,8 +46,7 @@ public class ReportGeneratorController {
     @FXML
     private RadioButton customersReport;
 
-    @FXML
-    private RadioButton complaintsReport;
+
 
     @FXML
     private LineChart<String, Number> revenueChart;
@@ -91,6 +90,13 @@ public class ReportGeneratorController {
     @FXML
     private Button backBtn;
 
+    // Store selection for network admin
+    @FXML
+    private ComboBox<String> storeComboBox;
+
+    @FXML
+    private VBox storeSelectionContainer;
+
     // Sample data for demonstration (will be replaced with real data)
     private Map<String, Double> revenueData = new HashMap<>();
     private Map<String, Integer> productData = new HashMap<>();
@@ -117,6 +123,13 @@ public class ReportGeneratorController {
     // Add current user field to prevent session loss
     private LoginRegCheck currentUser;
 
+    // Store filtering
+    private int selectedStoreId = -1; // -1 means all stores, 1-3 for specific stores
+    private boolean isNetworkAdmin = false;
+    
+    // Track refunds from canceled orders
+    private double totalRefundsFromOrders = 0.0;
+
     @FXML
     void initialize() {
         // Ensure we're only registered once
@@ -130,7 +143,49 @@ public class ReportGeneratorController {
         setupDatePickers();
         setupReportTypeGroup();
         setupCharts();
+        setupStoreSelection();
         updateQuickRangeButton();
+    }
+
+    private void setupStoreSelection() {
+        // Initialize store combo box with store options
+        ObservableList<String> storeOptions = FXCollections.observableArrayList(
+            "All Stores", "Haifa", "Krayot", "Nahariyya"
+        );
+        storeComboBox.setItems(storeOptions);
+        storeComboBox.setValue("All Stores");
+
+        // Add listener for store selection changes
+        storeComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                updateSelectedStoreId(newValue);
+                // If we have data, regenerate the report with new store filter
+                if (!allOrders.isEmpty()) {
+                    processOrders(allOrders);
+                }
+            }
+        });
+    }
+
+    private void updateSelectedStoreId(String storeName) {
+        switch (storeName) {
+            case "All Stores":
+                selectedStoreId = -1;
+                break;
+            case "Haifa":
+                selectedStoreId = 1;
+                break;
+            case "Krayot":
+                selectedStoreId = 2;
+                break;
+            case "Nahariyya":
+                selectedStoreId = 3;
+                break;
+            default:
+                selectedStoreId = -1;
+                break;
+        }
+        System.out.println("[ReportGenerator] Selected store ID: " + selectedStoreId);
     }
 
     private void setupDatePickers() {
@@ -161,7 +216,6 @@ public class ReportGeneratorController {
         reportTypeGroup = new ToggleGroup();
         ordersReport.setToggleGroup(reportTypeGroup);
         customersReport.setToggleGroup(reportTypeGroup);
-        complaintsReport.setToggleGroup(reportTypeGroup);
 
         // Default selection
         ordersReport.setSelected(true);
@@ -245,6 +299,7 @@ public class ReportGeneratorController {
         totalRevenue = 0.0;
         avgOrderValue = 0.0;
         topProduct = "N/A";
+        totalRefundsFromOrders = 0.0; // Reset refunds from orders
 
         System.out.println("[ReportGenerator] Reset report state for new generation");
     }
@@ -272,9 +327,6 @@ public class ReportGeneratorController {
                 break;
             case "👥 Customer Analysis":
                 updateCustomerCharts();
-                break;
-            case " Complaints and Refunds":
-                updateComplaintCharts();
                 break;
         }
     }
@@ -331,20 +383,7 @@ public class ReportGeneratorController {
         }
     }
 
-    private void updateComplaintCharts() {
-        // Update revenue chart with complaint impact
-        ChartUtils.updateRevenueChart(revenueChart, revenueData);
 
-        // Update product chart with complaint data
-        if (complaintData.isEmpty()) {
-            // If no complaints, show a message
-            productChart.getData().clear();
-            PieChart.Data noData = new PieChart.Data("No Complaints", 1);
-            productChart.getData().add(noData);
-        } else {
-            //add here complaint handle function - just show on the left side graph the amount of refund in each complaint - right side should be empty
-        }
-    }
 
     private void updateSummaryStatistics() {
         totalOrdersLbl.setText(String.valueOf(totalOrders));
@@ -397,10 +436,15 @@ public class ReportGeneratorController {
 
     private void exportCSVData(File file) throws IOException {
         try (FileWriter writer = new FileWriter(file)) {
-            // Write header
+            // Write header with store information
+            String storeInfo = getStoreInfo();
+            writer.write("Store Report: " + storeInfo + "\n");
+            writer.write("Date Range: " + startDatePicker.getValue() + " to " + endDatePicker.getValue() + "\n\n");
+            
+            // Write revenue data
+            writer.write("Revenue Data\n");
             writer.write("Date,Revenue,Orders\n");
 
-            // Write revenue data
             List<String> sortedDates = new ArrayList<>(revenueData.keySet());
             sortedDates.sort(Comparator.naturalOrder());
 
@@ -410,12 +454,62 @@ public class ReportGeneratorController {
             }
 
             // Write summary
-            writer.write("\nSummary\n");
+            writer.write("\nSummary Statistics\n");
             writer.write(String.format("Total Orders,%d\n", totalOrders));
             writer.write(String.format("Total Revenue,%.2f\n", totalRevenue));
             writer.write(String.format("Average Order Value,%.2f\n", avgOrderValue));
             writer.write(String.format("Top Product,%s\n", topProduct));
+            writer.write(String.format("Unique Customers,%d\n", customerData.getOrDefault("Unique Customers", 0)));
+
+            // Write complaint data
+            writer.write("\nComplaint Data\n");
+            writer.write("Complaint Type,Count,Total Refund Amount\n");
+            
+            double totalComplaintRefunds = 0.0;
+            for (Map.Entry<String, Integer> entry : complaintData.entrySet()) {
+                String complaintType = entry.getKey();
+                int count = entry.getValue();
+                double refundAmount = getRefundAmountForComplaintType(complaintType);
+                totalComplaintRefunds += refundAmount;
+                writer.write(String.format("%s,%d,%.2f\n", complaintType, count, refundAmount));
+            }
+            
+            writer.write(String.format("Total Complaints,%d,%.2f\n", 
+                complaintData.values().stream().mapToInt(Integer::intValue).sum(), totalComplaintRefunds));
+
+            // Write detailed complaint information
+            writer.write("\nDetailed Complaint Information\n");
+            writer.write("Client,Complaint,Refund Amount\n");
+            
+            for (Complain complaint : allComplaints) {
+                if (complaint != null) {
+                    String clientName = complaint.getClient() != null ? complaint.getClient() : "Unknown";
+                    String complaintText = complaint.getComplaint() != null ? complaint.getComplaint() : "No complaint text";
+                    double refundAmount = complaint.getRefundAmount();
+                    writer.write(String.format("%s,%s,%.2f\n", clientName, complaintText, refundAmount));
+                }
+            }
         }
+    }
+
+    public String getStoreInfo() {
+        if (selectedStoreId == -1) {
+            return "All Stores (Network Report)";
+        } else {
+            switch (selectedStoreId) {
+                case 1: return "Haifa Store";
+                case 2: return "Krayot Store";
+                case 3: return "Nahariyya Store";
+                default: return "Unknown Store";
+            }
+        }
+    }
+
+    private double getRefundAmountForComplaintType(String complaintType) {
+        return allComplaints.stream()
+                .filter(c -> c != null && c.getComplaint() != null && categorizeComplaint(c.getComplaint()).equals(complaintType))
+                .mapToDouble(Complain::getRefundAmount)
+                .sum();
     }
 
     @FXML
@@ -485,12 +579,27 @@ public class ReportGeneratorController {
         return complaintData;
     }
 
+    public List<Complain> getAllComplaints() {
+        return allComplaints;
+    }
+
+
+
     public double getTotalRefunds() {
         // Calculate total refunds from all complaints
-        return allComplaints.stream()
+        double complaintRefunds = allComplaints.stream()
                 .filter(c -> c != null && c.getRefundAmount() > 0)
                 .mapToDouble(Complain::getRefundAmount)
                 .sum();
+        
+        // Calculate total refunds from canceled orders
+        double orderRefunds = allOrders.stream()
+                .filter(o -> o != null && "CANCELLED".equals(o.getStatus()) && o.getRefundAmount() > 0)
+                .mapToDouble(Order::getRefundAmount)
+                .sum();
+        
+        // Return sum of both complaint and order refunds
+        return complaintRefunds + orderRefunds;
     }
 
     // Single EventBus handler for all data types to prevent conflicts
@@ -664,7 +773,7 @@ public class ReportGeneratorController {
         for (Order order : orders) {
             LocalDate orderDate = order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
             System.out.println("  - Order ID: " + order.getId() + ", Customer: " + order.getCustomerName() +
-                    ", Date: " + orderDate + ", Amount: " + order.getTotalAmount());
+                    ", Date: " + orderDate + ", Amount: " + order.getTotalAmount() + ", Store ID: " + order.getStoreId());
         }
 
         // If there are orders, set the default date range to the earliest and latest order dates
@@ -685,7 +794,7 @@ public class ReportGeneratorController {
             System.out.println("[ReportGenerator] Adjusted date range to: " + earliest + " to " + latest);
         }
 
-        // Filter by date range
+        // Filter by date range and store
         LocalDate start = startDatePicker.getValue();
         LocalDate end = endDatePicker.getValue();
         revenueData.clear();
@@ -694,17 +803,36 @@ public class ReportGeneratorController {
         Set<String> customers = new HashSet<>();
         totalOrders = 0;
         totalRevenue = 0.0;
+        totalRefundsFromOrders = 0.0; // Reset refunds from canceled orders
 
-        System.out.println("[ReportGenerator] Filtering orders between " + start + " and " + end);
+        System.out.println("[ReportGenerator] Filtering orders between " + start + " and " + end + " for store ID: " + selectedStoreId);
 
         for (Order order : orders) {
             LocalDate orderDate = order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-            if ((orderDate.isEqual(start) || orderDate.isAfter(start)) && (orderDate.isEqual(end) || orderDate.isBefore(end))) {
+            
+            // Check date range
+            boolean inDateRange = (orderDate.isEqual(start) || orderDate.isAfter(start)) && 
+                                 (orderDate.isEqual(end) || orderDate.isBefore(end));
+            
+            // Check store filter
+            boolean inStoreRange = selectedStoreId == -1 || order.getStoreId() == selectedStoreId;
+            
+            if (inDateRange && inStoreRange) {
                 String dateStr = orderDate.toString();
-                revenueData.put(dateStr, revenueData.getOrDefault(dateStr, 0.0) + order.getTotalAmount());
-                totalRevenue += order.getTotalAmount();
+                double orderAmount = order.getTotalAmount();
+                
+                // Subtract refund amount if order was canceled
+                if ("CANCELLED".equals(order.getStatus()) && order.getRefundAmount() > 0) {
+                    totalRefundsFromOrders += order.getRefundAmount();
+                    orderAmount -= order.getRefundAmount();
+                    System.out.println("[ReportGenerator] Order " + order.getId() + " was canceled, refund: " + order.getRefundAmount());
+                }
+                
+                revenueData.put(dateStr, revenueData.getOrDefault(dateStr, 0.0) + orderAmount);
+                totalRevenue += orderAmount;
                 totalOrders++;
-                System.out.println("[ReportGenerator] Including order: " + order.getId() + " from " + orderDate + " amount: " + order.getTotalAmount());
+                System.out.println("[ReportGenerator] Including order: " + order.getId() + " from " + orderDate + 
+                                 " amount: " + orderAmount + " store: " + order.getStoreId());
 
                 for (CartItem item : order.getItems()) {
                     String productName = item.getFlower().getFlowerName();
@@ -712,7 +840,8 @@ public class ReportGeneratorController {
                 }
                 customers.add(order.getCustomerEmail());
             } else {
-                System.out.println("[ReportGenerator] Excluding order: " + order.getId() + " from " + orderDate + " (outside date range)");
+                System.out.println("[ReportGenerator] Excluding order: " + order.getId() + " from " + orderDate + 
+                                 " (outside date range or store filter)");
             }
         }
 
@@ -721,11 +850,15 @@ public class ReportGeneratorController {
         customerData.put("Unique Customers", customers.size());
 
         System.out.println("[ReportGenerator] Final stats - Orders: " + totalOrders + ", Revenue: " + totalRevenue +
-                ", Avg: " + avgOrderValue + ", Customers: " + customers.size());
+                ", Avg: " + avgOrderValue + ", Customers: " + customers.size() + ", Refunds from orders: " + totalRefundsFromOrders);
 
         Platform.runLater(() -> {
             updateChartsForReportType();
             updateSummaryStatistics();
+            // Update total refunds label to include canceled order refunds
+            if (totalRefundsLbl != null) {
+                totalRefundsLbl.setText(String.format("₪%.2f", getTotalRefunds()));
+            }
             generateReportBtn.setText("Generate Report");
             generateReportBtn.setDisable(false);
             isProcessingUsers = false; // Reset flag when done
@@ -738,7 +871,7 @@ public class ReportGeneratorController {
             return;
         }
 
-        // Store all complaints for refund calculations
+        // Store all complaints for refund calculations (no store filtering for complaints)
         allComplaints.clear();
         allComplaints.addAll(complaints);
 
@@ -751,16 +884,10 @@ public class ReportGeneratorController {
             }
         }
 
-        // Calculate total refunds separately
-        final double totalRefunds = complaints.stream()
-                .filter(c -> c != null && c.getRefundAmount() > 0)
-                .mapToDouble(Complain::getRefundAmount)
-                .sum();
-
-        // Update the total refunds label
+        // Update the total refunds label with combined refunds (complaints + canceled orders)
         Platform.runLater(() -> {
             if (totalRefundsLbl != null) {
-                totalRefundsLbl.setText(String.format("₪%.2f", totalRefunds));
+                totalRefundsLbl.setText(String.format("₪%.2f", getTotalRefunds()));
             }
             updateChartsForReportType();
             updateSummaryStatistics();
@@ -795,7 +922,50 @@ public class ReportGeneratorController {
     // Add methods to manage current user
     public void setCurrentUser(LoginRegCheck user) {
         this.currentUser = user;
-        if (!(user.getEmployeetype() == 0 && (user.getStore() >= 1 && user.getStore() <= 3 || user.getStore() == 4))) {
+        
+        // Determine user permissions and setup store filtering
+        if (user != null && user.isType()) {
+            // Check if user is store admin (type == true, employeetype == 0, store == 1-3)
+            // or network admin (type == true, employeetype == 0, store == 4)
+            if (user.getEmployeetype() == 0) {
+                if (user.getStore() >= 1 && user.getStore() <= 3) {
+                    // Store admin - can only see their own store
+                    selectedStoreId = user.getStore();
+                    isNetworkAdmin = false;
+                    storeSelectionContainer.setVisible(false);
+                    System.out.println("[ReportGenerator] Store admin for store: " + user.getStore());
+                } else if (user.getStore() == 4) {
+                    // Network admin - can see all stores with selection
+                    selectedStoreId = -1; // All stores by default
+                    isNetworkAdmin = true;
+                    storeSelectionContainer.setVisible(true);
+                    System.out.println("[ReportGenerator] Network admin - store selection enabled");
+                } else {
+                    // Invalid store assignment
+                    generateReportBtn.setDisable(true);
+                    exportPdfBtn.setDisable(true);
+                    exportCsvBtn.setDisable(true);
+                    emailReportBtn.setDisable(true);
+                    quickRangeBtn.setDisable(true);
+                    ordersReport.setDisable(true);
+                    customersReport.setDisable(true);
+                    showAlert("Access denied. Invalid store assignment.");
+                    return;
+                }
+            } else {
+                // Not a store admin or network admin
+                generateReportBtn.setDisable(true);
+                exportPdfBtn.setDisable(true);
+                exportCsvBtn.setDisable(true);
+                emailReportBtn.setDisable(true);
+                quickRangeBtn.setDisable(true);
+                ordersReport.setDisable(true);
+                customersReport.setDisable(true);
+                showAlert("Access denied. Only store administrators and network administrators can view reports.");
+                return;
+            }
+        } else {
+            // Not an employee
             generateReportBtn.setDisable(true);
             exportPdfBtn.setDisable(true);
             exportCsvBtn.setDisable(true);
@@ -803,8 +973,10 @@ public class ReportGeneratorController {
             quickRangeBtn.setDisable(true);
             ordersReport.setDisable(true);
             customersReport.setDisable(true);
-            complaintsReport.setDisable(true);
+            showAlert("Access denied. Only employees and administrators can view reports.");
+            return;
         }
+        
         System.out.println("[ReportGenerator] Current user set to: " + (user != null ? user.getUsername() : "null"));
     }
 
