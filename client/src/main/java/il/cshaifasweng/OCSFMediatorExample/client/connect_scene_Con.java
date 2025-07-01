@@ -100,6 +100,24 @@ public class connect_scene_Con  {
     }
 
 
+    private static Stage paymentStageInstance = null;
+
+    public static boolean isPaymentStageOpen() {
+        return paymentStageInstance != null && paymentStageInstance.isShowing();
+    }
+
+    public static void setPaymentStageInstance(Stage stage) {
+        paymentStageInstance = stage;
+        if (paymentStageInstance != null) {
+            paymentStageInstance.setOnHidden(e -> paymentStageInstance = null);
+        }
+    }
+    public static void closeAllPopups() {
+        if (isRegStageOpen()) registerStageInstance.close();
+        if (isPaymentStageOpen()) paymentStageInstance.close();
+    }
+
+
     @FXML
     void initialize() {
 
@@ -135,6 +153,12 @@ public class connect_scene_Con  {
             registerStageInstance.requestFocus();
             return;
         }
+        if (isPaymentStageOpen()) {
+            Warning warning = new Warning("Cannot open registration while payment window is open.");
+            EventBus.getDefault().post(new WarningEvent(warning));
+            return;
+        }
+
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("registration_screen.fxml"));
             RegistrationController regController = fxmlLoader.getController();
@@ -152,6 +176,7 @@ public class connect_scene_Con  {
             stage.setResizable(false);
             setRegStageInstance(stage);
 
+
             stage.show();
 
         } catch (IOException e) {
@@ -161,6 +186,7 @@ public class connect_scene_Con  {
     @FXML
     void guess_enter(ActionEvent event)
     {
+        connect_scene_Con.closeAllPopups();
         SimpleClient.isGuest = true;
         guess = true;
         try {
@@ -228,6 +254,8 @@ public class connect_scene_Con  {
             System.out.println("Processing as guest");
             Platform.runLater(() -> {
                 try {
+                    connect_scene_Con.closeAllPopups();
+
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
                     Parent root = loader.load();
 
@@ -319,23 +347,24 @@ public class connect_scene_Con  {
                         FXMLLoader loader;
                         Parent root;
 
-                        if (loginRegCheck.isType()) {
-                            loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
-                            root = loader.load();
-                            CatalogController_employee controller = loader.getController();
-                            List<Store> stores=event.getStores();
+                                if (loginRegCheck.isType()) {
+                                    connect_scene_Con.closeAllPopups();
+                                    loader = new FXMLLoader(getClass().getResource("catalog_employee.fxml"));
+                                    root = loader.load();
+                                    CatalogController_employee controller = loader.getController();
+                                    List<Store> stores=event.getStores();
 
-                            System.out.println("DEBUG: Stores list size: " + (stores != null ? stores.size() : "NULL"));
+                                    System.out.println("DEBUG: Stores list size: " + (stores != null ? stores.size() : "NULL"));
 
-                            if(type_local==4)// network
-                            {
-                                System.out.println("this employee is network ");
-                                controller.set_type(type_local);
-                                controller.set_isLogin(true);
-                                controller.set_user(loginRegCheck);
-                                controller.setStoresList(stores);
-                                controller.setCatalogData(event.getUpdatedItems());
-                                employeeController=controller;
+                                    if(type_local==4)// network
+                                    {
+                                        System.out.println("this employee is network ");
+                                        controller.set_type(type_local);
+                                        controller.set_isLogin(true);
+                                        controller.set_user(loginRegCheck);
+                                        controller.setStoresList(stores);
+                                        controller.setCatalogData(event.getUpdatedItems());
+                                        employeeController=controller;
 
                             }
                             else
@@ -365,25 +394,26 @@ public class connect_scene_Con  {
                                 employeeController=controller;
                             }
 
-                        }
-                        else {
-                            loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
-                            root = loader.load();
-                            CatalogController controller = loader.getController();
-                            List<Store> stores=event.getStores();
+                                }
+                                else {
+                                    connect_scene_Con.closeAllPopups();
+                                    loader = new FXMLLoader(getClass().getResource("catalog_win.fxml"));
+                                    root = loader.load();
+                                    CatalogController controller = loader.getController();
+                                    List<Store> stores=event.getStores();
 
-                            System.out.println("DEBUG: Stores list size: " + (stores != null ? stores.size() : "NULL"));
+                                    System.out.println("DEBUG: Stores list size: " + (stores != null ? stores.size() : "NULL"));
 
-                            if(type_local==4)// network
-                            {
-                                controller.set_type(type_local);
-                                System.out.println("this client is network ");
-                                controller.set_isLogin(true);
-                                controller.set_user(loginRegCheck);
-                                controller.setStoresList(stores);
-                                controller.setCatalogData(event.getUpdatedItems());
-                                catalogController=controller;
-                                controller.setController(this);
+                                    if(type_local==4)// network
+                                    {
+                                        controller.set_type(type_local);
+                                        System.out.println("this client is network ");
+                                        controller.set_isLogin(true);
+                                        controller.set_user(loginRegCheck);
+                                        controller.setStoresList(stores);
+                                        controller.setCatalogData(event.getUpdatedItems());
+                                        catalogController=controller;
+                                        controller.setController(this);
 
                             }
                             else
@@ -427,7 +457,7 @@ public class connect_scene_Con  {
                             App.getStage().centerOnScreen();
                         }
 
-                        System.out.println("show the catalog as user/employee first time");
+                                System.out.println("show the catalog as user/employee first time");
 
                     } catch (IOException e) {
                         e.printStackTrace();

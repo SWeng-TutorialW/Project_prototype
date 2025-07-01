@@ -209,7 +209,6 @@ public class DatabaseInitializer {
         ));
 
         List<Flower> krayotFlowers = new ArrayList<>(Arrays.asList(
-
             flowers.get(2),  // Tulip
             flowers.get(10), // Carnation
             flowers.get(11), // Chrysanthemum
