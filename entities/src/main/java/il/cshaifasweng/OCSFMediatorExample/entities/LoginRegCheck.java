@@ -28,17 +28,11 @@ public class LoginRegCheck implements Serializable {
     private int Employeetype = 0;
 
 
+    @Column(name = "subscription_start_date")
     private LocalDate subscriptionStartDate;
     private int isLogin; // 1 = login, 0 = registration
 
-    public int getEmployeetype() {
-        return Employeetype;
-    }
-
-    public void setEmployeetype(int employeetype) {
-        Employeetype = employeetype;
-    }
-
+    @Column(name = "type")
     private boolean type;// false = client, true = employee
     private int store;// 1 for store number 1 ,until 3 ,
     // if the value is 4 is for all the stores -workes must be between 1-2-3
@@ -55,6 +49,7 @@ public class LoginRegCheck implements Serializable {
     private String fullName;
 
 
+    @Column(name = "is_yearly_subscription")
     boolean is_yearly_subscription=false;
     boolean send_complain=false;
     boolean receive_answer=false;
@@ -171,6 +166,9 @@ public class LoginRegCheck implements Serializable {
     {
         this.is_yearly_subscription=is_yearly_subscription;
     }
+    public void setType(boolean type) {
+        this.type = type;
+    }
     public void setStore(int store) {
         this.store = store;
     }
@@ -194,6 +192,14 @@ public class LoginRegCheck implements Serializable {
 
     public void setFullName(String newName) {
         this.fullName = newName;
+    }
+
+    public int getEmployeetype() {
+        return Employeetype;
+    }
+
+    public void setEmployeetype(int employeetype) {
+        Employeetype = employeetype;
     }
 }
 
