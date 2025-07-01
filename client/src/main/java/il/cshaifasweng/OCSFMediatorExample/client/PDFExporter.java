@@ -74,34 +74,33 @@ public class PDFExporter {
                 writer.write(String.format("%s\t\t%d\n", entry.getKey(), entry.getValue()));
             }
             
-            // Add complaints data if available
-            Map<String, Integer> complaintData = controller.getComplaintData();
-            if (complaintData != null && !complaintData.isEmpty()) {
-                writer.write("\nComplaints by Type:\n");
-                writer.write("Type\t\tCount\t\tTotal Refund Amount\n");
-                writer.write("----\t\t-----\t\t------------------\n");
-                
-                double totalComplaintRefunds = 0.0;
-                for (Map.Entry<String, Integer> entry : complaintData.entrySet()) {
-                    String complaintType = entry.getKey();
-                    int count = entry.getValue();
-                    double refundAmount = getRefundAmountForComplaintType(complaintType, controller.getAllComplaints());
-                    totalComplaintRefunds += refundAmount;
-                    writer.write(String.format("%s\t\t%d\t\t%.2f\n", complaintType, count, refundAmount));
-                }
-                
-                writer.write(String.format("Total Complaints:\t%d\t\t%.2f\n", 
-                    complaintData.values().stream().mapToInt(Integer::intValue).sum(), totalComplaintRefunds));
-                
-                // Add detailed complaints information
-                writer.write("\nDetailed Complaints Information:\n");
-                writer.write("Client\t\tComplaint\t\tRefund Amount\n");
-                writer.write("------\t\t---------\t\t-------------\n");
-                
-                List<Complain> allComplaints = controller.getAllComplaints();
-                if (allComplaints != null) {
-                    for (Complain complaint : allComplaints) {
-                        if (complaint != null) {
+            // Write complaint data
+            writer.write("\nComplaint Data:\n");
+            writer.write("Type\t\tCount\t\tTotal Refund\n");
+            
+            double totalComplaintRefunds = 0.0;
+            for (Map.Entry<String, Integer> entry : controller.getComplaintData().entrySet()) {
+                String complaintType = entry.getKey();
+                int count = entry.getValue();
+                double refundAmount = getRefundAmountForComplaintType(complaintType, controller.getAllComplaints(), controller);
+                totalComplaintRefunds += refundAmount;
+                writer.write(String.format("%s\t\t%d\t\t%.2f\n", complaintType, count, refundAmount));
+            }
+            
+            writer.write(String.format("Total Complaints\t\t%d\t\t%.2f\n", 
+                controller.getComplaintData().values().stream().mapToInt(Integer::intValue).sum(), totalComplaintRefunds));
+
+            // Write detailed complaint information (filtered by store)
+            writer.write("\nDetailed Complaint Information:\n");
+            writer.write("Client\t\tComplaint\t\tRefund Amount\n");
+            
+            if (controller.getAllComplaints() != null) {
+                int selectedStoreId = controller.getSelectedStoreId();
+                for (Complain complaint : controller.getAllComplaints()) {
+                    if (complaint != null) {
+                        // Filter by store ID
+                        boolean inStoreRange = selectedStoreId == -1 || complaint.getStoreId() == selectedStoreId;
+                        if (inStoreRange) {
                             String clientName = complaint.getClient() != null ? complaint.getClient() : "Unknown";
                             String complaintText = complaint.getComplaint() != null ? complaint.getComplaint() : "No complaint text";
                             double refundAmount = complaint.getRefundAmount();
@@ -122,11 +121,13 @@ public class PDFExporter {
         }
     }
     
-    private static double getRefundAmountForComplaintType(String complaintType, List<Complain> complaints) {
+    private static double getRefundAmountForComplaintType(String complaintType, List<Complain> complaints, ReportGeneratorController controller) {
         if (complaints == null) return 0.0;
         
+        int selectedStoreId = controller.getSelectedStoreId();
         return complaints.stream()
                 .filter(c -> c != null && c.getComplaint() != null && categorizeComplaint(c.getComplaint()).equals(complaintType))
+                .filter(c -> selectedStoreId == -1 || c.getStoreId() == selectedStoreId) // Filter by store
                 .mapToDouble(Complain::getRefundAmount)
                 .sum();
     }

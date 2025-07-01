@@ -45,6 +45,8 @@ public class worker_request_controller {
         Complain complain = new Complain(request_text);
         if (currentUser != null) {
             complain.setClient(currentUser.getUsername());
+            // Set store ID for report filtering
+            complain.setStoreId(currentUser.getStore());
         }
         
         if (cc != null) {

@@ -133,6 +133,8 @@ public class ReplyComplainController {
     
             newComplain.setComplaint(replyText);
             newComplain.setOrder(originalComplain.getOrder()); // Optional, keep order context if needed
+            // Preserve store ID from original complaint for report filtering
+            newComplain.setStoreId(originalComplain.getStoreId());
     
             // Send new complaint + wrapper to server
             // Don't send wrapper to reset user flags since multiple complaints are now allowed
