@@ -89,8 +89,8 @@ public class complain_controller implements Initializable {
             if (clickedOrder != null) {
                 selectedOrder = clickedOrder;
                 ordersTable.getSelectionModel().select(clickedOrder);
-                Warning warning = new Warning("Order #" + selectedOrder.getId() + " selected. You can now submit your complaint.");
-                EventBus.getDefault().post(new WarningEvent(warning));
+                Success success = new Success("Order #" + selectedOrder.getId() + " selected. You can now submit your complaint.");
+                EventBus.getDefault().post(new SuccessEvent(success));
             }
         });
     }

@@ -345,9 +345,6 @@ public class RegistrationController {
     }
 
     private void openPaymentWindow(Runnable onSuccess, Runnable onCancel, MouseEvent event) {
-
-        connect_scene_Con.closeAllPopups();
-
         if (isPaymentStageOpen()) {
             Warning warning = new Warning("The subscription/payment window is already open.");
             EventBus.getDefault().post(new WarningEvent(warning));
