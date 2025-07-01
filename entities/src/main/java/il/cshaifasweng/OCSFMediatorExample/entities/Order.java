@@ -60,6 +60,10 @@ public class Order implements Serializable {
     private double totalAmount;
     private double discountAmount = 0.0;
     
+    // Track if a complaint has been sent for this order
+    @Column(nullable = false)
+    private boolean sentComplaint = false;
+    
     public Order() {
         this.orderDate = new Date();
         this.status = "PENDING";
@@ -343,5 +347,14 @@ public class Order implements Serializable {
 
     public void setStoreId(int storeId) {
         this.storeId = storeId;
+    }
+
+    // Getter and setter for sentComplaint
+    public boolean isSentComplaint() {
+        return sentComplaint;
+    }
+
+    public void setSentComplaint(boolean sentComplaint) {
+        this.sentComplaint = sentComplaint;
     }
 } 

@@ -473,7 +473,18 @@ public class ReportGeneratorController {
             double totalComplaintRefunds = 0.0;
             for (Map.Entry<String, Integer> entry : complaintData.entrySet()) {
                 String complaintType = entry.getKey();
-                int count = entry.getValue();
+                int count = (int) allComplaints.stream()
+                        .filter(c -> c != null && c.getComplaint() != null && categorizeComplaint(c.getComplaint()).equals(complaintType))
+                        .filter(c -> selectedStoreId == -1 || c.getStoreId() == selectedStoreId)
+                        .filter(c -> {
+                            if (c.getTimestamp() == null) return false;
+                            LocalDate complaintDate = c.getTimestamp().toLocalDate();
+                            LocalDate start = startDatePicker.getValue();
+                            LocalDate end = endDatePicker.getValue();
+                            return (complaintDate.isEqual(start) || complaintDate.isAfter(start)) &&
+                                   (complaintDate.isEqual(end) || complaintDate.isBefore(end));
+                        })
+                        .count();
                 double refundAmount = getRefundAmountForComplaintType(complaintType);
                 totalComplaintRefunds += refundAmount;
                 writer.write(String.format("%s,%d,%.2f\n", complaintType, count, refundAmount));
@@ -482,19 +493,47 @@ public class ReportGeneratorController {
             writer.write(String.format("Total Complaints,%d,%.2f\n", 
                 complaintData.values().stream().mapToInt(Integer::intValue).sum(), totalComplaintRefunds));
 
-            // Write detailed complaint information (filtered by store)
+            // Write detailed complaint information (filtered by store and date)
             writer.write("\nDetailed Complaint Information\n");
-            writer.write("Client,Complaint,Refund Amount\n");
-            
+            writer.write("Client,Complaint,Refund Amount,Complaint Date\n");
+            LocalDate start = startDatePicker.getValue();
+            LocalDate end = endDatePicker.getValue();
             for (Complain complaint : allComplaints) {
                 if (complaint != null) {
-                    // Filter by store ID
+                    // Filter by store ID and date
                     boolean inStoreRange = selectedStoreId == -1 || complaint.getStoreId() == selectedStoreId;
-                    if (inStoreRange) {
+                    boolean inDateRange = false;
+                    if (complaint.getTimestamp() != null) {
+                        LocalDate complaintDate = complaint.getTimestamp().toLocalDate();
+                        inDateRange = (complaintDate.isEqual(start) || complaintDate.isAfter(start)) &&
+                                     (complaintDate.isEqual(end) || complaintDate.isBefore(end));
+                    }
+                    if (inStoreRange && inDateRange) {
                         String clientName = complaint.getClient() != null ? complaint.getClient() : "Unknown";
                         String complaintText = complaint.getComplaint() != null ? complaint.getComplaint() : "No complaint text";
                         double refundAmount = complaint.getRefundAmount();
-                        writer.write(String.format("%s,%s,%.2f\n", clientName, complaintText, refundAmount));
+                        String complaintDateStr = complaint.getTimestamp() != null ? complaint.getTimestamp().toString() : "N/A";
+                        writer.write(String.format("%s,%s,%.2f,%s\n", clientName, complaintText, refundAmount, complaintDateStr));
+                    }
+                }
+            }
+
+            // Write detailed canceled order refunds (filtered by store and date)
+            writer.write("\nCanceled Orders Refunds\n");
+            writer.write("Order ID,Customer,Refund Amount,Order Date\n");
+            for (Order order : allOrders) {
+                if (order != null && "CANCELLED".equals(order.getStatus()) && order.getRefundAmount() > 0) {
+                    boolean inStoreRange = selectedStoreId == -1 || order.getStoreId() == selectedStoreId;
+                    boolean inDateRange = false;
+                    if (order.getOrderDate() != null) {
+                        LocalDate orderDate = order.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+                        inDateRange = (orderDate.isEqual(start) || orderDate.isAfter(start)) &&
+                                     (orderDate.isEqual(end) || orderDate.isBefore(end));
+                    }
+                    if (inStoreRange && inDateRange) {
+                        String customer = order.getCustomerName() != null ? order.getCustomerName() : "Unknown";
+                        String orderDateStr = order.getOrderDate() != null ? order.getOrderDate().toString() : "N/A";
+                        writer.write(String.format("%d,%s,%.2f,%s\n", order.getId(), customer, order.getRefundAmount(), orderDateStr));
                     }
                 }
             }
@@ -515,9 +554,17 @@ public class ReportGeneratorController {
     }
 
     private double getRefundAmountForComplaintType(String complaintType) {
+        LocalDate start = startDatePicker.getValue();
+        LocalDate end = endDatePicker.getValue();
         return allComplaints.stream()
                 .filter(c -> c != null && c.getComplaint() != null && categorizeComplaint(c.getComplaint()).equals(complaintType))
-                .filter(c -> selectedStoreId == -1 || c.getStoreId() == selectedStoreId) // Filter by store
+                .filter(c -> selectedStoreId == -1 || c.getStoreId() == selectedStoreId)
+                .filter(c -> {
+                    if (c.getTimestamp() == null) return false;
+                    LocalDate complaintDate = c.getTimestamp().toLocalDate();
+                    return (complaintDate.isEqual(start) || complaintDate.isAfter(start)) &&
+                           (complaintDate.isEqual(end) || complaintDate.isBefore(end));
+                })
                 .mapToDouble(Complain::getRefundAmount)
                 .sum();
     }
@@ -598,17 +645,33 @@ public class ReportGeneratorController {
     }
 
     public double getTotalRefunds() {
-        // Calculate total refunds from complaints (filtered by store)
+        // Get selected date range
+        LocalDate start = startDatePicker.getValue();
+        LocalDate end = endDatePicker.getValue();
+
+        // Calculate total refunds from complaints (filtered by store and date)
         double complaintRefunds = allComplaints.stream()
                 .filter(c -> c != null && c.getRefundAmount() > 0)
-                .filter(c -> selectedStoreId == -1 || c.getStoreId() == selectedStoreId) // Filter by store
+                .filter(c -> selectedStoreId == -1 || c.getStoreId() == selectedStoreId)
+                .filter(c -> {
+                    if (c.getTimestamp() == null) return false;
+                    LocalDate complaintDate = c.getTimestamp().toLocalDate();
+                    return (complaintDate.isEqual(start) || complaintDate.isAfter(start)) &&
+                           (complaintDate.isEqual(end) || complaintDate.isBefore(end));
+                })
                 .mapToDouble(Complain::getRefundAmount)
                 .sum();
         
-        // Calculate total refunds from canceled orders (filtered by store)
+        // Calculate total refunds from canceled orders (filtered by store and date)
         double orderRefunds = allOrders.stream()
                 .filter(o -> o != null && "CANCELLED".equals(o.getStatus()) && o.getRefundAmount() > 0)
-                .filter(o -> selectedStoreId == -1 || o.getStoreId() == selectedStoreId) // Filter by store
+                .filter(o -> selectedStoreId == -1 || o.getStoreId() == selectedStoreId)
+                .filter(o -> {
+                    if (o.getOrderDate() == null) return false;
+                    LocalDate orderDate = o.getOrderDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+                    return (orderDate.isEqual(start) || orderDate.isAfter(start)) &&
+                           (orderDate.isEqual(end) || orderDate.isBefore(end));
+                })
                 .mapToDouble(Order::getRefundAmount)
                 .sum();
         

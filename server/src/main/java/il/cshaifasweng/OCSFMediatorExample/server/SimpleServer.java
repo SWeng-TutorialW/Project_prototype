@@ -1003,6 +1003,23 @@ public class SimpleServer extends AbstractServer {
 			Session session = App.getSessionFactory().openSession();
 			try {
 				session.beginTransaction();
+				// If this is a reply (clientName starts with 'answer to') and has an order, set sentComplaint to false
+				if (complain.getOrder() != null && complain.getClient() != null && complain.getClient().startsWith("answer to")) {
+					Order order = session.get(Order.class, complain.getOrder().getId());
+					if (order != null) {
+						order.setSentComplaint(false);
+						session.update(order);
+						System.out.println("[Server] Reset sentComplaint to false for order " + order.getId());
+					}
+				} else if (complain.getOrder() != null) {
+					// If this is a new complaint for an order, set sentComplaint to true
+					Order order = session.get(Order.class, complain.getOrder().getId());
+					if (order != null) {
+						order.setSentComplaint(true);
+						session.update(order);
+						System.out.println("[Server] Set sentComplaint to true for order " + order.getId());
+					}
+				}
 				session.save(complain);
 				session.getTransaction().commit();
 				sendToAllClients("update_complainScene_after_change");

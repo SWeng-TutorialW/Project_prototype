@@ -191,6 +191,12 @@ public class complain_controller implements Initializable {
         
         // If an order is selected, include order information
         if (selectedOrder != null) {
+            // Block if a complaint has already been sent for this order
+            if (selectedOrder.isSentComplaint()) {
+                Warning warning = new Warning("You have already sent a complaint for this order. Please wait for a reply before sending another complaint.");
+                EventBus.getDefault().post(new WarningEvent(warning));
+                return;
+            }
             String complaintWithOrder = "Order #" + selectedOrder.getId() + " - Price: ₪" + String.format("%.2f", selectedOrder.getTotalAmount()) + " - " + client_complaint;
             complain.setComplaint(complaintWithOrder);
             complain.setOrder(selectedOrder); // Set the order reference
